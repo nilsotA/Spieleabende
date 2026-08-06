@@ -1,13 +1,20 @@
-import { readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const DATA_DIR = path.join(__dirname, '..', 'data');
 
+/** Anzahl Fragen je Kategorie – entspricht den Punktereihen 100/200/300/500. */
+export const QUESTIONS_PER_CATEGORY = 4;
+const MAX_TEXT = 2000;
+
 /**
  * Validiert und normalisiert einen Fragensatz.
  * Erwartet: { name, rounds: [ { categories: [ { name, questions: [ {text, answer, image?, note?} ] } ] } ] }
+ *
+ * Wirft bei allem, was das Board verziehen oder Inhalte verlieren würde – lieber eine
+ * klare Meldung im Fragensatz-Menü als ein verrutschtes Board am Beamer.
  */
 export function normalizeSet(raw, fallbackName = 'Fragensatz') {
   if (!raw || typeof raw !== 'object') throw new Error('Fragensatz ist kein Objekt.');
@@ -17,21 +24,33 @@ export function normalizeSet(raw, fallbackName = 'Fragensatz') {
   const normRounds = rounds.map((round, ri) => {
     const cats = Array.isArray(round.categories) ? round.categories : [];
     if (cats.length === 0) throw new Error(`Runde ${ri + 1} hat keine Kategorien.`);
-    if (cats.length > 8) throw new Error(`Runde ${ri + 1} hat mehr als 8 Kategorien.`);
+    if (cats.length > 8) throw new Error(`Runde ${ri + 1} hat ${cats.length} Kategorien – höchstens 8 passen aufs Board.`);
     return {
       categories: cats.map((cat, ci) => {
-        const qs = Array.isArray(cat.questions) ? cat.questions : [];
-        if (qs.length === 0) {
-          throw new Error(`Kategorie "${cat.name || ci + 1}" in Runde ${ri + 1} hat keine Fragen.`);
+        const label = `„${cat?.name || ci + 1}" in Runde ${ri + 1}`;
+        const qs = Array.isArray(cat?.questions) ? cat.questions : [];
+        if (qs.length !== QUESTIONS_PER_CATEGORY) {
+          throw new Error(
+            `Kategorie ${label} hat ${qs.length} Fragen – es müssen genau ${QUESTIONS_PER_CATEGORY} sein.`,
+          );
         }
         return {
           name: String(cat.name || `Kategorie ${ci + 1}`).slice(0, 40),
-          questions: qs.slice(0, 4).map((q) => ({
-            text: String(q.text || '').slice(0, 400),
-            answer: String(q.answer || '').slice(0, 400),
-            image: q.image ? String(q.image) : null,
-            note: q.note ? String(q.note).slice(0, 400) : null,
-          })),
+          questions: qs.map((q, qi) => {
+            const text = String(q?.text ?? '');
+            const answer = String(q?.answer ?? '');
+            if (!text.trim()) throw new Error(`Frage ${qi + 1} in Kategorie ${label} hat keinen Text.`);
+            if (!answer.trim()) throw new Error(`Frage ${qi + 1} in Kategorie ${label} hat keine Antwort.`);
+            if (text.length > MAX_TEXT || answer.length > MAX_TEXT) {
+              throw new Error(`Frage ${qi + 1} in Kategorie ${label} ist länger als ${MAX_TEXT} Zeichen.`);
+            }
+            return {
+              text,
+              answer,
+              image: q.image ? String(q.image) : null,
+              note: q.note ? String(q.note).slice(0, MAX_TEXT) : null,
+            };
+          }),
         };
       }),
     };
@@ -44,6 +63,12 @@ export function normalizeSet(raw, fallbackName = 'Fragensatz') {
   };
 }
 
+/* --------------------------------------------------------------- Dateien */
+
+// Fragensätze mit eingebetteten Fotos sind schnell mehrere MB groß. Ohne Cache
+// würde jedes Öffnen der Liste sie alle neu parsen und dabei den Server blockieren.
+const cache = new Map(); // datei -> { mtimeMs, size, info }
+
 export async function listSets() {
   let files = [];
   try {
@@ -53,10 +78,16 @@ export async function listSets() {
   }
   const out = [];
   for (const file of files.filter((f) => f.endsWith('.json'))) {
+    const full = path.join(DATA_DIR, file);
     try {
-      const raw = JSON.parse(await readFile(path.join(DATA_DIR, file), 'utf8'));
-      const set = normalizeSet(raw, file.replace(/\.json$/, ''));
-      out.push({
+      const info = await stat(full);
+      const hit = cache.get(file);
+      if (hit && hit.mtimeMs === info.mtimeMs && hit.size === info.size) {
+        out.push(hit.info);
+        continue;
+      }
+      const set = normalizeSet(JSON.parse(await readFile(full, 'utf8')), file.replace(/\.json$/, ''));
+      const entry = {
         file,
         name: set.name,
         description: set.description,
@@ -65,9 +96,13 @@ export async function listSets() {
           (sum, r) => sum + r.categories.reduce((s, c) => s + c.questions.length, 0),
           0,
         ),
-      });
+      };
+      cache.set(file, { mtimeMs: info.mtimeMs, size: info.size, info: entry });
+      out.push(entry);
     } catch (err) {
-      out.push({ file, name: file, error: err.message });
+      const entry = { file, name: file, error: err.message };
+      cache.delete(file);
+      out.push(entry);
     }
   }
   return out.sort((a, b) => a.name.localeCompare(b.name, 'de'));
@@ -78,4 +113,13 @@ export async function loadSet(file) {
   if (!safe.endsWith('.json')) throw new Error('Ungültige Datei.');
   const raw = JSON.parse(await readFile(path.join(DATA_DIR, safe), 'utf8'));
   return normalizeSet(raw, safe.replace(/\.json$/, ''));
+}
+
+export async function setExists(file) {
+  try {
+    await stat(path.join(DATA_DIR, path.basename(String(file || ''))));
+    return true;
+  } catch {
+    return false;
+  }
 }

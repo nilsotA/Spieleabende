@@ -27,11 +27,18 @@ function load() {
   }
 }
 
+let persistWarned = false;
 function persist() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(set));
+    persistWarned = false;
   } catch {
-    /* z.B. wenn viele Bilder eingebettet sind */
+    // Passiert bei vielen eingebetteten Bildern. Stillschweigen wäre fatal:
+    // der Nutzer glaubt, sein Stand sei gesichert.
+    if (!persistWarned) {
+      persistWarned = true;
+      toast('Zwischenspeicher voll – bitte herunterladen oder auf dem Server speichern!', 'error');
+    }
   }
 }
 
@@ -190,24 +197,49 @@ $('#btn-download').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
-$('#btn-save').addEventListener('click', async () => {
+$('#btn-save').addEventListener('click', () => save(false));
+
+async function save(overwrite) {
+  const luecken = fehlendeFelder();
+  if (luecken.length) {
+    toast(`Noch unvollständig: ${luecken.slice(0, 3).join(', ')}${luecken.length > 3 ? ` und ${luecken.length - 3} weitere` : ''}`, 'error');
+    return;
+  }
   try {
     const res = await fetch('/api/sets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ set, file: `${slug(set.name)}.json` }),
+      body: JSON.stringify({ set, file: `${slug(set.name)}.json`, overwrite }),
     });
     const data = await res.json();
     if (data.ok) {
       toast(`Gespeichert als ${data.file}`);
       loadSetList();
+    } else if (data.exists) {
+      if (confirm(`„${data.file}" gibt es schon. Überschreiben?`)) save(true);
     } else {
       toast(data.error || 'Speichern fehlgeschlagen.', 'error');
     }
   } catch (err) {
     toast('Speichern fehlgeschlagen: ' + err.message, 'error');
   }
-});
+}
+
+/** Leere Fragen fallen sonst erst beim Spielstart auf – oder gar nicht. */
+function fehlendeFelder() {
+  const out = [];
+  set.rounds.forEach((round, ri) => {
+    round.categories.forEach((cat) => {
+      cat.questions.forEach((q, qi) => {
+        const wert = BASE_VALUES[qi] * (ri === 0 ? 1 : 2);
+        if (!q.text?.trim() || !q.answer?.trim()) {
+          out.push(`R${ri + 1} ${cat.name || '?'} ${wert}`);
+        }
+      });
+    });
+  });
+  return out;
+}
 
 $('#file-input').addEventListener('change', async (ev) => {
   const file = ev.target.files?.[0];
@@ -250,7 +282,12 @@ async function loadSetList() {
 function normalizeLoaded(raw) {
   const rounds = (raw.rounds || []).map((round) => ({
     categories: (round.categories || []).map((cat) => {
-      const questions = [...(cat.questions || [])];
+      const questions = (cat.questions || []).map((q) => ({
+        text: q.text || '',
+        answer: q.answer || '',
+        image: q.image || null,
+        note: q.note || null,
+      }));
       while (questions.length < 4) questions.push({ text: '', answer: '', image: null, note: null });
       return { name: cat.name || '', questions: questions.slice(0, 4) };
     }),

@@ -422,3 +422,11 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   .buzz-circle { width: 58px; height: 58px; }
   .player { min-width: 108px; }
 }
+
+/* Die Lösung steht auf der Leinwand, die alle sehen – deshalb standardmäßig
+   unkenntlich. „👁" bzw. Taste L deckt sie kurz auf. */
+.control-hint { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+#solution-wrap { display: inline-flex; align-items: center; gap: 0.4rem; }
+.peek-btn { padding: 0.15rem 0.45rem; line-height: 1.2; }
+.solution { transition: filter 0.18s ease; font-weight: 700; color: #cfe0f8; }
+.solution.blurred { filter: blur(7px); user-select: none; }

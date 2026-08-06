@@ -80,22 +80,67 @@ export function teamOfClient(state, clientId) {
   return state.teams.find((t) => t.members.some((m) => m.clientId === clientId)) || null;
 }
 
-/** Spieler (Gerät) einem Team zuordnen. Ein Gerät gehört immer zu genau einem Team. */
+/**
+ * Spieler (Gerät) einem Team zuordnen. Ein Gerät gehört immer zu genau einem Team.
+ * Während einer laufenden Frage gesperrt: sonst könnte ein Gerät, das schon falsch
+ * gebuzzert hat, einfach das Team wechseln und es nochmal versuchen.
+ */
 export function joinTeam(state, clientId, teamId, name) {
+  requireNotMidQuestion(state);
   const target = findTeam(state, teamId);
+  const alreadyIn = target.members.some((m) => m.clientId === clientId);
+  // Kapazität VOR dem Entfernen prüfen – sonst steht der Spieler bei einem Fehler
+  // plötzlich in gar keinem Team mehr.
+  if (!alreadyIn && countOnline(target) >= 4) {
+    throw new GameError('Dieses Team ist voll (max. 4 Geräte).');
+  }
   for (const team of state.teams) {
     team.members = team.members.filter((m) => m.clientId !== clientId);
   }
-  if (target.members.length >= 4) throw new GameError('Dieses Team ist voll (max. 4 Geräte).');
-  target.members.push({ clientId, name: String(name || 'Spieler').trim().slice(0, 24) });
+  target.members.push({
+    clientId,
+    name: String(name || 'Spieler').trim().slice(0, 24),
+    online: true,
+  });
   return state;
 }
 
 export function leaveTeams(state, clientId) {
+  requireNotMidQuestion(state);
   for (const team of state.teams) {
     team.members = team.members.filter((m) => m.clientId !== clientId);
   }
   return state;
+}
+
+/** Host entfernt ein einzelnes Gerät – z.B. eine Karteileiche nach Handywechsel. */
+export function removeMember(state, teamId, clientId) {
+  const team = findTeam(state, teamId);
+  team.members = team.members.filter((m) => m.clientId !== clientId);
+  return state;
+}
+
+/**
+ * Verbindungsstatus eines Geräts. Getrennte Geräte bleiben im Team stehen
+ * (damit ein Reconnect nahtlos klappt), zählen aber nicht gegen das Limit.
+ */
+export function setMemberOnline(state, clientId, online) {
+  for (const team of state.teams) {
+    for (const member of team.members) {
+      if (member.clientId === clientId) member.online = online;
+    }
+  }
+  return state;
+}
+
+function countOnline(team) {
+  return team.members.filter((m) => m.online !== false).length;
+}
+
+function requireNotMidQuestion(state) {
+  if (state.phase === 'question') {
+    throw new GameError('Teamwechsel geht erst wieder, wenn die Frage durch ist.');
+  }
 }
 
 export function adjustScore(state, teamId, delta) {
@@ -270,11 +315,13 @@ export function judge(state, correct) {
     const delta = isPrimary ? full : half;
     team.score += delta;
     q.log.push({ teamId: team.id, result: 'correct', delta });
-    q.revealed = true;
     q.lastDelta = { teamId: team.id, delta };
+    // Achtung: erst aufdecken, wenn die Frage wirklich durch ist. Sonst könnten
+    // die übrigen Teams die Lösung ablesen und trotzdem noch mitpunkten.
     if (isPrimary && state.settings.buzzAfterCorrect) {
       return openBuzz(state);
     }
+    q.revealed = true;
     q.step = 'result';
     q.onTheHook = null;
     return state;
@@ -297,20 +344,36 @@ export function judge(state, correct) {
 
 export function revealAnswer(state) {
   const q = requireQuestion(state);
+  // Solange jemand am Zug ist, wäre das Aufdecken eine Vorlage: erst werten.
+  if (q.onTheHook) throw new GameError('Erst werten – es ist noch jemand am Zug.');
   q.revealed = true;
   return state;
+}
+
+/** Buzz zurücknehmen (Fehlbedienung), Buzzer bleibt für die Übrigen offen. */
+export function resetBuzz(state) {
+  const q = requireQuestion(state);
+  if (q.step !== 'buzz') throw new GameError('Der Buzzer ist gerade nicht offen.');
+  q.buzzedTeamId = null;
+  q.buzzedBy = null;
+  q.onTheHook = null;
+  return openBuzz(state);
 }
 
 /** Frage schließen, Zug weitergeben, zurück aufs Board. */
 export function closeQuestion(state) {
   const q = requireQuestion(state);
+  // Ohne diesen Riegel würde ein zu früher Druck auf „Weiter" die Frage
+  // ungewertet verbrennen – das Feld wäre weg und niemand hätte sie gesehen.
+  if (q.step !== 'result') {
+    throw new GameError('Die Frage läuft noch – erst werten oder auflösen.');
+  }
   const solvedBy = q.log.find((e) => e.result === 'correct');
-  const keep =
-    state.settings.turnMode === 'keepOnCorrect' &&
-    solvedBy &&
-    solvedBy.teamId === q.teamId;
 
-  if (!keep) {
+  if (state.settings.turnMode === 'keepOnCorrect' && solvedBy) {
+    // Wer gelöst hat, ist als Nächstes dran – auch wenn er sich reingebuzzert hat.
+    setTurn(state, solvedBy.teamId);
+  } else {
     state.turnIndex = (state.turnIndex + 1) % Math.max(state.teams.length, 1);
   }
   state.current = null;
@@ -345,7 +408,12 @@ export function setTurn(state, teamId) {
 }
 
 export function backToLobby(state) {
-  const teams = state.teams.map((t) => ({ ...t, score: 0 }));
+  const teams = state.teams.map((t) => ({
+    ...t,
+    score: 0,
+    // Karteileichen von Geräten, die längst weg sind, nicht ins nächste Spiel schleppen.
+    members: t.members.filter((m) => m.online !== false),
+  }));
   const fresh = createState();
   fresh.teams = teams;
   fresh.settings = state.settings;
@@ -385,7 +453,11 @@ export function viewFor(state, { isHost, clientId }) {
       name: t.name,
       color: t.color,
       score: t.score,
-      members: t.members.map((m) => ({ name: m.name, clientId: m.clientId })),
+      members: t.members.map((m) => ({
+        name: m.name,
+        clientId: m.clientId,
+        online: m.online !== false,
+      })),
     })),
     board: state.board && {
       multiplier: state.board.multiplier,

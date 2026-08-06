@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070c">
+<title>Quizduell – Fernbedienung</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/player.css">
+<link rel="stylesheet" href="/remote.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M62 2 30 52h18L36 98 78 40H56z' fill='%23e01b46'/%3E%3C/svg%3E">
+</head>
+<body class="remote">
+
+<div id="offline" class="offline" hidden>Verbindung verloren – versuche neu zu verbinden …</div>
+
+<main id="app">
+  <header class="rhead">
+    <div class="logo" style="font-size:1.5rem"><span>Quiz</span><span>Duell</span></div>
+    <span class="rtag">Fernbedienung</span>
+  </header>
+
+  <div id="r-phase" class="r-phase">Verbinde …</div>
+
+  <!-- Frage samt Lösung – dieses Gerät sieht niemand außer dem Host -->
+  <section id="r-question" class="r-card" hidden>
+    <div id="r-cat" class="r-cat"></div>
+    <div id="r-text" class="r-text"></div>
+    <div class="r-answer-box">
+      <span class="r-answer-label">Lösung</span>
+      <div id="r-answer" class="r-answer"></div>
+    </div>
+    <div id="r-log" class="r-log"></div>
+  </section>
+
+  <div id="r-buttons" class="r-buttons"></div>
+
+  <section class="r-card r-scores">
+    <h2>Punkte</h2>
+    <ul id="r-teams" class="r-teams"></ul>
+  </section>
+
+  <p class="muted small" style="text-align:center">
+    Diese Seite ist nur für dich – auf dem Beamer bleibt die Lösung verdeckt.
+  </p>
+</main>
+
+<div id="toasts"></div>
+<script type="module" src="/remote.js"></script>
+</body>
+</html>

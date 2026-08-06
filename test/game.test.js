@@ -188,7 +188,7 @@ test('Spieler sehen die Antwort erst nach dem Auflösen', () => {
   const host = G.viewFor(state, { isHost: true, clientId: null });
   assert.equal(host.current.answer, 'A-Antwort 0');
 
-  G.revealAnswer(state);
+  G.endQuestion(state);
   assert.equal(G.viewFor(state, { isHost: false, clientId: 'g2' }).current.answer, 'A-Antwort 0');
 });
 
@@ -227,4 +227,119 @@ test('Host kann stellvertretend buzzern', () => {
   G.buzzFor(state, state.teams[2].id);
   G.judge(state, true);
   assert.equal(score(state, 2), 100);
+});
+
+/* ------------------------------------------------------------ Regressionen */
+// Jeder Test hier steht für einen Fehler, der schon einmal drin war.
+
+test('„Weiter" verbrennt keine laufende Frage', () => {
+  const state = setup();
+  G.pickCell(state, 0, 3); // 500
+  assert.throws(() => G.closeQuestion(state), G.GameError);
+  G.judge(state, false);
+  assert.throws(() => G.closeQuestion(state), G.GameError, 'auch bei offenem Buzzer nicht');
+  G.endQuestion(state);
+  G.closeQuestion(state);
+  assert.equal(state.phase, 'board');
+});
+
+test('Auflösen ist gesperrt, solange jemand antworten muss', () => {
+  const state = setup();
+  G.joinTeam(state, 'g2', state.teams[1].id, 'Bea');
+  G.pickCell(state, 0, 0);
+  assert.throws(() => G.revealAnswer(state), G.GameError, 'nicht während das Zugteam dran ist');
+  G.judge(state, false);
+  G.buzz(state, 'g2');
+  assert.throws(() => G.revealAnswer(state), G.GameError, 'nicht während ein Buzzer dran ist');
+  assert.equal(G.viewFor(state, { isHost: false, clientId: 'g2' }).current.answer, null);
+});
+
+test('buzzAfterCorrect deckt die Lösung nicht vorzeitig auf', () => {
+  const state = setup();
+  state.settings.buzzAfterCorrect = true;
+  G.joinTeam(state, 'g2', state.teams[1].id, 'Bea');
+  G.pickCell(state, 0, 3);
+  G.judge(state, true);
+  const view = G.viewFor(state, { isHost: false, clientId: 'g2' });
+  assert.equal(view.you.canBuzz, true, 'die anderen dürfen noch');
+  assert.equal(view.current.answer, null, 'aber ohne die Lösung zu sehen');
+});
+
+test('Teamwechsel mitten in der Frage ist gesperrt', () => {
+  const state = setup();
+  G.joinTeam(state, 'handy', state.teams[1].id, 'Bea');
+  G.pickCell(state, 0, 3);
+  G.passQuestion(state);
+  G.buzz(state, 'handy');
+  G.judge(state, false); // -250, Team 2 gesperrt
+  assert.throws(() => G.joinTeam(state, 'handy', state.teams[2].id, 'Bea'), G.GameError);
+  assert.throws(() => G.leaveTeams(state, 'handy'), G.GameError);
+  assert.equal(state.teams[2].score, 0);
+});
+
+test('keepOnCorrect gibt den Zug an den, der wirklich gelöst hat', () => {
+  const state = setup();
+  state.settings.turnMode = 'keepOnCorrect';
+  G.joinTeam(state, 'g3', state.teams[2].id, 'Cem');
+  G.pickCell(state, 0, 0);
+  G.judge(state, false);
+  G.buzz(state, 'g3');
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(state.teams[state.turnIndex].id, state.teams[2].id);
+});
+
+test('resetBuzz wirkt nur bei offenem Buzzer', () => {
+  const state = setup();
+  G.joinTeam(state, 'g2', state.teams[1].id, 'Bea');
+  G.pickCell(state, 0, 3);
+  assert.throws(() => G.resetBuzz(state), G.GameError, 'nicht während das Zugteam dran ist');
+  G.judge(state, false);
+  G.buzz(state, 'g2');
+  G.resetBuzz(state);
+  assert.equal(state.current.buzzedTeamId, null);
+  assert.equal(G.viewFor(state, { isHost: false, clientId: 'g2' }).you.canBuzz, true);
+
+  G.buzz(state, 'g2');
+  G.judge(state, true);
+  assert.equal(state.teams[1].score, 250);
+  assert.throws(() => G.resetBuzz(state), G.GameError, 'eine gewertete Frage bleibt gewertet');
+  assert.equal(state.teams[1].score, 250);
+});
+
+test('volles Team lässt den Spieler in seinem alten Team', () => {
+  const state = G.createState();
+  G.addTeam(state, 'Voll');
+  G.addTeam(state, 'Annas Team');
+  for (const id of ['a', 'b', 'c', 'd']) G.joinTeam(state, id, state.teams[0].id, id);
+  G.joinTeam(state, 'anna', state.teams[1].id, 'Anna');
+  assert.throws(() => G.joinTeam(state, 'anna', state.teams[0].id, 'Anna'), G.GameError);
+  assert.equal(G.teamOfClient(state, 'anna')?.id, state.teams[1].id, 'Anna bleibt wo sie war');
+});
+
+test('getrennte Geräte blockieren keinen Platz im Team', () => {
+  const state = G.createState();
+  G.addTeam(state, 'Team');
+  G.addTeam(state, 'Anderes');
+  for (const id of ['a', 'b', 'c', 'd']) G.joinTeam(state, id, state.teams[0].id, id);
+  G.setMemberOnline(state, 'a', false);
+  G.joinTeam(state, 'e', state.teams[0].id, 'Neu');
+  assert.equal(state.teams[0].members.length, 5);
+  assert.equal(G.viewFor(state, { isHost: true }).teams[0].members[0].online, false);
+
+  G.removeMember(state, state.teams[0].id, 'a');
+  assert.equal(state.teams[0].members.length, 4);
+});
+
+test('neues Spiel nimmt Karteileichen nicht mit', () => {
+  const state = G.createState();
+  G.addTeam(state, 'Team');
+  G.addTeam(state, 'Zwei');
+  G.joinTeam(state, 'da', state.teams[0].id, 'Da');
+  G.joinTeam(state, 'weg', state.teams[0].id, 'Weg');
+  G.setMemberOnline(state, 'weg', false);
+  G.adjustScore(state, state.teams[0].id, 400);
+  const fresh = G.backToLobby(state);
+  assert.deepEqual(fresh.teams[0].members.map((m) => m.name), ['Da']);
+  assert.equal(fresh.teams[0].score, 0);
 });

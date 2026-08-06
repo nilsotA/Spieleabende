@@ -35,6 +35,10 @@
       <p class="muted small">Alle öffnen im Browser diese Adresse (gleiches WLAN):</p>
       <div id="join-urls" class="join-urls"></div>
       <p class="muted small">Dort Namen eingeben, Team wählen – fertig. Ohne Handy geht’s auch: dann buzzert ihr per Zuruf und der Host drückt hier die Knöpfe.</p>
+      <p class="muted small" style="margin-bottom:0">
+        <b>Tipp für den Host:</b> Auf deinem eigenen Handy <code id="remote-url">…/remote</code> öffnen.
+        Dort stehen Frage <i>und Lösung</i>, und du bewertest von dort – so steht die Lösung nie auf der Leinwand.
+      </p>
     </div>
 
     <div class="card">
@@ -141,7 +145,16 @@
   <!-- Steuerleiste für den Host -->
   <div id="controls" class="controls">
     <div class="controls-inner">
-      <div id="control-hint" class="control-hint"></div>
+      <div class="control-hint">
+        <span id="control-hint"></span>
+        <!-- Die Lösung steht auf der Leinwand, die alle sehen: also standardmäßig
+             unkenntlich. Wer ohne Fernbedienung spielt, kann sie kurz aufdecken. -->
+        <span id="solution-wrap" hidden>
+          <button id="btn-peek" class="btn btn-sm btn-ghost peek-btn" type="button"
+                  title="Lösung kurz zeigen – Achtung, alle sehen den Bildschirm">👁</button>
+          <span id="solution" class="solution blurred"></span>
+        </span>
+      </div>
       <div id="control-buttons" class="control-buttons"></div>
       <button id="btn-menu" class="btn btn-ghost btn-sm" title="Punkte korrigieren / Spiel beenden">⋯</button>
     </div>

@@ -1,11 +1,13 @@
-import { $, $$, el, connect, action, toast, sound } from '/common.js';
+import { $, el, connect, action, toast, sound, installAudioUnlock } from '/common.js';
 
 let state = null;
 let localSet = null;      // per Datei geladener Fragensatz (noch nicht gespeichert)
-let lastPhaseKey = '';
 let lastScores = new Map();
+let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
 
 const act = (type, payload) => action(type, payload, 'host');
+
+installAudioUnlock();
 
 /* --------------------------------------------------------------- Verbindung */
 
@@ -16,11 +18,8 @@ connect({
     state = next;
     render(prev);
   },
-  onEvent: (name, data) => {
-    if (name === 'buzz') {
-      sound('buzz');
-      flashBuzz(data);
-    }
+  onEvent: (name) => {
+    if (name === 'buzz') sound('buzz');
   },
 });
 
@@ -44,16 +43,19 @@ $('#set-file').addEventListener('change', async (ev) => {
   const file = ev.target.files?.[0];
   if (!file) return;
   try {
-    localSet = JSON.parse(await file.text());
-    $('#set-select').insertAdjacentHTML(
-      'afterbegin',
-      `<option value="__local" selected>${escapeHtml(localSet.name || file.name)} (aus Datei)</option>`,
-    );
-    $('#set-select').value = '__local';
+    const parsed = JSON.parse(await file.text());
+    localSet = parsed;
+    const select = $('#set-select');
+    // Vorhandenen Datei-Eintrag ersetzen statt einen zweiten anzulegen.
+    select.querySelector('option[value="__local"]')?.remove();
+    select.prepend(el('option', { value: '__local' }, `${parsed.name || file.name} (aus Datei)`));
+    select.value = '__local';
     describeSet(localSet);
     toast('Fragensatz geladen.');
   } catch (err) {
     toast('Datei konnte nicht gelesen werden: ' + err.message, 'error');
+  } finally {
+    ev.target.value = ''; // dieselbe Datei soll erneut wählbar bleiben
   }
 });
 
@@ -62,9 +64,10 @@ $('#set-select').addEventListener('change', async (ev) => {
   localSet = null;
   try {
     const set = await (await fetch(`/api/set?file=${encodeURIComponent(ev.target.value)}`)).json();
+    if (set.error) throw new Error(set.error);
     describeSet(set);
-  } catch {
-    $('#set-info').textContent = '';
+  } catch (err) {
+    $('#set-info').textContent = err.message || '';
   }
 });
 
@@ -80,29 +83,33 @@ async function loadSets() {
   try {
     const sets = await (await fetch('/api/sets')).json();
     const select = $('#set-select');
+    const keepLocal = select.querySelector('option[value="__local"]');
     select.innerHTML = '';
-    if (!sets.length) {
+    if (keepLocal) select.append(keepLocal);
+    if (!sets.length && !keepLocal) {
       select.append(el('option', { value: '' }, 'Keine Fragensätze gefunden'));
       return;
     }
     for (const set of sets) {
       select.append(
         el('option', { value: set.file, disabled: !!set.error },
-          set.error ? `${set.file} – Fehler: ${set.error}` : `${set.name} (${set.questions} Fragen)`),
+          set.error ? `${set.file} – ${set.error}` : `${set.name} (${set.questions} Fragen)`),
       );
     }
     select.dispatchEvent(new Event('change'));
-  } catch (err) {
+  } catch {
     toast('Fragensätze konnten nicht geladen werden.', 'error');
   }
 }
 
 function describeSet(set) {
   if (!set) return;
-  const rounds = (set.rounds || []).map(
-    (r, i) => `Runde ${i + 1}: ${r.categories.map((c) => c.name).join(' · ')}`,
-  );
-  $('#set-info').innerHTML = rounds.map(escapeHtml).join('<br>');
+  $('#set-info').innerHTML = '';
+  (set.rounds || []).forEach((r, i) => {
+    $('#set-info').append(
+      el('div', {}, `Runde ${i + 1}: ${r.categories.map((c) => c.name).join(' · ')}`),
+    );
+  });
 }
 
 async function loadUrls() {
@@ -110,6 +117,7 @@ async function loadUrls() {
     const info = await (await fetch('/api/info')).json();
     $('#join-urls').innerHTML = '';
     for (const url of info.urls) $('#join-urls').append(el('code', {}, url));
+    $('#remote-url').textContent = `${info.urls[0]}/remote`;
   } catch {
     /* egal */
   }
@@ -126,13 +134,18 @@ function render(prev) {
   $('#view-lobby').classList.toggle('active', inLobby);
   $('#view-game').classList.toggle('active', !inLobby);
 
-  if (inLobby) return renderLobby();
+  if (inLobby) {
+    // Sonst schweben beim nächsten Spielstart Phantom-Abzüge über den Teams.
+    lastScores.clear();
+    return renderLobby();
+  }
 
-  renderBoard(prev);
+  renderBoard();
   renderQuestion(prev);
-  renderPlayers(prev);
+  renderPlayers();
   renderScoreboard();
   renderControls();
+  if (!$('#menu').hidden) fillMenu();
 }
 
 function renderLobby() {
@@ -149,7 +162,7 @@ function renderLobby() {
           el('div', { class: 'tname' }, team.name),
           el('div', { class: 'tmembers' },
             team.members.length
-              ? team.members.map((m) => m.name).join(', ')
+              ? team.members.map((m) => (m.online ? m.name : `${m.name} (offline)`)).join(', ')
               : 'kein Handy verbunden'),
         ),
         el('button', { class: 'btn btn-sm btn-ghost', onclick: () => act('removeTeam', { teamId: team.id }) }, '✕'),
@@ -162,32 +175,35 @@ function renderLobby() {
   $('#btn-start').disabled = state.teams.length < 2;
 }
 
-function renderBoard(prev) {
+function renderBoard() {
   const board = $('#board');
   const data = state.board;
   if (!data) return;
   const cols = data.categories.length;
-  const rows = data.categories[0]?.cells.length || 4;
+  const rows = Math.max(...data.categories.map((c) => c.cells.length), 1);
 
-  const key = `${state.round}:${cols}:${rows}`;
+  // Schlüssel aus dem Inhalt, nicht nur aus der Rundennummer: ein zweites Spiel
+  // mit anderem Fragensatz hätte sonst weiter die alten Kategorien im Kopf.
+  const key = [state.setName, state.round, data.categories.map((c) => `${c.name}/${c.cells.length}`).join('|')].join('#');
   if (board.dataset.key !== key) {
     board.dataset.key = key;
     board.innerHTML = '';
     board.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     board.style.gridTemplateRows = `auto repeat(${rows}, minmax(0, 1fr))`;
     data.categories.forEach((cat, catIdx) => {
-      board.append(el('div', { class: 'cat', style: { gridColumn: catIdx + 1, gridRow: 1 } }, cat.name));
+      board.append(el('div', { class: 'cat', style: { gridColumn: catIdx + 1, gridRow: 1 } },
+        el('span', {}, cat.name)));
       cat.cells.forEach((cell, rowIdx) => {
         board.append(
           el('button', {
             class: 'tile',
             'data-cell': `${catIdx}-${rowIdx}`,
-            style: { gridColumn: catIdx + 1, gridRow: rowIdx + 2 },
+            style: { gridColumn: catIdx + 1, gridRow: rowIdx + 2, '--i': catIdx + rowIdx },
             onclick: () => {
               sound('pick');
               act('pick', { catIdx, rowIdx });
             },
-          }, String(cell.value)),
+          }, el('span', {}, String(cell.value))),
         );
       });
     });
@@ -202,7 +218,7 @@ function renderBoard(prev) {
       tile.disabled = cell.used || state.phase !== 'board';
       if (cell.used && !wasUsed) {
         tile.classList.add('picked');
-        setTimeout(() => tile.classList.remove('picked'), 400);
+        setTimeout(() => tile.classList.remove('picked'), 500);
       }
     });
   });
@@ -211,8 +227,9 @@ function renderBoard(prev) {
   $('#round-mult').textContent = data.multiplier > 1 ? `${data.multiplier}× Punkte` : '';
 
   const active = state.teams[state.turnIndex];
-  $('#turn-name').textContent = active ? `Am Zug: ${active.name}` : '—';
-  $('#turn-pill').style.display = state.phase === 'board' || state.phase === 'question' ? '' : 'none';
+  $('#turn-name').textContent = active ? active.name : '—';
+  $('#turn-pill').hidden = !(state.phase === 'board' || state.phase === 'question');
+  if (active) $('#turn-pill').style.setProperty('--team', active.color);
 }
 
 function renderQuestion(prev) {
@@ -237,31 +254,29 @@ function renderQuestion(prev) {
     img.removeAttribute('src');
   }
 
-  // Statuszeile
   const status = $('#q-status');
   status.innerHTML = '';
-  const team = (id) => state.teams.find((t) => t.id === id);
+  const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+
   if (q.step === 'primary') {
-    const t = team(q.teamId);
-    status.append(el('div', { class: 'chip turn' }, `Am Zug: ${t ? t.name : '?'}`));
+    status.append(el('div', { class: 'chip turn' }, `Am Zug: ${teamName(q.teamId)}`));
+    setBuzzIndicator('idle');
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-    status.append(el('div', { class: 'chip buzzopen' }, '⚡ Buzzer frei – wer weiß es?'));
+    status.append(el('div', { class: 'chip buzzopen' }, `⚡ Buzzer frei · ${q.halfValue} Punkte`));
     setBuzzIndicator('armed');
-  } else if (q.buzzedTeamId && q.step === 'buzz') {
-    const t = team(q.buzzedTeamId);
-    status.append(el('div', { class: 'chip buzzed' }, `${t ? t.name : '?'} hat gebuzzert!`));
-    setBuzzIndicator('hit');
+  } else if (q.buzzedTeamId) {
+    status.append(el('div', { class: 'chip buzzed' }, `${teamName(q.buzzedTeamId)} hat gebuzzert!`));
+    setBuzzIndicator(q.step === 'buzz' ? 'hit' : 'idle');
+  } else {
+    setBuzzIndicator('idle');
   }
-  if (q.step !== 'buzz') setBuzzIndicator(q.step === 'primary' ? 'idle' : 'idle');
 
   for (const entry of q.log) {
-    const t = team(entry.teamId);
-    if (!t) continue;
     const label =
       entry.result === 'pass' ? 'wusste es nicht'
         : entry.result === 'correct' ? `richtig +${entry.delta}`
           : entry.delta ? `falsch ${entry.delta}` : 'falsch';
-    status.append(el('div', { class: 'chip' }, `${t.name}: ${label}`));
+    status.append(el('div', { class: `chip log ${entry.result}` }, `${teamName(entry.teamId)}: ${label}`));
   }
 
   const answer = $('#q-answer');
@@ -271,12 +286,13 @@ function renderQuestion(prev) {
   note.hidden = !(q.revealed && q.note);
   note.textContent = q.note || '';
 
-  // Tonsignale bei Zustandswechseln
+  // Tonsignale nur bei echten Übergängen derselben Frage.
   const prevQ = prev?.current;
-  if (prevQ && prevQ.log.length < q.log.length) {
+  const sameQuestion = prevQ && prevQ.catIdx === q.catIdx && prevQ.rowIdx === q.rowIdx;
+  if (sameQuestion && prevQ.log.length < q.log.length) {
     sound(q.log[q.log.length - 1].result === 'correct' ? 'correct' : 'wrong');
   }
-  if (prevQ && !prevQ.revealed && q.revealed && !q.log.some((e) => e.result === 'correct')) {
+  if (sameQuestion && !prevQ.revealed && q.revealed && !q.log.some((e) => e.result === 'correct')) {
     sound('reveal');
   }
 }
@@ -287,12 +303,7 @@ function setBuzzIndicator(mode) {
   node.classList.toggle('hit', mode === 'hit');
 }
 
-function flashBuzz() {
-  const node = $('#buzz-indicator');
-  node.classList.add('hit');
-}
-
-function renderPlayers(prev) {
+function renderPlayers() {
   const box = $('#players');
   const key = state.teams.map((t) => t.id).join('|');
   if (box.dataset.key !== key) {
@@ -300,12 +311,15 @@ function renderPlayers(prev) {
     box.innerHTML = '';
     for (const team of state.teams) {
       box.append(
-        el('div', { class: 'player', 'data-team': team.id, style: { borderColor: team.color } },
+        el('div', { class: 'player', 'data-team': team.id, style: { '--team': team.color } },
           el('div', { class: 'pname' }, team.name),
           el('div', { class: 'pmembers' }, ''),
           el('div', { class: 'pscore' }, '0'),
         ),
       );
+    }
+    for (const id of [...lastScores.keys()]) {
+      if (!state.teams.some((t) => t.id === id)) lastScores.delete(id);
     }
   }
 
@@ -313,7 +327,9 @@ function renderPlayers(prev) {
   for (const team of state.teams) {
     const node = box.querySelector(`[data-team="${team.id}"]`);
     if (!node) continue;
-    node.querySelector('.pmembers').textContent = team.members.map((m) => m.name).join(', ');
+    node.querySelector('.pmembers').textContent = team.members
+      .map((m) => (m.online ? m.name : `${m.name} ⚪`))
+      .join(', ');
     const scoreNode = node.querySelector('.pscore');
     scoreNode.textContent = team.score;
     scoreNode.classList.toggle('neg', team.score < 0);
@@ -325,7 +341,11 @@ function renderPlayers(prev) {
       const delta = team.score - before;
       const badge = el('div', { class: `delta ${delta > 0 ? 'plus' : 'minus'}` }, `${delta > 0 ? '+' : ''}${delta}`);
       node.append(badge);
-      setTimeout(() => badge.remove(), 1700);
+      node.classList.add(delta > 0 ? 'gain' : 'loss');
+      setTimeout(() => {
+        badge.remove();
+        node.classList.remove('gain', 'loss');
+      }, 1700);
     }
     lastScores.set(team.id, team.score);
   }
@@ -340,32 +360,51 @@ function renderScoreboard() {
   const final = state.phase === 'gameOver';
   $('#score-title').textContent = final ? 'Endstand' : `Runde ${state.round} beendet`;
   const list = $('#score-list');
-  list.innerHTML = '';
   const ranked = [...state.teams].sort((a, b) => b.score - a.score);
-  ranked.forEach((team, i) => {
-    list.append(
-      el('li', { class: i === 0 ? 'first' : '' },
-        el('span', { class: 'rank' }, `${i + 1}.`),
-        el('span', {}, team.name),
-        el('span', { class: 'pts' }, String(team.score)),
-      ),
-    );
-  });
+  const key = ranked.map((t) => `${t.id}:${t.score}`).join('|') + `#${state.phase}`;
+  if (list.dataset.key !== key) {
+    list.dataset.key = key;
+    list.innerHTML = '';
+    ranked.forEach((team, i) => {
+      list.append(
+        el('li', { class: i === 0 ? 'first' : '', style: { '--i': i, '--team': team.color } },
+          el('span', { class: 'rank' }, `${i + 1}`),
+          el('span', { class: 'sname' }, team.name),
+          el('span', { class: 'pts' }, String(team.score)),
+        ),
+      );
+    });
+  }
   $('#btn-next-round').hidden = final;
   $('#btn-new-game').hidden = !final;
 }
 
 /* --------------------------------------------------------------- Steuerung */
 
+$('#btn-peek').addEventListener('click', () => {
+  peek = !peek;
+  renderControls();
+});
+
 function renderControls() {
   const hint = $('#control-hint');
   const bar = $('#control-buttons');
   bar.innerHTML = '';
   const q = state.current;
+  const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+
+  // Die Lösung gehört nicht ungefragt auf die Leinwand.
+  const wrap = $('#solution-wrap');
+  const solution = $('#solution');
+  const showSolution = !!q && !!q.answer && !q.revealed;
+  wrap.hidden = !showSolution;
+  if (showSolution) {
+    solution.textContent = `Lösung: ${q.answer}`;
+    solution.classList.toggle('blurred', !peek);
+  }
 
   if (state.phase === 'board') {
-    const active = state.teams[state.turnIndex];
-    hint.textContent = `Am Zug: ${active ? active.name : '?'} – Feld anklicken oder auf dem Handy antippen.`;
+    hint.textContent = `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – Feld anklicken oder auf dem Handy antippen.`;
     bar.append(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];
       act('setTurn', { teamId: next.id });
@@ -380,34 +419,29 @@ function renderControls() {
 
   if (!q) { hint.textContent = ''; return; }
 
-  const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
-
   if (q.step === 'primary') {
-    hint.innerHTML = `Am Zug: <b>${escapeHtml(teamName(q.teamId))}</b> · Lösung: <b>${escapeHtml(q.answer || '')}</b>`;
+    hint.textContent = `${teamName(q.teamId)} antwortet.`;
     bar.append(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
       button('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), '3'),
     );
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-    hint.innerHTML = `Buzzer ist frei · Lösung: <b>${escapeHtml(q.answer || '')}</b>`;
+    hint.textContent = 'Buzzer ist frei.';
     for (const team of state.teams) {
       if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
       bar.append(button(`Buzz: ${team.name}`, 'btn-ghost btn-sm', () => act('buzzFor', { teamId: team.id })));
     }
-    bar.append(
-      button('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion'), '4'),
-    );
-  } else if (q.step === 'buzz' && q.buzzedTeamId) {
-    hint.innerHTML = `<b>${escapeHtml(teamName(q.buzzedTeamId))}</b> hat gebuzzert (±${q.halfValue}) · Lösung: <b>${escapeHtml(q.answer || '')}</b>`;
+    bar.append(button('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion'), '4'));
+  } else if (q.buzzedTeamId && q.step === 'buzz') {
+    hint.textContent = `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`;
     bar.append(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
       button('Buzz zurücknehmen', 'btn-ghost btn-sm', () => act('resetBuzz')),
     );
   } else {
-    hint.innerHTML = `Lösung: <b>${escapeHtml(q.answer || '')}</b>`;
-    if (!q.revealed) bar.append(button('Auflösen', 'btn-primary', () => act('reveal'), '4'));
+    hint.textContent = 'Frage beendet.';
     bar.append(button('Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
   }
 }
@@ -421,30 +455,52 @@ function button(label, cls, onclick, key) {
 $('#btn-next-round').addEventListener('click', () => act('nextRound'));
 $('#btn-new-game').addEventListener('click', () => act('backToLobby'));
 $('#btn-menu').addEventListener('click', openMenu);
-$('#btn-close-menu').addEventListener('click', () => ($('#menu').hidden = true));
+$('#btn-close-menu').addEventListener('click', closeMenu);
+$('#menu').addEventListener('click', (ev) => {
+  if (ev.target.id === 'menu') closeMenu();
+});
 $('#btn-abort').addEventListener('click', () => {
   if (confirm('Spiel wirklich beenden und zurück in die Lobby?')) {
     act('backToLobby');
-    $('#menu').hidden = true;
+    closeMenu();
   }
 });
 
 function openMenu() {
+  fillMenu();
+  $('#menu').hidden = false;
+  $('#btn-close-menu').focus();
+}
+
+function closeMenu() {
+  $('#menu').hidden = true;
+}
+
+function fillMenu() {
   const list = $('#menu-teams');
   list.innerHTML = '';
   for (const team of state.teams) {
+    const offline = team.members.filter((m) => !m.online);
     list.append(
       el('li', {},
-        el('span', { class: 'dot', style: { background: team.color, width: '12px', height: '12px', borderRadius: '50%' } }),
-        el('span', { class: 'tname' }, team.name),
+        el('span', { class: 'dot', style: { background: team.color } }),
+        el('span', { class: 'tname' },
+          team.name,
+          offline.length
+            ? el('span', { class: 'muted small' }, ` · ${offline.length} offline`)
+            : null),
         el('span', { class: 'sc' }, String(team.score)),
-        button('−100', 'btn-sm btn-ghost', () => { act('adjustScore', { teamId: team.id, delta: -100 }); setTimeout(openMenu, 120); }),
-        button('+100', 'btn-sm btn-ghost', () => { act('adjustScore', { teamId: team.id, delta: 100 }); setTimeout(openMenu, 120); }),
-        button('dran', 'btn-sm btn-ghost', () => { act('setTurn', { teamId: team.id }); setTimeout(openMenu, 120); }),
+        button('−100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: -100 })),
+        button('+100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: 100 })),
+        button('dran', 'btn-sm btn-ghost', () => act('setTurn', { teamId: team.id })),
+        offline.length
+          ? button('Offline entfernen', 'btn-sm btn-ghost', () => {
+            for (const m of offline) act('removeMember', { teamId: team.id, clientId: m.clientId });
+          })
+          : null,
       ),
     );
   }
-  $('#menu').hidden = false;
 }
 
 /* ------------------------------------------------------------ Tastatur */
@@ -452,25 +508,28 @@ function openMenu() {
 document.addEventListener('keydown', (ev) => {
   if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
   if (!state || state.phase === 'lobby') return;
-  const q = state.current;
+
+  const menuOpen = !$('#menu').hidden;
   const key = ev.key.toLowerCase();
 
-  if (key === 'escape') { $('#menu').hidden = !$('#menu').hidden; return; }
+  if (key === 'escape') {
+    ev.preventDefault();
+    return menuOpen ? closeMenu() : openMenu();
+  }
+  // Solange das Menü offen ist, gehören die Tasten dem Menü.
+  if (menuOpen) return;
+
+  const q = state.current;
   if (!q) {
     if (key === ' ' && state.phase === 'roundEnd') { ev.preventDefault(); act('nextRound'); }
     return;
   }
-  if (key === '1') { ev.preventDefault(); act('judge', { correct: true }); }
-  else if (key === '2') { ev.preventDefault(); act('judge', { correct: false }); }
-  else if (key === '3' && q.step === 'primary') { ev.preventDefault(); act('pass'); }
-  else if (key === '4') {
-    ev.preventDefault();
-    act(q.step === 'buzz' && !q.buzzedTeamId ? 'endQuestion' : 'reveal');
-  }
-  else if (key === ' ') { ev.preventDefault(); act('close'); }
-});
 
-function escapeHtml(str) {
-  return String(str ?? '').replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
+  const judging = q.step === 'primary' || (q.step === 'buzz' && q.buzzedTeamId);
+  if (key === '1' && judging) { ev.preventDefault(); act('judge', { correct: true }); }
+  else if (key === '2' && judging) { ev.preventDefault(); act('judge', { correct: false }); }
+  else if (key === '3' && q.step === 'primary') { ev.preventDefault(); act('pass'); }
+  else if (key === '4' && q.step === 'buzz' && !q.buzzedTeamId) { ev.preventDefault(); act('endQuestion'); }
+  else if (key === ' ' && q.step === 'result') { ev.preventDefault(); act('close'); }
+  else if (key === 'l') { ev.preventDefault(); peek = !peek; renderControls(); }
+});

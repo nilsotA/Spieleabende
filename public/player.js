@@ -1,8 +1,13 @@
-import { $, el, connect, action, toast, sound, vibrate } from '/common.js';
+import {
+  $, el, connect, action, toast, sound, vibrate, flash,
+  installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline,
+} from '/common.js';
 
 let state = null;
 let selectedTeam = localStorage.getItem('quizduell.teamId') || null;
+let pointerDown = false;
 
+installAudioUnlock();
 $('#my-name').value = localStorage.getItem('quizduell.name') || '';
 
 connect({
@@ -17,16 +22,25 @@ connect({
   },
 });
 
+onConnectionChange(() => {
+  if (state) renderBuzzer(null);
+});
+
 /* ---------------------------------------------------------------- Anmeldung */
 
 $('#join-form').addEventListener('submit', async (ev) => {
   ev.preventDefault();
+  unlockAudio(); // echte Nutzergeste – ab jetzt darf iOS Töne abspielen
+  keepScreenAwake();
   const name = $('#my-name').value.trim();
   if (!name) return;
   if (!selectedTeam) return toast('Bitte ein Team auswählen.', 'error');
-  localStorage.setItem('quizduell.name', name);
-  localStorage.setItem('quizduell.teamId', selectedTeam);
-  await action('joinTeam', { teamId: selectedTeam, name });
+  document.activeElement?.blur?.(); // Tastatur wegräumen
+  const res = await action('joinTeam', { teamId: selectedTeam, name });
+  if (res.ok) {
+    localStorage.setItem('quizduell.name', name);
+    localStorage.setItem('quizduell.teamId', selectedTeam);
+  }
 });
 
 $('#btn-leave').addEventListener('click', () => action('leaveTeam'));
@@ -36,25 +50,49 @@ $('#btn-leave').addEventListener('click', () => action('leaveTeam'));
 const buzzer = $('#buzzer');
 let buzzLock = false;
 
-function pressBuzzer() {
-  if (buzzer.disabled || buzzLock) return;
+async function pressBuzzer() {
+  if (buzzLock) return;
+
+  if (!state?.you?.canBuzz) {
+    // Bewusst kein disabled-Attribut: deaktivierte Buttons feuern gar keine
+    // Events, dann bliebe ein zu früher Druck völlig unkommentiert.
+    if (state?.current?.step === 'primary') {
+      buzzer.classList.remove('tooearly');
+      void buzzer.offsetWidth;
+      buzzer.classList.add('tooearly');
+      toast('Noch zu früh – erst muss das Zugteam antworten.');
+    }
+    return;
+  }
+  if (!isOnline()) return toast('Keine Verbindung – dein Buzz käme nicht an.', 'error');
+
   buzzLock = true;
   setTimeout(() => (buzzLock = false), 400);
   vibrate(60);
   sound('buzz');
-  action('buzz');
+
+  const res = await action('buzz', { quiet: true });
+  if (!res.ok) {
+    // „Zu spät" ist normal und braucht keinen roten Kasten – der Screen zeigt
+    // ohnehin gleich, wer schneller war.
+    if (res.offline) toast('Nicht angekommen – nochmal drücken!', 'error');
+    else if (!/spät/i.test(res.error || '')) toast(res.error, 'error');
+  }
 }
 
-// pointerdown statt click: spart die ~100 ms bis zum click-Event.
 buzzer.addEventListener('pointerdown', (ev) => {
   ev.preventDefault();
+  pointerDown = true;
   pressBuzzer();
 });
+for (const evt of ['pointerup', 'pointercancel', 'pointerleave']) {
+  buzzer.addEventListener(evt, () => (pointerDown = false));
+}
 document.addEventListener('keydown', (ev) => {
-  if (ev.key === ' ' && document.activeElement?.tagName !== 'INPUT') {
-    ev.preventDefault();
-    pressBuzzer();
-  }
+  if (ev.key !== ' ' || ev.repeat) return;
+  if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+  ev.preventDefault();
+  pressBuzzer();
 });
 
 /* ------------------------------------------------------------------ Render */
@@ -64,12 +102,21 @@ function render(prev) {
   const joined = !!state.you?.teamId;
   $('#view-join').classList.toggle('active', !joined);
   $('#view-play').classList.toggle('active', joined);
-  if (!joined) return renderJoin();
+
+  if (!joined) {
+    if (prev?.you?.teamId) {
+      toast('Dein Team gibt es nicht mehr – bitte neu wählen.', 'error');
+      selectedTeam = null;
+    }
+    return renderJoin();
+  }
 
   const me = state.teams.find((t) => t.id === state.you.teamId);
   $('#p-team').textContent = me?.name || '—';
   $('#p-name').textContent = (me?.members || []).map((m) => m.name).join(', ');
   $('#p-score').textContent = me?.score ?? 0;
+  // Teamwechsel lehnt der Server während einer Frage ab – Knopf dann ausblenden.
+  $('#btn-leave').hidden = state.phase === 'question';
 
   renderQuestion();
   renderPicker();
@@ -79,24 +126,33 @@ function render(prev) {
 
 function renderJoin() {
   const box = $('#team-choices');
-  box.innerHTML = '';
-  if (!state.teams.length) {
-    box.append(el('p', { class: 'muted small' }, 'Der Host hat noch keine Teams angelegt. Gleich geht’s los …'));
-  }
-  for (const team of state.teams) {
-    const node = el('button', {
-      type: 'button',
-      class: `team-choice ${selectedTeam === team.id ? 'selected' : ''}`,
-      onclick: () => { selectedTeam = team.id; renderJoin(); },
-    },
-      el('span', { class: 'dot', style: { background: team.color } }),
-      el('span', {},
-        el('div', {}, team.name),
-        el('div', { class: 'sub' },
-          team.members.length ? team.members.map((m) => m.name).join(', ') : 'noch frei'),
-      ),
-    );
-    box.append(node);
+  // Nur neu bauen, wenn sich wirklich etwas geändert hat – sonst geht ein
+  // Antippen verloren, weil zwischendurch ein State-Update eintrudelt.
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.members.map((m) => m.name).join(',')}`).join('|')
+    + `#${selectedTeam}`;
+  if (box.dataset.key !== key) {
+    box.dataset.key = key;
+    box.innerHTML = '';
+    if (!state.teams.length) {
+      box.append(el('p', { class: 'muted small' }, 'Der Host hat noch keine Teams angelegt. Gleich geht’s los …'));
+    }
+    if (selectedTeam && !state.teams.some((t) => t.id === selectedTeam)) selectedTeam = null;
+    for (const team of state.teams) {
+      box.append(
+        el('button', {
+          type: 'button',
+          class: `team-choice ${selectedTeam === team.id ? 'selected' : ''}`,
+          onclick: () => { selectedTeam = team.id; renderJoin(); },
+        },
+          el('span', { class: 'dot', style: { background: team.color } }),
+          el('span', {},
+            el('div', {}, team.name),
+            el('div', { class: 'sub' },
+              team.members.length ? team.members.map((m) => m.name).join(', ') : 'noch frei'),
+          ),
+        ),
+      );
+    }
   }
   $('#join-hint').textContent =
     state.phase === 'lobby'
@@ -130,7 +186,12 @@ function renderPicker() {
   box.hidden = !canPick;
   if (!canPick) return;
 
-  const key = `${state.round}:${state.board.categories.map((c) => c.cells.map((x) => x.used ? 1 : 0).join('')).join('')}`;
+  // Fragensatz mit in den Schlüssel: sonst zeigt ein neues Spiel mit gleicher
+  // Feldbelegung noch die Kategorien des alten.
+  const key = [
+    state.setName, state.round,
+    state.board.categories.map((c) => `${c.name}:${c.cells.map((x) => (x.used ? 1 : 0)).join('')}`).join('|'),
+  ].join('#');
   if (box.dataset.key === key) return;
   box.dataset.key = key;
   box.innerHTML = '';
@@ -142,8 +203,13 @@ function renderPicker() {
           cat.cells.map((cell, rowIdx) =>
             el('button', {
               type: 'button',
-              disabled: cell.used,
-              onclick: () => { sound('pick'); action('pick', { catIdx, rowIdx }); },
+              class: cell.used ? 'used' : '',
+              onclick: (ev) => {
+                if (cell.used) return;
+                ev.currentTarget.classList.add('used');
+                sound('pick');
+                action('pick', { catIdx, rowIdx, quiet: true });
+              },
             }, String(cell.value)),
           ),
         ),
@@ -158,52 +224,51 @@ function renderBuzzer(prev) {
   const status = $('#p-status');
   const label = $('#buzzer-label');
 
-  buzzer.classList.remove('armed', 'won');
-  buzzer.disabled = true;
+  buzzer.classList.remove('armed', 'won', 'locked');
   label.textContent = 'BUZZ';
+  status.classList.remove('you');
 
-  if (state.phase === 'lobby') {
-    status.textContent = 'Warten auf den Start …';
-    status.classList.remove('you');
-    label.textContent = 'BEREIT';
+  const lock = (text) => {
+    buzzer.classList.add('locked');
+    label.textContent = text;
+  };
+
+  if (!isOnline()) {
+    status.textContent = 'Keine Verbindung – warte kurz …';
+    lock('OFFLINE');
     return;
   }
-  if (state.phase === 'roundEnd') { status.textContent = 'Runde vorbei – gleich geht’s weiter.'; return; }
-  if (state.phase === 'gameOver') { status.textContent = 'Spiel beendet!'; return; }
+  if (state.phase === 'lobby') {
+    status.textContent = 'Warten auf den Start …';
+    lock('BEREIT');
+    return;
+  }
+  if (state.phase === 'roundEnd') { status.textContent = 'Runde vorbei – gleich geht’s weiter.'; lock('PAUSE'); return; }
+  if (state.phase === 'gameOver') { status.textContent = 'Spiel beendet!'; lock('ENDE'); return; }
 
   if (state.phase === 'board') {
     status.textContent = you.isMyTurn
       ? 'Du bist dran – wähle ein Feld!'
       : `Am Zug: ${state.teams[state.turnIndex]?.name ?? '?'} …`;
     status.classList.toggle('you', you.isMyTurn);
+    lock(you.isMyTurn ? 'DU WÄHLST' : 'GESPERRT');
     return;
   }
 
   if (!q) return;
 
-  if (q.step === 'primary') {
-    const active = state.teams.find((t) => t.id === q.teamId);
-    status.textContent = you.onTheHook
-      ? 'Du bist dran – sag deine Antwort!'
-      : `Am Zug: ${active?.name ?? '?'}. Buzzer noch gesperrt.`;
-    status.classList.toggle('you', !!you.onTheHook);
-    label.textContent = you.onTheHook ? 'DU BIST DRAN' : 'GESPERRT';
-    return;
-  }
-
-  if (q.step === 'buzz' && !q.buzzedTeamId) {
-    if (you.canBuzz) {
-      buzzer.disabled = false;
-      buzzer.classList.add('armed');
-      status.textContent = `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`;
-      status.classList.add('you');
-      if (prev?.current?.step !== 'buzz') { vibrate([30, 50, 30]); sound('reveal'); }
-    } else {
-      status.textContent = q.lockedOut.includes(you.teamId)
-        ? 'Ihr hattet euren Versuch.'
-        : 'Andere buzzern gerade.';
-      status.classList.remove('you');
-      label.textContent = 'GESPERRT';
+  if (you.canBuzz) {
+    buzzer.classList.add('armed');
+    status.textContent = `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`;
+    status.classList.add('you');
+    // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst
+    // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.
+    if (prev && !prev.you?.canBuzz) {
+      vibrate([30, 50, 30]);
+      sound('armed');
+      flash();
+      // Wer den Daumen schon aufliegen hat, soll nicht extra neu tippen müssen.
+      if (pointerDown) pressBuzzer();
     }
     return;
   }
@@ -211,21 +276,42 @@ function renderBuzzer(prev) {
   if (q.buzzedTeamId) {
     const team = state.teams.find((t) => t.id === q.buzzedTeamId);
     const mine = q.buzzedTeamId === you.teamId;
-    buzzer.classList.add('won');
+    buzzer.classList.add(mine ? 'won' : 'locked');
     label.textContent = mine ? 'DU!' : (team?.name || '').toUpperCase();
     status.textContent = mine ? 'Du warst zuerst – antworte!' : `${team?.name} war schneller.`;
     status.classList.toggle('you', mine);
     return;
   }
 
-  status.textContent = q.revealed ? 'Aufgelöst.' : '…';
-  status.classList.remove('you');
+  if (q.step === 'primary') {
+    const active = state.teams.find((t) => t.id === q.teamId);
+    status.textContent = you.onTheHook
+      ? 'Du bist dran – sag deine Antwort!'
+      : `Am Zug: ${active?.name ?? '?'}. Buzzer noch gesperrt.`;
+    status.classList.toggle('you', !!you.onTheHook);
+    lock(you.onTheHook ? 'DU BIST DRAN' : 'GESPERRT');
+    return;
+  }
+
+  if (q.step === 'buzz') {
+    status.textContent = q.lockedOut.includes(you.teamId)
+      ? 'Ihr hattet euren Versuch.'
+      : 'Deine Frage – die anderen sind dran.';
+    lock('GESPERRT');
+    return;
+  }
+
+  status.textContent = q.revealed ? `Lösung: ${q.answer ?? ''}` : '…';
+  lock('DURCH');
 }
 
 function renderScores() {
   const box = $('#p-scores');
-  box.innerHTML = '';
   const activeId = state.teams[state.turnIndex]?.id;
+  const key = state.teams.map((t) => `${t.id}:${t.score}`).join('|') + `#${activeId}`;
+  if (box.dataset.key === key) return;
+  box.dataset.key = key;
+  box.innerHTML = '';
   for (const team of state.teams) {
     const cls = [
       'chip',

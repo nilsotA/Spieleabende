@@ -1,75 +1,77 @@
 import http from 'node:http';
 import { createReadStream } from 'node:fs';
-import { stat, writeFile } from 'node:fs/promises';
+import { stat, writeFile, rename } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
-import { listSets, loadSet, normalizeSet, DATA_DIR } from './questions.js';
+import { listSets, loadSet, normalizeSet, setExists, DATA_DIR } from './questions.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const PORT = Number(process.env.PORT) || 3000;
+const MAX_BODY_BYTES = 32 * 1024 * 1024;
+
+// Ein Spieleabend darf nicht daran scheitern, dass irgendein Randfall den Prozess
+// beendet – mit dem Prozess wäre der komplette Punktestand weg.
+process.on('uncaughtException', (err) => console.error('Unerwarteter Fehler:', err));
+process.on('unhandledRejection', (err) => console.error('Unerwarteter Fehler:', err));
 
 /* ------------------------------------------------------------ Spielzustand */
 
 let state = G.createState();
-const clients = new Map(); // clientId -> { res, isHost, name }
+
+/**
+ * Verbindungen werden pro Tab geführt, nicht pro Gerät: derselbe Browser kann
+ * Host-Screen und Spieleransicht offen haben, und ein Reload darf die frische
+ * Verbindung nicht abräumen.
+ */
+const connections = new Map(); // connId -> { res, clientId, isHost }
+
+function connectionsOf(clientId) {
+  return [...connections.values()].filter((c) => c.clientId === clientId);
+}
+
+function isHostClient(clientId) {
+  return connectionsOf(clientId).some((c) => c.isHost);
+}
 
 function broadcast() {
-  for (const [clientId, client] of clients) {
-    sendState(clientId, client);
-  }
+  for (const conn of connections.values()) sendState(conn);
 }
 
-function sendState(clientId, client) {
-  const view = G.viewFor(state, { isHost: client.isHost, clientId });
-  try {
-    client.res.write(`event: state\ndata: ${JSON.stringify(view)}\n\n`);
-  } catch {
-    clients.delete(clientId);
-  }
+function sendState(conn) {
+  write(conn, 'state', G.viewFor(state, { isHost: conn.isHost, clientId: conn.clientId }));
 }
 
-function notify(clientId, level, text) {
-  const client = clients.get(clientId);
-  if (!client) return;
+function write(conn, event, payload) {
   try {
-    client.res.write(`event: toast\ndata: ${JSON.stringify({ level, text })}\n\n`);
+    conn.res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
   } catch {
-    clients.delete(clientId);
+    connections.delete(conn.id);
   }
 }
 
 /** Kleines Signal für alle – z.B. Buzzer-Sound auf dem Host-Screen. */
 function broadcastEvent(name, payload) {
-  for (const [clientId, client] of clients) {
-    try {
-      client.res.write(`event: ${name}\ndata: ${JSON.stringify(payload)}\n\n`);
-    } catch {
-      clients.delete(clientId);
-    }
-  }
+  for (const conn of connections.values()) write(conn, name, payload);
 }
 
 /* ---------------------------------------------------------------- Aktionen */
 
 const HOST_ACTIONS = new Set([
-  'addTeam', 'renameTeam', 'removeTeam', 'adjustScore', 'setTurn',
-  'startGame', 'pick', 'judge', 'pass', 'openBuzz', 'reveal',
-  'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz',
-  'buzzFor', 'endQuestion',
+  'addTeam', 'renameTeam', 'removeTeam', 'removeMember', 'adjustScore', 'setTurn',
+  'startGame', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion',
+  'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz', 'buzzFor',
 ]);
 
 async function handleAction(clientId, body) {
-  const client = clients.get(clientId);
-  // Maßgeblich ist die Rolle der offenen Verbindung – ein Spielerhandy kann sich
-  // also nicht per Rollenangabe im Request zum Host erklären.
-  const isHost = client ? client.isHost : body.role === 'host';
+  const isHost = isHostClient(clientId);
   const type = String(body.type || '');
 
-  if (HOST_ACTIONS.has(type) && !isHost && type !== 'pick') {
+  if (HOST_ACTIONS.has(type) && !isHost) {
     throw new G.GameError('Nur der Host darf das.');
   }
 
@@ -89,6 +91,9 @@ async function handleAction(clientId, body) {
     case 'removeTeam':
       G.removeTeam(state, body.teamId);
       break;
+    case 'removeMember':
+      G.removeMember(state, body.teamId, body.clientId);
+      break;
     case 'adjustScore':
       G.adjustScore(state, body.teamId, body.delta);
       break;
@@ -106,7 +111,8 @@ async function handleAction(clientId, body) {
     case 'pick': {
       // Auch das Team, das dran ist, darf vom Handy aus wählen.
       const team = G.teamOfClient(state, clientId);
-      G.pickCell(state, Number(body.catIdx), Number(body.rowIdx), isHost ? null : team?.id);
+      if (!isHost && !team) throw new G.GameError('Du gehörst zu keinem Team.');
+      G.pickCell(state, Number(body.catIdx), Number(body.rowIdx), isHost ? null : team.id);
       break;
     }
     case 'buzz': {
@@ -134,11 +140,7 @@ async function handleAction(clientId, body) {
       G.openBuzz(state);
       break;
     case 'resetBuzz':
-      if (state.current) {
-        state.current.buzzedTeamId = null;
-        state.current.onTheHook = null;
-        state.current.step = 'buzz';
-      }
+      G.resetBuzz(state);
       break;
     case 'reveal':
       G.revealAnswer(state);
@@ -187,12 +189,20 @@ const ROUTES = {
   '/': 'index.html',
   '/host': 'host.html',
   '/play': 'player.html',
+  '/remote': 'remote.html',
   '/editor': 'editor.html',
 };
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = decodeURIComponent(url.pathname);
+  let pathname;
+  let url;
+  try {
+    url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    pathname = decodeURIComponent(url.pathname);
+  } catch {
+    // Eine einzige kaputt kodierte Adresse darf nicht den ganzen Abend beenden.
+    return send(res, 400, 'text/plain; charset=utf-8', 'Ungültige Adresse');
+  }
 
   try {
     if (pathname === '/api/events') return sseHandler(req, res, url);
@@ -203,17 +213,19 @@ const server = http.createServer(async (req, res) => {
     }
     const file = ROUTES[pathname] || pathname.replace(/^\//, '');
     const full = path.join(PUBLIC_DIR, file);
-    if (!full.startsWith(PUBLIC_DIR)) return send(res, 403, 'text/plain', 'Verboten');
+    if (!full.startsWith(PUBLIC_DIR + path.sep)) return send(res, 403, 'text/plain', 'Verboten');
     return serveFile(res, full);
   } catch (err) {
     console.error(err);
+    if (pathname.startsWith('/api/')) return sendJson(res, 500, { error: err.message });
     send(res, 500, 'text/plain; charset=utf-8', 'Serverfehler: ' + err.message);
   }
 });
 
 function sseHandler(req, res, url) {
-  const clientId = url.searchParams.get('clientId') || `c_${Math.random().toString(36).slice(2)}`;
+  const clientId = url.searchParams.get('clientId') || `c_${randomUUID()}`;
   const isHost = url.searchParams.get('role') === 'host';
+  const connId = randomUUID();
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
@@ -221,12 +233,15 @@ function sseHandler(req, res, url) {
     Connection: 'keep-alive',
     'X-Accel-Buffering': 'no',
   });
-  res.write(`retry: 1000\n\n`);
-  res.write(`event: hello\ndata: ${JSON.stringify({ clientId, isHost })}\n\n`);
+  res.write('retry: 1000\n\n');
 
-  const client = { res, isHost };
-  clients.set(clientId, client);
-  sendState(clientId, client);
+  const conn = { id: connId, res, clientId, isHost };
+  connections.set(connId, conn);
+  G.setMemberOnline(state, clientId, true);
+
+  write(conn, 'hello', { clientId, isHost });
+  sendState(conn);
+  broadcast(); // die anderen sehen sofort, dass jemand wieder online ist
 
   const ping = setInterval(() => {
     try {
@@ -236,10 +251,18 @@ function sseHandler(req, res, url) {
     }
   }, 20000);
 
-  req.on('close', () => {
+  const close = () => {
     clearInterval(ping);
-    clients.delete(clientId);
-  });
+    connections.delete(connId);
+    // Nur offline melden, wenn das Gerät wirklich keine Verbindung mehr hat –
+    // beim Neuladen einer Seite überlappen alte und neue Verbindung kurz.
+    if (connectionsOf(clientId).length === 0) {
+      G.setMemberOnline(state, clientId, false);
+      broadcast();
+    }
+  };
+  req.on('close', close);
+  res.on('error', close);
 }
 
 async function apiHandler(req, res, url, pathname) {
@@ -247,28 +270,57 @@ async function apiHandler(req, res, url, pathname) {
     return sendJson(res, 200, await listSets());
   }
   if (pathname === '/api/set' && req.method === 'GET') {
-    return sendJson(res, 200, await loadSet(url.searchParams.get('file')));
+    try {
+      return sendJson(res, 200, await loadSet(url.searchParams.get('file')));
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
   }
   if (pathname === '/api/sets' && req.method === 'POST') {
-    const body = await readJson(req);
-    const set = normalizeSet(body.set, 'Eigener Satz');
-    const name = path.basename(String(body.file || 'eigener-satz.json'));
-    const file = name.endsWith('.json') ? name : `${name}.json`;
-    await writeFile(path.join(DATA_DIR, file), JSON.stringify(set, null, 2), 'utf8');
-    return sendJson(res, 200, { ok: true, file });
+    let body;
+    try {
+      body = await readJson(req);
+    } catch (err) {
+      return sendJson(res, err.statusCode || 400, { error: err.message });
+    }
+    try {
+      const set = normalizeSet(body.set, 'Eigener Satz');
+      const name = path.basename(String(body.file || 'eigener-satz.json'));
+      const file = name.endsWith('.json') ? name : `${name}.json`;
+      const overwrite = await setExists(file);
+      if (overwrite && !body.overwrite) {
+        return sendJson(res, 200, { ok: false, exists: true, file });
+      }
+      // Erst in eine Nebendatei schreiben, dann umbenennen: ein Absturz mittendrin
+      // darf den vorhandenen Fragensatz nicht zerstören.
+      const target = path.join(DATA_DIR, file);
+      const tmp = `${target}.tmp`;
+      await writeFile(tmp, JSON.stringify(set, null, 2), 'utf8');
+      await rename(tmp, target);
+      return sendJson(res, 200, { ok: true, file });
+    } catch (err) {
+      return sendJson(res, 200, { ok: false, error: err.message });
+    }
   }
   if (pathname === '/api/info' && req.method === 'GET') {
     return sendJson(res, 200, { urls: localUrls(), port: PORT });
   }
   if (pathname === '/api/action' && req.method === 'POST') {
-    const body = await readJson(req);
+    let body;
+    try {
+      body = await readJson(req);
+    } catch (err) {
+      return sendJson(res, err.statusCode || 400, { ok: false, error: err.message });
+    }
     const clientId = String(body.clientId || '');
     try {
       await handleAction(clientId, body);
       return sendJson(res, 200, { ok: true });
     } catch (err) {
       if (!(err instanceof G.GameError)) console.error(err);
-      notify(clientId, 'error', err.message);
+      // Der Aufrufer zeigt den Fehler selbst an; zusätzlich alle Clients auf den
+      // tatsächlichen Serverstand ziehen, falls die Aktion halb durchlief.
+      broadcast();
       return sendJson(res, 200, { ok: false, error: err.message });
     }
   }
@@ -281,7 +333,10 @@ async function serveFile(res, full) {
     if (!info.isFile()) throw new Error('not a file');
     const type = MIME[path.extname(full).toLowerCase()] || 'application/octet-stream';
     res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache' });
-    createReadStream(full).pipe(res);
+    const stream = createReadStream(full);
+    // Ohne diesen Handler beendet ein Lesefehler nach gesendetem Header den Prozess.
+    stream.on('error', () => res.destroy());
+    stream.pipe(res);
   } catch {
     send(res, 404, 'text/plain; charset=utf-8', 'Nicht gefunden');
   }
@@ -298,20 +353,41 @@ function sendJson(res, code, obj) {
 
 function readJson(req) {
   return new Promise((resolve, reject) => {
-    let data = '';
+    const declared = Number(req.headers['content-length'] || 0);
+    if (declared > MAX_BODY_BYTES) {
+      req.destroy();
+      return reject(tooLarge());
+    }
+    // Als Buffer sammeln: an einer Chunk-Grenze mitten in einem Umlaut würde
+    // stückweises Dekodieren die Zeichen zerstören.
+    const chunks = [];
+    let size = 0;
     req.on('data', (chunk) => {
-      data += chunk;
-      if (data.length > 20e6) reject(new Error('Anfrage zu groß'));
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        req.destroy();
+        return reject(tooLarge());
+      }
+      chunks.push(chunk);
     });
     req.on('end', () => {
       try {
-        resolve(data ? JSON.parse(data) : {});
-      } catch (err) {
+        const text = Buffer.concat(chunks).toString('utf8');
+        resolve(text ? JSON.parse(text) : {});
+      } catch {
         reject(new Error('Ungültiges JSON'));
       }
     });
     req.on('error', reject);
   });
+}
+
+function tooLarge() {
+  const err = new Error(
+    `Zu groß (über ${Math.round(MAX_BODY_BYTES / 1024 / 1024)} MB). Große Bilder besser in data/bilder ablegen und als "/bilder/name.jpg" eintragen.`,
+  );
+  err.statusCode = 413;
+  return err;
 }
 
 function localUrls() {
@@ -323,6 +399,16 @@ function localUrls() {
   }
   return out.length ? out : [`http://localhost:${PORT}`];
 }
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n  Port ${PORT} ist schon belegt.`);
+    console.error('  Läuft der Server vielleicht bereits in einem anderen Fenster?');
+    console.error(`  Sonst mit einem anderen Port starten:  PORT=${PORT + 1} npm start\n`);
+    process.exit(1);
+  }
+  throw err;
+});
 
 server.listen(PORT, () => {
   console.log('\n  🎉  Quizduell für Spieleabende läuft!\n');
