@@ -1,0 +1,122 @@
+{
+  "name": "Spieleabend Klassiker",
+  "description": "Zwei Runden gemischtes Allgemeinwissen – zum Loslegen ohne Vorbereitung.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Erdkunde",
+          "questions": [
+            { "text": "Wie heißt die Hauptstadt von Australien?", "answer": "Canberra", "note": "Nicht Sydney – der häufigste Irrtum." },
+            { "text": "Welcher Fluss fließt durch Wien, Budapest und Belgrad?", "answer": "Die Donau" },
+            { "text": "Zu welchem Land gehören die Kanarischen Inseln?", "answer": "Spanien" },
+            { "text": "Welches ist mit Abstand das flächengrößte Land Afrikas?", "answer": "Algerien" }
+          ]
+        },
+        {
+          "name": "Musik",
+          "questions": [
+            { "text": "Welche Band veröffentlichte das Album „Abbey Road“?", "answer": "The Beatles" },
+            { "text": "Wie heißt der Sänger von Rammstein mit vollem Namen?", "answer": "Till Lindemann" },
+            { "text": "Wie viele Saiten hat eine klassische Konzertgitarre?", "answer": "Sechs" },
+            { "text": "Welche Künstlerin sang „Rolling in the Deep“?", "answer": "Adele" }
+          ]
+        },
+        {
+          "name": "Film & Serie",
+          "questions": [
+            { "text": "In welcher Stadt spielt die Serie „Friends“?", "answer": "New York" },
+            { "text": "Wie heißt der Zauberschul-Direktor in Harry Potter?", "answer": "Albus Dumbledore" },
+            { "text": "Welcher Film gewann 2020 als erster nicht-englischsprachiger Film den Oscar als bester Film?", "answer": "Parasite" },
+            { "text": "Wie heißt der Schöpfer der Serie „Breaking Bad“?", "answer": "Vince Gilligan" }
+          ]
+        },
+        {
+          "name": "Essen & Trinken",
+          "questions": [
+            { "text": "Aus welchem Land stammt die Paella ursprünglich?", "answer": "Spanien (Valencia)" },
+            { "text": "Welches Gewürz ist das teuerste der Welt?", "answer": "Safran" },
+            { "text": "Welche Nudelsorte heißt übersetzt „Schmetterlinge“?", "answer": "Farfalle" },
+            { "text": "Woraus wird Tofu hergestellt?", "answer": "Aus Sojabohnen" }
+          ]
+        },
+        {
+          "name": "Sport",
+          "questions": [
+            { "text": "Wie viele Spieler stehen beim Volleyball pro Team auf dem Feld?", "answer": "Sechs" },
+            { "text": "In welchem Land fanden die Olympischen Sommerspiele 2021 statt?", "answer": "Japan (Tokio)" },
+            { "text": "Wie oft wurde Deutschland Fußball-Weltmeister?", "answer": "Vier Mal" },
+            { "text": "Welche Farbe hat das Trikot des Führenden bei der Tour de France?", "answer": "Gelb" }
+          ]
+        },
+        {
+          "name": "Bunte Mischung",
+          "questions": [
+            { "text": "Wie viele Minuten hat ein Tag?", "answer": "1440" },
+            { "text": "Welches Tier kann seinen Kopf um fast 270 Grad drehen?", "answer": "Die Eule" },
+            { "text": "Welche Farbe entsteht, wenn man Blau und Gelb mischt?", "answer": "Grün" },
+            { "text": "Wie heißt das größte Organ des menschlichen Körpers?", "answer": "Die Haut" }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Abkürzungen",
+          "questions": [
+            { "text": "Wofür steht die Abkürzung „WLAN“?", "answer": "Wireless Local Area Network" },
+            { "text": "Wofür steht „TÜV“?", "answer": "Technischer Überwachungsverein" },
+            { "text": "Wofür steht „LASER“?", "answer": "Light Amplification by Stimulated Emission of Radiation" },
+            { "text": "Wofür steht „GmbH“?", "answer": "Gesellschaft mit beschränkter Haftung" }
+          ]
+        },
+        {
+          "name": "Geschichte",
+          "questions": [
+            { "text": "In welchem Jahr fiel die Berliner Mauer?", "answer": "1989" },
+            { "text": "Wer war der erste Mensch auf dem Mond?", "answer": "Neil Armstrong" },
+            { "text": "Welches Reich regierte Julius Cäsar?", "answer": "Das Römische Reich" },
+            { "text": "In welchem Jahr begann der Erste Weltkrieg?", "answer": "1914" }
+          ]
+        },
+        {
+          "name": "Wissenschaft",
+          "questions": [
+            { "text": "Welches chemische Element hat das Symbol „Fe“?", "answer": "Eisen" },
+            { "text": "Wie viele Planeten hat unser Sonnensystem?", "answer": "Acht" },
+            { "text": "Wie heißt der Vorgang, bei dem Pflanzen aus Licht Energie gewinnen?", "answer": "Photosynthese" },
+            { "text": "Wie schnell ist das Licht ungefähr, in Kilometern pro Sekunde?", "answer": "Rund 300.000 km/s" }
+          ]
+        },
+        {
+          "name": "Was ist die Frage?",
+          "questions": [
+            { "text": "Dieses Ereignis beschreibt die Explosion eines Sterns am Ende seines Lebenszyklus.", "answer": "Was ist eine Supernova?" },
+            { "text": "Dieses Land hat die meisten Einwohner der Welt.", "answer": "Was ist Indien?" },
+            { "text": "Diese Währung wird in Japan benutzt.", "answer": "Was ist der Yen?" },
+            { "text": "Dieser deutsche Dichter schrieb „Faust“.", "answer": "Wer ist Johann Wolfgang von Goethe?" }
+          ]
+        },
+        {
+          "name": "Marken & Logos",
+          "questions": [
+            { "text": "Welche Automarke hat vier ineinandergreifende Ringe im Logo?", "answer": "Audi" },
+            { "text": "Welches Unternehmen wirbt mit dem Slogan „Just Do It“?", "answer": "Nike" },
+            { "text": "Aus welchem Land kommt der Möbelhersteller IKEA?", "answer": "Schweden" },
+            { "text": "Welche Farbe hat der Hintergrund im Logo von Nivea?", "answer": "Dunkelblau" }
+          ]
+        },
+        {
+          "name": "Internet & Trends",
+          "questions": [
+            { "text": "Wie heißt der Gründer von Facebook?", "answer": "Mark Zuckerberg" },
+            { "text": "Welche Plattform machte Kurzvideos mit dem Namen „Vine“ berühmt?", "answer": "Vine (von Twitter)" },
+            { "text": "Wofür steht das „S“ in HTTPS?", "answer": "Secure" },
+            { "text": "In welchem Jahr wurde YouTube gegründet?", "answer": "2005" }
+          ]
+        }
+      ]
+    }
+  ]
+}

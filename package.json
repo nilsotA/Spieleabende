@@ -1,0 +1,17 @@
+{
+  "name": "spieleabende-quizduell",
+  "version": "1.0.0",
+  "description": "Quizduell-Spielbrett für Spieleabende: Host-Screen am Beamer, Buzzer auf dem Handy.",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "private": true
+}

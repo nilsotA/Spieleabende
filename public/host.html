@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quizduell – Host-Screen</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/host.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M62 2 30 52h18L36 98 78 40H56z' fill='%23e01b46'/%3E%3C/svg%3E">
+</head>
+<body class="host">
+
+<div id="offline" class="offline" hidden>Verbindung verloren – versuche neu zu verbinden …</div>
+
+<!-- ================================================== LOBBY ============ -->
+<section id="view-lobby" class="view">
+  <header class="lobby-head">
+    <div class="logo" style="font-size:3.2rem"><span>Quiz</span><span>Duell</span></div>
+    <p class="muted">Spieleabend-Edition</p>
+  </header>
+
+  <div class="lobby-grid">
+    <div class="card">
+      <h2>1 · Teams &amp; Spieler</h2>
+      <p class="muted small">Einzelspieler = einfach ein Team pro Person. Für Zweierteams beide Handys demselben Team zuordnen.</p>
+      <form id="team-form" class="row" style="margin:0.8rem 0">
+        <input id="team-name" class="grow" placeholder="Teamname, z.B. „Die Grübler“" maxlength="24" autocomplete="off">
+        <button class="btn btn-primary" type="submit">Team anlegen</button>
+      </form>
+      <ul id="lobby-teams" class="lobby-teams"></ul>
+    </div>
+
+    <div class="card">
+      <h2>2 · Handys verbinden</h2>
+      <p class="muted small">Alle öffnen im Browser diese Adresse (gleiches WLAN):</p>
+      <div id="join-urls" class="join-urls"></div>
+      <p class="muted small">Dort Namen eingeben, Team wählen – fertig. Ohne Handy geht’s auch: dann buzzert ihr per Zuruf und der Host drückt hier die Knöpfe.</p>
+    </div>
+
+    <div class="card">
+      <h2>3 · Fragen</h2>
+      <div class="row" style="margin-bottom:0.6rem">
+        <select id="set-select" class="grow"></select>
+        <button id="btn-reload-sets" class="btn btn-ghost btn-sm" type="button">↻</button>
+      </div>
+      <p id="set-info" class="muted small"></p>
+      <div class="row">
+        <label class="btn btn-ghost btn-sm" style="margin:0;cursor:pointer">
+          Datei laden … <input id="set-file" type="file" accept="application/json" hidden>
+        </label>
+        <a class="btn btn-ghost btn-sm" href="/editor" target="_blank" rel="noopener">Fragen-Editor öffnen</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4 · Regeln</h2>
+      <div class="settings">
+        <div>
+          <label for="set-turnmode">Wer ist als Nächstes dran?</label>
+          <select id="set-turnmode">
+            <option value="rotate">Reihum – jeder kommt gleich oft dran</option>
+            <option value="keepOnCorrect">Wer richtig liegt, bleibt dran</option>
+          </select>
+        </div>
+        <div>
+          <label for="set-penalty">Abzug, wenn das Zugteam falsch liegt</label>
+          <select id="set-penalty">
+            <option value="none">Kein Abzug</option>
+            <option value="half">Halbe Punkte</option>
+            <option value="full">Volle Punkte</option>
+          </select>
+        </div>
+        <div>
+          <label for="set-buzzcorrect">Buzzern nach richtiger Antwort?</label>
+          <select id="set-buzzcorrect">
+            <option value="false">Nein – Frage ist dann durch</option>
+            <option value="true">Ja – andere dürfen trotzdem noch</option>
+          </select>
+        </div>
+      </div>
+      <p class="muted small" style="margin-top:0.8rem">
+        Fest eingebaut: Zugteam bekommt <b>volle Punkte</b>. Erst wenn es geantwortet hat, ist der
+        Buzzer frei – richtig gebuzzert gibt <b>die Hälfte</b>, falsch kostet <b>die Hälfte</b>.
+        Runde 2 zählt doppelt.
+      </p>
+    </div>
+  </div>
+
+  <div class="lobby-start">
+    <button id="btn-start" class="btn btn-primary btn-big">Spiel starten</button>
+  </div>
+</section>
+
+<!-- ================================================== SPIEL ============ -->
+<section id="view-game" class="view">
+  <div class="stage">
+    <div class="stage-top">
+      <div class="round-badge">
+        <span id="round-label">Runde 1</span>
+        <small id="round-mult"></small>
+      </div>
+      <div class="logo" style="font-size:2.6rem"><span>Quiz</span><span>Duell</span></div>
+      <div class="buzz-indicator" id="buzz-indicator">
+        <div class="buzz-circle"><span>⚡</span><small>BUZZ</small></div>
+      </div>
+    </div>
+
+    <div class="turn-bar">
+      <div id="turn-pill" class="turn-pill"><span id="turn-name">—</span></div>
+    </div>
+
+    <div id="board" class="board"></div>
+
+    <!-- Frage-Overlay -->
+    <div id="question" class="question" hidden>
+      <div class="q-panel">
+        <div id="q-head" class="q-head">Kategorie 100</div>
+        <div id="q-text" class="q-text"></div>
+        <img id="q-image" class="q-image" alt="" hidden>
+        <div id="q-status" class="q-status"></div>
+        <div id="q-answer" class="q-answer" hidden></div>
+        <div id="q-note" class="q-note" hidden></div>
+      </div>
+    </div>
+
+    <!-- Rundenende / Endstand -->
+    <div id="scoreboard" class="question" hidden>
+      <div class="q-panel scores-panel">
+        <div id="score-title" class="q-head">Rundenende</div>
+        <ol id="score-list" class="score-list"></ol>
+        <div class="row" style="justify-content:center;margin-top:1.2rem">
+          <button id="btn-next-round" class="btn btn-primary btn-big">Nächste Runde</button>
+          <button id="btn-new-game" class="btn btn-ghost" hidden>Neues Spiel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="players" class="players"></div>
+
+  <!-- Steuerleiste für den Host -->
+  <div id="controls" class="controls">
+    <div class="controls-inner">
+      <div id="control-hint" class="control-hint"></div>
+      <div id="control-buttons" class="control-buttons"></div>
+      <button id="btn-menu" class="btn btn-ghost btn-sm" title="Punkte korrigieren / Spiel beenden">⋯</button>
+    </div>
+  </div>
+
+  <!-- Host-Menü -->
+  <div id="menu" class="menu" hidden>
+    <div class="card menu-card">
+      <h2>Punkte &amp; Steuerung</h2>
+      <ul id="menu-teams" class="menu-teams"></ul>
+      <div class="row" style="margin-top:1rem">
+        <button id="btn-close-menu" class="btn grow">Schließen</button>
+        <button id="btn-abort" class="btn btn-bad">Spiel beenden</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="toasts"></div>
+<script type="module" src="/host.js"></script>
+</body>
+</html>

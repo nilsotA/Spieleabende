@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quizduell für Spieleabende</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M62 2 30 52h18L36 98 78 40H56z' fill='%23e01b46'/%3E%3C/svg%3E">
+<style>
+  main { max-width: 720px; margin: 0 auto; padding: 3rem 1.2rem 4rem; text-align: center; }
+  .tiles { display: grid; gap: 1rem; margin-top: 2.5rem; text-align: left; }
+  .tiles a { text-decoration: none; color: inherit; display: block; }
+  .tiles .card { transition: border-color .15s ease, transform .15s ease; }
+  .tiles a:hover .card { border-color: #4f9bec; transform: translateY(-2px); }
+  .tiles h2 { font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--text); margin-bottom: .3rem; }
+  .tiles p { margin: 0; font-size: .9rem; color: var(--muted); }
+  .tiles .big { font-size: 1.8rem; margin-right: .8rem; float: left; }
+  footer { margin-top: 3rem; font-size: .85rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo" style="font-size:3.4rem"><span>Quiz</span><span>Duell</span></div>
+  <p class="muted" style="letter-spacing:.3em;text-transform:uppercase;font-size:.75rem;margin-top:1rem">
+    Spieleabend-Edition
+  </p>
+
+  <div class="tiles">
+    <a href="/play">
+      <div class="card">
+        <span class="big">📱</span>
+        <h2>Mitspielen</h2>
+        <p>Name eingeben, Team wählen, buzzern. Das hier ist die richtige Seite für alle Mitspieler.</p>
+      </div>
+    </a>
+    <a href="/host">
+      <div class="card">
+        <span class="big">🖥️</span>
+        <h2>Host-Screen</h2>
+        <p>Das Spielbrett für Beamer, TV oder Bildschirmteilen. Hier werden Teams angelegt und Antworten bewertet.</p>
+      </div>
+    </a>
+    <a href="/editor">
+      <div class="card">
+        <span class="big">✏️</span>
+        <h2>Fragen-Editor</h2>
+        <p>Eigene Kategorien und Fragen bauen, als Datei speichern und beim nächsten Mal wieder laden.</p>
+      </div>
+    </a>
+  </div>
+
+  <footer>
+    Regeln: Wer dran ist, wählt ein Feld und bekommt bei richtiger Antwort die vollen Punkte.
+    Erst danach ist der Buzzer für alle anderen frei – richtig gibt die Hälfte, falsch kostet die Hälfte.
+    Runde 2 zählt doppelt.
+  </footer>
+</main>
+</body>
+</html>

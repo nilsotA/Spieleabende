@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#05070c">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Quizduell – Buzzer</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/player.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M62 2 30 52h18L36 98 78 40H56z' fill='%23e01b46'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div id="offline" class="offline" hidden>Verbindung verloren – versuche neu zu verbinden …</div>
+
+<main id="app">
+
+  <!-- Anmeldung -->
+  <section id="view-join" class="screen">
+    <div class="logo" style="font-size:2.4rem"><span>Quiz</span><span>Duell</span></div>
+    <form id="join-form" class="card join-card">
+      <div>
+        <label for="my-name">Dein Name</label>
+        <input id="my-name" maxlength="24" autocomplete="nickname" placeholder="z.B. Nils" required>
+      </div>
+      <div>
+        <label>Team</label>
+        <div id="team-choices" class="team-choices"></div>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Mitspielen</button>
+      <p id="join-hint" class="muted small"></p>
+    </form>
+  </section>
+
+  <!-- Spielansicht -->
+  <section id="view-play" class="screen">
+    <header class="phead">
+      <div>
+        <div id="p-team" class="p-team">—</div>
+        <div id="p-name" class="muted small">—</div>
+      </div>
+      <div id="p-score" class="p-score">0</div>
+    </header>
+
+    <div id="p-status" class="p-status">Warte auf den Host …</div>
+
+    <!-- Feldauswahl, wenn man dran ist -->
+    <div id="p-picker" class="picker" hidden></div>
+
+    <!-- Frage -->
+    <div id="p-question" class="p-question" hidden>
+      <div id="p-q-head" class="p-q-head"></div>
+      <div id="p-q-text" class="p-q-text"></div>
+      <img id="p-q-image" class="p-q-image" alt="" hidden>
+      <div id="p-q-answer" class="p-q-answer" hidden></div>
+    </div>
+
+    <!-- Buzzer -->
+    <button id="buzzer" class="buzzer" disabled>
+      <span class="bolt">⚡</span>
+      <span id="buzzer-label" class="buzzer-label">BUZZ</span>
+    </button>
+
+    <div id="p-scores" class="p-scores"></div>
+    <button id="btn-leave" class="btn btn-ghost btn-sm" style="align-self:center">Team wechseln</button>
+  </section>
+
+</main>
+
+<div id="toasts"></div>
+<script type="module" src="/player.js"></script>
+</body>
+</html>

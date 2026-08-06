@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quizduell – Fragen-Editor</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M62 2 30 52h18L36 98 78 40H56z' fill='%23e01b46'/%3E%3C/svg%3E">
+<style>
+  main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.2rem 5rem; }
+  h1 { font-size: 1.6rem; margin: 0 0 .3rem; }
+  .bar { position: sticky; top: 0; z-index: 10; background: rgba(5,7,12,.94);
+         backdrop-filter: blur(6px); padding: .8rem 0; margin-bottom: 1.2rem;
+         border-bottom: 1px solid var(--line); }
+  .round { margin-bottom: 2rem; }
+  .round > h2 { display: flex; align-items: center; gap: .6rem; }
+  .round-mult { font-size: .72rem; color: var(--red-1); }
+  .cats { display: grid; gap: 1rem; }
+  .cat-card { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: rgba(255,255,255,.02); }
+  .cat-head { display: flex; gap: .6rem; align-items: center; padding: .6rem .8rem;
+              background: linear-gradient(180deg, rgba(224,27,70,.85), rgba(141,12,40,.85)); }
+  .cat-head input { background: rgba(0,0,0,.25); border-color: rgba(255,255,255,.25); font-weight: 800;
+                    text-transform: uppercase; letter-spacing: .06em; }
+  .qrow { display: grid; grid-template-columns: 4.2rem 1fr 1fr auto; gap: .5rem; align-items: start;
+          padding: .55rem .8rem; border-top: 1px solid var(--line); }
+  .qrow .val { font-family: var(--font-num); font-style: italic; color: #7fb6f0; padding-top: .55rem; }
+  .qrow textarea { min-height: 2.6rem; resize: vertical; }
+  .qrow .img-btn { display: flex; flex-direction: column; gap: .3rem; }
+  .qrow img { max-width: 90px; max-height: 60px; border-radius: 6px; border: 2px solid #fff; background: #fff; }
+  @media (max-width: 760px) { .qrow { grid-template-columns: 1fr; } .qrow .val { padding-top: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar">
+    <div class="row">
+      <div class="grow">
+        <h1>Fragen-Editor</h1>
+        <p class="muted small" style="margin:0">6 Kategorien × 4 Fragen pro Runde. Runde 2 zählt automatisch doppelt.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="/host">← Host-Screen</a>
+    </div>
+    <div class="row" style="margin-top:.8rem">
+      <input id="set-name" class="grow" placeholder="Name des Fragensatzes" maxlength="80">
+      <select id="load-select" class="grow"></select>
+      <button id="btn-load" class="btn btn-ghost btn-sm" type="button">Laden</button>
+      <label class="btn btn-ghost btn-sm" style="margin:0;cursor:pointer">
+        Datei öffnen <input id="file-input" type="file" accept="application/json" hidden>
+      </label>
+      <button id="btn-download" class="btn btn-ghost btn-sm" type="button">Herunterladen</button>
+      <button id="btn-save" class="btn btn-primary btn-sm" type="button">Auf dem Server speichern</button>
+    </div>
+  </div>
+
+  <div id="rounds"></div>
+
+  <div class="row" style="justify-content:center;margin-top:1.5rem">
+    <button id="btn-add-round" class="btn btn-ghost" type="button">+ Weitere Runde</button>
+  </div>
+</main>
+
+<div id="toasts"></div>
+<script type="module" src="/editor.js"></script>
+</body>
+</html>
