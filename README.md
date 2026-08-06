@@ -135,7 +135,25 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 - `note` ist optional und erscheint beim Auflösen als kleiner Zusatz.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.
 
-Mitgeliefert: `data/beispiel-spieleabend.json` mit 48 Fragen zum sofort Losspielen.
+### Mitgeliefert
+
+Vier fertige Sätze mit je 48 Fragen – zusammen 192, keine doppelt:
+
+| Satz | Kategorien |
+|---|---|
+| **Spieleabend Klassiker** | Gemischtes Allgemeinwissen zum Loslegen ohne Vorbereitung |
+| **Popkultur & Emoji** | Emoji-Rätsel, Filmzitate, Werbeslogans, Serien, Musik, Gaming |
+| **Kopfnuss** | Anagramme, Geheimschrift, Schätzfragen, Logik, Wahr oder falsch |
+| **Deutschland-Duell** | KFZ-Kennzeichen, Bundesländer, Dialekt, Marken, Erfindungen |
+
+„Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
+knacken, ohne irgendetwas auswendig zu wissen.
+
+Dazu gibt es in der Auswahl **🎲 Zufallsmix aus allen Sätzen** – zwölf Kategorien,
+bei jedem Start neu gewürfelt. So ist kein Abend wie der andere.
+
+Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
+`Welcher Film?\n🦁 👑` sind die Symbole ja die eigentliche Frage.
 
 ---
 

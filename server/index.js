@@ -7,12 +7,13 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
-import { listSets, loadSet, normalizeSet, setExists, externalizeImages, DATA_DIR } from './questions.js';
+import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, DATA_DIR } from './questions.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const PORT = Number(process.env.PORT) || 3000;
 const MAX_BODY_BYTES = 32 * 1024 * 1024;
+const MIX = '__mix'; // Kennung für das gewürfelte Board
 
 // Ein Spieleabend darf nicht daran scheitern, dass irgendein Randfall den Prozess
 // beendet – mit dem Prozess wäre der komplette Punktestand weg.
@@ -185,7 +186,11 @@ async function handleAction(clientId, body) {
       Object.assign(state.settings, pickSettings(body.settings));
       break;
     case 'startGame': {
-      const roh = body.set ? normalizeSet(body.set) : await loadSet(body.file);
+      const roh = body.set
+        ? normalizeSet(body.set)
+        : body.file === MIX
+          ? normalizeSet(await mixSet())
+          : await loadSet(body.file);
       const { set, images } = externalizeImages(roh);
       bilder = images;
       G.startGame(state, set);
@@ -354,6 +359,13 @@ function sseHandler(req, res, url) {
 async function apiHandler(req, res, url, pathname) {
   if (pathname === '/api/sets' && req.method === 'GET') {
     return sendJson(res, 200, await listSets());
+  }
+  if (pathname === '/api/mix' && req.method === 'GET') {
+    try {
+      return sendJson(res, 200, await mixSet());
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
   }
   if (pathname === '/api/set' && req.method === 'GET') {
     try {

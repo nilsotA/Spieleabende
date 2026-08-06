@@ -1,6 +1,6 @@
 // Host-Fernbedienung: zeigt Frage UND Lösung auf dem Handy des Hosts und
 // erlaubt das Bewerten – damit die Lösung nie auf der Leinwand landet.
-import { $, el, connect, action, sound, installAudioUnlock, keepScreenAwake } from '/common.js';
+import { $, el, connect, action, sound, installAudioUnlock, keepScreenAwake, setFrageText } from '/common.js';
 
 let state = null;
 
@@ -33,7 +33,7 @@ function render() {
   box.hidden = !q;
   if (q) {
     $('#r-cat').textContent = `${q.category} · ${q.value} Punkte`;
-    $('#r-text').textContent = q.text;
+    setFrageText($('#r-text'), q.text);
     $('#r-answer').textContent = q.answer ?? '—';
     const log = $('#r-log');
     log.innerHTML = '';

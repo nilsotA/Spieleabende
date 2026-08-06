@@ -149,3 +149,40 @@ export async function setExists(file) {
     return false;
   }
 }
+
+/**
+ * Würfelt ein Board aus den Kategorien aller vorhandenen Sätze zusammen.
+ * Damit ist kein Abend wie der andere, ohne dass jemand neue Fragen schreiben muss.
+ * Kategorienamen werden entdoppelt – „Was ist die Frage?" gibt es in fast jedem Satz.
+ */
+export async function mixSet() {
+  const dateien = (await listSets()).filter((s) => !s.error);
+  const nachName = new Map(); // Name -> Liste gleichnamiger Kategorien
+  for (const eintrag of dateien) {
+    const set = await loadSet(eintrag.file);
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        if (!nachName.has(cat.name)) nachName.set(cat.name, []);
+        nachName.get(cat.name).push(cat);
+      }
+    }
+  }
+
+  const auswahl = [...nachName.values()].map((gleiche) => gleiche[Math.floor(Math.random() * gleiche.length)]);
+  if (auswahl.length < 12) {
+    throw new Error(`Für einen Zufallsmix braucht es mindestens 12 verschiedene Kategorien, gefunden: ${auswahl.length}.`);
+  }
+  for (let i = auswahl.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [auswahl[i], auswahl[j]] = [auswahl[j], auswahl[i]];
+  }
+
+  return {
+    name: 'Zufallsmix',
+    description: `Zwölf Kategorien, gewürfelt aus ${dateien.length} Fragensätzen.`,
+    rounds: [
+      { categories: auswahl.slice(0, 6) },
+      { categories: auswahl.slice(6, 12) },
+    ],
+  };
+}

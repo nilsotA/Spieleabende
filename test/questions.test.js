@@ -59,15 +59,57 @@ test('mehr als 8 Kategorien passen nicht aufs Board', () => {
   assert.throws(() => normalizeSet(satz(viele)), /9 Kategorien/);
 });
 
-test('der mitgelieferte Beispielsatz ist gültig', async () => {
-  const { readFile } = await import('node:fs/promises');
-  const raw = JSON.parse(await readFile(new URL('../data/beispiel-spieleabend.json', import.meta.url), 'utf8'));
-  const set = normalizeSet(raw);
-  assert.equal(set.rounds.length, 2);
-  for (const round of set.rounds) {
-    assert.equal(round.categories.length, 6);
-    for (const cat of round.categories) assert.equal(cat.questions.length, 4);
+/* Jeder mitgelieferte Satz wird geprüft – ein kaputter Satz fiele sonst erst
+   am Spieleabend auf, wenn das Menü ihn ausgegraut anzeigt. */
+
+const { readdir, readFile } = await import('node:fs/promises');
+const DATEN = new URL('../data/', import.meta.url);
+const DATEIEN = (await readdir(DATEN))
+  .filter((f) => f.endsWith('.json') && !f.startsWith('.'))
+  .sort();
+
+test('es sind mehrere Fragensätze dabei', () => {
+  assert.ok(DATEIEN.length >= 4, `nur ${DATEIEN.length} Sätze gefunden`);
+});
+
+for (const datei of DATEIEN) {
+  test(`Fragensatz ${datei} ist gültig`, async () => {
+    const raw = JSON.parse(await readFile(new URL(datei, DATEN), 'utf8'));
+    const set = normalizeSet(raw);
+    assert.ok(set.name, 'Name fehlt');
+    assert.ok(set.description, 'Beschreibung fehlt');
+    assert.equal(set.rounds.length, 2, 'genau zwei Runden erwartet');
+    for (const round of set.rounds) {
+      assert.equal(round.categories.length, 6, 'sechs Kategorien pro Runde');
+      const namen = round.categories.map((c) => c.name);
+      assert.equal(new Set(namen).size, namen.length, 'Kategorienamen doppelt');
+      for (const cat of round.categories) {
+        assert.equal(cat.questions.length, 4);
+        for (const q of cat.questions) {
+          assert.ok(q.text.trim().length > 5, `zu kurze Frage in ${cat.name}`);
+          assert.ok(q.answer.trim().length > 0);
+        }
+      }
+    }
+  });
+}
+
+test('keine Frage kommt in zwei Sätzen doppelt vor', async () => {
+  const gesehen = new Map();
+  const dopplungen = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) {
+          const schluessel = `${q.text}|${q.answer}`.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+          if (gesehen.has(schluessel)) dopplungen.push(`${q.text} (${datei} und ${gesehen.get(schluessel)})`);
+          gesehen.set(schluessel, datei);
+        }
+      }
+    }
   }
+  assert.deepEqual(dopplungen, [], 'gleiche Frage in mehreren Sätzen');
 });
 
 test('der gesicherte Spielstand taucht nicht als Fragensatz auf', async () => {
@@ -85,4 +127,28 @@ test('der gesicherte Spielstand taucht nicht als Fragensatz auf', async () => {
   } finally {
     await unlink(spielstand).catch(() => {});
   }
+});
+
+test('der Zufallsmix baut ein vollständiges Board aus allen Sätzen', async () => {
+  const { mixSet } = await import('../server/questions.js');
+  const mix = normalizeSet(await mixSet());
+
+  assert.equal(mix.rounds.length, 2);
+  const namen = mix.rounds.flatMap((r) => r.categories.map((c) => c.name));
+  assert.equal(namen.length, 12);
+  assert.equal(new Set(namen).size, 12, 'jede Kategorie darf nur einmal vorkommen');
+  for (const round of mix.rounds) {
+    for (const cat of round.categories) assert.equal(cat.questions.length, 4);
+  }
+});
+
+test('zwei Mixe unterscheiden sich', async () => {
+  const { mixSet } = await import('../server/questions.js');
+  const alsText = async () =>
+    (await mixSet()).rounds.flatMap((r) => r.categories.map((c) => c.name)).join('|');
+  // Bei 40+ Kategorien wäre zweimal dieselbe Auswahl in dieser Reihenfolge
+  // astronomisch unwahrscheinlich; zehn Versuche schließen einen festen Mix aus.
+  const proben = new Set();
+  for (let i = 0; i < 10; i++) proben.add(await alsText());
+  assert.ok(proben.size > 1, 'der Mix würfelt nicht');
 });

@@ -1,0 +1,275 @@
+{
+  "name": "Kopfnuss",
+  "description": "Knobeln statt pauken: Anagramme, Geheimschrift, Schätzfragen und Logik – hier hat auch eine Chance, wer nichts auswendig weiß.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Anagramme",
+          "questions": [
+            {
+              "text": "Welches Wort steckt in „NEBEL“? (Buchstaben neu sortieren)",
+              "answer": "LEBEN"
+            },
+            {
+              "text": "Welches Wort steckt in „LAGER“?",
+              "answer": "REGAL"
+            },
+            {
+              "text": "Welches Wort steckt in „SCHLAF“?",
+              "answer": "FALSCH"
+            },
+            {
+              "text": "Welches Wort steckt in „ELTERN“?",
+              "answer": "LERNTE"
+            }
+          ]
+        },
+        {
+          "name": "Schätzfragen",
+          "questions": [
+            {
+              "text": "Wie viele Felder hat ein Schachbrett?",
+              "answer": "64"
+            },
+            {
+              "text": "Wie viele Tasten hat ein Klavier?",
+              "answer": "88"
+            },
+            {
+              "text": "Wie viele Sekunden hat eine Stunde?",
+              "answer": "3600"
+            },
+            {
+              "text": "Wie viele Knochen hat ein erwachsener Mensch?",
+              "answer": "206"
+            }
+          ]
+        },
+        {
+          "name": "Wahr oder falsch",
+          "questions": [
+            {
+              "text": "Fledermäuse sind blind.",
+              "answer": "Falsch – sie sehen, orientieren sich aber vor allem per Echo"
+            },
+            {
+              "text": "Ein Tag auf der Venus dauert länger als ein Jahr auf der Venus.",
+              "answer": "Wahr",
+              "note": "Die Venus dreht sich langsamer, als sie die Sonne umrundet"
+            },
+            {
+              "text": "Karotten verbessern die Nachtsicht deutlich.",
+              "answer": "Falsch – das ist ein Mythos aus dem Zweiten Weltkrieg"
+            },
+            {
+              "text": "Die Chinesische Mauer ist mit bloßem Auge vom Mond aus zu sehen.",
+              "answer": "Falsch"
+            }
+          ]
+        },
+        {
+          "name": "Verdrehte Sprichwörter",
+          "questions": [
+            {
+              "text": "Wie heißt es richtig? „Der frühe Wurm fängt den Vogel.“",
+              "answer": "Der frühe Vogel fängt den Wurm"
+            },
+            {
+              "text": "Wie heißt es richtig? „Viele Brüche verderben den Kobold.“",
+              "answer": "Viele Köche verderben den Brei"
+            },
+            {
+              "text": "Wie heißt es richtig? „Wer im Glashaus sitzt, soll nicht mit Brötchen werfen.“",
+              "answer": "Wer im Glashaus sitzt, soll nicht mit Steinen werfen"
+            },
+            {
+              "text": "Wie heißt es richtig? „Morgenstund hat Blei im Mund.“",
+              "answer": "Morgenstund hat Gold im Mund"
+            }
+          ]
+        },
+        {
+          "name": "Wer bin ich?",
+          "questions": [
+            {
+              "text": "Ich schrieb „Faust“ und kam in Frankfurt zur Welt.",
+              "answer": "Johann Wolfgang von Goethe"
+            },
+            {
+              "text": "Ich malte die Mona Lisa.",
+              "answer": "Leonardo da Vinci"
+            },
+            {
+              "text": "Ich komponierte meine 9. Sinfonie, als ich fast nichts mehr hörte.",
+              "answer": "Ludwig van Beethoven"
+            },
+            {
+              "text": "Ich bekam Nobelpreise in zwei verschiedenen Naturwissenschaften.",
+              "answer": "Marie Curie",
+              "note": "Physik 1903, Chemie 1911"
+            }
+          ]
+        },
+        {
+          "name": "Zahlenspiele",
+          "questions": [
+            {
+              "text": "Was ergibt 7 × 8?",
+              "answer": "56"
+            },
+            {
+              "text": "Wie viele Nullen hat eine Million?",
+              "answer": "Sechs"
+            },
+            {
+              "text": "Wie geht die Reihe weiter? 1, 4, 9, 16, 25, …",
+              "answer": "36",
+              "note": "Quadratzahlen"
+            },
+            {
+              "text": "Wie geht die Reihe weiter? 1, 1, 2, 3, 5, 8, …",
+              "answer": "13",
+              "note": "Fibonacci-Folge"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Was ist die Frage?",
+          "questions": [
+            {
+              "text": "Dieses Organ ist das größte des Menschen.",
+              "answer": "Was ist die Haut?"
+            },
+            {
+              "text": "Diese Farbe entsteht aus Blau und Gelb.",
+              "answer": "Was ist Grün?"
+            },
+            {
+              "text": "Bei diesem Vorgang machen Pflanzen aus Licht Energie.",
+              "answer": "Was ist die Photosynthese?"
+            },
+            {
+              "text": "Dieser Ozean ist der größte der Erde.",
+              "answer": "Was ist der Pazifik?"
+            }
+          ]
+        },
+        {
+          "name": "Geheimschrift",
+          "questions": [
+            {
+              "text": "Jeder Buchstabe ist einen weitergerutscht. Wie heißt das Wort? „TQJFM“",
+              "answer": "SPIEL"
+            },
+            {
+              "text": "Gleiche Regel: „GSBHF“",
+              "answer": "FRAGE"
+            },
+            {
+              "text": "Gleiche Regel: „QVOLUF“",
+              "answer": "PUNKTE"
+            },
+            {
+              "text": "Gleiche Regel: „TQJFMFBCFOE“",
+              "answer": "SPIELEABEND"
+            }
+          ]
+        },
+        {
+          "name": "Logik",
+          "questions": [
+            {
+              "text": "Ein Bauer hat 17 Schafe. Alle bis auf 9 laufen weg. Wie viele hat er noch?",
+              "answer": "Neun"
+            },
+            {
+              "text": "Wie viele Monate haben 28 Tage?",
+              "answer": "Alle zwölf"
+            },
+            {
+              "text": "Ein Ziegelstein wiegt ein Kilo plus einen halben Ziegelstein. Wie schwer ist er?",
+              "answer": "Zwei Kilo"
+            },
+            {
+              "text": "Vater und Sohn sind zusammen 66 Jahre alt, der Vater ist doppelt so alt. Wie alt ist der Sohn?",
+              "answer": "22 Jahre",
+              "note": "Vater 44, Sohn 22"
+            }
+          ]
+        },
+        {
+          "name": "Sprachen",
+          "questions": [
+            {
+              "text": "Wie sagt man „Danke“ auf Spanisch?",
+              "answer": "Gracias"
+            },
+            {
+              "text": "Wie begrüßt man sich auf Japanisch tagsüber?",
+              "answer": "Konnichiwa"
+            },
+            {
+              "text": "In welchem Land spricht man Flämisch?",
+              "answer": "In Belgien"
+            },
+            {
+              "text": "Wie viele Amtssprachen hat die Schweiz?",
+              "answer": "Vier",
+              "note": "Deutsch, Französisch, Italienisch, Rätoromanisch"
+            }
+          ]
+        },
+        {
+          "name": "Was war zuerst?",
+          "questions": [
+            {
+              "text": "Was kam zuerst auf den Markt: die CD oder die DVD?",
+              "answer": "Die CD"
+            },
+            {
+              "text": "Was wurde zuerst erfunden: das Telefon oder die Glühbirne?",
+              "answer": "Das Telefon",
+              "note": "Telefon 1876, Glühbirne 1879"
+            },
+            {
+              "text": "Was war zuerst: der Buchdruck mit beweglichen Lettern oder Kolumbus in Amerika?",
+              "answer": "Der Buchdruck",
+              "note": "Um 1450 gegenüber 1492"
+            },
+            {
+              "text": "Was war zuerst: die Pyramiden von Gizeh oder Kleopatra?",
+              "answer": "Die Pyramiden",
+              "note": "Rund 2500 v. Chr. gegenüber dem 1. Jahrhundert v. Chr."
+            }
+          ]
+        },
+        {
+          "name": "Körper",
+          "questions": [
+            {
+              "text": "Wie viele Zähne hat ein erwachsener Mensch normalerweise?",
+              "answer": "32"
+            },
+            {
+              "text": "Wie viele Kammern hat das menschliche Herz?",
+              "answer": "Vier"
+            },
+            {
+              "text": "Welches Organ stellt Insulin her?",
+              "answer": "Die Bauchspeicheldrüse"
+            },
+            {
+              "text": "Wie heißt der längste Knochen im menschlichen Körper?",
+              "answer": "Der Oberschenkelknochen"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

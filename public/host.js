@@ -1,4 +1,4 @@
-import { $, el, connect, action, toast, sound, installAudioUnlock } from '/common.js';
+import { $, el, connect, action, toast, sound, installAudioUnlock, setFrageText } from '/common.js';
 import { qrSvg } from '/qr.js';
 
 let state = null;
@@ -75,7 +75,14 @@ $('#set-file').addEventListener('change', async (ev) => {
   }
 });
 
+const MIX = '__mix';
+
 $('#set-select').addEventListener('change', async (ev) => {
+  if (ev.target.value === MIX) {
+    localSet = null;
+    $('#set-info').textContent = 'Zwölf Kategorien, beim Start frisch aus allen Sätzen gewürfelt.';
+    return;
+  }
   // Der geladene Satz haengt an der Option, nicht am Auswahl-Zeitpunkt: sonst
   // ist er nach einem Blick auf einen anderen Satz unwiederbringlich weg und
   // „Spiel starten" schickt den Platzhalter „__local" an den Server.
@@ -111,6 +118,10 @@ async function loadSets() {
     if (!sets.length && !keepLocal) {
       select.append(el('option', { value: '' }, 'Keine Fragensätze gefunden'));
       return;
+    }
+    // Ab zwei brauchbaren Sätzen lohnt der Mix – darunter käme immer dasselbe Board.
+    if (sets.filter((s) => !s.error).length >= 2) {
+      select.append(el('option', { value: MIX }, '🎲 Zufallsmix aus allen Sätzen'));
     }
     for (const set of sets) {
       select.append(
@@ -301,7 +312,7 @@ function renderQuestion(prev) {
   }
 
   $('#q-head').textContent = `${q.category} ${q.value}`;
-  $('#q-text').textContent = q.text;
+  setFrageText($('#q-text'), q.text);
 
   const img = $('#q-image');
   if (q.image) {

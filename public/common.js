@@ -230,3 +230,22 @@ export function keepScreenAwake() {
     if (document.visibilityState === 'visible' && !lock) request();
   });
 }
+
+/**
+ * Schreibt einen Fragetext in ein Element. Zeilen ohne Buchstaben und Ziffern
+ * sind reine Symbolzeilen – bei Emoji-Rätseln ist genau das die Frage, also
+ * bekommen sie ihre eigene, deutlich größere Zeile.
+ */
+export function setFrageText(node, text) {
+  node.innerHTML = '';
+  const zeilen = String(text ?? '').split('\n');
+  zeilen.forEach((zeile, i) => {
+    if (i > 0) node.append(document.createElement('br'));
+    const istSymbolzeile = zeile.trim() && !/[\p{L}\p{N}]/u.test(zeile);
+    if (istSymbolzeile) {
+      node.append(el('span', { class: 'symbolzeile' }, zeile.trim()));
+    } else {
+      node.append(document.createTextNode(zeile));
+    }
+  });
+}

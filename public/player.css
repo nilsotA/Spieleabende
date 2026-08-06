@@ -246,3 +246,6 @@ html, body { touch-action: manipulation; }
   border-color: transparent;
   cursor: default;
 }
+
+/* Emoji-Rätsel: die Symbole sind die Frage, nicht Beiwerk. */
+.p-q-text .symbolzeile { display: inline-block; font-size: 1.9em; line-height: 1.3; letter-spacing: 0.1em; }

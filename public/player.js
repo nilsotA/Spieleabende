@@ -1,7 +1,6 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash,
-  installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline,
-} from '/common.js';
+  installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText } from '/common.js';
 
 let state = null;
 let selectedTeam = localStorage.getItem('quizduell.teamId') || null;
@@ -167,7 +166,7 @@ function renderQuestion() {
   if (!q) { box.hidden = true; return; }
   box.hidden = false;
   $('#p-q-head').textContent = `${q.category} · ${q.value} Punkte`;
-  $('#p-q-text').textContent = q.text;
+  setFrageText($('#p-q-text'), q.text);
   const img = $('#p-q-image');
   if (q.image) {
     if (img.getAttribute('src') !== q.image) img.src = q.image;

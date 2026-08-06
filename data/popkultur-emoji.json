@@ -1,0 +1,269 @@
+{
+  "name": "Popkultur & Emoji",
+  "description": "Filme, Serien, Musik und Rätsel aus Emojis – funktioniert auch, wenn nicht alle dieselben Serien schauen.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Emoji-Rätsel",
+          "questions": [
+            {
+              "text": "Welcher Film?\n🦁 👑",
+              "answer": "Der König der Löwen"
+            },
+            {
+              "text": "Welcher Film?\n🐠 🔎",
+              "answer": "Findet Nemo"
+            },
+            {
+              "text": "Welche Filmreihe?\n🧙‍♂️ 💍 🌋",
+              "answer": "Der Herr der Ringe"
+            },
+            {
+              "text": "Welcher Film?\n❄️ 👸 ⛄",
+              "answer": "Die Eiskönigin",
+              "note": "Im Original: Frozen"
+            }
+          ]
+        },
+        {
+          "name": "Filmzitate",
+          "questions": [
+            {
+              "text": "Aus welcher Filmreihe stammt „Ich bin dein Vater“?",
+              "answer": "Star Wars"
+            },
+            {
+              "text": "Wer stellt sich mit „Mein Name ist Bond. James Bond“ vor?",
+              "answer": "James Bond"
+            },
+            {
+              "text": "In welchem Film heißt es „Das Leben ist wie eine Schachtel Pralinen“?",
+              "answer": "Forrest Gump"
+            },
+            {
+              "text": "Aus welchem Film stammt „Ich mache ihm ein Angebot, das er nicht ablehnen kann“?",
+              "answer": "Der Pate"
+            }
+          ]
+        },
+        {
+          "name": "Werbeslogans",
+          "questions": [
+            {
+              "text": "Welche Fast-Food-Kette wirbt mit „Ich liebe es“?",
+              "answer": "McDonald’s"
+            },
+            {
+              "text": "Welche Schokolade ist „Quadratisch. Praktisch. Gut.“?",
+              "answer": "Ritter Sport"
+            },
+            {
+              "text": "Welches Möbelhaus fragt „Wohnst du noch oder lebst du schon?“",
+              "answer": "IKEA"
+            },
+            {
+              "text": "Welche Automarke warb mit „Nichts ist unmöglich“?",
+              "answer": "Toyota"
+            }
+          ]
+        },
+        {
+          "name": "Serien",
+          "questions": [
+            {
+              "text": "In welchem Land spielt die Serie „Squid Game“?",
+              "answer": "In Südkorea"
+            },
+            {
+              "text": "Wie heißt das Café, in dem die „Friends“ ständig sitzen?",
+              "answer": "Central Perk"
+            },
+            {
+              "text": "Wie heißt der Chemielehrer aus „Breaking Bad“ mit Nachnamen?",
+              "answer": "White",
+              "note": "Walter White"
+            },
+            {
+              "text": "Wie heißt die Kleinstadt, in der „Stranger Things“ spielt?",
+              "answer": "Hawkins"
+            }
+          ]
+        },
+        {
+          "name": "Musik",
+          "questions": [
+            {
+              "text": "Welcher Sänger wird „King of Pop“ genannt?",
+              "answer": "Michael Jackson"
+            },
+            {
+              "text": "Welche Band sang „Bohemian Rhapsody“?",
+              "answer": "Queen"
+            },
+            {
+              "text": "Welche schwedische Band gewann 1974 den Grand Prix mit „Waterloo“?",
+              "answer": "ABBA"
+            },
+            {
+              "text": "Auf welchem Beatles-Album ist der berühmte Zebrastreifen abgebildet?",
+              "answer": "Abbey Road"
+            }
+          ]
+        },
+        {
+          "name": "Gaming",
+          "questions": [
+            {
+              "text": "Wie heißt Nintendos Klempner mit der roten Mütze?",
+              "answer": "Mario"
+            },
+            {
+              "text": "Welches Tier ist Segas Maskottchen Sonic?",
+              "answer": "Ein Igel"
+            },
+            {
+              "text": "In welchem Spiel löst man Reihen aus fallenden Klötzchen auf?",
+              "answer": "Tetris"
+            },
+            {
+              "text": "Aus welchem Land stammt Alexei Paschitnow, der Erfinder von Tetris?",
+              "answer": "Aus Russland",
+              "note": "Damals die Sowjetunion, 1984"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Was ist die Frage?",
+          "questions": [
+            {
+              "text": "Dieses Getränk entsteht aus Wasser, Hopfen, Malz und Hefe.",
+              "answer": "Was ist Bier?"
+            },
+            {
+              "text": "Dieser Planet ist der Sonne am nächsten.",
+              "answer": "Was ist Merkur?"
+            },
+            {
+              "text": "Dieses Land schenkte den USA die Freiheitsstatue.",
+              "answer": "Was ist Frankreich?"
+            },
+            {
+              "text": "Dieser Physiker formulierte die Relativitätstheorie.",
+              "answer": "Wer ist Albert Einstein?"
+            }
+          ]
+        },
+        {
+          "name": "Abkürzungen",
+          "questions": [
+            {
+              "text": "Wofür steht „DIY“?",
+              "answer": "Do it yourself"
+            },
+            {
+              "text": "Wofür steht „ASAP“?",
+              "answer": "As soon as possible"
+            },
+            {
+              "text": "Wofür steht die Bilddatei-Endung „GIF“?",
+              "answer": "Graphics Interchange Format"
+            },
+            {
+              "text": "Wofür steht „PDF“?",
+              "answer": "Portable Document Format"
+            }
+          ]
+        },
+        {
+          "name": "Logos & Marken",
+          "questions": [
+            {
+              "text": "Welcher Konzern hat einen angebissenen Apfel im Logo?",
+              "answer": "Apple"
+            },
+            {
+              "text": "Welche Kaffeehauskette hat eine grüne Meerjungfrau im Logo?",
+              "answer": "Starbucks"
+            },
+            {
+              "text": "Aus welchem Land kommt das Möbelhaus IKEA?",
+              "answer": "Aus Schweden"
+            },
+            {
+              "text": "Welches Tier ziert das Logo von Lacoste?",
+              "answer": "Ein Krokodil"
+            }
+          ]
+        },
+        {
+          "name": "Internet",
+          "questions": [
+            {
+              "text": "Welches Zeichen leitet einen Hashtag ein?",
+              "answer": "Die Raute #"
+            },
+            {
+              "text": "Welches Videoportal kaufte Google im Jahr 2006?",
+              "answer": "YouTube"
+            },
+            {
+              "text": "In welchem Jahr ging Wikipedia online?",
+              "answer": "2001"
+            },
+            {
+              "text": "Wie hieß die Suchmaschine von Larry Page und Sergey Brin, bevor sie Google hieß?",
+              "answer": "BackRub"
+            }
+          ]
+        },
+        {
+          "name": "Tierreich",
+          "questions": [
+            {
+              "text": "Welches Tier ist an Land das schnellste?",
+              "answer": "Der Gepard"
+            },
+            {
+              "text": "Welches ist das größte Tier der Erde?",
+              "answer": "Der Blauwal"
+            },
+            {
+              "text": "Wie viele Herzen hat ein Oktopus?",
+              "answer": "Drei"
+            },
+            {
+              "text": "Welches Landtier trägt am längsten, nämlich rund 22 Monate?",
+              "answer": "Der Elefant"
+            }
+          ]
+        },
+        {
+          "name": "Popkultur-Jahre",
+          "questions": [
+            {
+              "text": "In welchem Jahr kam der erste „Star Wars“-Film ins Kino?",
+              "answer": "1977"
+            },
+            {
+              "text": "In welchem Jahr kam das erste iPhone auf den Markt?",
+              "answer": "2007"
+            },
+            {
+              "text": "In welchem Jahr lief die erste Folge der „Simpsons“ im US-Fernsehen?",
+              "answer": "1989"
+            },
+            {
+              "text": "In welchem Jahr trennten sich die Beatles?",
+              "answer": "1970"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

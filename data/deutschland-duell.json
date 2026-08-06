@@ -1,0 +1,270 @@
+{
+  "name": "Deutschland-Duell",
+  "description": "Kennzeichen, Dialekte, Marken und Geschichte – der Satz für Runden, in denen alle mitreden können.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "KFZ-Kennzeichen",
+          "questions": [
+            {
+              "text": "Welche Stadt hat das Kennzeichen HH?",
+              "answer": "Hamburg",
+              "note": "Hansestadt Hamburg"
+            },
+            {
+              "text": "Welche Stadt hat das Kennzeichen M?",
+              "answer": "München"
+            },
+            {
+              "text": "Welche Stadt hat das Kennzeichen KI?",
+              "answer": "Kiel"
+            },
+            {
+              "text": "Welche Stadt hat das Kennzeichen HRO?",
+              "answer": "Rostock"
+            }
+          ]
+        },
+        {
+          "name": "Bundesländer",
+          "questions": [
+            {
+              "text": "Wie heißt die Hauptstadt von Nordrhein-Westfalen?",
+              "answer": "Düsseldorf"
+            },
+            {
+              "text": "Wie viele Bundesländer hat Deutschland?",
+              "answer": "16"
+            },
+            {
+              "text": "Welches Bundesland ist flächenmäßig das größte?",
+              "answer": "Bayern"
+            },
+            {
+              "text": "Welches Bundesland ist flächenmäßig das kleinste?",
+              "answer": "Bremen"
+            }
+          ]
+        },
+        {
+          "name": "Flüsse & Berge",
+          "questions": [
+            {
+              "text": "Wie heißt der höchste Berg Deutschlands?",
+              "answer": "Die Zugspitze"
+            },
+            {
+              "text": "Welcher Fluss fließt durch Köln?",
+              "answer": "Der Rhein"
+            },
+            {
+              "text": "Welcher Fluss fließt durch Dresden?",
+              "answer": "Die Elbe"
+            },
+            {
+              "text": "Welcher Fluss bildet einen Teil der Grenze zu Polen?",
+              "answer": "Die Oder"
+            }
+          ]
+        },
+        {
+          "name": "Deutsche Marken",
+          "questions": [
+            {
+              "text": "Welche Automarke baut den Golf?",
+              "answer": "Volkswagen"
+            },
+            {
+              "text": "Welche deutsche Firma ist für Gummibärchen bekannt?",
+              "answer": "Haribo"
+            },
+            {
+              "text": "Welcher Sportartikelhersteller mit drei Streifen sitzt in Herzogenaurach?",
+              "answer": "Adidas"
+            },
+            {
+              "text": "Welche Firma stellt die Küchenmaschine Thermomix her?",
+              "answer": "Vorwerk"
+            }
+          ]
+        },
+        {
+          "name": "Essen & Trinken",
+          "questions": [
+            {
+              "text": "Aus welchem Bundesland kommt die Weißwurst?",
+              "answer": "Aus Bayern"
+            },
+            {
+              "text": "Aus welchem Gemüse wird Sauerkraut gemacht?",
+              "answer": "Aus Weißkohl"
+            },
+            {
+              "text": "Welche Stadt ist für ihren Lebkuchen berühmt?",
+              "answer": "Nürnberg"
+            },
+            {
+              "text": "Welche Zutaten erlaubt das Reinheitsgebot für Bier?",
+              "answer": "Wasser, Hopfen und Malz",
+              "note": "Hefe kam später dazu"
+            }
+          ]
+        },
+        {
+          "name": "Fernsehen",
+          "questions": [
+            {
+              "text": "Wie heißt die Nachrichtensendung der ARD um 20 Uhr?",
+              "answer": "Tagesschau"
+            },
+            {
+              "text": "Welche Krimireihe läuft sonntags um 20:15 Uhr?",
+              "answer": "Tatort"
+            },
+            {
+              "text": "Wie heißt die Sesamstraßen-Figur, die in einer Mülltonne wohnt?",
+              "answer": "Oscar"
+            },
+            {
+              "text": "Welche deutsche Sängerin hatte den Welthit „99 Luftballons“?",
+              "answer": "Nena"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Was ist die Frage?",
+          "questions": [
+            {
+              "text": "Dieses Tor in Berlin war das Wahrzeichen der geteilten Stadt.",
+              "answer": "Was ist das Brandenburger Tor?"
+            },
+            {
+              "text": "Dieser Bundeskanzler wird „Kanzler der Einheit“ genannt.",
+              "answer": "Wer ist Helmut Kohl?"
+            },
+            {
+              "text": "Dieses Fest in München gilt als größtes Volksfest der Welt.",
+              "answer": "Was ist das Oktoberfest?"
+            },
+            {
+              "text": "Diese Kathedrale mit zwei Türmen steht direkt am Hauptbahnhof einer Millionenstadt am Rhein.",
+              "answer": "Was ist der Kölner Dom?"
+            }
+          ]
+        },
+        {
+          "name": "Geschichte",
+          "questions": [
+            {
+              "text": "Wofür stand die Abkürzung DDR?",
+              "answer": "Deutsche Demokratische Republik"
+            },
+            {
+              "text": "In welchem Jahr wurde die Berliner Mauer gebaut?",
+              "answer": "1961"
+            },
+            {
+              "text": "Wer war der erste Bundeskanzler der Bundesrepublik?",
+              "answer": "Konrad Adenauer"
+            },
+            {
+              "text": "In welchem Jahr wurde das Deutsche Kaiserreich gegründet?",
+              "answer": "1871"
+            }
+          ]
+        },
+        {
+          "name": "Städte",
+          "questions": [
+            {
+              "text": "In welcher Stadt steht das Brandenburger Tor?",
+              "answer": "In Berlin"
+            },
+            {
+              "text": "In welcher Stadt steht der größte Flughafen Deutschlands?",
+              "answer": "In Frankfurt am Main"
+            },
+            {
+              "text": "Welche Stadt wird „Elbflorenz“ genannt?",
+              "answer": "Dresden"
+            },
+            {
+              "text": "Welche Stadt war von 1949 bis 1990 Hauptstadt der Bundesrepublik?",
+              "answer": "Bonn"
+            }
+          ]
+        },
+        {
+          "name": "Erfindungen",
+          "questions": [
+            {
+              "text": "Wer erfand den Buchdruck mit beweglichen Lettern?",
+              "answer": "Johannes Gutenberg"
+            },
+            {
+              "text": "Welches Fahrzeug baute Carl Benz als Erster?",
+              "answer": "Das Automobil"
+            },
+            {
+              "text": "Wer entdeckte die Röntgenstrahlen?",
+              "answer": "Wilhelm Conrad Röntgen"
+            },
+            {
+              "text": "Welches deutsche Institut war maßgeblich an der Entwicklung von MP3 beteiligt?",
+              "answer": "Das Fraunhofer-Institut",
+              "note": "Federführend: Karlheinz Brandenburg"
+            }
+          ]
+        },
+        {
+          "name": "Sprichwörter",
+          "questions": [
+            {
+              "text": "Wie geht es weiter? „Morgenstund hat …“",
+              "answer": "… Gold im Mund"
+            },
+            {
+              "text": "Wie geht es weiter? „Wer anderen eine Grube gräbt, …“",
+              "answer": "… fällt selbst hinein"
+            },
+            {
+              "text": "Wie geht es weiter? „Der Apfel fällt nicht weit …“",
+              "answer": "… vom Stamm"
+            },
+            {
+              "text": "Wie geht es weiter? „Was Hänschen nicht lernt, …“",
+              "answer": "… lernt Hans nimmermehr"
+            }
+          ]
+        },
+        {
+          "name": "Dialekt",
+          "questions": [
+            {
+              "text": "Wo in Deutschland grüßt man mit „Moin“?",
+              "answer": "Im Norden"
+            },
+            {
+              "text": "Was bedeutet das bayerische „Servus“?",
+              "answer": "Hallo – und auch Tschüss"
+            },
+            {
+              "text": "Was ist im Schwäbischen ein „Fleischkäs“?",
+              "answer": "Leberkäse"
+            },
+            {
+              "text": "Was heißt „Et hätt noch immer jot jejange“?",
+              "answer": "Es ist noch immer gut gegangen",
+              "note": "Aus dem Kölschen Grundgesetz"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
