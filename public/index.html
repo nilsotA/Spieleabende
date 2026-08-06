@@ -2,58 +2,88 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04060b">
 <title>Quizduell für Spieleabende</title>
 <link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/start.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M62 2 30 52h18L36 98 78 40H56z' fill='%23e01b46'/%3E%3C/svg%3E">
-<style>
-  main { max-width: 720px; margin: 0 auto; padding: 3rem 1.2rem 4rem; text-align: center; }
-  .tiles { display: grid; gap: 1rem; margin-top: 2.5rem; text-align: left; }
-  .tiles a { text-decoration: none; color: inherit; display: block; }
-  .tiles .card { transition: border-color .15s ease, transform .15s ease; }
-  .tiles a:hover .card { border-color: #4f9bec; transform: translateY(-2px); }
-  .tiles h2 { font-size: 1.1rem; text-transform: none; letter-spacing: 0; color: var(--text); margin-bottom: .3rem; }
-  .tiles p { margin: 0; font-size: .9rem; color: var(--muted); }
-  .tiles .big { font-size: 1.8rem; margin-right: .8rem; float: left; }
-  footer { margin-top: 3rem; font-size: .85rem; color: var(--muted); }
-</style>
 </head>
-<body>
-<main>
-  <div class="logo" style="font-size:3.4rem"><span>Quiz</span><span>Duell</span></div>
-  <p class="muted" style="letter-spacing:.3em;text-transform:uppercase;font-size:.75rem;margin-top:1rem">
-    Spieleabend-Edition
-  </p>
+<body class="start">
 
-  <div class="tiles">
-    <a href="/play">
-      <div class="card">
-        <span class="big">📱</span>
-        <h2>Mitspielen</h2>
-        <p>Name eingeben, Team wählen, buzzern. Das hier ist die richtige Seite für alle Mitspieler.</p>
-      </div>
+<main>
+  <header class="hero">
+    <div class="logo"><span>Quiz</span><span>Duell</span></div>
+    <p class="claim">Spieleabend-Edition</p>
+    <p class="lead">
+      Ein Quizbrett für den großen Bildschirm – gebuzzert wird auf dem Handy.
+    </p>
+  </header>
+
+  <!-- Für die Mitspieler ist das die wichtigste Taste, also bekommt sie den Platz. -->
+  <a class="tile-main" href="/play">
+    <svg class="tile-icon" viewBox="0 0 62 104" aria-hidden="true"><path d="M50 3 13 56h16.5L14.5 101 54 43H35.5z" fill="currentColor"/></svg>
+    <span class="tile-text">
+      <strong>Mitspielen</strong>
+      <small>Name eingeben, Team wählen, buzzern</small>
+    </span>
+    <span class="tile-go" aria-hidden="true">→</span>
+  </a>
+
+  <section class="tiles">
+    <a class="tile" href="/host">
+      <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M9 20.5h6M12 17.5v3"/></svg>
+      <strong>Host-Screen</strong>
+      <small>Das Spielbrett für Beamer, TV oder Bildschirmteilen. Hier werden Teams angelegt und das Spiel gestartet.</small>
     </a>
-    <a href="/host">
-      <div class="card">
-        <span class="big">🖥️</span>
-        <h2>Host-Screen</h2>
-        <p>Das Spielbrett für Beamer, TV oder Bildschirmteilen. Hier werden Teams angelegt und Antworten bewertet.</p>
-      </div>
+    <a class="tile" href="/remote">
+      <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><circle cx="12" cy="15" r="2.6"/><path d="M9 7h6"/></svg>
+      <strong>Fernbedienung</strong>
+      <small>Für den Host aufs eigene Handy: zeigt die Lösung und die Bewertungsknöpfe – die Leinwand bleibt sauber.</small>
     </a>
-    <a href="/editor">
-      <div class="card">
-        <span class="big">✏️</span>
-        <h2>Fragen-Editor</h2>
-        <p>Eigene Kategorien und Fragen bauen, als Datei speichern und beim nächsten Mal wieder laden.</p>
-      </div>
+    <a class="tile" href="/editor">
+      <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L20 8a2.6 2.6 0 0 0-3.7-3.7L4 16.5z"/><path d="M14.5 6.2 17.8 9.5"/></svg>
+      <strong>Fragen-Editor</strong>
+      <small>Eigene Kategorien und Fragen bauen, als Datei sichern und beim nächsten Mal wieder laden.</small>
     </a>
-  </div>
+  </section>
+
+  <section class="rules">
+    <h2>So läuft eine Frage</h2>
+    <ol class="steps">
+      <li>
+        <span class="step-no">1</span>
+        <div>
+          <b>Wer dran ist, wählt ein Feld</b> und beantwortet die Frage.
+          <span class="chip good">richtig · volle Punkte</span>
+        </div>
+      </li>
+      <li>
+        <span class="step-no">2</span>
+        <div>
+          <b>Erst danach ist der Buzzer frei</b> – für alle anderen gleichzeitig.
+          Der Server entscheidet, wer zuerst gedrückt hat.
+        </div>
+      </li>
+      <li>
+        <span class="step-no">3</span>
+        <div>
+          <b>Wer sich reinbuzzert, riskiert etwas.</b>
+          <span class="chip good">richtig · halbe Punkte</span>
+          <span class="chip bad">falsch · halbe Punkte Abzug</span>
+        </div>
+      </li>
+    </ol>
+    <p class="fine">
+      Zwei Runden mit je sechs Kategorien. Runde 1 spielt um 100 – 500 Punkte,
+      Runde 2 hat neue Kategorien und <b>zählt doppelt</b>. Wer am Ende vorne liegt, gewinnt.
+    </p>
+  </section>
 
   <footer>
-    Regeln: Wer dran ist, wählt ein Feld und bekommt bei richtiger Antwort die vollen Punkte.
-    Erst danach ist der Buzzer für alle anderen frei – richtig gibt die Hälfte, falsch kostet die Hälfte.
-    Runde 2 zählt doppelt.
+    Alles läuft auf diesem Rechner im eigenen WLAN – ohne Konto, ohne Cloud.
   </footer>
 </main>
+
 </body>
 </html>

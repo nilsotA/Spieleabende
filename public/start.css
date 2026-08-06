@@ -1,0 +1,182 @@
+/* Startseite. Sie ist die erste Seite, die Mitspieler auf dem Handy sehen –
+   deshalb mobil zuerst gedacht und mit genau einer offensichtlichen Taste. */
+
+body.start {
+  background: var(--ink-900, #04060b);
+  min-height: 100dvh;
+}
+body.start::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 40% at 50% 0%, #16294a 0%, transparent 68%),
+    radial-gradient(120% 60% at 50% 108%, #0a1220 0%, transparent 60%);
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(2rem, 7vw, 3.6rem) clamp(1rem, 5vw, 2rem) 3rem;
+  display: grid;
+  gap: clamp(1.2rem, 4vw, 1.8rem);
+}
+
+/* --------------------------------------------------------------- Kopf */
+
+.hero { text-align: center; display: grid; justify-items: center; gap: 0.5rem; }
+.hero .logo { font-size: clamp(2.8rem, 12vw, 4.4rem); }
+.claim {
+  margin: 0.6rem 0 0;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #7f8ea6;
+}
+.lead {
+  margin: 0.2rem 0 0;
+  font-size: clamp(0.95rem, 3.6vw, 1.1rem);
+  color: #c3d2e8;
+  max-width: 34ch;
+  text-wrap: balance;
+}
+
+/* ------------------------------------------------------- Hauptaktion */
+
+.tile-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  padding: clamp(1rem, 4vw, 1.35rem) clamp(1rem, 4vw, 1.5rem);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 40%),
+    linear-gradient(180deg, #e8143f 0%, #b30f31 55%, #7a0a21 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 16px 34px -14px rgba(232, 20, 63, 0.7),
+    0 3px 0 #52061a;
+  transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.14s linear;
+}
+.tile-main:hover { transform: translateY(-3px); }
+.tile-main:active { transform: translateY(1px); }
+.tile-main .tile-icon {
+  width: 2rem;
+  height: 2.4rem;
+  flex: none;
+  align-self: center;
+  color: #fff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+.tile-main .tile-text { display: grid; gap: 0.15rem; flex: 1; }
+.tile-main strong {
+  font-size: clamp(1.25rem, 5.5vw, 1.6rem);
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+.tile-main small { font-size: 0.85rem; color: rgba(255, 255, 255, 0.82); }
+.tile-main .tile-go { font-size: 1.5rem; opacity: 0.75; }
+
+/* ------------------------------------------------------ Weitere Wege */
+
+.tiles { display: grid; gap: 0.7rem; }
+.tile {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr;
+  grid-template-areas: 'icon title' 'icon text';
+  column-gap: 0.85rem;
+  row-gap: 0.15rem;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.95rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.14s linear;
+}
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px rgba(120, 180, 255, 0.45), 0 12px 26px -16px #000;
+}
+.tile .tile-icon {
+  grid-area: icon;
+  display: block;
+  width: 1.6rem;
+  height: 1.6rem;
+  color: #6ea8e8;
+}
+.tile:hover .tile-icon { color: #9fd0ff; }
+.tile strong { grid-area: title; font-size: 1rem; }
+.tile small { grid-area: text; font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+
+@media (min-width: 620px) {
+  .tiles { grid-template-columns: repeat(3, 1fr); }
+  .tile { grid-template-columns: 1fr; grid-template-areas: 'icon' 'title' 'text'; row-gap: 0.3rem; }
+}
+
+/* -------------------------------------------------------------- Regeln */
+
+.rules {
+  border-radius: 16px;
+  padding: clamp(1.1rem, 4vw, 1.5rem);
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.rules h2 {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8ba6cc;
+}
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.9rem; }
+.steps li { display: flex; gap: 0.85rem; align-items: flex-start; font-size: 0.95rem; line-height: 1.45; }
+.step-no {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-num);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #bcd8ff;
+  background: linear-gradient(180deg, #1e4f8e, #0c2749);
+  box-shadow: inset 0 0 0 1px rgba(180, 220, 255, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.steps .chip {
+  display: inline-block;
+  margin: 0.35rem 0.3rem 0 0;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chip.good { background: rgba(37, 201, 125, 0.16); color: #7ff0b8; box-shadow: inset 0 0 0 1px rgba(37, 201, 125, 0.5); }
+.chip.bad { background: rgba(255, 59, 92, 0.16); color: #ffb0bd; box-shadow: inset 0 0 0 1px rgba(255, 59, 92, 0.5); }
+
+.fine {
+  margin: 1.1rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.87rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.fine b { color: #cfe0f8; }
+
+footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #5d6a80;
+}

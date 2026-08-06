@@ -24,8 +24,9 @@ Fragen-Editor:            http://localhost:3000/editor
 ```
 
 1. **Host-Screen** öffnen und Teams anlegen – für Einzelspieler einfach ein Team pro Person.
-2. Alle anderen rufen die WLAN-Adresse auf dem Handy auf, geben ihren Namen ein und
-   wählen ihr Team. Für Zweierteams wählen beide dasselbe Team.
+2. Alle anderen scannen den **QR-Code**, der in der Lobby steht (oder tippen die
+   WLAN-Adresse ein), geben ihren Namen ein und wählen ihr Team. Für Zweierteams
+   wählen beide dasselbe Team.
 3. Fragensatz auswählen, Regeln einstellen, **Spiel starten**.
 
 Anderer Port: `PORT=8080 node server/index.js`
@@ -141,12 +142,17 @@ Mitgeliefert: `data/beispiel-spieleabend.json` mit 48 Fragen zum sofort Losspiel
   offenen Verbindung, nicht an einer Angabe im Request, damit nicht jedes Handy Punkte
   verteilen kann. Ein Passwort gibt es bewusst nicht: Es ist ein Spieleabend im eigenen
   WLAN, kein öffentlicher Dienst. Stell den Server nicht ins offene Internet.
-- **Tests:** `npm test` (Node-Testrunner, deckt die Punkte- und Buzzer-Regeln ab).
+- **QR-Code:** eigener Encoder in `public/qr.js` (Byte-Modus, Version 1–10), damit
+  auch dafür keine Abhängigkeit nötig ist. Die Ausgabe ist über 394 Zufallseingaben
+  gegen eine unabhängige Implementierung geprüft und bis auf die Maskenwahl in
+  3 Fällen bitgenau identisch – die Maske beeinflusst nur die Robustheit.
+- **Tests:** `npm test` (Node-Testrunner, deckt Punkte- und Buzzer-Regeln,
+  Fragensatz-Prüfung und den QR-Encoder ab).
 
 ```
 server/   game.js (Spielregeln) · questions.js (Fragensätze) · index.js (HTTP/SSE)
 public/   host.* (Board) · player.* (Handy) · remote.* (Fernbedienung)
-          editor.* (Fragen) · common.js · style.css
+          editor.* (Fragen) · index.html/start.css · common.js · qr.js · style.css
 data/     Fragensätze als JSON, Bilder unter data/bilder/
 test/     Regeltests
 ```

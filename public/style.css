@@ -43,34 +43,41 @@ a { color: #79b6ff; }
 
 /* ------------------------------------------------------------------ Logo */
 
+/* Wortmarke aus echtem Text statt einer Grafik: sie skaliert mit der
+   Schriftgröße, bleibt scharf und braucht keine externe Datei. */
 .logo {
   display: inline-flex;
   flex-direction: column;
-  align-items: center;
-  line-height: 0.78;
+  align-items: flex-start;
+  line-height: 0.8;
   font-family: var(--font-num);
   font-style: italic;
-  letter-spacing: 0.02em;
+  font-weight: 900;
+  letter-spacing: -0.005em;
   text-transform: uppercase;
   position: relative;
-  padding: 0 0.35em;
+  padding: 0.06em 0.3em 0.1em;
   user-select: none;
+  filter: drop-shadow(0 0.1em 0.22em rgba(0, 0, 0, 0.8));
 }
 .logo span {
   font-size: 1em;
   color: #fff;
-  text-shadow:
-    0 0 1px #000, 2px 2px 0 #000, -2px 2px 0 #000, 2px -2px 0 #000, -2px -2px 0 #000,
-    0 6px 18px rgba(0, 0, 0, 0.8);
+  /* Sauberer Konturschnitt statt vier gestapelter Textschatten. paint-order
+     legt die Kontur hinter die Füllung, sonst frisst sie die Buchstaben an. */
+  -webkit-text-stroke: 0.07em #05070c;
+  paint-order: stroke fill;
 }
-.logo span:last-child { margin-left: 1.1em; }
-/* Der Blitz liegt quer über beiden Zeilen – wie im Original. */
+.logo span:first-child { margin-left: -0.06em; }
+.logo span:last-child { margin-left: 1.05em; }
+
+/* Der Blitz schlägt quer durch beide Zeilen – wie in der Vorlage. */
 .logo::after {
   content: '';
   position: absolute;
-  inset: -26% -10%;
-  background: no-repeat 54% center / auto 100%
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 100'%3E%3Cpath d='M48 3 12 55h16L14 97 52 41H34z' fill='%23e01b46' stroke='%23000' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E");
+  inset: -0.22em -0.1em;
+  background: no-repeat 64% center / auto 112%
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 62 104'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ff5f74'/%3E%3Cstop offset='.45' stop-color='%23e8143f'/%3E%3Cstop offset='1' stop-color='%23a30a2a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 3 13 56h16.5L14.5 101 54 43H35.5z' fill='url(%23b)' stroke='%2305070c' stroke-width='6.5' stroke-linejoin='round'/%3E%3Cpath d='M50 3 13 56h16.5L14.5 101 54 43H35.5z' fill='none' stroke='%23ffb3bf' stroke-width='1.2' stroke-linejoin='round' opacity='.55'/%3E%3C/svg%3E");
   pointer-events: none;
 }
 

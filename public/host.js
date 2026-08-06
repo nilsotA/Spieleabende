@@ -1,4 +1,5 @@
 import { $, el, connect, action, toast, sound, installAudioUnlock } from '/common.js';
+import { qrSvg } from '/qr.js';
 
 let state = null;
 let localSet = null;      // aktuell gewählter Satz aus einer Datei
@@ -136,12 +137,33 @@ function describeSet(set) {
 async function loadUrls() {
   try {
     const info = await (await fetch('/api/info')).json();
-    $('#join-urls').innerHTML = '';
-    for (const url of info.urls) $('#join-urls').append(el('code', {}, url));
+    const liste = $('#join-urls');
+    liste.innerHTML = '';
+    // Bei mehreren Netzwerkkarten kann der Host die richtige antippen.
+    for (const url of info.urls) {
+      liste.append(el('code', {
+        class: 'url',
+        tabindex: '0',
+        role: info.urls.length > 1 ? 'button' : null,
+        onclick: () => zeigeQr(url, liste),
+      }, url));
+    }
+    zeigeQr(info.urls[0], liste);
     $('#remote-url').textContent = `${info.urls[0]}/remote`;
   } catch {
     /* egal */
   }
+}
+
+/** QR-Code auf die Mitspielen-Seite – Abtippen einer IP ist der lästigste Teil. */
+function zeigeQr(basis, liste) {
+  const ziel = `${basis}/play`;
+  try {
+    $('#join-qr').innerHTML = qrSvg(ziel, { ecl: 'M' });
+  } catch {
+    $('#join-qr').hidden = true;
+  }
+  for (const node of liste.children) node.classList.toggle('aktiv', node.textContent === basis);
 }
 
 loadSets();

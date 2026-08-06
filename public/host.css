@@ -96,19 +96,6 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
 .lobby-teams .tmembers { font-size: 0.78rem; color: var(--muted); }
 
 .join-urls { display: grid; gap: 0.4rem; margin: 0.7rem 0; }
-.join-urls code {
-  display: block;
-  background: #0b1220;
-  border: 1px dashed #33507d;
-  border-radius: 10px;
-  padding: 0.7rem;
-  font-size: 1.25rem;
-  font-weight: 700;
-  text-align: center;
-  color: #8fc6ff;
-  word-break: break-all;
-}
-
 .lobby-start { text-align: center; margin-top: 1.6rem; }
 .btn-big { font-size: 1.15rem; padding: 0.9rem 2.4rem; border-radius: 12px; }
 
@@ -783,3 +770,32 @@ body.host.flat .tile {
   .stage-top .logo { font-size: 1.7rem !important; }
   .player { min-width: 104px; clip-path: none; }
 }
+
+/* Beitreten per Scan – eine IP abzutippen ist der lästigste Teil des Abends. */
+.join-box { display: grid; justify-items: center; gap: 0.7rem; margin: 0.8rem 0; }
+.join-qr {
+  width: clamp(130px, 11vw, 170px);
+  border-radius: 10px;
+  background: #fff;
+  padding: 6px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5), 0 10px 24px -10px #000;
+  line-height: 0;
+}
+.join-qr svg { width: 100%; height: auto; display: block; }
+.join-urls { width: 100%; display: grid; gap: 0.4rem; margin: 0; }
+.join-urls .url {
+  display: block;
+  background: #0b1220;
+  border: 1px dashed #33507d;
+  border-radius: 10px;
+  padding: 0.55rem 0.4rem;
+  font-size: clamp(0.8rem, 0.95vw, 1.05rem);
+  font-weight: 700;
+  text-align: center;
+  color: #8fc6ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.join-urls .url.aktiv { border-style: solid; border-color: #4f9bec; color: #cfe6ff; }
