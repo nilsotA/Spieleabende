@@ -343,3 +343,14 @@ test('neues Spiel nimmt Karteileichen nicht mit', () => {
   assert.deepEqual(fresh.teams[0].members.map((m) => m.name), ['Da']);
   assert.equal(fresh.teams[0].score, 0);
 });
+
+test('Auflösen ist auch bei offenem Buzzer gesperrt', () => {
+  const state = setup();
+  G.pickCell(state, 0, 0);
+  G.passQuestion(state); // Buzzer offen, niemand am Zug
+  assert.equal(state.current.onTheHook, null);
+  assert.throws(() => G.revealAnswer(state), G.GameError, 'sonst wäre die Lösung eine Vorlage');
+  G.endQuestion(state);
+  G.revealAnswer(state);
+  assert.equal(state.current.revealed, true);
+});

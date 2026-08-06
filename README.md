@@ -19,6 +19,7 @@ Der Server nennt beim Start alle Adressen:
 ```
 Host-Screen (Beamer/TV):  http://localhost:3000/host
 Handys der Mitspieler:    http://192.168.x.x:3000
+Fernbedienung für dich:   http://192.168.x.x:3000/remote
 Fragen-Editor:            http://localhost:3000/editor
 ```
 
@@ -28,6 +29,16 @@ Fragen-Editor:            http://localhost:3000/editor
 3. Fragensatz auswählen, Regeln einstellen, **Spiel starten**.
 
 Anderer Port: `PORT=8080 node server/index.js`
+
+### Fernbedienung: `/remote`
+
+Der große Screen ist für alle sichtbar – die Lösung darf da nicht draufstehen. Öffne
+deshalb als Host **`/remote` auf deinem eigenen Handy**. Dort stehen Frage *und Lösung*,
+und du bewertest von dort mit großen Knöpfen. Auf der Leinwand bleibt die Lösung verdeckt.
+
+Ohne zweites Gerät geht es auch: In der Steuerleiste des Host-Screens ist die Lösung
+unscharf und lässt sich mit `👁` oder der Taste `L` kurz aufdecken – dann sehen sie
+allerdings alle im Raum.
 
 ### Auch ohne Handys spielbar
 
@@ -68,9 +79,10 @@ hat. Wer falsch buzzert, ist für diese Frage raus; die Übrigen dürfen weiter.
 | `1` | Richtig |
 | `2` | Falsch |
 | `3` | Zugteam weiß es nicht → Buzzer frei |
-| `4` | Auflösen |
+| `4` | Keiner weiß es → auflösen |
+| `L` | Lösung kurz aufdecken (Achtung: alle sehen den Bildschirm) |
 | `Leertaste` | Weiter / nächste Runde |
-| `Esc` | Menü (Punkte korrigieren, Zug setzen, Spiel beenden) |
+| `Esc` | Menü (Punkte korrigieren, Zug setzen, Offline-Geräte entfernen) |
 
 ---
 
@@ -105,8 +117,10 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 }
 ```
 
-- Die vier Fragen einer Kategorie sind **100 / 200 / 300 / 500** – in Runde 2 automatisch
-  verdoppelt. Die Reihenfolge im JSON bestimmt also die Schwierigkeit.
+- Jede Kategorie braucht **genau vier** Fragen: **100 / 200 / 300 / 500** – in Runde 2
+  automatisch verdoppelt. Die Reihenfolge im JSON bestimmt also die Schwierigkeit.
+  Stimmt die Anzahl nicht, sagt das die Fragensatz-Auswahl im Host-Screen direkt –
+  nichts wird stillschweigend abgeschnitten.
 - `image` ist optional: eine URL, ein `data:`-URI oder ein Dateiname aus `data/bilder/`
   (dann als `"/bilder/foto.jpg"` eintragen).
 - `note` ist optional und erscheint beim Auflösen als kleiner Zusatz.
@@ -123,14 +137,16 @@ Mitgeliefert: `data/beispiel-spieleabend.json` mit 48 Fragen zum sofort Losspiel
 - **Verbindung:** Server-Sent Events für Updates, `POST /api/action` für Eingaben. Der
   Server vergibt den Buzz nach Eingangszeit; wer die Antwort noch nicht sehen darf,
   bekommt sie auch nicht geschickt.
-- **Rollen:** Wer `/host` öffnet, ist Host. Das ist bewusst ohne Passwort – es ist ein
-  Spieleabend im eigenen WLAN, kein öffentlicher Dienst. Stell den Server nicht ins
-  offene Internet.
+- **Rollen:** Host ist, wer `/host` oder `/remote` offen hat – die Rechte hängen an der
+  offenen Verbindung, nicht an einer Angabe im Request, damit nicht jedes Handy Punkte
+  verteilen kann. Ein Passwort gibt es bewusst nicht: Es ist ein Spieleabend im eigenen
+  WLAN, kein öffentlicher Dienst. Stell den Server nicht ins offene Internet.
 - **Tests:** `npm test` (Node-Testrunner, deckt die Punkte- und Buzzer-Regeln ab).
 
 ```
 server/   game.js (Spielregeln) · questions.js (Fragensätze) · index.js (HTTP/SSE)
-public/   host.* (Board) · player.* (Handy) · editor.* (Fragen) · common.js
+public/   host.* (Board) · player.* (Handy) · remote.* (Fernbedienung)
+          editor.* (Fragen) · common.js · style.css
 data/     Fragensätze als JSON, Bilder unter data/bilder/
 test/     Regeltests
 ```

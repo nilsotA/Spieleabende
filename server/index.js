@@ -353,21 +353,23 @@ function sendJson(res, code, obj) {
 
 function readJson(req) {
   return new Promise((resolve, reject) => {
+    // Nicht destroy(): sonst stirbt die Verbindung, bevor die Fehlermeldung
+    // beim Editor ankommt, und der Nutzer sieht nur „Speichern fehlgeschlagen".
+    const stop = () => {
+      req.pause();
+      req.removeAllListeners('data');
+      reject(tooLarge());
+    };
+
     const declared = Number(req.headers['content-length'] || 0);
-    if (declared > MAX_BODY_BYTES) {
-      req.destroy();
-      return reject(tooLarge());
-    }
+    if (declared > MAX_BODY_BYTES) return stop();
     // Als Buffer sammeln: an einer Chunk-Grenze mitten in einem Umlaut würde
     // stückweises Dekodieren die Zeichen zerstören.
     const chunks = [];
     let size = 0;
     req.on('data', (chunk) => {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES) {
-        req.destroy();
-        return reject(tooLarge());
-      }
+      if (size > MAX_BODY_BYTES) return stop();
       chunks.push(chunk);
     });
     req.on('end', () => {

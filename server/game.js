@@ -342,10 +342,16 @@ export function judge(state, correct) {
   return openBuzz(state);
 }
 
+/**
+ * Reines Sicherheitsnetz: Aufdecken geht erst, wenn die Frage abgeschlossen ist.
+ * Bei offenem Buzzer wäre die Lösung eine Vorlage für die halben Punkte –
+ * dafür gibt es endQuestion, das die Frage gleichzeitig beendet.
+ */
 export function revealAnswer(state) {
   const q = requireQuestion(state);
-  // Solange jemand am Zug ist, wäre das Aufdecken eine Vorlage: erst werten.
-  if (q.onTheHook) throw new GameError('Erst werten – es ist noch jemand am Zug.');
+  if (q.step !== 'result') {
+    throw new GameError('Erst werten oder über „auflösen" beenden.');
+  }
   q.revealed = true;
   return state;
 }

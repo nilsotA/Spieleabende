@@ -469,11 +469,14 @@ $('#btn-abort').addEventListener('click', () => {
 function openMenu() {
   fillMenu();
   $('#menu').hidden = false;
+  // Alles dahinter stilllegen, sonst wandert der Tabulator aufs Board.
+  $('#view-game').inert = true;
   $('#btn-close-menu').focus();
 }
 
 function closeMenu() {
   $('#menu').hidden = true;
+  $('#view-game').inert = false;
 }
 
 function fillMenu() {
