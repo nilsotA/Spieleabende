@@ -69,3 +69,20 @@ test('der mitgelieferte Beispielsatz ist gültig', async () => {
     for (const cat of round.categories) assert.equal(cat.questions.length, 4);
   }
 });
+
+test('der gesicherte Spielstand taucht nicht als Fragensatz auf', async () => {
+  const { listSets, DATA_DIR } = await import('../server/questions.js');
+  const { writeFile, unlink } = await import('node:fs/promises');
+  const path = await import('node:path');
+  const spielstand = path.join(DATA_DIR, '.test-spielstand.json');
+  await writeFile(spielstand, JSON.stringify({ state: { phase: 'board' } }), 'utf8');
+  try {
+    const sets = await listSets();
+    assert.ok(
+      !sets.some((s) => s.file.startsWith('.')),
+      'Punktdateien gehören nicht in die Fragensatz-Auswahl',
+    );
+  } finally {
+    await unlink(spielstand).catch(() => {});
+  }
+});

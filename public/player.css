@@ -137,15 +137,23 @@ body {
    herunter, statt nur kleiner zu werden. Er sitzt fest am unteren Rand –
    bei Bildfragen darf man nicht erst scrollen müssen, um zu buzzern. */
 
+/* Die Trefferfläche ist alles: wer im Eifer danebentippt, verliert den Buzz.
+   Deshalb zählt die ganze freie Fläche, und der Knopf nimmt sie so weit wie
+   möglich ein. */
+.buzz-zone {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 1.7rem; /* Platz für den Sockelschatten */
+}
+
 .buzzer {
   appearance: none;
   border: none;
-  flex: none;
-  align-self: center;
-  width: min(72vw, 38dvh);
+  width: min(86vw, 46dvh);
   aspect-ratio: 1;
   border-radius: 50%;
-  margin: auto auto 1.7rem; /* Platz für den Sockelschatten */
   background: radial-gradient(circle at 50% 32%, #3b4762 0%, #232c3d 45%, #131a26 100%);
   color: #4a5568;
   display: flex;

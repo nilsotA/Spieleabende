@@ -77,7 +77,8 @@ export async function listSets() {
     return [];
   }
   const out = [];
-  for (const file of files.filter((f) => f.endsWith('.json'))) {
+  // Punktdateien überspringen: der gesicherte Spielstand ist kein Fragensatz.
+  for (const file of files.filter((f) => f.endsWith('.json') && !f.startsWith('.'))) {
     const full = path.join(DATA_DIR, file);
     try {
       const info = await stat(full);

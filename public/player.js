@@ -80,13 +80,14 @@ async function pressBuzzer() {
   }
 }
 
-buzzer.addEventListener('pointerdown', (ev) => {
+// Auf der Zone statt nur auf dem Knopf: ein Fehlgriff daneben soll trotzdem zählen.
+$('#buzz-zone').addEventListener('pointerdown', (ev) => {
   ev.preventDefault();
   pointerDown = true;
   pressBuzzer();
 });
 for (const evt of ['pointerup', 'pointercancel', 'pointerleave']) {
-  buzzer.addEventListener(evt, () => (pointerDown = false));
+  $('#buzz-zone').addEventListener(evt, () => (pointerDown = false));
 }
 document.addEventListener('keydown', (ev) => {
   if (ev.key !== ' ' || ev.repeat) return;

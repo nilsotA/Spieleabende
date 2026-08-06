@@ -31,6 +31,7 @@ function load() {
 // Bei jedem Tastendruck den ganzen Satz samt Bildern zu serialisieren ist teuer.
 let persistTimer;
 function persistSoon() {
+  updateFortschritt(); // die Anzeige soll beim Tippen sofort mitlaufen
   clearTimeout(persistTimer);
   persistTimer = setTimeout(persist, 500);
 }
@@ -102,10 +103,21 @@ function render() {
               placeholder: 'Frage',
               oninput: (ev) => { q.text = ev.target.value; persistSoon(); },
             }, q.text || ''),
-            el('textarea', {
-              placeholder: 'Antwort',
-              oninput: (ev) => { q.answer = ev.target.value; persistSoon(); },
-            }, q.answer || ''),
+            el('div', { class: 'antwort' },
+              el('textarea', {
+                placeholder: 'Antwort',
+                oninput: (ev) => { q.answer = ev.target.value; persistSoon(); },
+              }, q.answer || ''),
+              // Der Zusatz erscheint beim Auflösen klein unter der Lösung –
+              // gut für „Nicht Sydney!" oder eine Quellenangabe.
+              el('input', {
+                class: 'notiz',
+                placeholder: 'Zusatz beim Auflösen (optional)',
+                maxlength: 200,
+                value: q.note || '',
+                oninput: (ev) => { q.note = ev.target.value.trim() || null; persistSoon(); },
+              }),
+            ),
             el('div', { class: 'img-btn' },
               q.image ? el('img', { src: q.image, alt: '' }) : null,
               el('label', { class: 'btn btn-ghost btn-sm', style: { margin: 0, cursor: 'pointer' } },
@@ -151,6 +163,7 @@ function render() {
     );
     box.append(wrap);
   });
+  updateFortschritt();
 }
 
 /** Bilder werden als Data-URL eingebettet – der Fragensatz bleibt eine einzige Datei. */
@@ -218,7 +231,7 @@ $('#btn-save').addEventListener('click', () => save(false));
 async function save(overwrite) {
   const luecken = fehlendeFelder();
   if (luecken.length) {
-    toast(`Noch unvollständig: ${luecken.slice(0, 3).join(', ')}${luecken.length > 3 ? ` und ${luecken.length - 3} weitere` : ''}`, 'error');
+    toast(`Noch unvollständig: ${luecken.slice(0, 3).map((l) => l.label).join(', ')}${luecken.length > 3 ? ` und ${luecken.length - 3} weitere` : ''}`, 'error');
     return;
   }
   try {
@@ -242,16 +255,45 @@ async function save(overwrite) {
   }
 }
 
+/**
+ * 48 Fragen zu schreiben ist viel – sichtbar zu machen, wie weit man ist und
+ * wo noch Lücken sind, nimmt der Sache das Zähe.
+ */
+function updateFortschritt() {
+  const gesamt = set.rounds.reduce((n, r) => n + r.categories.length * 4, 0);
+  const offen = fehlendeFelder();
+  const fertig = gesamt - offen.length;
+  const knopf = $('#fortschritt');
+  $('#fortschritt-balken').style.width = gesamt ? `${(fertig / gesamt) * 100}%` : '0';
+  $('#fortschritt-text').textContent = offen.length
+    ? `${fertig} von ${gesamt} Fragen fertig · nächste Lücke: ${offen[0].label}`
+    : `Alle ${gesamt} Fragen ausgefüllt`;
+  knopf.classList.toggle('fertig', offen.length === 0);
+}
+
+$('#fortschritt').addEventListener('click', () => {
+  const offen = fehlendeFelder();
+  if (!offen.length) return;
+  const feld = document.querySelectorAll('.qrow')[offen[0].index];
+  if (!feld) return;
+  feld.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  feld.classList.add('luecke');
+  setTimeout(() => feld.classList.remove('luecke'), 1600);
+  feld.querySelector('textarea')?.focus();
+});
+
 /** Leere Fragen fallen sonst erst beim Spielstart auf – oder gar nicht. */
 function fehlendeFelder() {
   const out = [];
+  let index = 0;
   set.rounds.forEach((round, ri) => {
     round.categories.forEach((cat) => {
       cat.questions.forEach((q, qi) => {
         const wert = BASE_VALUES[qi] * (ri === 0 ? 1 : 2);
         if (!q.text?.trim() || !q.answer?.trim()) {
-          out.push(`R${ri + 1} ${cat.name || '?'} ${wert}`);
+          out.push({ label: `R${ri + 1} ${cat.name || '?'} ${wert}`, index });
         }
+        index++;
       });
     });
   });
@@ -347,3 +389,4 @@ function slug(str) {
 
 loadSetList();
 render();
+updateFortschritt();

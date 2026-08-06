@@ -136,26 +136,25 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
 
 /* Trefferanzeige: harte Outline statt Glühen – bleibt über jedem Grund lesbar. */
 .hitmark {
-  position: absolute;
-  left: 50%; top: 28%;
+  position: fixed;
   z-index: 35;
   pointer-events: none;
   font-family: var(--font-num);
   font-style: italic;
   line-height: 1;
-  font-size: clamp(3.4rem, 8vw, 7rem);
+  font-size: clamp(2.6rem, 5vw, 4.6rem);
   color: var(--gold);
-  -webkit-text-stroke: 7px #05070c;
+  -webkit-text-stroke: 5px #05070c;
   paint-order: stroke fill;
   animation: hit 900ms var(--ease-snap) forwards;
 }
 .hitmark.minus { color: #ff6e86; }
 @keyframes hit {
-  0%   { opacity: 0; transform: translate(-50%, 0) scale(1.7) rotate(-6deg); }
-  16%  { opacity: 1; transform: translate(-50%, 0) scale(0.95) rotate(-6deg); }
-  28%  { transform: translate(-50%, 0) scale(1.03) rotate(-6deg); }
-  72%  { opacity: 1; transform: translate(-50%, -16px) scale(1) rotate(-6deg); }
-  100% { opacity: 0; transform: translate(-50%, -78px) scale(1) rotate(-6deg); }
+  0%   { opacity: 0; transform: translate(-50%, -60%) scale(1.7) rotate(-6deg); }
+  16%  { opacity: 1; transform: translate(-50%, -70%) scale(0.95) rotate(-6deg); }
+  28%  { transform: translate(-50%, -72%) scale(1.03) rotate(-6deg); }
+  72%  { opacity: 1; transform: translate(-50%, -95%) scale(1) rotate(-6deg); }
+  100% { opacity: 0; transform: translate(-50%, -150%) scale(1) rotate(-6deg); }
 }
 
 .stage-top {
@@ -609,10 +608,14 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
   background: linear-gradient(180deg, rgba(32, 48, 76, 0.85), rgba(8, 13, 22, 0.95));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  padding: 0.6rem 1rem 0.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  padding: 0.55rem 1rem 0.6rem;
+  /* Name links, Punktestand groß rechts: aus drei Metern Entfernung ist die
+     Zahl das Einzige, worauf wirklich alle schauen. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'name score' 'members score';
+  align-items: center;
+  column-gap: 0.7rem;
   position: relative;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
@@ -653,8 +656,10 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
 .player.loss { box-shadow: 0 -14px 40px rgba(255, 59, 92, 0.4); }
 
 .player .pname {
+  grid-area: name;
+  align-self: end;
   font-weight: 800;
-  font-size: 0.84rem;
+  font-size: clamp(0.8rem, 1vw, 1.05rem);
   line-height: 1.35; /* sonst schneidet overflow die Umlautpunkte ab */
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -663,7 +668,9 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   text-overflow: ellipsis;
 }
 .player .pmembers {
-  font-size: 0.7rem;
+  grid-area: members;
+  align-self: start;
+  font-size: clamp(0.68rem, 0.75vw, 0.85rem);
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -674,15 +681,17 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
 /* Zählende Zahlen aufrecht und tabellarisch – sonst zappelt die Breite beim
    Hochzählen. Die Kachelziffern bleiben kursiv, das ist die Signatur der Vorlage. */
 .player .pscore {
-  align-self: flex-start;
+  grid-area: score;
+  justify-self: end;
   border-radius: 999px;
-  padding: 0.2rem 0.95rem;
+  padding: 0.1rem 0.85rem;
   font-family: var(--font);
   font-style: normal;
   font-weight: 900;
   font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: -0.01em;
-  font-size: clamp(1.1rem, 1.6vw, 1.7rem);
+  letter-spacing: -0.02em;
+  font-size: clamp(1.5rem, 2.5vw, 2.9rem);
+  line-height: 1.15;
   background: linear-gradient(180deg, var(--neon-1), var(--neon-3));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 0 0 1px rgba(220, 235, 255, 0.22);
 }

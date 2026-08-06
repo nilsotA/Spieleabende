@@ -429,7 +429,7 @@ function renderPlayers() {
       const delta = team.score - before;
       const badge = el('div', { class: `delta ${delta > 0 ? 'plus' : 'minus'}` }, `${delta > 0 ? '+' : ''}${delta}`);
       node.append(badge);
-      hitmark(delta);
+      hitmark(delta, node);
       node.classList.add(delta > 0 ? 'gain' : 'loss');
       setTimeout(() => {
         badge.remove();
@@ -440,11 +440,17 @@ function renderPlayers() {
   }
 }
 
-/** Die Punktzahl steigt groß über der Bühne auf – der Moment, in dem sichtbar
- *  wird, dass etwas verdient wurde. */
-function hitmark(delta) {
+/**
+ * Die Punktzahl steigt groß auf – aber über dem Pult des Teams, das sie bekommt,
+ * nicht mitten über der Bühne: dort verdeckte sie den Fragetext, und man sah
+ * ausserdem nicht, wem sie gehört.
+ */
+function hitmark(delta, karte) {
   const mark = el('div', { class: `hitmark ${delta > 0 ? '' : 'minus'}` }, `${delta > 0 ? '+' : ''}${delta}`);
-  $('.stage').append(mark);
+  const kasten = karte.getBoundingClientRect();
+  mark.style.left = `${kasten.left + kasten.width / 2}px`;
+  mark.style.top = `${kasten.top}px`;
+  document.body.append(mark);
   setTimeout(() => mark.remove(), 950);
 }
 

@@ -41,6 +41,14 @@ Ohne zweites Gerät geht es auch: In der Steuerleiste des Host-Screens ist die L
 unscharf und lässt sich mit `👁` oder der Taste `L` kurz aufdecken – dann sehen sie
 allerdings alle im Raum.
 
+### Wenn etwas abstürzt
+
+Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Board
+und sogar eine offen stehende Frage werden laufend gesichert und beim Start wieder
+hergestellt. Ein versehentlich geschlossenes Terminal oder ein abgestürzter Rechner
+kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand,
+und „Spiel beenden“ im Host-Menü verwirft ihn sofort.
+
 ### Auch ohne Handys spielbar
 
 Wenn ihr um einen Bildschirm herumsitzt, braucht ihr keine Handys: Der Host bewertet
@@ -133,8 +141,7 @@ Mitgeliefert: `data/beispiel-spieleabend.json` mit 48 Fragen zum sofort Losspiel
 
 ## Technik
 
-- **Server:** Node ≥ 18, reine Standardbibliothek. Der Spielzustand liegt im Speicher –
-  Server neu starten heißt neues Spiel.
+- **Server:** Node ≥ 18, reine Standardbibliothek.
 - **Verbindung:** Server-Sent Events für Updates, `POST /api/action` für Eingaben. Der
   Server vergibt den Buzz nach Eingangszeit; wer die Antwort noch nicht sehen darf,
   bekommt sie auch nicht geschickt.
@@ -146,8 +153,11 @@ Mitgeliefert: `data/beispiel-spieleabend.json` mit 48 Fragen zum sofort Losspiel
   auch dafür keine Abhängigkeit nötig ist. Die Ausgabe ist über 394 Zufallseingaben
   gegen eine unabhängige Implementierung geprüft und bis auf die Maskenwahl in
   3 Fällen bitgenau identisch – die Maske beeinflusst nur die Robustheit.
-- **Tests:** `npm test` (Node-Testrunner, deckt Punkte- und Buzzer-Regeln,
-  Fragensatz-Prüfung und den QR-Encoder ab).
+- **Spielstand:** liegt in `data/.spielstand.json` (eingebettete Bilder daneben) und
+  wird beim Start zurückgeholt. Über `QUIZDUELL_STATE_FILE` umlenkbar.
+- **Tests:** `npm test` (Node-Testrunner). Neben den Punkte- und Buzzer-Regeln,
+  der Fragensatz-Prüfung und dem QR-Encoder laufen Integrationstests gegen einen
+  echten Server – inklusive `SIGKILL` mitten im Spiel und anschließendem Neustart.
 
 ```
 server/   game.js (Spielregeln) · questions.js (Fragensätze) · index.js (HTTP/SSE)

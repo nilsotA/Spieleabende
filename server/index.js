@@ -1,6 +1,6 @@
 import http from 'node:http';
 import { createReadStream } from 'node:fs';
-import { stat, writeFile, rename } from 'node:fs/promises';
+import { stat, writeFile, rename, readFile, unlink } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
@@ -24,6 +24,85 @@ process.on('unhandledRejection', (err) => console.error('Unerwarteter Fehler:', 
 let state = G.createState();
 let bilder = new Map(); // Bilder des laufenden Fragensatzes, siehe externalizeImages
 
+/* ------------------------------------------------------ Spielstand sichern
+ *
+ * Ohne das wäre ein versehentlich geschlossenes Terminal das Ende des Abends:
+ * Punkte, Teams und das halb gespielte Board sind weg. Deshalb liegt der Stand
+ * auf der Platte und wird beim Start zurückgeholt.
+ */
+
+// Über QUIZDUELL_STATE_FILE umlenkbar, damit Tests nie einen echten
+// Spielstand überschreiben.
+const SAVE_FILE = process.env.QUIZDUELL_STATE_FILE || path.join(DATA_DIR, '.spielstand.json');
+const SAVE_IMAGES = `${SAVE_FILE.replace(/\.json$/, '')}-bilder.json`;
+const SAVE_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+let saveTimer = null;
+
+function saveSoon() {
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    saveNow().catch((err) => console.error('Spielstand konnte nicht gesichert werden:', err.message));
+  }, 400);
+}
+
+async function saveNow() {
+  if (state.phase === 'lobby' && state.teams.length === 0) return;
+  const tmp = `${SAVE_FILE}.tmp`;
+  await writeFile(tmp, JSON.stringify({ gespeichert: Date.now(), state }), 'utf8');
+  await rename(tmp, SAVE_FILE);
+}
+
+/**
+ * Eingebettete Bilder liegen sonst nur im Arbeitsspeicher – nach einem Neustart
+ * wären in einem wiederhergestellten Spiel alle Bildfragen kaputt. Sie ändern
+ * sich nur beim Spielstart, also genügt ein Schreibvorgang je Spiel.
+ */
+async function saveImages() {
+  if (!bilder.size) return unlink(SAVE_IMAGES).catch(() => {});
+  const roh = {};
+  for (const [id, bild] of bilder) roh[id] = { type: bild.type, data: bild.buffer.toString('base64') };
+  const tmp = `${SAVE_IMAGES}.tmp`;
+  await writeFile(tmp, JSON.stringify(roh), 'utf8');
+  await rename(tmp, SAVE_IMAGES);
+}
+
+async function restoreImages() {
+  try {
+    const roh = JSON.parse(await readFile(SAVE_IMAGES, 'utf8'));
+    const map = new Map();
+    for (const [id, bild] of Object.entries(roh)) {
+      map.set(id, { type: bild.type, buffer: Buffer.from(bild.data, 'base64') });
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+async function restore() {
+  try {
+    const roh = JSON.parse(await readFile(SAVE_FILE, 'utf8'));
+    if (!roh?.state || Date.now() - (roh.gespeichert || 0) > SAVE_MAX_AGE_MS) return null;
+    const wieder = roh.state;
+    // Kein Gerät ist nach einem Neustart noch verbunden.
+    for (const team of wieder.teams || []) {
+      for (const member of team.members || []) member.online = false;
+    }
+    bilder = await restoreImages();
+    return wieder;
+  } catch {
+    return null; // kein Spielstand da, oder er ist unbrauchbar
+  }
+}
+
+async function forgetSave() {
+  await Promise.all([
+    unlink(SAVE_FILE).catch(() => {}),
+    unlink(SAVE_IMAGES).catch(() => {}),
+  ]);
+}
+
 /**
  * Verbindungen werden pro Tab geführt, nicht pro Gerät: derselbe Browser kann
  * Host-Screen und Spieleransicht offen haben, und ein Reload darf die frische
@@ -41,6 +120,7 @@ function isHostClient(clientId) {
 
 function broadcast() {
   for (const conn of connections.values()) sendState(conn);
+  saveSoon();
 }
 
 function sendState(conn) {
@@ -109,6 +189,7 @@ async function handleAction(clientId, body) {
       const { set, images } = externalizeImages(roh);
       bilder = images;
       G.startGame(state, set);
+      await saveImages();
       break;
     }
     case 'pick': {
@@ -156,6 +237,8 @@ async function handleAction(clientId, body) {
       break;
     case 'backToLobby':
       state = G.backToLobby(state);
+      bilder = new Map();
+      await forgetSave();
       break;
     default:
       throw new G.GameError(`Unbekannte Aktion: ${type}`);
@@ -425,8 +508,18 @@ server.on('error', (err) => {
   throw err;
 });
 
+const wiederhergestellt = await restore();
+if (wiederhergestellt) {
+  state = wiederhergestellt;
+}
+
 server.listen(PORT, () => {
   console.log('\n  🎉  Quizduell für Spieleabende läuft!\n');
+  if (wiederhergestellt) {
+    const teams = state.teams.map((t) => `${t.name} ${t.score}`).join(' · ');
+    console.log(`  Letzter Spielstand wiederhergestellt: ${teams || 'Lobby'}`);
+    console.log('  „Spiel beenden" im Host-Menü verwirft ihn.\n');
+  }
   console.log(`  Host-Screen (Beamer/TV):  http://localhost:${PORT}/host`);
   for (const u of localUrls()) {
     console.log(`  Handys der Mitspieler:    ${u}`);

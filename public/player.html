@@ -60,13 +60,17 @@
     <div id="p-scores" class="p-scores"></div>
    </div>
 
-    <!-- Buzzer. Bewusst nie `disabled`: deaktivierte Buttons feuern keine Events,
-         dann bliebe ein zu früher Druck unkommentiert und ein schon aufliegender
+    <!-- Die ganze freie Fläche zählt als Buzzer: im Eifer trifft man den Kreis
+         nicht zuverlässig. Der Knopf bleibt trotzdem sichtbar der Anker.
+         Bewusst nie `disabled`: deaktivierte Buttons feuern keine Events, dann
+         bliebe ein zu früher Druck unkommentiert und ein schon aufliegender
          Daumen würde die Freigabe verpassen. -->
-    <button id="buzzer" class="buzzer locked" type="button">
-      <span class="bolt">⚡</span>
-      <span id="buzzer-label" class="buzzer-label">BUZZ</span>
-    </button>
+    <div id="buzz-zone" class="buzz-zone">
+      <button id="buzzer" class="buzzer locked" type="button">
+        <span class="bolt">⚡</span>
+        <span id="buzzer-label" class="buzzer-label">BUZZ</span>
+      </button>
+    </div>
 
     <button id="btn-leave" class="btn btn-ghost btn-sm" style="align-self:center">Team wechseln</button>
   </section>
