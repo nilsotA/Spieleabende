@@ -98,6 +98,7 @@
 <!-- ================================================== SPIEL ============ -->
 <section id="view-game" class="view">
   <div class="stage">
+    <div id="buzzline" class="buzzline" aria-hidden="true"></div>
     <div class="stage-top">
       <div class="round-badge">
         <span id="round-label">Runde 1</span>
@@ -113,7 +114,10 @@
       <div id="turn-pill" class="turn-pill"><span id="turn-name">—</span></div>
     </div>
 
-    <div id="board" class="board"></div>
+    <div class="board-wrap">
+      <div class="chrome-rail" aria-hidden="true"></div>
+      <div id="board" class="board"></div>
+    </div>
 
     <!-- Frage-Overlay -->
     <div id="question" class="question" hidden>
@@ -139,6 +143,9 @@
       </div>
     </div>
   </div>
+
+  <div id="stage-flash" class="stage-flash" aria-hidden="true"></div>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
 
   <div id="players" class="players"></div>
 

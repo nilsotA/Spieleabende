@@ -1,10 +1,63 @@
-/* Host-Screen: Board, Frage-Overlay, Spielerleiste. */
+/* Host-Screen: beleuchtete Studiowand, Frage-Panel, Teampulte.
+   Leitidee: Das Board ist keine Seite mit Kacheln, sondern eine Wand aus
+   hinterleuchteten Glaspanels in einer Chromrasterung. Tiefe entsteht durch
+   eine minimale Neigung, echte Materialstärke in den Schatten und Bewegung
+   in Z – nicht durch Dauer-Animationen.
+
+   Animiert wird ausschließlich transform und opacity. Kein Effekt darf die
+   Frage schlechter lesbar machen; aus 3 Metern zählt Kontrast, nicht Glanz. */
+
+:root {
+  --ink-900: #04060b;   /* Seitengrund */
+  --stage-core: #12233d; /* Kern des Bühnenlichts */
+
+  /* Blau = Möbel. Die Felder sind immer da und leuchten nie. */
+  --panel-1: #4e9ae8;
+  --panel-2: #1e4f8e;
+  --panel-3: #0c2749;
+  --panel-kante: rgba(180, 220, 255, 0.34);
+  --panel-kante-hell: rgba(214, 238, 255, 0.85);
+  --tot-1: #0b0f17;
+  --tot-2: #06090f;
+  --tot-tinte: #1e293a;
+
+  /* Rot = Beschriftung. Gedeckter als reines Neonrot, das auf TVs ausfranst. */
+  --neon-1: #d41340;
+  --neon-2: #8b0b27;
+  --neon-3: #5c0518;
+
+  /* Ereignisfarben – jede hat genau eine Bedeutung. */
+  --gold: #ffc531;
+  --gold-hell: #ffe9a0;
+  --richtig: #25c97d;
+  --falsch: #ff3b5c;
+
+  /* Eine Kurve für alles: genau das lässt Sendungsgrafik teuer wirken. */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.25, 1.22);
+  --t-micro: 140ms; --t-ui: 260ms; --t-show: 420ms; --t-panel: 560ms;
+
+  /* Chrom gehört auf schmale Flächen – großflächig kippt es sofort ins Kitschige. */
+  --chrom: linear-gradient(160deg, #f2f7ff 0%, #8fa3bd 28%, #dfe9f7 52%, #5b6a80 78%, #c8d6e8 100%);
+}
 
 body.host {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--ink-900);
+}
+/* Ein einziger fixierter Verlauf als Bühnenlicht – keine Blend-Modi, keine Filter. */
+body.host::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 42% at 50% 24%, var(--stage-core) 0%, transparent 70%),
+    radial-gradient(120% 70% at 50% 112%, #0a1220 0%, transparent 62%);
 }
 
 .view { display: none; flex: 1; min-height: 0; flex-direction: column; }
@@ -13,7 +66,7 @@ body.host {
 h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color: #9db4d6; margin: 0 0 0.5rem; }
 .small { font-size: 0.8rem; }
 
-/* ------------------------------------------------------------- Lobby */
+/* ------------------------------------------------------------------ Lobby */
 
 .view#view-lobby { overflow: auto; padding: 2rem clamp(1rem, 4vw, 3rem) 3rem; }
 .lobby-head { text-align: center; margin-bottom: 2rem; }
@@ -59,7 +112,7 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
 .lobby-start { text-align: center; margin-top: 1.6rem; }
 .btn-big { font-size: 1.15rem; padding: 0.9rem 2.4rem; border-radius: 12px; }
 
-/* ------------------------------------------------------------- Bühne */
+/* ------------------------------------------------------------------ Bühne */
 
 .stage {
   flex: 1;
@@ -67,7 +120,55 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: clamp(0.6rem, 1.6vh, 1.4rem) clamp(0.8rem, 3vw, 3rem) 0;
+  padding: clamp(0.5rem, 1.4vh, 1.2rem) clamp(0.8rem, 3vw, 3rem) 0;
+}
+
+/* Goldener Lichtbalken über die volle Bühnenbreite: das eine Signal für
+   „Buzzer ist frei". Deshalb glüht sonst nichts mit. */
+.buzzline {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 4px;
+  z-index: 25;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: 50% 50%;
+  opacity: 0;
+  will-change: transform;
+  background: linear-gradient(90deg, transparent, var(--gold-hell) 22%, var(--gold) 50%, var(--gold-hell) 78%, transparent);
+  box-shadow: 0 0 26px rgba(255, 197, 49, 0.55);
+  transition: transform var(--t-show) var(--ease), opacity 180ms linear,
+              background 160ms linear, box-shadow 160ms linear;
+}
+.stage.buzzopen .buzzline { transform: scaleX(1); opacity: 1; }
+.stage.buzzhit .buzzline {
+  background: linear-gradient(90deg, transparent, #fff 50%, transparent);
+  background: linear-gradient(90deg, transparent, var(--team, #fff) 50%, transparent);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+}
+
+/* Trefferanzeige: harte Outline statt Glühen – bleibt über jedem Grund lesbar. */
+.hitmark {
+  position: absolute;
+  left: 50%; top: 28%;
+  z-index: 35;
+  pointer-events: none;
+  font-family: var(--font-num);
+  font-style: italic;
+  line-height: 1;
+  font-size: clamp(3.4rem, 8vw, 7rem);
+  color: var(--gold);
+  -webkit-text-stroke: 7px #05070c;
+  paint-order: stroke fill;
+  animation: hit 900ms var(--ease-snap) forwards;
+}
+.hitmark.minus { color: #ff6e86; }
+@keyframes hit {
+  0%   { opacity: 0; transform: translate(-50%, 0) scale(1.7) rotate(-6deg); }
+  16%  { opacity: 1; transform: translate(-50%, 0) scale(0.95) rotate(-6deg); }
+  28%  { transform: translate(-50%, 0) scale(1.03) rotate(-6deg); }
+  72%  { opacity: 1; transform: translate(-50%, -16px) scale(1) rotate(-6deg); }
+  100% { opacity: 0; transform: translate(-50%, -78px) scale(1) rotate(-6deg); }
 }
 
 .stage-top {
@@ -75,6 +176,8 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 1rem;
+  position: relative;
+  z-index: 2;
 }
 
 .round-badge {
@@ -88,116 +191,205 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   font-size: 0.8rem;
   color: #9db4d6;
 }
-.round-badge small { color: var(--red-1); font-size: 0.72rem; letter-spacing: 0.14em; }
+.round-badge small { color: var(--neon-1); font-size: 0.72rem; letter-spacing: 0.14em; }
 
 .buzz-indicator { justify-self: end; }
 .buzz-circle {
-  width: 82px; height: 82px;
+  width: clamp(58px, 5vw, 86px);
+  aspect-ratio: 1;
   border-radius: 50%;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 0.1rem;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 2px 0 rgba(255, 255, 255, 0.1);
   color: #55617a;
-  transition: all 0.15s ease;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
-.buzz-circle span { font-size: 1.5rem; line-height: 1; filter: grayscale(1); }
+.buzz-circle span { font-size: 1.5rem; line-height: 1; filter: grayscale(1); opacity: 0.5; }
 .buzz-circle small { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.14em; }
-.buzz-indicator.armed .buzz-circle {
-  background: linear-gradient(180deg, #f8d548, #e08c12);
-  border-color: #ffe9a0;
-  color: #3a2a00;
-  box-shadow: 0 0 40px rgba(248, 200, 60, 0.6);
-  animation: buzzPulse 0.9s ease-in-out infinite;
-}
-.buzz-indicator.armed .buzz-circle span { filter: none; }
-.buzz-indicator.hit .buzz-circle {
-  background: linear-gradient(180deg, var(--red-1), var(--red-2));
-  border-color: #ff8ba3;
-  color: #fff;
-  box-shadow: 0 0 50px rgba(224, 27, 70, 0.7);
-}
-.buzz-indicator.hit .buzz-circle span { filter: none; }
-@keyframes buzzPulse { 50% { transform: scale(1.07); } }
 
-.turn-bar { display: flex; justify-content: flex-end; margin: 0.5rem 0 0.9rem; min-height: 44px; }
+.buzz-indicator.armed .buzz-circle {
+  background: radial-gradient(circle at 50% 32%, #ffe9a0, var(--gold) 45%, #d09a05 100%);
+  color: #3a2a00;
+  box-shadow: 0 0 0 2px #ffe9a0, 0 0 46px rgba(255, 207, 61, 0.6);
+  animation: buzzPulse 1.2s ease-in-out infinite;
+}
+.buzz-indicator.hit .buzz-circle {
+  background: radial-gradient(circle at 50% 32%, #ff6b83, var(--neon-1) 45%, var(--neon-3) 100%);
+  color: #fff;
+  box-shadow: 0 0 0 2px #ff8ba3, 0 0 56px rgba(255, 45, 85, 0.7);
+  animation: none;
+}
+.buzz-indicator.armed .buzz-circle span,
+.buzz-indicator.hit .buzz-circle span { filter: none; opacity: 1; }
+@keyframes buzzPulse { 50% { transform: scale(1.1); } }
+
+/* Wer dran ist: Namensschild in Teamfarbe. */
+.turn-bar { display: flex; justify-content: flex-end; margin: 0.45rem 0 0.8rem; min-height: 42px; position: relative; z-index: 2; }
 .turn-pill {
+  --team: var(--neon-1);
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 1.4rem 0.55rem 1.1rem;
+  gap: 0.55rem;
+  padding: 0.5rem 1.5rem;
   border-radius: 999px;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: clamp(0.85rem, 1.4vw, 1.1rem);
-  background: linear-gradient(90deg, var(--red-2) 0%, var(--red-1) 18%, #2b6fbe 55%, #3f9ae8 100%);
-  box-shadow: 0 0 26px rgba(60, 140, 230, 0.45);
+  font-size: clamp(0.85rem, 1.3vw, 1.1rem);
   color: #fff;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--team) 85%, white 15%), var(--team));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 0 2px rgba(255, 255, 255, 0.12),
+    0 0 34px color-mix(in srgb, var(--team) 55%, transparent);
+  animation: turnIn 0.3s ease;
 }
-.turn-pill::before { content: '★'; color: #ffd76a; }
-.turn-pill::after { content: '★'; color: #9fdcff; }
+.turn-pill::before { content: '★'; color: rgba(255, 255, 255, 0.85); }
+@keyframes turnIn { from { opacity: 0; transform: translateY(-6px); } }
 
-/* -------------------------------------------------------------- Board */
+/* ------------------------------------------------------------- Studiowand */
+
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  /* Der Bühnenwechsel: das Board tritt zurück, wenn die Frage nach vorn kommt.
+     Zwei Eigenschaften auf einem Element statt 24 Einzelanimationen. */
+  transform-origin: 50% 42%;
+  transition: transform var(--t-panel) var(--ease), opacity var(--t-show) linear;
+}
+.stage.focused .board-wrap { transform: scale(0.955); opacity: 0.2; pointer-events: none; }
+.stage.focused .chrome-rail { opacity: 0.2; transition: opacity var(--t-show) linear; }
+
+/* Ein weicher Schein hinter der gesamten Kategorienzeile. Sechs Einzelglows
+   lassen die Zeile in Bonbons zerfallen – einer bindet sie zu einem Band. */
+.chrome-rail {
+  position: absolute;
+  top: -0.8rem;
+  left: -4%;
+  right: -4%;
+  height: 6.5rem;
+  background: radial-gradient(60% 130% at 50% 50%, rgba(255, 45, 85, 0.26), transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
 
 .board {
   flex: 1;
   min-height: 0;
   display: grid;
-  gap: clamp(0.35rem, 0.9vh, 0.8rem) clamp(0.4rem, 0.9vw, 0.9rem);
-  align-content: start;
+  gap: clamp(0.4rem, 1vh, 0.75rem) clamp(0.45rem, 0.85vw, 0.85rem);
+  align-content: stretch;
+  position: relative;
 }
 
+/* Kategorien: Neonschilder, an der Schiene montiert. */
 .cat {
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0.55rem 0.6rem;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--red-1), var(--red-2));
-  box-shadow: 0 0 22px rgba(224, 27, 70, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  font-weight: 800;
-  font-size: clamp(0.6rem, 0.95vw, 0.92rem);
-  letter-spacing: 0.06em;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--neon-1), var(--neon-2) 60%, var(--neon-3));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 8px 18px -6px rgba(0, 0, 0, 0.75);
+  font-weight: 900;
+  /* 23px auf 1920px – gedeckelt bei 1.05rem waren es 17px. */
+  font-size: clamp(1rem, 1.2vw, 1.45rem);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  line-height: 1.15;
-  min-height: 3rem;
+  line-height: 1.14;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+  min-height: 3.6rem;
+  margin-top: 0.95rem;
+  position: relative;
+  z-index: 2;
+  /* Kein Glühen auf dem Text – bei dieser Größe matscht es die Buchstaben zu. */
+}
+.cat > span { position: relative; z-index: 1; }
+.cat::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 55%);
+  pointer-events: none;
 }
 
+/* Panels: Materialstärke unten, Lichtkante oben, Schlagschatten auf die Wand. */
 .tile {
   appearance: none;
-  border: 1px solid rgba(120, 180, 255, 0.35);
-  border-radius: var(--tile-radius);
-  background: linear-gradient(180deg, #2f6cae 0%, #1b4478 55%, #12294a 100%);
-  box-shadow: 0 0 18px rgba(50, 120, 220, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border: 0;
+  border-radius: 12px;
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0, rgba(255, 255, 255, 0) 34%),
+    linear-gradient(180deg, var(--panel-1) 0, var(--panel-2) 46%, var(--panel-3) 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--panel-kante),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -14px 22px rgba(4, 10, 22, 0.34),
+    0 3px 0 #060b14,
+    0 14px 22px -12px rgba(0, 0, 0, 0.85);
   color: #fff;
   font-family: var(--font-num);
   font-style: italic;
-  font-size: clamp(1rem, 2.2vw, 1.9rem);
-  letter-spacing: 0.02em;
-  cursor: pointer;
+  /* 50px auf 1920px – gedeckelt bei 2.1rem waren es 34px und damit zu wenig. */
+  font-size: clamp(1.35rem, 2.6vw, 3rem);
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 2.6rem;
-  transition: transform 0.1s ease, filter 0.15s ease;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform var(--t-micro) var(--ease);
+  animation: panelBoot 380ms var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 18ms);
 }
-.tile:hover:not(:disabled) { filter: brightness(1.3); transform: translateY(-2px); }
-.tile:active:not(:disabled) { transform: translateY(0); }
-.tile.used {
-  background: linear-gradient(180deg, #141922 0%, #0c1017 100%);
-  border-color: rgba(255, 255, 255, 0.05);
-  box-shadow: none;
-  color: #2b3342;
-  cursor: default;
+/* Hover-Kante vorgemalt: so wird nie ein box-shadow animiert. */
+.tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px var(--panel-kante-hell);
+  opacity: 0;
+  transition: opacity var(--t-micro) linear;
 }
-.tile.picked { animation: tilePick 0.35s ease; }
-@keyframes tilePick { 0% { transform: scale(1); } 45% { transform: scale(1.08); filter: brightness(1.8); } }
+.tile:hover:not(:disabled) { transform: translateY(-4px); }
+.tile:hover:not(:disabled)::after,
+.tile:focus-visible::after { opacity: 1; }
+.tile:focus-visible { outline: none; }
 
-/* --------------------------------------------------------- Frage-Panel */
+@keyframes panelBoot {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+}
+
+/* Verbrauchte Felder verschwinden nicht – sie schalten ab. Die Wand bleibt heil. */
+/* Verbraucht = abgeschaltet, nicht ausgegraut: die Wand bleibt geschlossen. */
+.tile.used {
+  background: linear-gradient(180deg, var(--tot-1), var(--tot-2));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.045),
+    inset 0 12px 22px rgba(0, 0, 0, 0.8),
+    0 2px 0 #04070c;
+  color: var(--tot-tinte);
+  cursor: default;
+  text-shadow: none;
+}
+.tile.used::after { display: none; }
+
+/* ------------------------------------------------------------ Frage-Panel */
 
 .question {
   position: absolute;
@@ -205,49 +397,96 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(1rem, 4vh, 3rem);
+  padding: clamp(1.6rem, 4vh, 3rem) clamp(1rem, 4vw, 3rem);
   z-index: 20;
+  overflow-y: auto;
 }
+/* Scrim statt Filter über der Wand – ein Vollbild-Blur pro Frame wäre zu teuer. */
+.question::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(80% 70% at 50% 45%, rgba(4, 6, 11, 0.55), rgba(4, 6, 11, 0.93));
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } }
 
 .q-panel {
-  width: min(1100px, 92%);
-  max-height: 100%;
-  overflow: auto;
-  background: linear-gradient(180deg, #2e6cae 0%, #1d4a85 60%, #163a6b 100%);
-  border: 2px solid rgba(150, 200, 255, 0.55);
-  border-radius: 18px;
-  box-shadow: 0 0 60px rgba(30, 100, 200, 0.55), 0 30px 80px rgba(0, 0, 0, 0.7);
-  padding: clamp(1rem, 3vh, 2rem) clamp(1.2rem, 4vw, 3rem) clamp(1.2rem, 3vh, 2.2rem);
+  --fx: 0px; --fy: 0px; --fs: 0.34;
+  position: relative;
+  width: min(1180px, 94%);
+  margin: auto;
+  overflow: visible;
+  /* Dunkler Körper: Weiß darauf ergibt 13:1 statt 5:1. Der Kontrast ist es,
+     der die Show finanziert – nicht der Glanz. */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0, rgba(255, 255, 255, 0) 26%),
+    radial-gradient(130% 90% at 50% -18%, #235c9e 0%, #123566 44%, #0a1e3a 100%);
+  border-radius: 20px;
+  box-shadow:
+    inset 0 0 0 1px rgba(150, 200, 255, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 44px 110px -28px #000;
+  padding: clamp(1.6rem, 3.6vh, 2.6rem) clamp(1.2rem, 4vw, 3rem) clamp(1.2rem, 3vh, 2.2rem);
   text-align: center;
-  animation: panelIn 0.22s ease;
+  animation: panelOpen var(--t-panel) var(--ease) both;
 }
-@keyframes panelIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } }
+/* Ein 2px-Lichtstrich statt eines dicken Rahmens. */
+.q-panel::before {
+  content: '';
+  position: absolute;
+  left: 16%; right: 16%; top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8fc6ff, transparent);
+}
+/* Das Panel klappt aus genau der Kachel auf, die gewählt wurde. */
+@keyframes panelOpen {
+  from { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--fs)); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}
 
+/* Kopfzeile als Schild, das die obere Panelkante überlappt. */
 .q-head {
-  color: #9fd4ff;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.4rem 1.7rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #132c46, #08172a);
+  box-shadow: 0 0 0 1px rgba(214, 238, 255, 0.55), 0 8px 20px rgba(0, 0, 0, 0.7);
+  color: #a9d3ff;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-size: clamp(0.85rem, 1.5vw, 1.2rem);
-  margin-bottom: clamp(0.8rem, 2vh, 1.6rem);
+  font-size: clamp(0.85rem, 1.25vw, 1.15rem);
+  white-space: nowrap;
 }
 
 .q-text {
   font-weight: 800;
   text-transform: uppercase;
-  font-size: clamp(1.1rem, 2.9vw, 2.4rem);
-  line-height: 1.2;
-  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+  /* 50px auf 1920px. Harte Schattenkante statt Glühen – Glühen matscht. */
+  font-size: clamp(1.5rem, 3.1vw, 3rem);
+  line-height: 1.16;
+  letter-spacing: 0.01em;
+  max-width: 26ch;
+  margin-inline: auto;
+  text-wrap: balance;
+  color: #f2f7ff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
 }
 
 .q-image {
   display: block;
   margin: clamp(0.8rem, 2vh, 1.4rem) auto 0;
-  max-width: min(100%, 460px);
+  max-width: min(100%, 520px);
   max-height: 38vh;
-  border-radius: 10px;
-  border: 3px solid rgba(255, 255, 255, 0.85);
-  background: #fff;
+  border: 0;
+  border-radius: 8px;
+  background: #0a1322;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16), 0 24px 54px -18px #000;
   object-fit: contain;
 }
 
@@ -255,140 +494,237 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   margin-top: clamp(0.9rem, 2.4vh, 1.6rem);
   display: flex;
   justify-content: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  min-height: 2.6rem;
+  min-height: 2.4rem;
   align-items: center;
 }
 .q-status .chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
   border-radius: 999px;
-  padding: 0.5rem 1.1rem;
+  padding: 0.45rem 1.1rem;
   font-weight: 800;
-  font-size: clamp(0.75rem, 1.2vw, 1rem);
+  font-size: clamp(0.72rem, 1.1vw, 0.95rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
-.q-status .chip.turn { background: rgba(255, 255, 255, 0.14); }
+.q-status .chip.turn { background: rgba(255, 255, 255, 0.16); }
+.q-status .chip.log.correct { background: rgba(34, 224, 138, 0.2); box-shadow: inset 0 0 0 1px rgba(34, 224, 138, 0.6); }
+.q-status .chip.log.wrong { background: rgba(255, 59, 92, 0.2); box-shadow: inset 0 0 0 1px rgba(255, 59, 92, 0.6); }
 .q-status .chip.buzzopen {
-  background: linear-gradient(180deg, #f8d548, #e08c12);
+  background: linear-gradient(180deg, #ffe9a0, var(--gold));
   color: #3a2a00;
-  border-color: #ffe9a0;
-  animation: buzzPulse 0.9s ease-in-out infinite;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .q-status .chip.buzzed {
-  background: linear-gradient(180deg, var(--red-1), var(--red-2));
-  border-color: #ff9db2;
-  animation: none;
+  background: linear-gradient(180deg, var(--neon-1), var(--neon-3));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 30px rgba(255, 45, 85, 0.6);
 }
-.q-status .chip .avatar { width: 22px; height: 22px; border-radius: 50%; }
 
 .q-answer {
   margin: clamp(0.9rem, 2.4vh, 1.5rem) auto 0;
   display: inline-block;
-  background: linear-gradient(180deg, #37c176, #21894f);
+  background: linear-gradient(180deg, #3ceea0, #12a05f);
+  color: #05240f;
   border-radius: 999px;
-  padding: 0.6rem 1.8rem;
-  font-size: clamp(1.1rem, 2.4vw, 2rem);
-  font-weight: 700;
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
-  animation: panelIn 0.25s ease;
+  padding: 0.55rem 2rem;
+  font-size: clamp(1.1rem, 2.6vw, 2.1rem);
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 10px 30px rgba(0, 0, 0, 0.45);
+  animation: snapIn 0.26s cubic-bezier(0.2, 1.4, 0.5, 1);
 }
-.q-note { margin-top: 0.8rem; font-size: 0.9rem; color: #cfe4ff; opacity: 0.85; }
+@keyframes snapIn { from { transform: scale(0.82); opacity: 0; } 70% { transform: scale(1.04); } }
 
-/* --------------------------------------------------------- Punktestand */
+.q-note { margin-top: 0.7rem; font-size: 0.9rem; color: #cfe4ff; opacity: 0.85; }
+
+.q-panel.wrong { animation: shakePanel 0.28s ease; }
+@keyframes shakePanel {
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-5px); }
+}
+
+/* ------------------------------------------------------------ Punktestand */
 
 .scores-panel { text-align: center; }
-.score-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.score-list { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.55rem; }
 .score-list li {
+  --team: var(--panel-1);
   display: grid;
-  grid-template-columns: 2.6rem 1fr auto;
+  grid-template-columns: 2.4rem 1fr auto;
   align-items: center;
   gap: 0.9rem;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--team) 30%, transparent), rgba(0, 0, 0, 0.3));
   border-radius: 12px;
-  padding: 0.7rem 1.1rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  padding: 0.65rem 1.1rem;
   font-size: clamp(1rem, 2vw, 1.5rem);
   font-weight: 800;
+  animation: rankIn 0.35s both;
+  animation-delay: calc(var(--i, 0) * 90ms);
 }
+@keyframes rankIn { from { opacity: 0; transform: translateX(-24px); } }
 .score-list .rank { font-family: var(--font-num); font-style: italic; color: #9fd4ff; }
+.score-list .sname { text-align: left; }
 .score-list .pts { font-family: var(--font-num); font-style: italic; }
-.score-list li.first { background: linear-gradient(90deg, rgba(248, 213, 72, 0.3), rgba(0, 0, 0, 0.25)); border-color: #f8d548; }
-.score-list li.first .rank { color: #f8d548; }
+.score-list li.first {
+  background: linear-gradient(90deg, rgba(255, 207, 61, 0.35), rgba(0, 0, 0, 0.3));
+  box-shadow: inset 0 0 0 2px var(--gold), 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px);
+}
+.score-list li.first .rank { color: var(--gold); }
 
-/* ------------------------------------------------------- Spielerleiste */
+/* ----------------------------------------------------------- Studioblitz */
+
+.stage-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 0 220px 60px var(--team, var(--neon-1));
+}
+.stage-flash.on { animation: stageFlash 0.4s ease-out; }
+@keyframes stageFlash { 25% { opacity: 0.9; } 100% { opacity: 0; } }
+
+.confetti { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+.confetti i {
+  position: absolute;
+  top: -20px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  will-change: transform;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  to { transform: translate3d(var(--dx, 0), 105vh, 0) rotate(var(--rot, 540deg)); }
+}
+
+/* ------------------------------------------------------------- Teampulte */
 
 .players {
   display: flex;
   gap: 0.6rem;
-  padding: 0.7rem clamp(0.8rem, 3vw, 3rem) 0.4rem;
+  padding: 0.9rem clamp(0.8rem, 3vw, 3rem) 0.5rem;
   overflow-x: auto;
+  position: relative;
+  z-index: 2;
 }
 .player {
+  --team: var(--panel-1);
   flex: 1 1 0;
-  min-width: 130px;
-  border: 2px solid #2f5f9c;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(30, 45, 72, 0.75), rgba(10, 15, 24, 0.9));
-  padding: 0.6rem 0.7rem;
+  min-width: 128px;
+  /* Trapez: das Pult steht auf dem Bühnenboden, statt flach aufzukleben. */
+  clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(32, 48, 76, 0.85), rgba(8, 13, 22, 0.95));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  padding: 0.6rem 1rem 0.6rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
   position: relative;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-.player.active { border-color: #f8d548; box-shadow: 0 0 28px rgba(248, 213, 72, 0.35); }
-.player.buzzed { border-color: var(--red-1); box-shadow: 0 0 34px rgba(224, 27, 70, 0.6); transform: translateY(-4px); }
+/* Lichtleiste oben: als eigenes Element, weil das Trapez einen Rahmen abschneiden würde. */
+.player::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 3%;
+  right: 3%;
+  height: 3px;
+  background: var(--team);
+  box-shadow: 0 0 14px var(--team);
+}
+.player.active {
+  transform: translateY(-6px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 -14px 40px rgba(255, 207, 61, 0.25);
+}
+/* Scheinwerferkegel über dem Pult, das gerade dran ist. */
+.player.active::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 180%;
+  height: 120px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, rgba(255, 207, 61, 0.14));
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+.player.buzzed { transform: translateY(-10px); box-shadow: 0 -16px 46px color-mix(in srgb, var(--team) 55%, transparent); }
+/* Hat jemand gebuzzert, treten alle anderen zurück – man sieht ohne ein Wort
+   Text, wer dran ist. */
+.players.someone-buzzed .player:not(.buzzed) { opacity: 0.42; transform: translateY(2px); }
+.players .player { transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.25s ease; }
+.player.gain { box-shadow: 0 -14px 40px rgba(34, 224, 138, 0.4); }
+.player.loss { box-shadow: 0 -14px 40px rgba(255, 59, 92, 0.4); }
+
 .player .pname {
   font-weight: 800;
-  font-size: 0.86rem;
-  letter-spacing: 0.04em;
+  font-size: 0.84rem;
+  line-height: 1.35; /* sonst schneidet overflow die Umlautpunkte ab */
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.player .pmembers { font-size: 0.7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 0.9rem; }
+.player .pmembers {
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 0.9rem;
+}
+/* Namensschild aus Chrom mit rotem Punktestand – wie am echten Pult. */
+/* Zählende Zahlen aufrecht und tabellarisch – sonst zappelt die Breite beim
+   Hochzählen. Die Kachelziffern bleiben kursiv, das ist die Signatur der Vorlage. */
 .player .pscore {
   align-self: flex-start;
   border-radius: 999px;
-  padding: 0.25rem 0.85rem;
-  font-family: var(--font-num);
-  font-style: italic;
-  font-size: 1.05rem;
-  background: linear-gradient(180deg, var(--red-1), var(--red-2));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  padding: 0.2rem 0.95rem;
+  font-family: var(--font);
+  font-style: normal;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+  font-size: clamp(1.1rem, 1.6vw, 1.7rem);
+  background: linear-gradient(180deg, var(--neon-1), var(--neon-3));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 0 0 1px rgba(220, 235, 255, 0.22);
 }
 .player .pscore.neg { background: linear-gradient(180deg, #4a4f5c, #23262e); }
 .player .delta {
   position: absolute;
-  right: 0.6rem;
-  top: 0.5rem;
+  right: 0.7rem;
+  top: 0.4rem;
   font-family: var(--font-num);
   font-style: italic;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   animation: floatUp 1.6s ease forwards;
   pointer-events: none;
 }
-.player .delta.plus { color: #4ade80; }
+.player .delta.plus { color: var(--richtig); }
 .player .delta.minus { color: #ff7a90; }
-@keyframes floatUp { to { transform: translateY(-22px); opacity: 0; } }
-.player .dot-online { position: absolute; left: 0.5rem; top: 0.5rem; width: 8px; height: 8px; border-radius: 50%; background: #35bb6c; }
+@keyframes floatUp { to { transform: translateY(-26px); opacity: 0; } }
 
-/* ---------------------------------------------------------- Steuerung */
+/* ------------------------------------------------------------- Steuerung */
 
 .controls {
-  border-top: 1px solid var(--line);
-  background: rgba(6, 9, 15, 0.9);
-  padding: 0.6rem clamp(0.8rem, 3vw, 3rem);
+  border-top: 1px solid rgba(120, 160, 220, 0.16);
+  background: rgba(4, 6, 11, 0.92);
+  padding: 0.55rem clamp(0.8rem, 3vw, 3rem);
+  position: relative;
+  z-index: 3;
 }
-.controls-inner { display: flex; align-items: center; gap: 0.8rem; max-width: 1600px; margin: 0 auto; }
-.control-hint { flex: 1; font-size: 0.85rem; color: var(--muted); min-height: 1.2rem; }
+.controls-inner { display: flex; align-items: center; gap: 0.8rem; max-width: 1700px; margin: 0 auto; }
+.control-hint { flex: 1; font-size: 0.85rem; color: var(--muted); min-height: 1.2rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .control-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
 .control-buttons kbd {
   font: inherit;
@@ -400,33 +736,50 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   margin-left: 0.4em;
 }
 
+/* Die Lösung steht auf der Leinwand, die alle sehen – deshalb standardmäßig
+   unkenntlich. „👁" bzw. Taste L deckt sie kurz auf. */
+#solution-wrap { display: inline-flex; align-items: center; gap: 0.4rem; }
+.peek-btn { padding: 0.15rem 0.45rem; line-height: 1.2; }
+.solution { transition: filter 0.18s ease; font-weight: 700; color: #cfe0f8; }
+.solution.blurred { filter: blur(7px); user-select: none; }
+
 .menu {
   position: fixed;
   inset: 0;
-  background: rgba(3, 5, 10, 0.8);
+  background: rgba(3, 5, 10, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
   padding: 1rem;
 }
-.menu-card { width: min(560px, 100%); max-height: 90vh; overflow: auto; }
+.menu-card { width: min(600px, 100%); max-height: 90vh; overflow: auto; }
 .menu-teams { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 .menu-teams li { display: flex; align-items: center; gap: 0.5rem; }
+.menu-teams .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 .menu-teams .tname { flex: 1; font-weight: 700; }
 .menu-teams .sc { font-family: var(--font-num); font-style: italic; min-width: 3.6rem; text-align: right; }
 
-@media (max-width: 720px) {
-  body.host { overflow: auto; }
-  .stage-top .logo { font-size: 1.8rem !important; }
-  .buzz-circle { width: 58px; height: 58px; }
-  .player { min-width: 108px; }
+/* --------------------------------------------------------------- Notausgang */
+
+/* Falls die Neigung auf einer Grafikkarte die Ziffern weich zeichnet: body.flat */
+body.host.flat::before { background: var(--ink-900); }
+body.host.flat .chrome-rail { display: none; }
+body.host.flat .tile {
+  box-shadow: inset 0 0 0 1px var(--panel-kante), 0 2px 0 #060b14;
 }
 
-/* Die Lösung steht auf der Leinwand, die alle sehen – deshalb standardmäßig
-   unkenntlich. „👁" bzw. Taste L deckt sie kurz auf. */
-.control-hint { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-#solution-wrap { display: inline-flex; align-items: center; gap: 0.4rem; }
-.peek-btn { padding: 0.15rem 0.45rem; line-height: 1.2; }
-.solution { transition: filter 0.18s ease; font-weight: 700; color: #cfe0f8; }
-.solution.blurred { filter: blur(7px); user-select: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .stage.focused .board-wrap { transform: none; }
+}
+
+@media (max-width: 820px) {
+  body.host { overflow: auto; }
+  .stage-top .logo { font-size: 1.7rem !important; }
+  .player { min-width: 104px; clip-path: none; }
+}

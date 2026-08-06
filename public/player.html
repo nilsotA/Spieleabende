@@ -35,6 +35,7 @@
 
   <!-- Spielansicht -->
   <section id="view-play" class="screen">
+   <div class="pscroll">
     <header class="phead">
       <div>
         <div id="p-team" class="p-team">—</div>
@@ -56,6 +57,9 @@
       <div id="p-q-answer" class="p-q-answer" hidden></div>
     </div>
 
+    <div id="p-scores" class="p-scores"></div>
+   </div>
+
     <!-- Buzzer. Bewusst nie `disabled`: deaktivierte Buttons feuern keine Events,
          dann bliebe ein zu früher Druck unkommentiert und ein schon aufliegender
          Daumen würde die Freigabe verpassen. -->
@@ -64,7 +68,6 @@
       <span id="buzzer-label" class="buzzer-label">BUZZ</span>
     </button>
 
-    <div id="p-scores" class="p-scores"></div>
     <button id="btn-leave" class="btn btn-ghost btn-sm" style="align-self:center">Team wechseln</button>
   </section>
 

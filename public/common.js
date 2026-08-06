@@ -8,7 +8,13 @@ export function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(props)) {
     if (key === 'class') node.className = value;
-    else if (key === 'style' && typeof value === 'object') Object.assign(node.style, value);
+    else if (key === 'style' && typeof value === 'object') {
+      for (const [prop, val] of Object.entries(value)) {
+        // Object.assign greift bei CSS-Variablen nicht – die brauchen setProperty.
+        if (prop.startsWith('--')) node.style.setProperty(prop, val);
+        else node.style[prop] = val;
+      }
+    }
     else if (key.startsWith('on') && typeof value === 'function') node.addEventListener(key.slice(2), value);
     else if (value === true) node.setAttribute(key, '');
     else if (value !== false && value != null) node.setAttribute(key, value);

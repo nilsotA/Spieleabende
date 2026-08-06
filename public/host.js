@@ -1,7 +1,8 @@
 import { $, el, connect, action, toast, sound, installAudioUnlock } from '/common.js';
 
 let state = null;
-let localSet = null;      // per Datei geladener Fragensatz (noch nicht gespeichert)
+let localSet = null;      // aktuell gewählter Satz aus einer Datei
+let dateiSatz = null;     // zuletzt geladene Datei, bleibt in der Auswahl verfügbar
 let lastScores = new Map();
 let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
 
@@ -18,10 +19,22 @@ connect({
     state = next;
     render(prev);
   },
-  onEvent: (name) => {
-    if (name === 'buzz') sound('buzz');
+  onEvent: (name, data) => {
+    if (name === 'buzz') {
+      sound('buzz');
+      stageFlash(state?.teams.find((t) => t.id === data.teamId)?.color);
+    }
   },
 });
+
+/** Kurzer Studioblitz in Teamfarbe – ein Element, kein Layout. */
+function stageFlash(color) {
+  const node = $('#stage-flash');
+  node.style.setProperty('--team', color || 'var(--neon-1)');
+  node.classList.remove('on');
+  void node.offsetWidth;
+  node.classList.add('on');
+}
 
 /* -------------------------------------------------------------------- Lobby */
 
@@ -44,6 +57,8 @@ $('#set-file').addEventListener('change', async (ev) => {
   if (!file) return;
   try {
     const parsed = JSON.parse(await file.text());
+    if (!Array.isArray(parsed?.rounds)) throw new Error('Das ist kein Fragensatz.');
+    dateiSatz = parsed;
     localSet = parsed;
     const select = $('#set-select');
     // Vorhandenen Datei-Eintrag ersetzen statt einen zweiten anzulegen.
@@ -60,7 +75,13 @@ $('#set-file').addEventListener('change', async (ev) => {
 });
 
 $('#set-select').addEventListener('change', async (ev) => {
-  if (ev.target.value === '__local') return describeSet(localSet);
+  // Der geladene Satz haengt an der Option, nicht am Auswahl-Zeitpunkt: sonst
+  // ist er nach einem Blick auf einen anderen Satz unwiederbringlich weg und
+  // „Spiel starten" schickt den Platzhalter „__local" an den Server.
+  if (ev.target.value === '__local') {
+    localSet = dateiSatz;
+    return describeSet(localSet);
+  }
   localSet = null;
   try {
     const set = await (await fetch(`/api/set?file=${encodeURIComponent(ev.target.value)}`)).json();
@@ -138,6 +159,15 @@ function render(prev) {
     // Sonst schweben beim nächsten Spielstart Phantom-Abzüge über den Teams.
     lastScores.clear();
     return renderLobby();
+  }
+
+  const stage = $('.stage');
+  const q = state.current;
+  stage.classList.toggle('focused', !!q || state.phase === 'roundEnd' || state.phase === 'gameOver');
+  stage.classList.toggle('buzzopen', !!q && q.step === 'buzz' && !q.buzzedTeamId);
+  stage.classList.toggle('buzzhit', !!q && !!q.buzzedTeamId);
+  if (q?.buzzedTeamId) {
+    stage.style.setProperty('--team', state.teams.find((t) => t.id === q.buzzedTeamId)?.color || '#fff');
   }
 
   renderBoard();
@@ -234,13 +264,19 @@ function renderBoard() {
 
 function renderQuestion(prev) {
   const box = $('#question');
+  const panel = box.querySelector('.q-panel');
   const q = state.current;
   if (!q) {
     box.hidden = true;
     setBuzzIndicator('idle');
     return;
   }
+  const neu = !prev?.current || prev.current.catIdx !== q.catIdx || prev.current.rowIdx !== q.rowIdx;
   box.hidden = false;
+  if (neu) {
+    peek = false; // die Lösung nicht von der Vorfrage her offen lassen
+    openFromTile(panel, q);
+  }
 
   $('#q-head').textContent = `${q.category} ${q.value}`;
   $('#q-text').textContent = q.text;
@@ -257,6 +293,8 @@ function renderQuestion(prev) {
   const status = $('#q-status');
   status.innerHTML = '';
   const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+
+  panel.classList.toggle('buzzopen', q.step === 'buzz' && !q.buzzedTeamId);
 
   if (q.step === 'primary') {
     status.append(el('div', { class: 'chip turn' }, `Am Zug: ${teamName(q.teamId)}`));
@@ -288,13 +326,37 @@ function renderQuestion(prev) {
 
   // Tonsignale nur bei echten Übergängen derselben Frage.
   const prevQ = prev?.current;
-  const sameQuestion = prevQ && prevQ.catIdx === q.catIdx && prevQ.rowIdx === q.rowIdx;
+  const sameQuestion = prevQ && prev.round === state.round && prevQ.catIdx === q.catIdx && prevQ.rowIdx === q.rowIdx;
   if (sameQuestion && prevQ.log.length < q.log.length) {
-    sound(q.log[q.log.length - 1].result === 'correct' ? 'correct' : 'wrong');
+    const letzte = q.log[q.log.length - 1];
+    sound(letzte.result === 'correct' ? 'correct' : 'wrong');
+    if (letzte.result === 'wrong') {
+      panel.classList.remove('wrong');
+      void panel.offsetWidth;
+      panel.classList.add('wrong');
+    }
   }
   if (sameQuestion && !prevQ.revealed && q.revealed && !q.log.some((e) => e.result === 'correct')) {
     sound('reveal');
   }
+}
+
+/**
+ * Die Frage kommt sichtbar aus dem Feld, das gewählt wurde: Panel von der
+ * Position und Größe der Kachel auf Endgröße fahren.
+ */
+function openFromTile(panel, q) {
+  const tile = $(`[data-cell="${q.catIdx}-${q.rowIdx}"]`);
+  const p = panel.getBoundingClientRect();
+  if (!tile || !p.width) return;
+  const t = tile.getBoundingClientRect();
+  panel.style.setProperty('--fx', `${t.left + t.width / 2 - (p.left + p.width / 2)}px`);
+  panel.style.setProperty('--fy', `${t.top + t.height / 2 - (p.top + p.height / 2)}px`);
+  panel.style.setProperty('--fs', (t.width / p.width).toFixed(3));
+  // Animation neu anstoßen
+  panel.style.animation = 'none';
+  void panel.offsetWidth;
+  panel.style.animation = '';
 }
 
 function setBuzzIndicator(mode) {
@@ -324,6 +386,8 @@ function renderPlayers() {
   }
 
   const activeId = state.teams[state.turnIndex]?.id;
+  const gebuzzert = state.current?.step === 'buzz' && state.current?.buzzedTeamId;
+  box.classList.toggle('someone-buzzed', !!gebuzzert);
   for (const team of state.teams) {
     const node = box.querySelector(`[data-team="${team.id}"]`);
     if (!node) continue;
@@ -331,7 +395,9 @@ function renderPlayers() {
       .map((m) => (m.online ? m.name : `${m.name} ⚪`))
       .join(', ');
     const scoreNode = node.querySelector('.pscore');
-    scoreNode.textContent = team.score;
+    const vorher = lastScores.get(team.id);
+    if (vorher != null && vorher !== team.score) countUp(scoreNode, vorher, team.score);
+    else scoreNode.textContent = team.score;
     scoreNode.classList.toggle('neg', team.score < 0);
     node.classList.toggle('active', team.id === activeId);
     node.classList.toggle('buzzed', state.current?.buzzedTeamId === team.id && state.current?.step === 'buzz');
@@ -341,6 +407,7 @@ function renderPlayers() {
       const delta = team.score - before;
       const badge = el('div', { class: `delta ${delta > 0 ? 'plus' : 'minus'}` }, `${delta > 0 ? '+' : ''}${delta}`);
       node.append(badge);
+      hitmark(delta);
       node.classList.add(delta > 0 ? 'gain' : 'loss');
       setTimeout(() => {
         badge.remove();
@@ -349,6 +416,26 @@ function renderPlayers() {
     }
     lastScores.set(team.id, team.score);
   }
+}
+
+/** Die Punktzahl steigt groß über der Bühne auf – der Moment, in dem sichtbar
+ *  wird, dass etwas verdient wurde. */
+function hitmark(delta) {
+  const mark = el('div', { class: `hitmark ${delta > 0 ? '' : 'minus'}` }, `${delta > 0 ? '+' : ''}${delta}`);
+  $('.stage').append(mark);
+  setTimeout(() => mark.remove(), 950);
+}
+
+/** Punkte laufen sichtbar hoch statt einfach umzuspringen. */
+function countUp(node, von, bis, dauer = 600) {
+  const start = performance.now();
+  const schritt = (jetzt) => {
+    const t = Math.min(1, (jetzt - start) / dauer);
+    const ease = 1 - (1 - t) ** 3;
+    node.textContent = Math.round(von + (bis - von) * ease);
+    if (t < 1) requestAnimationFrame(schritt);
+  };
+  requestAnimationFrame(schritt);
 }
 
 function renderScoreboard() {
@@ -377,6 +464,33 @@ function renderScoreboard() {
   }
   $('#btn-next-round').hidden = final;
   $('#btn-new-game').hidden = !final;
+  if (final && !konfettiGefallen) {
+    konfettiGefallen = true;
+    konfetti(ranked[0]?.color);
+  }
+  if (!final) konfettiGefallen = false;
+}
+
+let konfettiGefallen = false;
+
+/** Einmalig beim Sieg – 60 Schnipsel, danach werden die Elemente entfernt. */
+function konfetti(farbe) {
+  const box = $('#confetti');
+  const farben = [farbe || '#ffcf3d', '#ffcf3d', '#22e08a', '#3f86d8', '#ff2d55', '#fff'];
+  for (let i = 0; i < 60; i++) {
+    const teil = el('i', {
+      style: {
+        left: `${(i * 37) % 100}%`,
+        background: farben[i % farben.length],
+        '--dx': `${((i % 7) - 3) * 30}px`,
+        '--rot': `${360 + (i % 5) * 180}deg`,
+        animationDuration: `${2.2 + (i % 9) * 0.09}s`,
+        animationDelay: `${(i % 12) * 0.06}s`,
+      },
+    });
+    box.append(teil);
+  }
+  setTimeout(() => (box.innerHTML = ''), 4200);
 }
 
 /* --------------------------------------------------------------- Steuerung */
