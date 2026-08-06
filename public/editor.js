@@ -4,6 +4,7 @@ const BASE_VALUES = [100, 200, 300, 500];
 const STORAGE_KEY = 'quizduell.editor';
 
 let set = load() || blankSet();
+let zielDatei = null; // zuletzt geladene Datei – dorthin wird auch gespeichert
 
 function blankRound() {
   return {
@@ -26,6 +27,15 @@ function load() {
     return null;
   }
 }
+
+// Bei jedem Tastendruck den ganzen Satz samt Bildern zu serialisieren ist teuer.
+let persistTimer;
+function persistSoon() {
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(persist, 500);
+}
+window.addEventListener('blur', () => persist());
+document.addEventListener('visibilitychange', () => persist());
 
 let persistWarned = false;
 function persist() {
@@ -73,7 +83,7 @@ function render() {
             value: cat.name,
             maxlength: 40,
             placeholder: 'Kategoriename',
-            oninput: (ev) => { cat.name = ev.target.value; persist(); },
+            oninput: (ev) => { cat.name = ev.target.value; persistSoon(); },
           }),
           round.categories.length > 2
             ? el('button', {
@@ -90,11 +100,11 @@ function render() {
             el('div', { class: 'val' }, String(BASE_VALUES[qi] * mult)),
             el('textarea', {
               placeholder: 'Frage',
-              oninput: (ev) => { q.text = ev.target.value; persist(); },
+              oninput: (ev) => { q.text = ev.target.value; persistSoon(); },
             }, q.text || ''),
             el('textarea', {
               placeholder: 'Antwort',
-              oninput: (ev) => { q.answer = ev.target.value; persist(); },
+              oninput: (ev) => { q.answer = ev.target.value; persistSoon(); },
             }, q.answer || ''),
             el('div', { class: 'img-btn' },
               q.image ? el('img', { src: q.image, alt: '' }) : null,
@@ -168,7 +178,11 @@ function shrinkImage(file, maxSide) {
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d');
+        // Ohne weissen Grund werden transparente Bereiche im JPEG schwarz.
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL('image/jpeg', 0.82));
       };
       img.src = reader.result;
@@ -179,7 +193,7 @@ function shrinkImage(file, maxSide) {
 
 /* ---------------------------------------------------------------- Aktionen */
 
-$('#set-name').addEventListener('input', (ev) => { set.name = ev.target.value; persist(); });
+$('#set-name').addEventListener('input', (ev) => { set.name = ev.target.value; persistSoon(); });
 
 $('#btn-add-round').addEventListener('click', () => {
   set.rounds.push(blankRound());
@@ -188,6 +202,8 @@ $('#btn-add-round').addEventListener('click', () => {
 });
 
 $('#btn-download').addEventListener('click', () => {
+  const luecken = fehlendeFelder();
+  if (luecken.length && !confirm(`${luecken.length} Felder sind noch leer – trotzdem herunterladen?`)) return;
   const blob = new Blob([JSON.stringify(set, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = el('a', { href: url, download: `${slug(set.name)}.json` });
@@ -209,10 +225,11 @@ async function save(overwrite) {
     const res = await fetch('/api/sets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ set, file: `${slug(set.name)}.json`, overwrite }),
+      body: JSON.stringify({ set, file: zielDatei || `${slug(set.name)}.json`, overwrite }),
     });
     const data = await res.json();
     if (data.ok) {
+      zielDatei = data.file;
       toast(`Gespeichert als ${data.file}`);
       loadSetList();
     } else if (data.exists) {
@@ -245,12 +262,18 @@ $('#file-input').addEventListener('change', async (ev) => {
   const file = ev.target.files?.[0];
   if (!file) return;
   try {
-    set = normalizeLoaded(JSON.parse(await file.text()));
+    const raw = JSON.parse(await file.text());
+    if (!Array.isArray(raw?.rounds)) throw new Error('Das ist kein Fragensatz.');
+    if (!verwerfenOk()) return;
+    set = normalizeLoaded(raw);
+    zielDatei = file.name;
     persist();
     render();
     toast('Geladen.');
   } catch (err) {
-    toast('Datei konnte nicht gelesen werden.', 'error');
+    toast(`Datei konnte nicht gelesen werden: ${err.message}`, 'error');
+  } finally {
+    ev.target.value = '';
   }
 });
 
@@ -258,14 +281,26 @@ $('#btn-load').addEventListener('click', async () => {
   const file = $('#load-select').value;
   if (!file) return;
   try {
-    set = normalizeLoaded(await (await fetch(`/api/set?file=${encodeURIComponent(file)}`)).json());
+    const res = await fetch(`/api/set?file=${encodeURIComponent(file)}`);
+    const raw = await res.json();
+    if (!res.ok || raw.error) throw new Error(raw.error || 'Satz konnte nicht gelesen werden.');
+    if (!Array.isArray(raw.rounds)) throw new Error('Das ist kein Fragensatz.');
+    if (!verwerfenOk()) return;
+    set = normalizeLoaded(raw);
+    zielDatei = file;
     persist();
     render();
     toast('Geladen.');
   } catch (err) {
-    toast('Laden fehlgeschlagen.', 'error');
+    toast(`Laden fehlgeschlagen: ${err.message}`, 'error');
   }
 });
+
+/** Der Editor haelt nur einen Satz – vor dem Ueberschreiben also fragen. */
+function verwerfenOk() {
+  const hatInhalt = set.rounds.some((r) => r.categories.some((c) => c.questions.some((q) => q.text?.trim() || q.answer?.trim())));
+  return !hatInhalt || confirm('Der aktuelle Fragensatz wird ersetzt. Vorher heruntergeladen?');
+}
 
 async function loadSetList() {
   try {
@@ -288,6 +323,9 @@ function normalizeLoaded(raw) {
         image: q.image || null,
         note: q.note || null,
       }));
+      if (questions.length > 4) {
+        toast(`Kategorie „${cat.name || '?'}" hatte ${questions.length} Fragen – nur die ersten 4 werden übernommen.`, 'error');
+      }
       while (questions.length < 4) questions.push({ text: '', answer: '', image: null, note: null });
       return { name: cat.name || '', questions: questions.slice(0, 4) };
     }),

@@ -178,3 +178,14 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   padding: 0.35rem;
   z-index: 1000;
 }
+
+/* Bildschirmfüllender Farbblitz – auf iPhones das einzige Buzzer-Signal,
+   das ankommt, weil es dort keine Vibration gibt. */
+.screenflash {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  pointer-events: none;
+  animation: screenflash 0.5s ease-out forwards;
+}
+@keyframes screenflash { from { opacity: 0.9; } to { opacity: 0; } }

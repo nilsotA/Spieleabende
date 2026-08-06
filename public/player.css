@@ -175,3 +175,21 @@ body {
 }
 .p-scores .chip.me { border-color: #4f9bec; }
 .p-scores .chip.turn { border-color: #f8d548; color: #f8d548; }
+
+/* Doppeltipp-Zoom in der ganzen Spielansicht unterbinden, nicht nur am Buzzer. */
+html, body { touch-action: manipulation; }
+
+/* Rückmeldung, wenn jemand vor der Freigabe auf den Buzzer haut. */
+.buzzer.tooearly { animation: shake 0.25s ease; }
+@keyframes shake {
+  25% { transform: translateX(-7px); }
+  75% { transform: translateX(7px); }
+}
+
+/* Gespielte Felder im Handy-Picker – vorher sahen sie frei aus. */
+.picker .pick-values button.used {
+  background: #12161e;
+  color: #2b3342;
+  border-color: transparent;
+  cursor: default;
+}

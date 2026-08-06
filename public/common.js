@@ -212,8 +212,11 @@ export function keepScreenAwake() {
   const request = async () => {
     try {
       lock = await navigator.wakeLock?.request('screen');
+      // Das System gibt die Sperre beim Wegschalten von selbst frei – ohne
+      // dieses Aufräumen würde sie danach nie wieder angefordert.
+      lock?.addEventListener?.('release', () => { lock = null; });
     } catch {
-      /* nicht überall verfügbar */
+      lock = null; // nicht überall verfügbar
     }
   };
   request();

@@ -115,6 +115,31 @@ export async function loadSet(file) {
   return normalizeSet(raw, safe.replace(/\.json$/, ''));
 }
 
+/**
+ * Eingebettete Bilder (data:-URIs) aus dem Fragensatz herauslösen.
+ *
+ * Sonst würde jedes Foto bei jedem einzelnen Zustandsupdate erneut an alle
+ * Handys gehen – und die Buzzer-Freigabe je nach Gerät unterschiedlich stark
+ * verzögern. Als eigene Adresse kann der Browser sie stattdessen cachen.
+ */
+export function externalizeImages(set) {
+  const images = new Map(); // id -> { type, buffer }
+  let n = 0;
+  for (const round of set.rounds) {
+    for (const cat of round.categories) {
+      for (const q of cat.questions) {
+        if (!q.image || !q.image.startsWith('data:')) continue;
+        const match = /^data:([^;,]+);base64,(.*)$/s.exec(q.image);
+        if (!match) continue;
+        const id = `b${++n}`;
+        images.set(id, { type: match[1], buffer: Buffer.from(match[2], 'base64') });
+        q.image = `/api/bild/${id}`;
+      }
+    }
+  }
+  return { set, images };
+}
+
 export async function setExists(file) {
   try {
     await stat(path.join(DATA_DIR, path.basename(String(file || ''))));

@@ -7,7 +7,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
-import { listSets, loadSet, normalizeSet, setExists, DATA_DIR } from './questions.js';
+import { listSets, loadSet, normalizeSet, setExists, externalizeImages, DATA_DIR } from './questions.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -22,6 +22,7 @@ process.on('unhandledRejection', (err) => console.error('Unerwarteter Fehler:', 
 /* ------------------------------------------------------------ Spielzustand */
 
 let state = G.createState();
+let bilder = new Map(); // Bilder des laufenden Fragensatzes, siehe externalizeImages
 
 /**
  * Verbindungen werden pro Tab geführt, nicht pro Gerät: derselbe Browser kann
@@ -104,7 +105,9 @@ async function handleAction(clientId, body) {
       Object.assign(state.settings, pickSettings(body.settings));
       break;
     case 'startGame': {
-      const set = body.set ? normalizeSet(body.set) : await loadSet(body.file);
+      const roh = body.set ? normalizeSet(body.set) : await loadSet(body.file);
+      const { set, images } = externalizeImages(roh);
+      bilder = images;
       G.startGame(state, set);
       break;
     }
@@ -302,6 +305,12 @@ async function apiHandler(req, res, url, pathname) {
       return sendJson(res, 200, { ok: false, error: err.message });
     }
   }
+  if (pathname.startsWith('/api/bild/') && req.method === 'GET') {
+    const bild = bilder.get(pathname.slice('/api/bild/'.length));
+    if (!bild) return sendJson(res, 404, { error: 'Bild nicht gefunden' });
+    res.writeHead(200, { 'Content-Type': bild.type, 'Cache-Control': 'max-age=3600' });
+    return res.end(bild.buffer);
+  }
   if (pathname === '/api/info' && req.method === 'GET') {
     return sendJson(res, 200, { urls: localUrls(), port: PORT });
   }
@@ -401,6 +410,10 @@ function localUrls() {
   }
   return out.length ? out : [`http://localhost:${PORT}`];
 }
+
+// Ohne diese Werte baut jeder Buzz-POST in der Regel eine neue Verbindung auf.
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 125000;
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
