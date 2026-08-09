@@ -60,17 +60,22 @@ body.host::before {
     radial-gradient(120% 70% at 50% 112%, #0a1220 0%, transparent 62%);
 }
 
-.view { display: none; flex: 1; min-height: 0; flex-direction: column; }
+/* Positioniert, damit der Inhalt über dem Bühnenlicht liegt: body.host::before
+   ist `position: fixed; z-index: 0` und wird nach nicht positioniertem Inhalt
+   gemalt – die Lobbykarten lagen also unter dem Verlauf. */
+.view { display: none; flex: 1; min-height: 0; flex-direction: column; position: relative; z-index: 1; }
 .view.active { display: flex; }
 
-h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color: #9db4d6; margin: 0 0 0.5rem; }
-.small { font-size: 0.8rem; }
+/* Auch die Lobby steht auf der Leinwand: Hier liest der ganze Raum mit, wie er
+   mitspielen kann. Feste Pixelgrößen sind dafür durchweg zu klein. */
+h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transform: uppercase; color: #9db4d6; margin: 0 0 0.5rem; }
+.small { font-size: clamp(0.85rem, 0.92vw, 1.1rem); }
 
 /* ------------------------------------------------------------------ Lobby */
 
 .view#view-lobby { overflow: auto; padding: 2rem clamp(1rem, 4vw, 3rem) 3rem; }
 .lobby-head { text-align: center; margin-bottom: 2rem; }
-.lobby-head p { margin: 0.9rem 0 0; letter-spacing: 0.3em; text-transform: uppercase; font-size: 0.75rem; }
+.lobby-head p { margin: 0.9rem 0 0; letter-spacing: 0.3em; text-transform: uppercase; font-size: clamp(0.85rem, 1vw, 1.15rem); color: #a8bad4; }
 
 .lobby-grid {
   display: grid;
@@ -91,9 +96,11 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   border-radius: 10px;
   padding: 0.5rem 0.7rem;
 }
-.lobby-teams .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-.lobby-teams .tname { font-weight: 700; }
-.lobby-teams .tmembers { font-size: 0.78rem; color: var(--muted); }
+/* Die wachsende Teamliste ist das Einzige, was in der Lobby passiert – man
+   soll von weitem sehen, dass gerade jemand dazugekommen ist. */
+.lobby-teams .dot { width: 18px; height: 18px; border-radius: 50%; flex: none; box-shadow: 0 0 12px currentColor; }
+.lobby-teams .tname { font-weight: 700; font-size: clamp(1rem, 1.25vw, 1.45rem); }
+.lobby-teams .tmembers { font-size: clamp(0.82rem, 0.95vw, 1.1rem); color: #a8b8cf; }
 
 .join-urls { display: grid; gap: 0.4rem; margin: 0.7rem 0; }
 .lobby-start { text-align: center; margin-top: 1.6rem; }
@@ -166,20 +173,41 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   z-index: 2;
 }
 
+/* Aus vier Metern war das hier mit 12px eine graue Schliere. Die Rundenanzeige
+   wächst mit dem Screen mit – wie alles andere, was man aus dem Sessel lesen
+   können muss. */
 .round-badge {
   justify-self: start;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  align-items: flex-start;
+  gap: 0.4rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: clamp(0.8rem, 0.95vw, 1.15rem);
   color: #9db4d6;
 }
-.round-badge small { color: var(--neon-1); font-size: 0.72rem; letter-spacing: 0.14em; }
+.round-badge.leer { visibility: hidden; }
+/* „Doppelte Punkte“ ist die wichtigste Ansage der zweiten Runde – als Schild,
+   nicht als Fußnote. Gold, weil im ganzen Spiel nur Gewinn gold ist. */
+.round-badge small {
+  font-size: clamp(0.72rem, 0.85vw, 1rem);
+  letter-spacing: 0.14em;
+  color: #3a2a00;
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  border-radius: 999px;
+  padding: 0.2em 0.85em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 18px rgba(255, 197, 49, 0.35);
+}
 
-.buzz-indicator { justify-self: end; }
+.buzz-indicator {
+  justify-self: end;
+  transition: opacity var(--t-ui) linear;
+}
+/* Auf dem Ruheboard hat der Kreis nichts zu melden – dann ist er weg, statt
+   grau danebenzustehen. Nur die Deckkraft, damit das Kopf-Raster stehen bleibt. */
+.buzz-indicator.aus { opacity: 0; }
 .buzz-circle {
   width: clamp(58px, 5vw, 86px);
   aspect-ratio: 1;
@@ -328,8 +356,16 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   color: #fff;
   font-family: var(--font-num);
   font-style: italic;
-  /* 50px auf 1920px – gedeckelt bei 2.1rem waren es 34px und damit zu wenig. */
-  font-size: clamp(1.35rem, 2.6vw, 3rem);
+  /* 50px auf 1920px – gedeckelt bei 2.1rem waren es 34px und damit zu wenig.
+     Dazu eine Wertleiter: Die Ziffer wächst nach unten mit, die 500 ist rund
+     ein Fünftel größer als die 100. Die Wand bekommt damit eine Leserichtung,
+     ohne dass irgendwo etwas kleiner wird – der Faktor liegt nur auf dem
+     vw-Term und den Deckeln, die Untergrenze bleibt für schmale Fenster stehen. */
+  font-size: clamp(
+    1.35rem,
+    calc(2.6vw * (1 + var(--r, 0) * 0.07)),
+    calc(3rem * (1 + var(--r, 0) * 0.07))
+  );
   letter-spacing: 0.01em;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
   display: flex;
@@ -361,6 +397,16 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   from { opacity: 0; transform: translateY(16px) scale(0.97); }
 }
 
+/* Das Feld schaltet ab, wenn die Frage durch ist: einmal eindrücken und
+   einrasten. Die Klasse wurde bisher gesetzt und wieder entfernt, ohne dass
+   irgendeine Regel darauf hörte – das Panel sprang hart von Blau auf Schwarz. */
+.tile.picked { animation: panelAus 500ms var(--ease); }
+@keyframes panelAus {
+  0% { transform: translateY(-7px) scale(1.035); }
+  55% { transform: translateY(2px) scale(0.982); }
+  100% { transform: none; }
+}
+
 /* Verbrauchte Felder verschwinden nicht – sie schalten ab. Die Wand bleibt heil. */
 /* Verbraucht = abgeschaltet, nicht ausgegraut: die Wand bleibt geschlossen. */
 .tile.used {
@@ -374,6 +420,35 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   text-shadow: none;
 }
 .tile.used::after { display: none; }
+
+/* Runde 2 zählt doppelt. Damit man das sieht statt es zu lesen, wechselt die
+   Wand ihre Lichtfarbe: Goldkanten auf den Panels, goldener Schein über der
+   Kategorienzeile. Die Ziffern bleiben weiß – Weiß auf Blau ist der beste
+   Kontrast im Raum, und den verkauft man nicht für Stimmung. */
+.stage.doppelt .chrome-rail {
+  background: radial-gradient(62% 130% at 50% 50%, rgba(255, 197, 49, 0.38), transparent 74%);
+  height: 7.2rem;
+}
+/* Die Kategorienzeile trägt die Identität der Sendung – dort sitzt das Gold als
+   Halo um das ganze Band, statt 24 Panels einzeln zu verzieren. */
+.stage.doppelt .cat {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 210, 0.8),
+    inset 0 0 0 1px rgba(255, 214, 130, 0.5),
+    0 8px 18px -6px rgba(0, 0, 0, 0.75),
+    0 0 30px -4px rgba(255, 197, 49, 0.55);
+}
+/* Auf den Panels bleibt es beim warmen Lichtstrich oben: Das liest sich als
+   Beleuchtung im Raum, nicht als Umlackierung der Möbel. */
+.stage.doppelt .tile:not(.used) {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 214, 130, 0.42),
+    inset 0 2px 0 rgba(255, 240, 200, 0.85),
+    inset 0 -14px 22px rgba(4, 10, 22, 0.34),
+    0 3px 0 #060b14,
+    0 14px 22px -12px rgba(0, 0, 0, 0.85);
+}
+.stage.doppelt .tile:not(.used)::after { box-shadow: inset 0 0 0 2px rgba(255, 232, 175, 0.95); }
 
 /* ------------------------------------------------------------ Frage-Panel */
 
@@ -425,6 +500,27 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   height: 2px;
   background: linear-gradient(90deg, transparent, #8fc6ff, transparent);
 }
+/* Buzzer frei – das ganze Panel bekommt einen goldenen Rand. Vorgemalt und nur
+   in der Deckkraft geschaltet, damit nie ein box-shadow animiert wird. Den
+   Zustand schaltete host.js schon um; es gab dazu bloß keine einzige Regel. */
+.q-panel::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 23px;
+  pointer-events: none;
+  box-shadow: 0 0 0 3px var(--gold), 0 0 50px -6px rgba(255, 197, 49, 0.7);
+  opacity: 0;
+  transition: opacity var(--t-ui) linear;
+}
+.q-panel.buzzopen::after { opacity: 1; }
+/* Dieselbe Schattenform, nur in Teamfarbe – sonst springt der Ring beim Wechsel
+   um ein paar Pixel. --team setzt render() an der Bühne, das vererbt sich. */
+.q-panel.buzzed::after {
+  opacity: 1;
+  box-shadow: 0 0 0 3px var(--team, #fff), 0 0 50px -6px color-mix(in srgb, var(--team, #fff) 60%, transparent);
+}
+
 /* Das Panel klappt aus genau der Kachel auf, die gewählt wurde. */
 @keyframes panelOpen {
   from { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--fs)); }
@@ -491,7 +587,10 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   border-radius: 999px;
   padding: 0.45rem 1.1rem;
   font-weight: 800;
-  font-size: clamp(0.72rem, 1.1vw, 0.95rem);
+  /* 26px auf 1920px. „Team Rakete hat gebuzzert!" stand hier mit 15px neben
+     einer 48px-Frage – die Ansage, auf die es gerade ankommt, war die kleinste
+     Schrift im Bild. */
+  font-size: clamp(0.95rem, 1.35vw, 1.5rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   background: rgba(0, 0, 0, 0.3);
@@ -509,22 +608,46 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   background: linear-gradient(180deg, var(--neon-1), var(--neon-3));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 30px rgba(255, 45, 85, 0.6);
 }
+/* Zwei Stufen: „Buzzer frei" und „X hat gebuzzert" sind Ansagen an den Raum,
+   die Protokollzeilen daneben nur Gedächtnisstütze. Gleich groß wären beide
+   gleich wichtig – und das sind sie nicht. */
+.q-status .chip.buzzopen,
+.q-status .chip.buzzed {
+  font-size: clamp(1.15rem, 1.9vw, 2rem);
+  padding: 0.55rem 1.7rem;
+}
 
+/* Die Lösung ist der Moment, auf den alle gewartet haben – sie war kleiner als
+   die Frage, die sie beantwortet (34px gegen 48px). Jetzt ist sie das Größte
+   im Bild. Umbruch erlaubt, damit auch „Englisch und Französisch" hineinpasst,
+   statt das Panel zu sprengen. */
 .q-answer {
   margin: clamp(0.9rem, 2.4vh, 1.5rem) auto 0;
   display: inline-block;
+  max-width: 92%;
   background: linear-gradient(180deg, #3ceea0, #12a05f);
   color: #05240f;
   border-radius: 999px;
-  padding: 0.55rem 2rem;
-  font-size: clamp(1.1rem, 2.6vw, 2.1rem);
+  padding: 0.5rem 2.2rem;
+  font-size: clamp(1.5rem, 3.3vw, 3.2rem);
+  line-height: 1.2;
   font-weight: 800;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 10px 34px rgba(0, 0, 0, 0.5), 0 0 60px -12px rgba(60, 238, 160, 0.55);
   animation: snapIn 0.26s cubic-bezier(0.2, 1.4, 0.5, 1);
 }
 @keyframes snapIn { from { transform: scale(0.82); opacity: 0; } 70% { transform: scale(1.04); } }
 
-.q-note { margin-top: 0.7rem; font-size: 0.9rem; color: #cfe4ff; opacity: 0.85; }
+/* Der Zusatz ist der Satz, über den die Runde danach redet – 14px waren dafür
+   aus vier Metern zu wenig. */
+.q-note {
+  margin-top: 0.8rem;
+  font-size: clamp(0.95rem, 1.15vw, 1.35rem);
+  line-height: 1.35;
+  max-width: 44ch;
+  margin-inline: auto;
+  color: #cfe4ff;
+  opacity: 0.9;
+}
 
 .q-panel.wrong { animation: shakePanel 0.28s ease; }
 @keyframes shakePanel {
@@ -563,6 +686,69 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
 }
 .score-list li.first .rank { color: var(--gold); }
 
+/* --- Endstand: aus der Tabelle wird eine Ansage ------------------------- */
+
+/* Das Schild über dem Panel war mit 18px die kleinste Schrift im größten
+   Moment. Blau heißt „es geht weiter", Gold heißt „das war's". */
+.scores-panel .q-head { font-size: clamp(1.05rem, 1.9vw, 1.7rem); padding: 0.5rem 2.2rem; }
+.scores-panel.final .q-head {
+  color: #3a2a00;
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  box-shadow: 0 0 0 1px rgba(255, 236, 180, 0.8), 0 8px 26px rgba(0, 0, 0, 0.7);
+}
+
+.score-winner {
+  margin: 0.4rem auto 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  font-size: clamp(1.6rem, 3.6vw, 3.4rem);
+  color: var(--gold-hell);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  animation: siegerIn 0.5s var(--ease-snap) both;
+  animation-delay: 1.1s;
+}
+/* Bei Gleichstand ist niemand Sieger – dann bleibt es sachlich und weiß. */
+.score-winner.geteilt { color: #e8f2ff; font-size: clamp(1.3rem, 2.6vw, 2.4rem); }
+@keyframes siegerIn { from { opacity: 0; transform: scale(0.86); } }
+
+/* Der Endstand baut sich von unten auf: Letzter zuerst, Sieger zuletzt.
+   Die Stufe kommt aus host.js, hier steht nur, wie lange dazwischen liegt. */
+.scores-panel.final .score-list li { animation-delay: calc(var(--i, 0) * 280ms); }
+.scores-panel.final .score-list li.first {
+  animation: erstIn 0.55s var(--ease-snap) both;
+  animation-delay: calc(var(--i, 0) * 280ms);
+}
+@keyframes erstIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.9); }
+  70% { transform: translateY(-8px) scale(1.03); }
+  to { opacity: 1; transform: translateY(-4px); }
+}
+/* Krone statt Platzziffer – aus vier Metern erkennt man ein Zeichen schneller
+   als eine 1. */
+/* Die Krone braucht mehr als die 2,4rem der Ziffernspalte, sonst drängelt sie
+   sich an den Namen. Nur im Endstand – im Rundenende stehen dort Ziffern. */
+.scores-panel.final .score-list li { grid-template-columns: 3.2rem 1fr auto auto; }
+/* Platzsprung aus Runde 2. Grün und Rot wie überall im Spiel: rauf ist gut. */
+.score-list .sprung {
+  font-size: 0.72em;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  min-width: 3.2ch;
+  text-align: right;
+}
+.score-list .sprung.hoch { color: var(--richtig); }
+.score-list .sprung.runter { color: #ff7a90; }
+.score-list .sprung.gleich { color: rgba(255, 255, 255, 0.3); }
+.scores-panel.final .score-list li.first .rank { font-size: 0; }
+.scores-panel.final .score-list li.first .rank::before {
+  content: '👑';
+  font-size: clamp(1.3rem, 2.4vw, 2.2rem);
+  line-height: 1;
+}
+.scores-panel.final .score-list li.first { font-size: clamp(1.2rem, 2.6vw, 2rem); }
+
 /* ----------------------------------------------------------- Studioblitz */
 
 .stage-flash {
@@ -592,13 +778,20 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
 
 /* ------------------------------------------------------------- Teampulte */
 
+/* Kein Overflow-Clip auf großen Screens: `overflow-x: auto` macht laut Spec
+   auch die Y-Achse zum Clip-Container. Der Scheinwerferkegel über dem Zugpult
+   und das Anheben beim Buzz ragen nach oben hinaus – beides wurde bisher
+   restlos weggeschnitten, gemessen blieben 8 von 120 Pixeln übrig. Gescrollt
+   wird erst, wenn die Pulte wirklich nicht mehr nebeneinanderpassen. */
 .players {
   display: flex;
   gap: 0.6rem;
   padding: 0.9rem clamp(0.8rem, 3vw, 3rem) 0.5rem;
-  overflow-x: auto;
   position: relative;
   z-index: 2;
+}
+@media (max-width: 1150px) {
+  .players { overflow-x: auto; }
 }
 .player {
   --team: var(--panel-1);
@@ -634,19 +827,31 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   transform: translateY(-6px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 -14px 40px rgba(255, 207, 61, 0.25);
 }
-/* Scheinwerferkegel über dem Pult, das gerade dran ist. */
-.player.active::before {
+/* Scheinwerferkegel über dem Pult, das gerade dran ist.
+
+   Er hängt an der Leiste, nicht am Pult: Das Pult ist ein Trapez per clip-path,
+   und ein clip-path schneidet auch die eigenen Pseudo-Elemente weg. Zusammen
+   mit dem früheren `overflow-x: auto` der Leiste war der Kegel doppelt
+   abgeschnitten – gemessen kam kein einziges Pixel davon je auf die Leinwand.
+   Position und Breite setzt host.js aus dem tatsächlichen Pult. */
+.players::before {
   content: '';
   position: absolute;
-  left: 50%;
-  bottom: 100%;
-  width: 180%;
-  height: 120px;
+  left: var(--spot-x, 50%);
+  bottom: calc(100% - 1.4rem);
+  width: calc(var(--spot-w, 160px) * 2.4);
+  height: 150px;
   transform: translateX(-50%);
-  background: linear-gradient(180deg, transparent, rgba(255, 207, 61, 0.14));
-  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  /* Weicher Verlauf statt Trapez mit clip-path: Ein Kegel mit harten Kanten
+     liest sich als Geometrie, nicht als Licht – und am Bildrand schneidet er
+     sichtbar ab. Der Schein sitzt unten am Pult und verläuft nach oben ins
+     Nichts, über den Ziffern der untersten Reihe liegt damit fast nichts. */
+  background: radial-gradient(62% 100% at 50% 100%, rgba(255, 207, 61, 0.32), transparent 72%);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-ui) linear, left var(--t-ui) var(--ease);
 }
+.players.spot::before { opacity: 1; }
 .player.buzzed { transform: translateY(-10px); box-shadow: 0 -16px 46px color-mix(in srgb, var(--team) 55%, transparent); }
 /* Hat jemand gebuzzert, treten alle anderen zurück – man sieht ohne ein Wort
    Text, wer dran ist. */
@@ -696,19 +901,14 @@ h2 { font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; color
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 0 0 1px rgba(220, 235, 255, 0.22);
 }
 .player .pscore.neg { background: linear-gradient(180deg, #4a4f5c, #23262e); }
-.player .delta {
-  position: absolute;
-  right: 0.7rem;
-  top: 0.4rem;
-  font-family: var(--font-num);
-  font-style: italic;
-  font-size: 1.15rem;
-  animation: floatUp 1.6s ease forwards;
-  pointer-events: none;
+/* Wer führt, trägt Gold. Vorher waren 0 und 3950 dieselbe rote Pille – man
+   musste die Zahlen lesen und vergleichen, statt es zu sehen. */
+.player.leader .pscore {
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  color: #3a2a00;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 0 0 1px rgba(255, 220, 140, 0.5), 0 0 26px -6px rgba(255, 197, 49, 0.8);
 }
-.player .delta.plus { color: var(--richtig); }
-.player .delta.minus { color: #ff7a90; }
-@keyframes floatUp { to { transform: translateY(-26px); opacity: 0; } }
+.player.leader .pscore.neg { background: linear-gradient(180deg, #4a4f5c, #23262e); color: #fff; }
 
 /* ------------------------------------------------------------- Steuerung */
 
@@ -782,13 +982,18 @@ body.host.flat .tile {
 
 /* Beitreten per Scan – eine IP abzutippen ist der lästigste Teil des Abends. */
 .join-box { display: grid; justify-items: center; gap: 0.7rem; margin: 0.8rem 0; }
+/* Groß genug, um vom Sofa aus scharfgestellt zu werden – das Beitreten ist der
+   einzige Moment, in dem alle gleichzeitig auf die Leinwand starren müssen.
+   Die Ruhezone liegt im SVG (quiet: 4), nicht im Padding: Scanner brauchen sie
+   im Bild, und ein weißer Rahmen drumherum ist etwas anderes. */
 .join-qr {
-  width: clamp(130px, 11vw, 170px);
+  width: clamp(190px, 15vw, 290px);
+  max-width: 100%;
   border-radius: 10px;
   background: #fff;
-  padding: 6px;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5), 0 10px 24px -10px #000;
   line-height: 0;
+  overflow: hidden;
 }
 .join-qr svg { width: 100%; height: auto; display: block; }
 .join-urls { width: 100%; display: grid; gap: 0.4rem; margin: 0; }
@@ -797,14 +1002,19 @@ body.host.flat .tile {
   background: #0b1220;
   border: 1px dashed #33507d;
   border-radius: 10px;
-  padding: 0.55rem 0.4rem;
-  font-size: clamp(0.8rem, 0.95vw, 1.05rem);
+  padding: 0.7rem 0.5rem;
+  /* Die Adresse muss man abtippen können, wenn die Kamera zickt – 13px auf der
+     Leinwand reichten dafür nicht. */
+  font-size: clamp(1.05rem, 1.5vw, 1.8rem);
   font-weight: 700;
   text-align: center;
   color: #8fc6ff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Umbrechen statt abschneiden: „http://192.0.2…" kann niemand eintippen, und
+     genau dafür steht die Adresse hier. Der Umbruch darf überall passieren –
+     eine Zahlengruppe zerreißt es dabei nicht, weil die Punkte Sollbruchstellen
+     sind. */
+  overflow-wrap: anywhere;
+  line-height: 1.25;
   cursor: pointer;
 }
 .join-urls .url.aktiv { border-style: solid; border-color: #4f9bec; color: #cfe6ff; }

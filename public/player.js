@@ -84,14 +84,24 @@ async function pressBuzzer() {
 $('#buzz-zone').addEventListener('pointerdown', (ev) => {
   ev.preventDefault();
   pointerDown = true;
+  // Das Eindrücken hing an :active des Kreises – wer daneben traf, löste den
+  // Buzz aus, ohne dass sich irgendetwas bewegte. Die Zone führt es jetzt mit.
+  buzzer.classList.add('gedrueckt');
   pressBuzzer();
 });
 for (const evt of ['pointerup', 'pointercancel', 'pointerleave']) {
-  $('#buzz-zone').addEventListener(evt, () => (pointerDown = false));
+  $('#buzz-zone').addEventListener(evt, () => {
+    pointerDown = false;
+    buzzer.classList.remove('gedrueckt');
+  });
 }
 document.addEventListener('keydown', (ev) => {
   if (ev.key !== ' ' || ev.repeat) return;
   if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+  // Vor dem Beitreten gehört die Leertaste der Anmeldung: Sonst schluckt das
+  // preventDefault das Aktivieren der Team-Kacheln, und am Laptop kommt man
+  // mit der Tastatur nicht mehr ins Spiel.
+  if (!state?.you?.teamId) return;
   ev.preventDefault();
   pressBuzzer();
 });
@@ -123,6 +133,13 @@ function render(prev) {
   renderPicker();
   renderBuzzer(prev);
   renderScores();
+
+  // Der Buzzer tritt zurück, wann immer etwas anderes den Platz braucht und er
+  // ohnehin nichts tun kann: beim Feldwählen (dort standen von sechs Kategorien
+  // zwei im Bild), nach dem Auflösen und an den Rundenenden. Nur wenn wirklich
+  // nichts anderes zu zeigen ist, bleibt er groß – dann ist er die Ansage.
+  const wartetAufFrage = state.phase === 'question' && state.current?.step !== 'result';
+  $('#view-play').classList.toggle('knopf-ruht', !wartetAufFrage);
 }
 
 function renderJoin() {
@@ -166,7 +183,7 @@ function renderQuestion() {
   const q = state.current;
   if (!q) {
     box.hidden = true;
-    $('#view-play').classList.remove('hat-bild', 'frage-durch');
+    $('#view-play').classList.remove('hat-bild');
     return;
   }
   box.hidden = false;
@@ -181,9 +198,8 @@ function renderQuestion() {
     img.removeAttribute('src');
   }
   // Bei Bildfragen tritt der Buzzer-Kreis zurück, damit das Bild ganz sichtbar
-  // bleibt – und wenn die Frage durch ist, erst recht.
+  // bleibt. Ob er ganz ruht, entscheidet render() für alle Fälle gemeinsam.
   $('#view-play').classList.toggle('hat-bild', !!q.image);
-  $('#view-play').classList.toggle('frage-durch', q.step === 'result');
 
   const answer = $('#p-q-answer');
   answer.hidden = !q.revealed;
@@ -240,7 +256,7 @@ function renderBuzzer(prev) {
   const status = $('#p-status');
   const label = $('#buzzer-label');
 
-  buzzer.classList.remove('armed', 'won', 'locked');
+  buzzer.classList.remove('armed', 'won', 'locked', 'fremd');
   label.textContent = 'BUZZ';
   status.classList.remove('you');
 
@@ -292,7 +308,10 @@ function renderBuzzer(prev) {
   if (q.step === 'buzz' && q.buzzedTeamId) {
     const team = state.teams.find((t) => t.id === q.buzzedTeamId);
     const mine = q.buzzedTeamId === you.teamId;
-    buzzer.classList.add(mine ? 'won' : 'locked');
+    // „Zu spät" und „noch gesperrt" waren derselbe graue Teller. Jetzt trägt der
+    // Knopf die Farbe des Teams, das schneller war.
+    buzzer.classList.add(mine ? 'won' : 'fremd');
+    if (!mine) buzzer.style.setProperty('--fremd', team?.color || '#55617a');
     label.textContent = mine ? 'DU!' : (team?.name || '').toUpperCase();
     status.textContent = mine ? 'Du warst zuerst – antworte!' : `${team?.name} war schneller.`;
     status.classList.toggle('you', mine);

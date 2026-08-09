@@ -274,6 +274,9 @@ export function buzz(state, clientId) {
 export function buzzFor(state, teamId) {
   const q = requireQuestion(state);
   if (q.step !== 'buzz') throw new GameError('Buzzer ist noch gesperrt.');
+  // Wie buzz(): Ein bereits vergebener Buzz wird nicht überschrieben. Sonst
+  // nimmt ein Griff des Hosts dem Handy, das schneller war, die Frage weg.
+  if (q.buzzedTeamId) throw new GameError('Es hat schon jemand gebuzzert – erst werten oder den Buzz zurücknehmen.');
   const team = findTeam(state, teamId);
   if (team.id === q.teamId) throw new GameError('Dieses Team hatte die Frage bereits.');
   if (q.lockedOut.includes(team.id)) throw new GameError('Dieses Team hat es schon versucht.');

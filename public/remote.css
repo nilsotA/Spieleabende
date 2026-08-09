@@ -1,7 +1,13 @@
 /* Host-Fernbedienung: alles groß genug, um es blind zu treffen. */
 
+/* remote.html lädt player.css mit; dort ist #app auf genau eine Bildschirmhöhe
+   festgenagelt (height und max-height: 100dvh). Ohne diese beiden Zeilen wird
+   die Fernbedienung bei langer Frage und vielen Teams unten abgeschnitten,
+   statt zu scrollen – und dann fehlen ausgerechnet die Wertungsknöpfe. */
 body.remote #app {
   min-height: 100dvh;
+  height: auto;
+  max-height: none;
   padding: max(0.8rem, env(safe-area-inset-top)) 0.8rem max(1.2rem, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;

@@ -242,6 +242,17 @@ body {
 }
 .p-scores .chip.me { border-color: #4f9bec; }
 .p-scores .chip.turn { border-color: #f8d548; color: #f8d548; }
+/* Bei einer Bildfrage ist das Bild der Inhalt. Acht Teams brauchen umbrochen
+   vier Zeilen und drücken die Flagge auf einem kleinen Handy unter 90 Pixel –
+   dann legen sich die Punkte in eine Zeile, die man seitwärts schieben kann.
+   Weggenommen wird nichts, nur umgeräumt. */
+.hat-bild:not(.knopf-ruht) .p-scores {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.hat-bild:not(.knopf-ruht) .p-scores .chip { flex: none; }
 
 /* Doppeltipp-Zoom in der ganzen Spielansicht unterbinden, nicht nur am Buzzer. */
 html, body { touch-action: manipulation; }
@@ -295,27 +306,69 @@ html, body { touch-action: manipulation; }
    jetzt Lösung und Punktestand. Nur der Kreis wird kleiner, die Zone behält ihre
    Fläche: So bleibt der Abstand zum Fragenkasten gleich und nichts springt.
    Nach .hat-bild notiert, damit die Regel bei beendeten Bildfragen gewinnt. */
-.frage-durch .buzz-zone {
+.knopf-ruht .buzz-zone {
   flex: 0 0 auto;
   height: 7rem;
   min-height: 0;
   place-items: end center;
 }
-.frage-durch .buzzer {
+.knopf-ruht .buzzer {
   height: min(100%, 5.5rem);
   animation: none;
 }
-.frage-durch .buzzer .buzzer-label { font-size: 0.42em; }
+.knopf-ruht .buzzer .buzzer-label { font-size: 0.42em; }
 /* Lösung und Zusatz stehen unten im Kasten. Behält das Bild seine volle Höhe,
    rutschen sie unter die Kante – und zwar lautlos, weil .hat-bild abschneidet
    statt zu scrollen. Genau das, wofür man auf die Frage gewartet hat. */
-.frage-durch.hat-bild .p-q-image { flex: 0 1 auto; max-height: 26dvh; }
+.knopf-ruht.hat-bild .p-q-image { flex: 0 1 auto; max-height: 26dvh; }
 /* Der Kasten schrumpft jetzt nicht mehr, und abgeschnitten wird gar nichts:
    Passt ein langer Zusatz auf einem schmalen Handy nicht mehr aufs Bild, scrollt
    die Seite. Ein Scrollbalken ist ein Hinweis – ein weggeschnittener Satz nicht,
    und bei eigenen Fragensätzen weiß niemand, wie lang der Zusatz wird. */
-.frage-durch .p-question,
-.frage-durch.hat-bild .p-question {
+.knopf-ruht .p-question,
+.knopf-ruht.hat-bild .p-question {
   flex: 0 0 auto;
   overflow: visible;
+}
+
+/* Wer den Buzz verloren hat, sah bisher genau dasselbe wie jemand, dessen
+   Buzzer noch gesperrt ist: einen grauen Teller. Der Knopf trägt jetzt die
+   Farbe des Teams, das schneller war – aus dem Augenwinkel erkennt man den
+   Unterschied, ohne die kleine Beschriftung zu lesen. */
+.buzzer.fremd {
+  background: radial-gradient(circle at 50% 32%,
+    color-mix(in srgb, var(--fremd, #55617a) 55%, #ffffff) 0%,
+    var(--fremd, #55617a) 45%,
+    color-mix(in srgb, var(--fremd, #55617a) 55%, #05070c) 100%);
+  color: #fff;
+  box-shadow:
+    0 0 0 7px #131a26,
+    0 0 0 9px color-mix(in srgb, var(--fremd, #55617a) 60%, transparent),
+    0 16px 0 color-mix(in srgb, var(--fremd, #55617a) 45%, #05070c),
+    0 26px 50px color-mix(in srgb, var(--fremd, #55617a) 40%, transparent);
+  animation: none;
+}
+.buzzer.fremd .bolt { filter: none; opacity: 0.75; }
+
+/* Ein Treffer neben dem Kreis löst den Buzz aus – die ganze Zone ist ja
+   Trefferfläche. Bisher bewegte sich dabei nichts, weil das Eindrücken an
+   :active des Knopfes hing. Jetzt führt die Zone die Klasse mit. */
+.buzzer.gedrueckt { transform: translateY(12px); }
+.buzzer.armed.gedrueckt {
+  box-shadow:
+    0 0 0 7px #131a26,
+    0 0 0 9px rgba(255, 150, 170, 0.4),
+    0 4px 0 #6d0a20,
+    0 10px 22px rgba(224, 27, 70, 0.45);
+  animation: none;
+}
+
+/* Der Reduced-Motion-Block stand nur in host.css – player.html lädt die aber
+   nie. Auf dem Handy pulsierte der scharfe Buzzer also auch dann endlos, wenn
+   das Gerät ausdrücklich um weniger Bewegung bittet. Der Puls verschwindet,
+   die kurzen Rückmeldungen bleiben: Ein Buzz ohne jede Reaktion fühlt sich an,
+   als wäre er nicht angekommen. */
+@media (prefers-reduced-motion: reduce) {
+  .buzzer.armed, .buzzer.won, .buzzer.tooearly { animation: none; }
+  .buzzer { transition-duration: 0.01ms; }
 }

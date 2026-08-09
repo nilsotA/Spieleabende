@@ -344,6 +344,23 @@ test('neues Spiel nimmt Karteileichen nicht mit', () => {
   assert.equal(fresh.teams[0].score, 0);
 });
 
+test('Host-Buzz überschreibt keinen echten Buzz', () => {
+  // Der Host greift zur Fernbedienung, während schon jemand gedrückt hat –
+  // sonst nimmt sein Griff dem Handy die Frage weg, das schneller war.
+  const state = setup();
+  G.joinTeam(state, 'g2', state.teams[1].id, 'Bea');
+  G.pickCell(state, 0, 3);
+  G.passQuestion(state);
+  G.buzz(state, 'g2');
+
+  assert.throws(() => G.buzzFor(state, state.teams[2].id), G.GameError);
+  assert.equal(state.current.buzzedTeamId, state.teams[1].id, 'Bea bleibt am Zug');
+
+  G.resetBuzz(state);
+  G.buzzFor(state, state.teams[2].id);
+  assert.equal(state.current.buzzedTeamId, state.teams[2].id);
+});
+
 test('beendete Frage lässt keinen Buzz stehen', () => {
   // Sonst halten Fernbedienung und Handys die Frage für offen und zeigen weiter
   // „Bea hat gebuzzert" statt „Weiter" – der Abend bleibt an der Stelle hängen.

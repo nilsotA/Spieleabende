@@ -6,6 +6,7 @@ let localSet = null;      // aktuell gewählter Satz aus einer Datei
 let dateiSatz = null;     // zuletzt geladene Datei, bleibt in der Auswahl verfügbar
 let lastScores = new Map();
 let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
+let standVorRunde = null; // Platzierung am Ende der vorletzten Runde, für den Endstand
 
 const act = hostAction;
 
@@ -170,7 +171,7 @@ async function loadUrls() {
 function zeigeQr(basis, liste) {
   const ziel = `${basis}/play`;
   try {
-    $('#join-qr').innerHTML = qrSvg(ziel, { ecl: 'M' });
+    $('#join-qr').innerHTML = qrSvg(ziel, { ecl: 'M', quiet: 4 });
   } catch {
     $('#join-qr').hidden = true;
   }
@@ -191,6 +192,11 @@ function render(prev) {
   if (inLobby) {
     // Sonst schweben beim nächsten Spielstart Phantom-Abzüge über den Teams.
     lastScores.clear();
+    // Zurückgesetzt wurde das bisher nur in renderScoreboard() – und die läuft
+    // in der Lobby nie. Beim zweiten Spiel eines Ein-Runden-Satzes blieb das
+    // Konfetti deshalb aus.
+    konfettiGefallen = false;
+    standVorRunde = null;
     return renderLobby();
   }
 
@@ -202,6 +208,12 @@ function render(prev) {
   if (q?.buzzedTeamId) {
     stage.style.setProperty('--team', state.teams.find((t) => t.id === q.buzzedTeamId)?.color || '#fff');
   }
+
+  // Beim Endstand ist die Rundenanzeige nur noch Altpapier – und sie steht
+  // ausgerechnet dort, wo das Konfetti herunterkommt. Nur der Inhalt geht weg,
+  // der Platz bleibt: Das Kopf-Raster hat drei Spalten, und ohne die erste
+  // rutscht das Logo aus der Mitte.
+  $('.round-badge').classList.toggle('leer', state.phase === 'gameOver');
 
   renderBoard();
   renderQuestion(prev);
@@ -220,7 +232,8 @@ function renderLobby() {
   for (const team of state.teams) {
     list.append(
       el('li', {},
-        el('span', { class: 'dot', style: { background: team.color } }),
+        // color mitsetzen: Der Schein um den Punkt kommt aus currentColor.
+        el('span', { class: 'dot', style: { background: team.color, color: team.color } }),
         el('span', { class: 'grow' },
           el('div', { class: 'tname' }, team.name),
           el('div', { class: 'tmembers' },
@@ -248,7 +261,11 @@ function renderBoard() {
   // Schlüssel aus dem Inhalt, nicht nur aus der Rundennummer: ein zweites Spiel
   // mit anderem Fragensatz hätte sonst weiter die alten Kategorien im Kopf.
   const key = [state.setName, state.round, data.categories.map((c) => `${c.name}/${c.cells.length}`).join('|')].join('#');
-  if (board.dataset.key !== key) {
+  // Nach einem Neubau sind alle Kacheln frisch – „war vorher schon benutzt" ist
+  // dann für jedes Feld falsch, und ohne diese Merkung würde nach einem Reload
+  // des Host-Screens das halbe Board gleichzeitig abschalten.
+  const frischGebaut = board.dataset.key !== key;
+  if (frischGebaut) {
     board.dataset.key = key;
     board.innerHTML = '';
     board.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
@@ -261,7 +278,8 @@ function renderBoard() {
           el('button', {
             class: 'tile',
             'data-cell': `${catIdx}-${rowIdx}`,
-            style: { gridColumn: catIdx + 1, gridRow: rowIdx + 2, '--i': catIdx + rowIdx },
+            // --r ist die Zeile: Je teurer das Feld, desto größer die Ziffer.
+            style: { gridColumn: catIdx + 1, gridRow: rowIdx + 2, '--i': catIdx + rowIdx, '--r': rowIdx },
             onclick: () => {
               sound('pick');
               act('pick', { catIdx, rowIdx });
@@ -279,7 +297,7 @@ function renderBoard() {
       const wasUsed = tile.classList.contains('used');
       tile.classList.toggle('used', cell.used);
       tile.disabled = cell.used || state.phase !== 'board';
-      if (cell.used && !wasUsed) {
+      if (cell.used && !wasUsed && !frischGebaut) {
         tile.classList.add('picked');
         setTimeout(() => tile.classList.remove('picked'), 500);
       }
@@ -287,7 +305,13 @@ function renderBoard() {
   });
 
   $('#round-label').textContent = `Runde ${state.round} / ${state.roundCount}`;
-  $('#round-mult').textContent = data.multiplier > 1 ? `${data.multiplier}× Punkte` : '';
+  const mult = $('#round-mult');
+  mult.textContent = data.multiplier > 1 ? `${data.multiplier}× Punkte` : '';
+  mult.hidden = data.multiplier <= 1;
+  // Die Runde mit den doppelten Punkten sah bisher aus wie die erste – nur mit
+  // anderen Zahlen. Ein Klassenwechsel an der Bühne färbt Kanten und Schein um,
+  // ohne dass irgendwo Text kleiner oder kontrastärmer wird.
+  $('.stage').classList.toggle('doppelt', data.multiplier > 1);
 
   const active = state.teams[state.turnIndex];
   $('#turn-name').textContent = active ? active.name : '—';
@@ -301,13 +325,17 @@ function renderQuestion(prev) {
   const q = state.current;
   if (!q) {
     box.hidden = true;
-    setBuzzIndicator('idle');
+    setBuzzIndicator('aus');
     return;
   }
   const neu = !prev?.current || prev.current.catIdx !== q.catIdx || prev.current.rowIdx !== q.rowIdx;
   box.hidden = false;
   if (neu) {
     peek = false; // die Lösung nicht von der Vorfrage her offen lassen
+    // Das Wackeln von einer falschen Antwort blieb sonst als Klasse hängen –
+    // und weil `.q-panel.wrong` spezifischer ist als `.q-panel`, wackelte danach
+    // jede weitere Frage beim Aufklappen, statt aus ihrem Feld zu wachsen.
+    panel.classList.remove('wrong');
     openFromTile(panel, q);
   }
 
@@ -328,6 +356,21 @@ function renderQuestion(prev) {
   const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
 
   panel.classList.toggle('buzzopen', q.step === 'buzz' && !q.buzzedTeamId);
+  // Hat jemand gedrückt, wechselt der Ring von Gold auf die Teamfarbe – die
+  // Frage „wer denn jetzt?" ist damit beantwortet, bevor jemand liest.
+  panel.classList.toggle('buzzed', !!q.buzzedTeamId && q.step === 'buzz');
+
+  // Das Schild oben rechts nennt, wer jetzt antworten muss – nicht, wer das Feld
+  // gewählt hat. Hat jemand gebuzzert, leuchtete dort sonst weiter der Name des
+  // Zugteams, während ein ganz anderer Tisch reden musste.
+  const dran = q.onTheHook ? state.teams.find((t) => t.id === q.onTheHook) : null;
+  if (dran) {
+    $('#turn-name').textContent = dran.name;
+    $('#turn-pill').style.setProperty('--team', dran.color);
+  }
+  // Bei freiem Buzzer ist niemand am Zug. Das Schild nannte dann weiter das
+  // Zugteam – ausgerechnet das eine, das jetzt nicht mehr drücken darf.
+  if (q.step === 'buzz' && !q.buzzedTeamId) $('#turn-pill').hidden = true;
 
   if (q.step === 'primary') {
     status.append(el('div', { class: 'chip turn' }, `Am Zug: ${teamName(q.teamId)}`));
@@ -372,6 +415,17 @@ function renderQuestion(prev) {
   if (sameQuestion && !prevQ.revealed && q.revealed && !q.log.some((e) => e.result === 'correct')) {
     sound('reveal');
   }
+
+  // Der Übergang „jetzt dürfen alle" ist der spannendste des Spiels und war auf
+  // der Leinwand stumm – das aufsteigende Signal kannte nur das Handy. Am
+  // Zustand festgemacht, nicht am Wertungsschritt: Nach einem falschen Buzz
+  // geht der Buzzer erneut auf, und auch das gehört angesagt. Kurz verzögert,
+  // damit es nicht in den Wertungston hineinfällt.
+  const buzzerJetztFrei = q.step === 'buzz' && !q.buzzedTeamId;
+  const buzzerVorherFrei = sameQuestion && prevQ.step === 'buzz' && !prevQ.buzzedTeamId;
+  if (sameQuestion && buzzerJetztFrei && !buzzerVorherFrei) {
+    setTimeout(() => sound('armed'), 180);
+  }
 }
 
 /**
@@ -396,6 +450,9 @@ function setBuzzIndicator(mode) {
   const node = $('#buzz-indicator');
   node.classList.toggle('armed', mode === 'armed');
   node.classList.toggle('hit', mode === 'hit');
+  // Ohne offene Frage kann niemand buzzern – dann hat der Kreis auf der
+  // Leinwand auch nichts anzuzeigen und verschwindet ganz.
+  node.classList.toggle('aus', mode === 'aus');
 }
 
 function renderPlayers() {
@@ -418,7 +475,12 @@ function renderPlayers() {
     }
   }
 
-  const activeId = state.teams[state.turnIndex]?.id;
+  // Am Rundenende und beim Endstand ist niemand mehr am Zug. Der Scheinwerfer
+  // stand trotzdem auf dem Team, das als Nächstes gewählt hätte – beim Endstand
+  // also gern auf dem Letzten, während der Sieger unbeleuchtet danebenstand.
+  const amZug = state.phase === 'board' || state.phase === 'question';
+  const activeId = amZug ? state.teams[state.turnIndex]?.id : null;
+  const bestScore = Math.max(...state.teams.map((t) => t.score));
   const gebuzzert = state.current?.step === 'buzz' && state.current?.buzzedTeamId;
   box.classList.toggle('someone-buzzed', !!gebuzzert);
   for (const team of state.teams) {
@@ -434,20 +496,34 @@ function renderPlayers() {
     scoreNode.classList.toggle('neg', team.score < 0);
     node.classList.toggle('active', team.id === activeId);
     node.classList.toggle('buzzed', state.current?.buzzedTeamId === team.id && state.current?.step === 'buzz');
+    // Wer führt, war an den Pulten nicht zu erkennen – alle Punktepillen sahen
+    // gleich aus, ob 0 oder 3950. Bei Gleichstand leuchten eben mehrere.
+    node.classList.toggle('leader', state.teams.length > 1 && bestScore > 0 && team.score === bestScore);
 
     const before = lastScores.get(team.id);
     if (before != null && before !== team.score) {
       const delta = team.score - before;
-      const badge = el('div', { class: `delta ${delta > 0 ? 'plus' : 'minus'}` }, `${delta > 0 ? '+' : ''}${delta}`);
-      node.append(badge);
+      // Nur noch die fliegende Zahl über dem Pult: Die zweite, kleinere Anzeige
+      // im Pult selbst hat nie jemand gesehen – sie lag unter dem clip-path des
+      // Trapezes und flog beim Aufsteigen sofort in den abgeschnittenen Bereich.
       hitmark(delta, node);
       node.classList.add(delta > 0 ? 'gain' : 'loss');
-      setTimeout(() => {
-        badge.remove();
-        node.classList.remove('gain', 'loss');
-      }, 1700);
+      setTimeout(() => node.classList.remove('gain', 'loss'), 1700);
     }
     lastScores.set(team.id, team.score);
+  }
+
+  // Der Scheinwerfer liegt auf der Leiste und wandert zum Pult, das dran ist.
+  // Am Pult selbst könnte er nicht hängen: Dessen clip-path (das Trapez)
+  // schneidet auch die eigenen Pseudo-Elemente ab.
+  // Am Ende gehört der Scheinwerfer dem Sieger – vorher dem, der reden muss.
+  const imLicht = box.querySelector('.player.buzzed')
+    || box.querySelector('.player.active')
+    || (state.phase === 'gameOver' ? box.querySelector('.player.leader') : null);
+  box.classList.toggle('spot', !!imLicht);
+  if (imLicht) {
+    box.style.setProperty('--spot-x', `${imLicht.offsetLeft + imLicht.offsetWidth / 2}px`);
+    box.style.setProperty('--spot-w', `${imLicht.offsetWidth}px`);
   }
 }
 
@@ -485,21 +561,54 @@ function renderScoreboard() {
 
   const final = state.phase === 'gameOver';
   $('#score-title').textContent = final ? 'Endstand' : `Runde ${state.round} beendet`;
+  $('.scores-panel').classList.toggle('final', final);
   const list = $('#score-list');
   const ranked = [...state.teams].sort((a, b) => b.score - a.score);
+
+  // Sieg heißt mehr Punkte als alle anderen – bei Gleichstand gibt es keinen.
+  const geteilt = ranked.length > 1 && ranked[1].score === ranked[0].score;
+  const sieger = $('#score-winner');
+  sieger.hidden = !final;
+  if (final) {
+    sieger.textContent = geteilt
+      ? `Unentschieden – ${ranked.filter((t) => t.score === ranked[0].score).map((t) => t.name).join(' und ')}`
+      : `${ranked[0].name} gewinnt!`;
+    sieger.classList.toggle('geteilt', geteilt);
+  }
+
   const key = ranked.map((t) => `${t.id}:${t.score}`).join('|') + `#${state.phase}`;
   if (list.dataset.key !== key) {
     list.dataset.key = key;
     list.innerHTML = '';
     ranked.forEach((team, i) => {
+      // Beim Endstand baut sich die Liste von unten auf: Der Letzte zuerst, der
+      // Sieger zuletzt. Vorher lief die Spannung rückwärts.
+      const stufe = final ? ranked.length - 1 - i : i;
+      // Runde 2 zählt doppelt – dort entscheidet sich der Abend. Aus vier
+      // nackten Zahlen wird eine Geschichte, wenn danebensteht, wer sich um
+      // wie viele Plätze geschoben hat.
+      const vorher = final ? standVorRunde?.get(team.id) : null;
+      const sprung = vorher ? vorher.rang - i : 0;
       list.append(
-        el('li', { class: i === 0 ? 'first' : '', style: { '--i': i, '--team': team.color } },
+        el('li', { class: i === 0 ? 'first' : '', style: { '--i': stufe, '--team': team.color } },
           el('span', { class: 'rank' }, `${i + 1}`),
           el('span', { class: 'sname' }, team.name),
+          // Nur wer sich bewegt hat, bekommt einen Pfeil. Vier Punkte für „nichts
+          // passiert" wären bloß Rauschen in der wichtigsten Tabelle des Abends.
+          sprung !== 0
+            ? el('span', { class: `sprung ${sprung > 0 ? 'hoch' : 'runter'}` },
+              sprung > 0 ? `▲ ${sprung}` : `▼ ${-sprung}`)
+            : null,
           el('span', { class: 'pts' }, String(team.score)),
         ),
       );
     });
+  }
+
+  // Der Stand am Ende der vorletzten Runde ist die Vergleichsmarke. Der Server
+  // kennt ihn nicht – der Host-Screen merkt ihn sich einfach beim Durchlaufen.
+  if (!final) {
+    standVorRunde = new Map(ranked.map((t, i) => [t.id, { score: t.score, rang: i }]));
   }
   $('#btn-next-round').hidden = final;
   $('#btn-new-game').hidden = !final;
@@ -542,9 +651,24 @@ $('#btn-peek').addEventListener('click', () => {
 function renderControls() {
   const hint = $('#control-hint');
   const bar = $('#control-buttons');
-  bar.innerHTML = '';
   const q = state.current;
   const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+
+  // Die Leiste war der einzige Renderer ohne Schlüssel und baute sich bei jedem
+  // Broadcast neu auf – auch wenn nur ein Handy beigetreten ist. Fällt so ein
+  // Update zwischen Finger-runter und Klick, ist der Knopf weg und die Wertung
+  // verpufft. Der Hinweistext darf sich weiter jedes Mal ändern.
+  const key = [
+    state.phase, q?.step, q?.buzzedTeamId, q?.teamId,
+    (q?.lockedOut || []).join(','),
+    state.teams.map((t) => `${t.id}:${t.name}`).join('|'),
+  ].join('#');
+  const neu = bar.dataset.key !== key;
+  if (neu) {
+    bar.dataset.key = key;
+    bar.innerHTML = '';
+  }
+  const add = (...knoepfe) => { if (neu) bar.append(...knoepfe); };
 
   // Die Lösung gehört nicht ungefragt auf die Leinwand.
   const wrap = $('#solution-wrap');
@@ -558,7 +682,7 @@ function renderControls() {
 
   if (state.phase === 'board') {
     hint.textContent = `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – Feld anklicken oder auf dem Handy antippen.`;
-    bar.append(button('Zug überspringen', 'btn-ghost btn-sm', () => {
+    add(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];
       act('setTurn', { teamId: next.id });
     }));
@@ -574,7 +698,7 @@ function renderControls() {
 
   if (q.step === 'primary') {
     hint.textContent = `${teamName(q.teamId)} antwortet.`;
-    bar.append(
+    add(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
       button('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), '3'),
@@ -583,19 +707,19 @@ function renderControls() {
     hint.textContent = 'Buzzer ist frei.';
     for (const team of state.teams) {
       if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
-      bar.append(button(`Buzz: ${team.name}`, 'btn-ghost btn-sm', () => act('buzzFor', { teamId: team.id })));
+      add(button(`Buzz: ${team.name}`, 'btn-ghost btn-sm', () => act('buzzFor', { teamId: team.id })));
     }
-    bar.append(button('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion'), '4'));
+    add(button('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion'), '4'));
   } else if (q.buzzedTeamId && q.step === 'buzz') {
     hint.textContent = `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`;
-    bar.append(
+    add(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
       button('Buzz zurücknehmen', 'btn-ghost btn-sm', () => act('resetBuzz')),
     );
   } else {
     hint.textContent = 'Frage beendet.';
-    bar.append(button('Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
+    add(button('Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
   }
 }
 
