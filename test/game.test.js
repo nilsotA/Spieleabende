@@ -574,3 +574,104 @@ test('eine Bilanz ohne die neueren Felder wird ergänzt statt zu NaN', () => {
   const sicht = G.viewFor(state, { isHost: false, clientId: 'x' });
   assert.equal(typeof sicht.teams[0].bilanz.geklautPunkte, 'number');
 });
+
+/* ------------------------------------ Regeln, die sich gegenseitig bedingen */
+// Die Einstellungen lassen sich einzeln umlegen, und ihre Kombinationen sind
+// genau die Fälle, über die am Tisch gestritten wird. Hier stehen sie fest.
+
+test('keepOnCorrect + Nachbuzzern: der Erste, der richtig lag, bleibt dran', () => {
+  const state = setup();
+  state.settings.turnMode = 'keepOnCorrect';
+  state.settings.buzzAfterCorrect = true;
+  const [a, b] = state.teams;
+
+  G.pickCell(state, 0, 0);
+  assert.equal(state.current.teamId, a.id);
+  G.judge(state, true); // Zugteam richtig – der Buzzer bleibt trotzdem offen
+  assert.equal(state.current.step, 'buzz');
+  G.buzzFor(state, b.id);
+  G.judge(state, true); // auch das zweite Team liegt richtig
+  G.closeQuestion(state);
+
+  assert.equal(state.teams[state.turnIndex].id, a.id,
+    'zwei Richtige, aber der Erste behält den Zug – sonst wäre es Zufall, wer schneller drückt');
+  assert.equal(a.score, 100, 'volle Punkte fürs Zugteam');
+  assert.equal(b.score, 50, 'halbe fürs Nachbuzzern');
+});
+
+test('keepOnCorrect ohne einen einzigen Richtigen zählt normal weiter', () => {
+  const state = setup();
+  state.settings.turnMode = 'keepOnCorrect';
+  const [a, b] = state.teams;
+
+  G.pickCell(state, 0, 0);
+  G.judge(state, false);
+  G.buzzFor(state, b.id);
+  G.judge(state, false);
+  G.endQuestion(state);
+  G.closeQuestion(state);
+
+  assert.equal(state.teams[state.turnIndex].id, b.id,
+    'niemand hat gelöst – dann geht es reihum vom Team weiter, das die Frage hatte');
+  assert.notEqual(state.turnIndex, state.teams.indexOf(a));
+});
+
+test('voller Abzug trifft nur das Zugteam, der Buzzer kostet weiter die Hälfte', () => {
+  const state = setup();
+  state.settings.wrongPenalty = 'full';
+  const [a, b] = state.teams;
+
+  G.pickCell(state, 0, 3); // 500
+  G.judge(state, false);
+  assert.equal(a.score, -500, 'das Zugteam zahlt voll');
+  G.buzzFor(state, b.id);
+  G.judge(state, false);
+  assert.equal(b.score, -250, 'wer sich reinbuzzert, zahlt die Hälfte – unabhängig von der Einstellung');
+});
+
+test('Abzug greift auch in Runde 2, dort auf die verdoppelten Werte', () => {
+  const state = setup();
+  state.settings.wrongPenalty = 'half';
+  G.startRound(state, 2);
+  const a = state.teams[0];
+
+  G.pickCell(state, 0, 3); // in Runde 2: 1000
+  assert.equal(state.current.value, 1000);
+  G.judge(state, false);
+  assert.equal(a.score, -500, 'die Hälfte von 1000');
+});
+
+test('Nachbuzzern nach richtiger Antwort endet, wenn keiner mehr darf', () => {
+  const state = setup(['Team 1', 'Team 2']);
+  state.settings.buzzAfterCorrect = true;
+  const [a, b] = state.teams;
+
+  G.pickCell(state, 0, 0);
+  G.judge(state, true);
+  assert.equal(state.current.step, 'buzz', 'der Buzzer geht auf');
+  G.buzzFor(state, b.id);
+  G.judge(state, false);
+  // Bei zwei Teams ist danach niemand mehr übrig: Das Zugteam darf nicht, und
+  // das andere hat seinen Versuch gehabt.
+  assert.equal(state.current.step, 'result', 'die Frage schließt sich von selbst');
+  assert.equal(state.current.revealed, true);
+  assert.equal(a.score, 100);
+  assert.equal(b.score, -50);
+});
+
+test('die Einstellungen gelten ab sofort, auch mitten im Spiel', () => {
+  const state = setup();
+  const a = state.teams[0];
+
+  G.pickCell(state, 0, 3); // 500, kein Abzug eingestellt
+  G.judge(state, false);
+  assert.equal(a.score, 0);
+  G.endQuestion(state);
+  G.closeQuestion(state);
+
+  // Der Host stellt um – die nächste Frage rechnet schon anders.
+  state.settings.wrongPenalty = 'full';
+  G.pickCell(state, 1, 3); // 500
+  G.judge(state, false);
+  assert.equal(state.teams[1].score, -500, 'die neue Regel greift sofort');
+});

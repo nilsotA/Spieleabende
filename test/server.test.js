@@ -527,3 +527,184 @@ test('acht Teams mit je zwei Handys überstehen Abbruch und Rückkehr', async (t
   assert.equal(wieder.online, true, 'wieder online, ohne erneut beizutreten');
   assert.equal(wieder.name, 'handy-3-0', 'und mit demselben Namen');
 });
+
+/**
+ * Ein ganzer Abend am Stück – über die echte Schnittstelle, mit Prüfung nach
+ * jeder einzelnen Aktion.
+ *
+ * Die übrigen Tests schauen sich einzelne Regeln an. Dieser spielt beide Runden
+ * durch, mit allem, was an einem Abend vorkommt: richtig, falsch, „weiß nicht",
+ * Buzzer, zurückgenommene Wertungen, Punktekorrekturen von Hand und einem
+ * gesetzten Zug. Nach jedem Schritt wird geprüft, dass der Zustand überhaupt
+ * noch Sinn ergibt – ein kaputter Punktestand oder eine hängende Phase fällt so
+ * an der Stelle auf, an der sie entsteht, und nicht erst am Ende.
+ */
+/* Ein Satz in voller Größe: zwei Runden, sechs Kategorien, 48 Fragen – so wie
+   die mitgelieferten. Der kleine SATZ oben genügt für einzelne Regeln, aber
+   nicht, um einen Abend nachzuspielen. */
+const VOLLER_SATZ = {
+  name: 'Abendtest',
+  rounds: Array.from({ length: 2 }, (_, r) => ({
+    categories: Array.from({ length: 6 }, (_, c) => ({
+      name: `R${r + 1}K${c + 1}`,
+      questions: Array.from({ length: 4 }, (_, i) => ({
+        text: `Frage ${r}-${c}-${i}`,
+        answer: `Antwort ${r}-${c}-${i}`,
+      })),
+    })),
+  })),
+};
+
+test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const port = 5800 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  // Eine einzige offene Verbindung, die den Zustand mitschreibt: Für jeden
+  // Schritt eine neue zu öffnen wären hunderte Verbindungen.
+  let stand = null;
+  const res = await fetch(`${base}/api/events?clientId=abend&role=host`);
+  const reader = res.body.getReader();
+  (async () => {
+    const dec = new TextDecoder();
+    let puffer = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      puffer += dec.decode(value, { stream: true });
+      let i;
+      while ((i = puffer.indexOf('\n\n')) >= 0) {
+        const stueck = puffer.slice(0, i);
+        puffer = puffer.slice(i + 2);
+        const treffer = stueck.match(/^event: state\ndata: (.*)$/s);
+        if (treffer) stand = JSON.parse(treffer[1]);
+      }
+    }
+  })();
+  await warte(250);
+
+  const PHASEN = new Set(['lobby', 'board', 'question', 'roundEnd', 'gameOver']);
+  const SCHRITTE = new Set(['primary', 'buzz', 'result']);
+  let schrittZaehler = 0;
+
+  /** Führt eine Aktion aus und prüft danach, dass der Zustand heil ist. */
+  async function tu(body, darfScheitern = false) {
+    const antwort = await fetch(`${base}/api/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: 'abend', role: 'host', ...body }),
+    });
+    assert.ok(antwort.status < 500, `Serverfehler bei ${body.type}: ${antwort.status}`);
+    const daten = await antwort.json();
+    if (!darfScheitern && daten.error) {
+      throw new Error(`Schritt ${schrittZaehler} (${body.type}) abgelehnt: ${daten.error}`);
+    }
+    await warte(12);
+    schrittZaehler++;
+
+    const wo = `nach Schritt ${schrittZaehler} (${body.type})`;
+    assert.ok(stand, `kein Zustand ${wo}`);
+    assert.ok(PHASEN.has(stand.phase), `unbekannte Phase „${stand.phase}" ${wo}`);
+    for (const team of stand.teams) {
+      assert.ok(Number.isInteger(team.score), `Punktestand von ${team.name} ist ${team.score} ${wo}`);
+      for (const [feld, wert] of Object.entries(team.bilanz || {})) {
+        assert.ok(Number.isFinite(wert), `Bilanz ${feld} von ${team.name} ist ${wert} ${wo}`);
+      }
+    }
+    if (stand.phase === 'question') {
+      assert.ok(stand.current, `Phase „question" ohne Frage ${wo}`);
+      assert.ok(SCHRITTE.has(stand.current.step), `unbekannter Schritt ${wo}`);
+    } else {
+      assert.equal(stand.current, null, `Frage hängt in Phase „${stand.phase}" ${wo}`);
+    }
+    if (['board', 'question'].includes(stand.phase)) {
+      assert.ok(stand.turnIndex >= 0 && stand.turnIndex < stand.teams.length, `turnIndex daneben ${wo}`);
+    }
+    return daten;
+  }
+
+  const namen = ['Rot', 'Blau', 'Grün', 'Gelb', 'Lila'];
+  for (const name of namen) await tu({ type: 'addTeam', name });
+  await tu({ type: 'startGame', set: VOLLER_SATZ });
+
+  const offen = () => stand.board.categories
+    .flatMap((c, ci) => c.cells.map((z, ri) => (z.used ? null : [ci, ri])))
+    .filter(Boolean);
+
+  let gespielt = 0;
+  for (let runde = 1; runde <= 1; runde++) {
+    while (offen().length) {
+      const [ci, ri] = offen()[0];
+      await tu({ type: 'pick', catIdx: ci, rowIdx: ri });
+      const zugTeam = stand.current.teamId;
+      const muster = gespielt % 5;
+
+      if (muster === 0) {
+        await tu({ type: 'judge', correct: true });
+      } else if (muster === 1) {
+        // Falsch, dann holt sich ein anderes Team die halben Punkte.
+        await tu({ type: 'judge', correct: false });
+        const frei = stand.teams.find((x) => x.id !== zugTeam && !stand.current.lockedOut.includes(x.id));
+        if (frei) {
+          await tu({ type: 'buzzFor', teamId: frei.id });
+          await tu({ type: 'judge', correct: true });
+        }
+      } else if (muster === 2) {
+        // Weiß nicht, danebengebuzzert, dann aufgelöst.
+        await tu({ type: 'pass' });
+        const frei = stand.teams.find((x) => x.id !== zugTeam && !stand.current.lockedOut.includes(x.id));
+        if (frei) {
+          await tu({ type: 'buzzFor', teamId: frei.id });
+          await tu({ type: 'judge', correct: false });
+        }
+      } else if (muster === 3) {
+        // Verklickt: erst richtig, dann zurückgenommen und doch falsch.
+        await tu({ type: 'judge', correct: true });
+        const vorher = stand.teams.find((x) => x.id === zugTeam).score;
+        await tu({ type: 'undo' });
+        const nachher = stand.teams.find((x) => x.id === zugTeam).score;
+        assert.ok(nachher < vorher, 'das Zurücknehmen muss die Punkte auch wirklich zurücknehmen');
+        await tu({ type: 'judge', correct: false });
+      } else {
+        await tu({ type: 'judge', correct: false });
+      }
+
+      if (stand.current?.step !== 'result') await tu({ type: 'endQuestion' });
+      await tu({ type: 'close' });
+      gespielt++;
+
+      // Zwischendurch das, was ein Host sonst noch tut.
+      if (gespielt === 3) await tu({ type: 'adjustScore', teamId: stand.teams[2].id, delta: -100 });
+      if (gespielt === 5) await tu({ type: 'setTurn', teamId: stand.teams[4].id });
+    }
+    assert.equal(stand.phase, 'roundEnd', 'nach 24 Feldern ist die Runde durch');
+    await tu({ type: 'nextRound' });
+  }
+
+  assert.equal(stand.round, 2);
+  assert.equal(stand.board.multiplier, 2, 'Runde 2 zählt doppelt');
+  assert.equal(offen().length, 24, 'ein frisches Board');
+
+  // Zweite Runde zügig abräumen – hier zählt, dass nichts hängen bleibt.
+  while (offen().length) {
+    const [ci, ri] = offen()[0];
+    await tu({ type: 'pick', catIdx: ci, rowIdx: ri });
+    await tu({ type: 'judge', correct: gespielt % 2 === 0 });
+    if (stand.current?.step !== 'result') await tu({ type: 'endQuestion' });
+    await tu({ type: 'close' });
+    gespielt++;
+  }
+
+  assert.equal(gespielt, 48, 'beide Boards komplett gespielt');
+  assert.equal(stand.phase, 'gameOver');
+  assert.ok(stand.teams.every((x) => Number.isInteger(x.score)));
+  // Die Buchhaltung muss zum Verlauf passen.
+  const summeAntworten = stand.teams.reduce(
+    (n, x) => n + x.bilanz.richtig + x.bilanz.falsch + x.bilanz.gepasst, 0);
+  assert.ok(summeAntworten >= 48, `nur ${summeAntworten} verbuchte Antworten bei 48 Fragen`);
+  reader.cancel();
+});
