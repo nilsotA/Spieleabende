@@ -56,12 +56,19 @@ export function createState() {
 export function addTeam(state, name) {
   if (state.phase !== 'lobby') throw new GameError('Teams können nur in der Lobby geändert werden.');
   if (state.teams.length >= 8) throw new GameError('Maximal 8 Teams.');
-  const clean = String(name || '').trim().slice(0, 24) || `Team ${state.teams.length + 1}`;
-  const id = `t${state.teams.length + 1}_${Math.random().toString(36).slice(2, 7)}`;
+  // Auch der Standardname zählt nicht die Teams, sondern sucht die erste freie
+  // Nummer – sonst gibt es nach einem Löschen zweimal „Team 3".
+  let n = 1;
+  while (state.teams.some((t) => t.name === `Team ${n}`)) n++;
+  const clean = String(name || '').trim().slice(0, 24) || `Team ${n}`;
+  const id = `t${n}_${Math.random().toString(36).slice(2, 7)}`;
   state.teams.push({
     id,
     name: clean,
-    color: TEAM_COLORS[state.teams.length % TEAM_COLORS.length],
+    // Die erste noch freie Farbe, nicht die nach Anzahl: Wer ein Team löscht
+    // und ein neues anlegt, bekam sonst zweimal dieselbe Farbe an der Leiste.
+    color: TEAM_COLORS.find((f) => !state.teams.some((t) => t.color === f))
+      || TEAM_COLORS[state.teams.length % TEAM_COLORS.length],
     score: 0,
     members: [],
   });
@@ -435,7 +442,12 @@ export function closeQuestion(state) {
     // Wer gelöst hat, ist als Nächstes dran – auch wenn er sich reingebuzzert hat.
     setTurn(state, solvedBy.teamId);
   } else {
-    state.turnIndex = (state.turnIndex + 1) % Math.max(state.teams.length, 1);
+    // Weitergezählt wird ab dem Team, das die Frage hatte – nicht ab dem
+    // turnIndex. Der kann sich zwischendurch verschoben haben, wenn der Host
+    // im Menü „dran" gesetzt hat; dann übersprang das Reihum ein Team.
+    const hatte = state.teams.findIndex((t) => t.id === q.teamId);
+    const von = hatte >= 0 ? hatte : state.turnIndex;
+    state.turnIndex = (von + 1) % Math.max(state.teams.length, 1);
   }
   state.current = null;
 

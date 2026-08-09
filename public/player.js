@@ -142,7 +142,10 @@ function render(prev) {
   $('#view-play').classList.toggle('active', joined);
 
   if (!joined) {
-    if (prev?.you?.teamId) {
+    // Nur meckern, wenn das Team wirklich weg ist. „Team wechseln" erzeugt
+    // denselben Zustand – dafür einen roten Fehlerkasten zu zeigen, wäre eine
+    // Beschwerde über etwas, das man selbst gerade angetippt hat.
+    if (prev?.you?.teamId && !state.teams.some((t) => t.id === prev.you.teamId)) {
       toast('Dein Team gibt es nicht mehr – bitte neu wählen.', 'error');
       selectedTeam = null;
     }

@@ -48,7 +48,7 @@
       <h2>3 · Fragen</h2>
       <div class="row" style="margin-bottom:0.6rem">
         <select id="set-select" class="grow"></select>
-        <button id="btn-reload-sets" class="btn btn-ghost btn-sm" type="button">↻</button>
+        <button id="btn-reload-sets" class="btn btn-ghost btn-sm" type="button" title="Fragensätze neu einlesen" aria-label="Fragensätze neu einlesen">↻</button>
       </div>
       <p id="set-info" class="muted small"></p>
       <div class="row">
@@ -165,33 +165,38 @@
   <div id="controls" class="controls">
     <div class="controls-inner">
       <div class="control-hint">
-        <span id="control-hint"></span>
+        <span id="control-hint" role="status" aria-live="polite"></span>
         <!-- Die Lösung steht auf der Leinwand, die alle sehen: also standardmäßig
              unkenntlich. Wer ohne Fernbedienung spielt, kann sie kurz aufdecken. -->
         <span id="solution-wrap" hidden>
           <button id="btn-peek" class="btn btn-sm btn-ghost peek-btn" type="button"
-                  title="Lösung kurz zeigen – Achtung, alle sehen den Bildschirm">👁</button>
+                  title="Lösung kurz zeigen – Achtung, alle sehen den Bildschirm"
+                  aria-label="Lösung kurz zeigen">👁</button>
           <span id="solution" class="solution blurred"></span>
         </span>
       </div>
       <div id="control-buttons" class="control-buttons"></div>
-      <button id="btn-menu" class="btn btn-ghost btn-sm" title="Punkte korrigieren / Spiel beenden">⋯</button>
+      <button id="btn-menu" class="btn btn-ghost btn-sm" title="Punkte korrigieren / Spiel beenden" aria-label="Menü: Punkte korrigieren, Zug setzen, Ton, Spiel beenden">⋯</button>
     </div>
   </div>
 
-  <!-- Host-Menü -->
-  <div id="menu" class="menu" hidden>
-    <div class="card menu-card">
-      <h2>Punkte &amp; Steuerung</h2>
-      <ul id="menu-teams" class="menu-teams"></ul>
-      <div class="row" style="margin-top:1rem">
-        <button id="btn-ton" class="btn" title="Töne auf diesem Gerät an oder aus">🔊 Ton an</button>
-        <button id="btn-close-menu" class="btn grow">Schließen</button>
-        <button id="btn-abort" class="btn btn-bad">Spiel beenden</button>
-      </div>
+</section>
+
+<!-- Host-Menü. Bewusst AUSSERHALB von #view-game: openMenu() legt die Ansicht
+     dahinter per `inert` still, damit der Tabulator nicht ins Board wandert –
+     und `inert` vererbt sich. Lag das Menü darin, war es selbst tot: kein
+     Fokus, kein Klick, kein einziger Knopf. -->
+<div id="menu" class="menu" hidden role="dialog" aria-modal="true" aria-labelledby="menu-titel">
+  <div class="card menu-card">
+    <h2 id="menu-titel">Punkte &amp; Steuerung</h2>
+    <ul id="menu-teams" class="menu-teams"></ul>
+    <div class="row" style="margin-top:1rem">
+      <button id="btn-ton" class="btn" title="Töne auf diesem Gerät an oder aus">🔊 Ton an</button>
+      <button id="btn-close-menu" class="btn grow">Schließen</button>
+      <button id="btn-abort" class="btn btn-bad">Spiel beenden</button>
     </div>
   </div>
-</section>
+</div>
 
 <div id="toasts"></div>
 <script type="module" src="/host.js"></script>

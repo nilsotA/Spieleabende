@@ -344,6 +344,34 @@ test('neues Spiel nimmt Karteileichen nicht mit', () => {
   assert.equal(fresh.teams[0].score, 0);
 });
 
+test('gelöschtes Team gibt Farbe und Namen wieder frei', () => {
+  // Sonst tragen zwei Pulte dieselbe Farbe – und an der Leiste ist Farbe das
+  // Einzige, woran man die Teams aus vier Metern auseinanderhält.
+  const state = G.createState();
+  for (const n of ['A', 'B', 'C']) G.addTeam(state, n);
+  const farbeB = state.teams[1].color;
+  G.removeTeam(state, state.teams[1].id);
+  G.addTeam(state, 'D');
+  const farben = state.teams.map((t) => t.color);
+  assert.equal(new Set(farben).size, farben.length, 'jede Farbe nur einmal');
+  assert.equal(state.teams[2].color, farbeB, 'die frei gewordene Farbe wird wiederverwendet');
+
+  // Und der Standardname zählt nicht die Teams, sondern sucht die freie Nummer.
+  G.addTeam(state, '');
+  assert.equal(new Set(state.teams.map((t) => t.name)).size, state.teams.length);
+});
+
+test('„dran" mitten in der Frage überspringt kein Team', () => {
+  // setTurn verschiebt nur den Zeiger; weitergezählt wird ab dem Team, das die
+  // Frage hatte. Sonst kommt nach dem Schließen ein Team gar nicht dran.
+  const state = setup(); // Team 1, 2, 3 – Team 1 ist am Zug
+  G.pickCell(state, 0, 0);
+  G.setTurn(state, state.teams[2].id); // der Host korrigiert mitten in der Frage
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(state.teams[state.turnIndex].name, 'Team 2', 'nach Team 1 kommt Team 2');
+});
+
 test('Host-Buzz überschreibt keinen echten Buzz', () => {
   // Der Host greift zur Fernbedienung, während schon jemand gedrückt hat –
   // sonst nimmt sein Griff dem Handy die Frage weg, das schneller war.

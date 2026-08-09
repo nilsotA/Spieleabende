@@ -176,9 +176,12 @@ export function unlockAudio() {
 }
 
 export function installAudioUnlock() {
+  // Wirklich nur einmal: Ohne { once } lief bei jedem Tippen ein neuer
+  // Oszillator samt GainNode an – über einen langen Abend Hunderte Knoten,
+  // die nichts tun außer Speicher zu belegen.
   const once = () => unlockAudio();
-  document.addEventListener('pointerdown', once, { passive: true });
-  document.addEventListener('keydown', once);
+  document.addEventListener('pointerdown', once, { passive: true, once: true });
+  document.addEventListener('keydown', once, { once: true });
   // Nach dem Sperren des Displays ist der Context wieder suspendiert.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') audio?.resume?.();

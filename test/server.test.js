@@ -129,6 +129,64 @@ test('Server übersteht Absturz und Neustart mit vollem Spielstand', async (t) =
   assert.match(bild.headers.get('content-type'), /image\/png/);
 });
 
+test('Spielstand aus einer älteren Fassung bricht den ersten Buzz nicht', async (t) => {
+  // Der Stand auf der Platte kann Felder nicht kennen, die es damals noch nicht
+  // gab (state.rekorde, team.serie). Früher starb daran der erste Buzz nach dem
+  // Neustart – mitten im Spiel, mit allen am Tisch.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 4500 + Math.floor(Math.random() * 200);
+
+  // Ein alter Stand: mitten in der Frage, Buzzer offen, ohne die neuen Felder.
+  const alt = {
+    gespeichert: Date.now(),
+    state: {
+      phase: 'question',
+      round: 1,
+      roundCount: 2,
+      setName: 'Alt',
+      turnIndex: 0,
+      teams: [
+        { id: 't1', name: 'Rot', color: '#f00', score: 300, members: [] },
+        { id: 't2', name: 'Blau', color: '#00f', score: 100, members: [{ name: 'Bea', clientId: 'g2', online: true }] },
+      ],
+      board: { multiplier: 1, categories: [{ name: 'K', cells: [{ value: 100, used: true }] }] },
+      current: {
+        catIdx: 0, rowIdx: 0, category: 'K', value: 100, text: 'Frage', answer: 'Antwort',
+        image: null, step: 'buzz', teamId: 't1', onTheHook: null, buzzedTeamId: null,
+        lockedOut: [], revealed: false, log: [{ teamId: 't1', result: 'pass', delta: 0 }],
+        buzzOpenedAt: Date.now(),
+      },
+      settings: { turnMode: 'rotate', wrongPenalty: 'none', buzzAfterCorrect: false },
+      message: null,
+      // state.rekorde fehlt hier bewusst.
+    },
+  };
+  const { writeFile } = await import('node:fs/promises');
+  await writeFile(stateFile, JSON.stringify(alt));
+
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  // Bea buzzert – genau hier lag der Absturz.
+  const res = await fetch(`${base}/api/events?clientId=g2&role=player`);
+  res.body.getReader().read();
+  await warte(200);
+  const gebuzzert = await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'g2', type: 'buzz' }),
+  }).then((r) => r.json());
+
+  assert.equal(gebuzzert.ok, true, gebuzzert.error || '');
+  const stand = await zustand(base);
+  assert.equal(stand.current.buzzedTeamId, 't2');
+  assert.equal((await fetch(`${base}/api/info`)).status, 200, 'der Server lebt noch');
+});
+
 test('kaputt kodierte Adresse beendet den Server nicht', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
   const port = 3700 + Math.floor(Math.random() * 200);

@@ -321,6 +321,10 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1.14;
+  /* Ein langes Einzelwort („Naturwissenschaften") bleibt sonst ein Block und
+     läuft bei acht Kategorien links und rechts aus dem roten Schild heraus. */
+  overflow-wrap: anywhere;
+  hyphens: auto;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
   min-height: 3.6rem;
   margin-top: 0.95rem;
@@ -1017,6 +1021,11 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Bei acht Pulten auf einem 1280er Laptop bleiben je Pult rund 140px, und die
+     Punktepille nimmt sich davon, was sie braucht – der Name wurde auf null
+     Breite gequetscht und war nur noch „…". Diese Untergrenze gibt ihm Boden;
+     die Leiste darf dafür lieber seitlich scrollen. */
+  min-width: 4.5rem;
 }
 .player .pmembers {
   grid-area: members;

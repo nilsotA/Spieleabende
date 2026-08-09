@@ -963,10 +963,20 @@ function openMenu() {
 function closeMenu() {
   $('#menu').hidden = true;
   $('#view-game').inert = false;
+  // Fokus dorthin zurück, wo er hergekommen ist – sonst steht er nach dem
+  // Schließen im Nichts und der nächste Tabulator fängt oben wieder an.
+  $('#btn-menu').focus();
 }
 
 function fillMenu() {
   const list = $('#menu-teams');
+  // Solange das Menü offen ist, läuft das bei jedem Broadcast – auch wenn nur
+  // ein Handy aus dem Standby kommt. Ohne Schlüssel würden dabei die Knöpfe
+  // unter dem Finger des Hosts ausgetauscht, während er Punkte korrigiert.
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.score}:${t.members.filter((m) => !m.online).length}`).join('|')
+    + `#${state.turnIndex}`;
+  if (list.dataset.key === key) return;
+  list.dataset.key = key;
   list.innerHTML = '';
   for (const team of state.teams) {
     const offline = team.members.filter((m) => !m.online);

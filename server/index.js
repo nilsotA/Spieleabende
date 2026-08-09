@@ -85,7 +85,11 @@ async function restore() {
   try {
     const roh = JSON.parse(await readFile(SAVE_FILE, 'utf8'));
     if (!roh?.state || Date.now() - (roh.gespeichert || 0) > SAVE_MAX_AGE_MS) return null;
-    const wieder = roh.state;
+    // Ein Stand von der Platte kann aus einer älteren Fassung stammen und neue
+    // Felder gar nicht kennen. Deshalb gegen einen frischen Zustand auffüllen,
+    // statt ihn ungeprüft zu übernehmen: Sonst stirbt der erste Buzz nach dem
+    // Neustart an einem `state.rekorde`, das es damals noch nicht gab.
+    const wieder = { ...G.createState(), ...roh.state };
     // Kein Gerät ist nach einem Neustart noch verbunden.
     for (const team of wieder.teams || []) {
       for (const member of team.members || []) member.online = false;
