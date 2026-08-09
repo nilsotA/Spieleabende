@@ -178,14 +178,16 @@ async function loadUrls() {
     const info = await (await fetch('/api/info')).json();
     const liste = $('#join-urls');
     liste.innerHTML = '';
-    // Bei mehreren Netzwerkkarten kann der Host die richtige antippen.
+    // Bei mehreren Netzwerkkarten kann der Host die richtige antippen – dann ist
+    // die Adresse ein echter Knopf. Bei nur einer gibt es nichts zu wählen: Sie
+    // war trotzdem per Tab erreichbar und tat dort nichts, und mit `role=button`
+    // ohne Tastaturbehandlung hätte auch die Auswahl auf Enter geschwiegen. Ein
+    // <button> bringt beides von Haus aus mit.
+    const waehlbar = info.urls.length > 1;
     for (const url of info.urls) {
-      liste.append(el('code', {
-        class: 'url',
-        tabindex: '0',
-        role: info.urls.length > 1 ? 'button' : null,
-        onclick: () => zeigeQr(url, liste),
-      }, url));
+      liste.append(waehlbar
+        ? el('button', { class: 'url', type: 'button', onclick: () => zeigeQr(url, liste) }, url)
+        : el('code', { class: 'url' }, url));
     }
     zeigeQr(info.urls[0], liste);
     $('#remote-url').textContent = `${info.urls[0]}/remote`;

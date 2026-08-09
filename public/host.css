@@ -1215,7 +1215,13 @@ body.host.flat .tile {
   overflow-wrap: anywhere;
   line-height: 1.25;
   cursor: pointer;
+  /* Als <button> bei mehreren Adressen: Schrift und Breite kommen sonst vom
+     Browser, nicht von hier. */
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+.join-urls button.url { cursor: pointer; }
+.join-urls code.url { cursor: default; }
 .join-urls .url.aktiv { border-style: solid; border-color: #4f9bec; color: #cfe6ff; }
 
 /* Bei Emoji-Rätseln sind die Symbole die eigentliche Frage – die dürfen nicht
