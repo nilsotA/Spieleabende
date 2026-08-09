@@ -94,12 +94,19 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
    320px, zusammen 1338px –, und die vierte Karte mit den Regeln stand
    gemessen bis 1386px, also außerhalb des Bildes. Mit fester Breite entscheidet
    wieder der Platz: vier Spalten auf der Leinwand, drei auf dem Laptop. */
+/* Vier Karten passen erst ab rund 1500px nebeneinander, ohne dass es klemmt.
+   Auf einem MacBook Air (1440px) blieben je Karte 331px, und darin brach die
+   Beitrittsadresse mitten in der Zahl um – „http://192.0.2.2:321 / 0“ tippt
+   niemand richtig ab –, während die Auswahlfelder ihre Beschriftung
+   abschnitten. Mit 340px Mindestbreite weicht der Laptop auf drei Spalten à
+   435px aus; die Obergrenze steigt auf 1600px, damit große Schirme ihre vier
+   Spalten behalten, statt sich künstlich zu verengen. */
 .lobby-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 1.2rem;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px;
   margin-inline: auto;
 }
 .settings { display: grid; gap: 0.7rem; }

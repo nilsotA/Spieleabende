@@ -190,14 +190,29 @@ async function loadUrls() {
     const waehlbar = info.urls.length > 1;
     for (const url of info.urls) {
       liste.append(waehlbar
-        ? el('button', { class: 'url', type: 'button', onclick: () => zeigeQr(url, liste) }, url)
-        : el('code', { class: 'url' }, url));
+        ? el('button', { class: 'url', type: 'button', onclick: () => zeigeQr(url, liste) }, ...adressTeile(url))
+        : el('code', { class: 'url' }, ...adressTeile(url)));
     }
     zeigeQr(info.urls[0], liste);
     $('#remote-url').textContent = `${info.urls[0]}/remote`;
   } catch {
     /* egal */
   }
+}
+
+/**
+ * Die Adresse mit einer Sollbruchstelle hinter dem „//“.
+ *
+ * Umbrechen darf sie notfalls überall – eine lange Hostnamen-Adresse muss
+ * irgendwo hin. Ohne bevorzugte Stelle traf es aber ausgerechnet die Zahlen:
+ * auf einem 1920er Schirm stand dort „http://192.0.2.2:3“ und darunter „210“.
+ * Wer das abtippt, landet nirgends. Mit dem <wbr> bricht sie zuerst hinter dem
+ * Schema um, und beide Hälften bleiben für sich lesbar.
+ */
+function adressTeile(url) {
+  const i = url.indexOf('//');
+  if (i < 0) return [url];
+  return [url.slice(0, i + 2), el('wbr'), url.slice(i + 2)];
 }
 
 /** QR-Code auf die Mitspielen-Seite – Abtippen einer IP ist der lästigste Teil. */
