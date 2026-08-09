@@ -1,0 +1,277 @@
+{
+  "name": "Neunziger & Nuller",
+  "description": "Fernsehen, Werbung, Walkman und Tamagotchi – der Satz, bei dem am Tisch am meisten dazwischengerufen wird.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Fernsehen damals",
+          "questions": [
+            {
+              "text": "Welche Samstagabendshow moderierte Thomas Gottschalk jahrzehntelang?",
+              "answer": "Wetten, dass..?"
+            },
+            {
+              "text": "Welche gelbe Zeichentrickfamilie aus Springfield startete 1989 als eigene Serie?",
+              "answer": "Die Simpsons"
+            },
+            {
+              "text": "Welche deutsche Vorabendserie läuft seit 1992 bei RTL und wird meist mit vier Buchstaben abgekürzt?",
+              "answer": "Gute Zeiten, schlechte Zeiten",
+              "note": "„GZSZ“ genügt völlig."
+            },
+            {
+              "text": "Welche Quizshow mit Günther Jauch startete 1999 in Deutschland?",
+              "answer": "Wer wird Millionär?"
+            }
+          ]
+        },
+        {
+          "name": "Musik der Neunziger",
+          "questions": [
+            {
+              "text": "Wer sang 1998 „Believe“ – mit dem berühmt verzerrten Stimmeffekt?",
+              "answer": "Cher",
+              "note": "Der Effekt machte Autotune populär."
+            },
+            {
+              "text": "Welche Band aus Hannover sang „Wind Of Change“?",
+              "answer": "Scorpions"
+            },
+            {
+              "text": "Welche britische Girlgroup landete 1996 mit „Wannabe“ ihren Durchbruch?",
+              "answer": "Spice Girls"
+            },
+            {
+              "text": "Welcher Song eröffnet das Nirvana-Album „Nevermind“ von 1991?",
+              "answer": "Smells Like Teen Spirit"
+            }
+          ]
+        },
+        {
+          "name": "Werbung von früher",
+          "questions": [
+            {
+              "text": "„Geiz ist geil!“ – Welche Elektronikkette warb damit?",
+              "answer": "Saturn"
+            },
+            {
+              "text": "„Ich bin doch nicht blöd!“ – Welcher Elektronikmarkt?",
+              "answer": "Media Markt"
+            },
+            {
+              "text": "„Da werden Sie geholfen!“ – Wer rief das in der Werbung für die Telefonauskunft?",
+              "answer": "Verona Feldbusch",
+              "note": "Heute Verona Pooth – beides gilt."
+            },
+            {
+              "text": "„Nicht immer, aber immer öfter.“ – Welches Getränk warb damit?",
+              "answer": "Clausthaler",
+              "note": "Das alkoholfreie Bier."
+            }
+          ]
+        },
+        {
+          "name": "Technik-Museum",
+          "questions": [
+            {
+              "text": "Auf welchem runden, silbernen Datenträger kaufte man in den Neunzigern Musik?",
+              "answer": "Auf CD"
+            },
+            {
+              "text": "Wie hieß das tragbare Kassettenabspielgerät von Sony?",
+              "answer": "Walkman"
+            },
+            {
+              "text": "Was musste man vor dem Zurückbringen in die Videothek zurückspulen?",
+              "answer": "Die Videokassette",
+              "note": "„VHS“ gilt auch."
+            },
+            {
+              "text": "Wie viel Speicher fasste eine normale 3,5-Zoll-Diskette?",
+              "answer": "1,44 Megabyte",
+              "note": "„1440 Kilobyte“ ist dasselbe und gilt genauso."
+            }
+          ]
+        },
+        {
+          "name": "Kino der Neunziger",
+          "questions": [
+            {
+              "text": "Welcher Film von 1997 spielt auf einem sinkenden Ozeandampfer?",
+              "answer": "Titanic"
+            },
+            {
+              "text": "In welchem Film von 1993 werden Dinosaurier in einem Park zum Leben erweckt?",
+              "answer": "Jurassic Park"
+            },
+            {
+              "text": "In welchem Film von 1999 hat man die Wahl zwischen der roten und der blauen Pille?",
+              "answer": "Matrix"
+            },
+            {
+              "text": "In welchem Film von 1994 hört die Hauptfigur als Kind „Lauf, Forrest, lauf!“?",
+              "answer": "Forrest Gump"
+            }
+          ]
+        },
+        {
+          "name": "Pausenhof",
+          "questions": [
+            {
+              "text": "Wie heißt das Hüpfspiel, bei dem man einen Stein in aufgemalte Felder wirft?",
+              "answer": "Himmel und Hölle",
+              "note": "„Hickelkasten“, „Hüpfekästchen“ und ähnliche Namen gelten auch – das Spiel heißt fast in jeder Gegend anders."
+            },
+            {
+              "text": "Welche Sammelkarten mit Taschenmonstern eroberten Ende der Neunziger die Schulhöfe?",
+              "answer": "Pokémon"
+            },
+            {
+              "text": "Wie hieß das eiförmige Gerät mit Bildschirm, dessen Küken man füttern musste?",
+              "answer": "Tamagotchi"
+            },
+            {
+              "text": "Welche runden Papp-Scheiben stapelte man und schlug sie mit einem schweren Slammer um?",
+              "answer": "Pogs",
+              "note": "„Flippos“ oder „Caps“ gelten auch."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Was ist die Frage?",
+          "questions": [
+            {
+              "text": "Diese graue Handheld-Konsole von Nintendo kam 1989 heraus und hatte ein grünliches Display.",
+              "answer": "Was ist der Game Boy?"
+            },
+            {
+              "text": "Diese Mauer fiel im November 1989.",
+              "answer": "Was ist die Berliner Mauer?"
+            },
+            {
+              "text": "Diese Währung löste 2002 als Bargeld die D-Mark ab.",
+              "answer": "Was ist der Euro?"
+            },
+            {
+              "text": "Diese Suchmaschine wurde 1998 gegründet und ist nach einer sehr großen Zahl benannt.",
+              "answer": "Was ist Google?",
+              "note": "Die Zahl heißt „Googol“: eine Eins mit hundert Nullen."
+            }
+          ]
+        },
+        {
+          "name": "Serien-Intros",
+          "questions": [
+            {
+              "text": "In welcher Serie treffen sich sechs Freunde ständig im Café „Central Perk“?",
+              "answer": "Friends"
+            },
+            {
+              "text": "Welche Krankenhausserie startete 1994 und machte George Clooney weltbekannt?",
+              "answer": "Emergency Room",
+              "note": "„ER“ gilt auch."
+            },
+            {
+              "text": "In welcher Serie lebt die Familie Bundy in Chicago?",
+              "answer": "Eine schrecklich nette Familie"
+            },
+            {
+              "text": "Welche Mysteryserie folgte den FBI-Agenten Mulder und Scully?",
+              "answer": "Akte X"
+            }
+          ]
+        },
+        {
+          "name": "Boygroups & Popstars",
+          "questions": [
+            {
+              "text": "Welche Boygroup sang „I Want It That Way“?",
+              "answer": "Backstreet Boys"
+            },
+            {
+              "text": "Welche Sängerin startete 1998 mit „…Baby One More Time“?",
+              "answer": "Britney Spears"
+            },
+            {
+              "text": "In welcher Band wurde Robbie Williams berühmt?",
+              "answer": "Take That"
+            },
+            {
+              "text": "Welches deutsche Projekt hatte 1992 mit „Rhythm Is a Dancer“ einen Welthit?",
+              "answer": "Snap!"
+            }
+          ]
+        },
+        {
+          "name": "Handy-Zeitalter",
+          "questions": [
+            {
+              "text": "Wie nennt man die kurze Textnachricht, die man vor WhatsApp verschickte?",
+              "answer": "SMS"
+            },
+            {
+              "text": "Welches Spiel war auf den alten Nokia-Handys vorinstalliert und wurde immer länger?",
+              "answer": "Snake"
+            },
+            {
+              "text": "Wofür steht die Abkürzung SMS?",
+              "answer": "Short Message Service"
+            },
+            {
+              "text": "Welches Tier sang Mitte der Nuller den deutschen Klingelton-Hit „Ich bin Schnappi“?",
+              "answer": "Ein Krokodil"
+            }
+          ]
+        },
+        {
+          "name": "Zeichentrick",
+          "questions": [
+            {
+              "text": "Welche Katze jagt die Maus Jerry?",
+              "answer": "Tom"
+            },
+            {
+              "text": "Wie heißt die kleine Biene, die mit Willi und Flip unterwegs ist?",
+              "answer": "Biene Maja"
+            },
+            {
+              "text": "Welcher Zeichentrickheld wohnt in einer Ananas auf dem Meeresgrund?",
+              "answer": "SpongeBob Schwammkopf"
+            },
+            {
+              "text": "Wie heißen die drei Neffen von Donald Duck?",
+              "answer": "Tick, Trick und Track"
+            }
+          ]
+        },
+        {
+          "name": "Jahreszahlen",
+          "questions": [
+            {
+              "text": "In welchem Jahr wurde Deutschland wiedervereinigt?",
+              "answer": "1990"
+            },
+            {
+              "text": "In welchem Jahr kam der Euro in Deutschland als Bargeld?",
+              "answer": "2002"
+            },
+            {
+              "text": "In welchem Jahr fand die Fußball-WM in Deutschland statt, das „Sommermärchen“?",
+              "answer": "2006"
+            },
+            {
+              "text": "In welchem Jahr wurde Deutschland zuletzt Fußball-Europameister?",
+              "answer": "1996",
+              "note": "In England, 2:1 im Finale gegen Tschechien."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

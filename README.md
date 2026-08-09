@@ -202,9 +202,12 @@ Fünf fertige Sätze mit je 48 Fragen – zusammen 240, keine doppelt:
 | **Kopfnuss** | Anagramme, Geheimschrift, Schätzfragen, Logik, Wahr oder falsch |
 | **Deutschland-Duell** | KFZ-Kennzeichen, Bundesländer, Dialekt, Marken, Erfindungen |
 | **Länder & Flaggen** | Flaggen zum Ansehen, Hauptstädte, Wahrzeichen, Währungen, Nachbarländer |
+| **Neunziger & Nuller** | Fernsehen damals, Werbung, Technik-Museum, Pausenhof, Boygroups |
+| **Kurios & Wahr** | Tierische Superkräfte, Wahr oder falsch, aus Versehen erfunden, Schätzfragen |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
-knacken, ohne irgendetwas auswendig zu wissen.
+knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit
+dem meisten Dazwischengerufe, „Kurios & Wahr“ der, bei dem gutes Raten reicht.
 
 Dazu gibt es in der Auswahl **🎲 Zufallsmix aus allen Sätzen** – zwölf Kategorien,
 bei jedem Start neu gewürfelt. So ist kein Abend wie der andere.
