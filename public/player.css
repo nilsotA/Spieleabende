@@ -121,12 +121,23 @@ body {
 }
 .p-status.you { color: #f8d548; }
 
-/* Ohne min-height/overflow staucht der Flex-Container den Kasten unter seinen
-   Inhalt, und die Buzz-Zone legt sich über die untere Bildhälfte. */
+/* Der Kasten gibt nicht nach.
+
+   Er durfte lange schrumpfen (`flex: 0 1 auto` mit eigenem Scrollbalken) –
+   damals lag der Buzzer noch mit im scrollenden Bereich und hätte sich sonst
+   über die Frage gelegt. Inzwischen steht die Buzz-Zone außerhalb, und die
+   Stauchung schützte vor nichts mehr: Bei acht Teams brauchte die Punkteleiste
+   fünf Zeilen, der Fragenkasten wurde auf 50 Pixel zusammengedrückt und schnitt
+   den Text mitten in der Zeile ab. Der eigene Scrollbalken darin war so schmal,
+   dass er wie ein Darstellungsfehler aussah statt wie „hier geht es weiter".
+
+   Jetzt behält der Kasten seine Höhe und `.pscroll` scrollt – das ist der
+   Bereich, der die Maske am unteren Rand trägt und den man schon vom
+   Punktestand her kennt. Der Buzzer bleibt davon unberührt stehen. */
 .p-question {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow-y: auto;
+  overflow: visible;
   border-radius: 14px;
   background: radial-gradient(130% 90% at 50% -18%, #235c9e 0%, #123566 44%, #0a1e3a 100%);
   box-shadow: inset 0 0 0 1px rgba(150, 200, 255, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.3);
