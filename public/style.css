@@ -201,3 +201,29 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   animation: screenflash 0.5s ease-out forwards;
 }
 @keyframes screenflash { from { opacity: 0.9; } to { opacity: 0; } }
+/* Der Blitz liegt hier und nicht in player.css, damit die Regel auch für die
+   Fernbedienung gilt – dort blitzt es bei jedem einzelnen Buzz. Er verschwindet
+   nicht ganz: Er ist auf einem stummgeschalteten iPhone das einzige Signal.
+   Er blendet nur ohne Bewegung aus und deutlich sanfter. */
+@media (prefers-reduced-motion: reduce) {
+  .screenflash { animation-duration: 0.9s; }
+  @keyframes screenflash { from { opacity: 0.45; } to { opacity: 0; } }
+}
+
+/* Dateiauswahl: `hidden` nimmt das Feld aus dem Tabulator-Lauf, und ein <label>
+   steht dort nie drin – damit war „Datei laden …" mit der Tastatur überhaupt
+   nicht erreichbar. Jetzt liegt das Feld unsichtbar, aber fokussierbar über
+   seinem Knopf; der Fokusring wird ans Label weitergereicht. */
+.datei-knopf { position: relative; }
+.datei-knopf input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.datei-knopf:focus-within {
+  border-color: #4f9bec;
+  box-shadow: 0 0 0 3px rgba(79, 155, 236, 0.2);
+}

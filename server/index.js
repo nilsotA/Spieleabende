@@ -192,6 +192,12 @@ async function handleAction(clientId, body) {
       G.adjustScore(state, body.teamId, body.delta);
       break;
     case 'setTurn':
+      // Während einer Frage ist der Zug bereits vergeben: Wer die Frage hat und
+      // wer antworten muss, steht fest. Den Zeiger trotzdem zu verschieben,
+      // wirkt für den Host wie ein Fehlgriff – lieber klar absagen.
+      if (state.phase === 'question') {
+        throw new G.GameError('Der Zug lässt sich erst wieder setzen, wenn die Frage durch ist.');
+      }
       G.setTurn(state, body.teamId);
       break;
     case 'settings':

@@ -10,7 +10,7 @@
 </head>
 <body class="host">
 
-<div id="offline" class="offline" hidden>Verbindung verloren – versuche neu zu verbinden …</div>
+<div id="offline" class="offline" role="status" aria-live="polite" hidden>Verbindung verloren – versuche neu zu verbinden …</div>
 
 <!-- ================================================== LOBBY ============ -->
 <section id="view-lobby" class="view">
@@ -52,8 +52,8 @@
       </div>
       <p id="set-info" class="muted small"></p>
       <div class="row">
-        <label class="btn btn-ghost btn-sm" style="margin:0;cursor:pointer">
-          Datei laden … <input id="set-file" type="file" accept="application/json" hidden>
+        <label class="btn btn-ghost btn-sm datei-knopf" style="margin:0;cursor:pointer">
+          Datei laden … <input id="set-file" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei laden">
         </label>
         <a class="btn btn-ghost btn-sm" href="/editor" target="_blank" rel="noopener">Fragen-Editor öffnen</a>
       </div>

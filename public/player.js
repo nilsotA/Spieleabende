@@ -1,6 +1,6 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash,
-  installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText,
+  installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
   istStumm, setzeStumm } from '/common.js';
 
 let state = null;
@@ -339,7 +339,7 @@ function renderBuzzer(prev) {
   };
 
   if (!isOnline()) {
-    status.textContent = 'Keine Verbindung – warte kurz …';
+    setzeText(status, 'Keine Verbindung – warte kurz …');
     lock('OFFLINE');
     return;
   }
@@ -349,12 +349,12 @@ function renderBuzzer(prev) {
     // sich, summt und leuchtet. Nebenbei entsperrt das erste Antippen den Ton
     // auf iPhones, wo das ohne echte Geste nicht geht.
     buzzer.classList.add('probe');
-    status.textContent = 'Warten auf den Start – Buzzer ausprobieren?';
+    setzeText(status, 'Warten auf den Start – Buzzer ausprobieren?');
     label.textContent = 'PROBE';
     return;
   }
-  if (state.phase === 'roundEnd') { status.textContent = 'Runde vorbei – gleich geht’s weiter.'; lock('PAUSE'); return; }
-  if (state.phase === 'gameOver') { status.textContent = 'Spiel beendet!'; lock('ENDE'); return; }
+  if (state.phase === 'roundEnd') { setzeText(status, 'Runde vorbei – gleich geht’s weiter.'); lock('PAUSE'); return; }
+  if (state.phase === 'gameOver') { setzeText(status, 'Spiel beendet!'); lock('ENDE'); return; }
 
   if (state.phase === 'board') {
     // Die stillste Stelle des Abends: Nach „Weiter" steht das Board wieder da,
@@ -366,9 +366,9 @@ function renderBuzzer(prev) {
       sound('armed');
       flash();
     }
-    status.textContent = you.isMyTurn
+    setzeText(status, you.isMyTurn
       ? 'Du bist dran – wähle ein Feld!'
-      : `Am Zug: ${state.teams[state.turnIndex]?.name ?? '?'} …`;
+      : `Am Zug: ${state.teams[state.turnIndex]?.name ?? '?'} …`);
     status.classList.toggle('you', you.isMyTurn);
     lock(you.isMyTurn ? 'DU WÄHLST' : 'GESPERRT');
     return;
@@ -378,7 +378,7 @@ function renderBuzzer(prev) {
 
   if (you.canBuzz) {
     buzzer.classList.add('armed');
-    status.textContent = `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`;
+    setzeText(status, `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`);
     status.classList.add('you');
     // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst
     // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.
@@ -407,9 +407,9 @@ function renderBuzzer(prev) {
     // hier nicht doppelt. Beim Host-Buzz trägt buzzedBy den Teamnamen; dann
     // bleibt es beim Team, sonst stünde dort „Team Rakete war schneller" zweimal.
     const wer = q.buzzedBy && q.buzzedBy !== team?.name ? q.buzzedBy : team?.name;
-    status.textContent = mine
+    setzeText(status, mine
       ? `Du warst zuerst${knapp} – antworte!`
-      : `${wer} war schneller${knapp}.`;
+      : `${wer} war schneller${knapp}.`);
     status.classList.toggle('you', mine);
     // Nur beim Übergang tönen, nicht bei jedem Update derselben Lage.
     if (prev && !(prev.current?.step === 'buzz' && prev.current?.buzzedTeamId)) {
@@ -421,18 +421,18 @@ function renderBuzzer(prev) {
 
   if (q.step === 'primary') {
     const active = state.teams.find((t) => t.id === q.teamId);
-    status.textContent = you.onTheHook
+    setzeText(status, you.onTheHook
       ? 'Du bist dran – sag deine Antwort!'
-      : `Am Zug: ${active?.name ?? '?'}. Buzzer noch gesperrt.`;
+      : `Am Zug: ${active?.name ?? '?'}. Buzzer noch gesperrt.`);
     status.classList.toggle('you', !!you.onTheHook);
     lock(you.onTheHook ? 'DU BIST DRAN' : 'GESPERRT');
     return;
   }
 
   if (q.step === 'buzz') {
-    status.textContent = q.lockedOut.includes(you.teamId)
+    setzeText(status, q.lockedOut.includes(you.teamId)
       ? 'Ihr hattet euren Versuch.'
-      : 'Deine Frage – die anderen sind dran.';
+      : 'Deine Frage – die anderen sind dran.');
     lock('GESPERRT');
     return;
   }
@@ -440,10 +440,10 @@ function renderBuzzer(prev) {
   // Die Lösung steht schon groß im Kasten – hier stattdessen das, was man sonst
   // nirgends sieht: was die Frage dem eigenen Team gebracht hat.
   const eigen = q.log.reduce((summe, e) => (e.teamId === you.teamId ? summe + e.delta : summe), 0);
-  status.textContent = !you.teamId ? 'Frage beendet.'
+  setzeText(status, !you.teamId ? 'Frage beendet.'
     : eigen > 0 ? `+${eigen} Punkte für euch!`
     : eigen < 0 ? `${eigen} Punkte für euch.`
-    : 'Diesmal nichts für euch.';
+    : 'Diesmal nichts für euch.');
   status.classList.toggle('you', eigen > 0);
   lock('DURCH');
 }

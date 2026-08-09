@@ -57,7 +57,11 @@
   @media (max-width: 760px) { .qrow { grid-template-columns: 1fr; } .qrow .val { padding-top: 0; } }
   /* host.css mit seinem Reduced-Motion-Block wird hier nicht geladen. */
   @media (prefers-reduced-motion: reduce) {
-    .fortschritt-balken { transition-duration: .01ms; }
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+    }
   }
 </style>
 </head>
@@ -75,11 +79,12 @@
       <input id="set-name" class="grow" placeholder="Name des Fragensatzes" maxlength="80">
       <select id="load-select" class="grow"></select>
       <button id="btn-load" class="btn btn-ghost btn-sm" type="button">Laden</button>
-      <label class="btn btn-ghost btn-sm" style="margin:0;cursor:pointer">
-        Datei öffnen <input id="file-input" type="file" accept="application/json" hidden>
+      <label class="btn btn-ghost btn-sm datei-knopf" style="margin:0;cursor:pointer">
+        Datei öffnen <input id="file-input" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei öffnen">
       </label>
       <button id="btn-download" class="btn btn-ghost btn-sm" type="button">Herunterladen</button>
       <button id="btn-save" class="btn btn-primary btn-sm" type="button">Auf dem Server speichern</button>
+      <span id="ziel-datei" class="muted small" style="flex-basis:100%"></span>
     </div>
     <button id="fortschritt" class="fortschritt" type="button" title="Zur nächsten Lücke springen">
       <span id="fortschritt-balken" class="fortschritt-balken"></span>

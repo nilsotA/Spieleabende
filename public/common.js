@@ -44,6 +44,21 @@ export function clientId() {
   return id;
 }
 
+/**
+ * Text nur schreiben, wenn er sich geändert hat.
+ *
+ * Klingt nach Mikrooptimierung, ist aber der Unterschied zwischen einer
+ * nützlichen und einer unbenutzbaren Ansage: Ein Bereich mit aria-live meldet
+ * jede Änderung seines Inhalts – und `textContent = x` tauscht den Textknoten
+ * auch dann aus, wenn derselbe Satz drinsteht. Ohne diesen Vergleich würde ein
+ * Screenreader „Buzzer frei" bei jedem Broadcast erneut vorlesen, also auch,
+ * wenn nur irgendein Handy aus dem Standby kommt.
+ */
+export function setzeText(node, text) {
+  if (!node || node.textContent === text) return;
+  node.textContent = text;
+}
+
 export function toast(text, level = 'info') {
   const box = $('#toasts');
   if (!box) return;
@@ -162,6 +177,10 @@ let audio = null;
  */
 export function unlockAudio() {
   try {
+    // Läuft der Context schon, ist nichts zu tun. Ohne diesen Wächter entstand
+    // bei jedem einzelnen Tippen ein neuer Oszillator samt GainNode – über
+    // einen Abend Hunderte Knoten, die nur Speicher belegen.
+    if (audio && audio.state === 'running') return;
     if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === 'suspended') audio.resume();
     const osc = audio.createOscillator();
@@ -176,12 +195,14 @@ export function unlockAudio() {
 }
 
 export function installAudioUnlock() {
-  // Wirklich nur einmal: Ohne { once } lief bei jedem Tippen ein neuer
-  // Oszillator samt GainNode an – über einen langen Abend Hunderte Knoten,
-  // die nichts tun außer Speicher zu belegen.
+  // Die Horcher bleiben absichtlich hängen: Ein Context kann jederzeit wieder
+  // einschlafen – Displaysperre, Anruf, Tabwechsel –, und dann braucht es für
+  // das Aufwecken erneut eine echte Nutzergeste. Mit { once: true } wäre der
+  // Ton nach dem ersten Einschlafen für immer weg. Dass dabei nicht bei jedem
+  // Tippen Audio-Knoten entstehen, regelt der Wächter in unlockAudio().
   const once = () => unlockAudio();
-  document.addEventListener('pointerdown', once, { passive: true, once: true });
-  document.addEventListener('keydown', once, { once: true });
+  document.addEventListener('pointerdown', once, { passive: true });
+  document.addEventListener('keydown', once);
   // Nach dem Sperren des Displays ist der Context wieder suspendiert.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') audio?.resume?.();

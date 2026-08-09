@@ -1,5 +1,5 @@
 import {
-  $, el, connect, hostAction, toast, sound, installAudioUnlock, setFrageText,
+  $, el, connect, hostAction, toast, sound, installAudioUnlock, setFrageText, setzeText,
   istStumm, setzeStumm } from '/common.js';
 import { qrSvg } from '/qr.js';
 
@@ -270,7 +270,12 @@ function renderLobby() {
               ? team.members.map((m) => (m.online ? m.name : `${m.name} (offline)`)).join(', ')
               : 'kein Handy verbunden'),
         ),
-        el('button', { class: 'btn btn-sm btn-ghost', onclick: () => act('removeTeam', { teamId: team.id }) }, '✕'),
+        el('button', {
+          class: 'btn btn-sm btn-ghost',
+          'aria-label': `Team „${team.name}" entfernen`,
+          title: 'Team entfernen',
+          onclick: () => act('removeTeam', { teamId: team.id }),
+        }, '✕'),
       ),
     );
   }
@@ -877,7 +882,7 @@ function renderControls() {
   }
 
   if (state.phase === 'board') {
-    hint.textContent = `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – Feld anklicken oder auf dem Handy antippen.`;
+    setzeText(hint, `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – Feld anklicken oder auf dem Handy antippen.`);
     add(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];
       act('setTurn', { teamId: next.id });
@@ -886,35 +891,35 @@ function renderControls() {
   }
 
   if (state.phase === 'roundEnd' || state.phase === 'gameOver') {
-    hint.textContent = state.phase === 'gameOver' ? 'Spiel beendet.' : 'Bereit für die nächste Runde?';
+    setzeText(hint, state.phase === 'gameOver' ? 'Spiel beendet.' : 'Bereit für die nächste Runde?');
     return;
   }
 
-  if (!q) { hint.textContent = ''; return; }
+  if (!q) { setzeText(hint, ''); return; }
 
   if (q.step === 'primary') {
-    hint.textContent = `${teamName(q.teamId)} antwortet.`;
+    setzeText(hint, `${teamName(q.teamId)} antwortet.`);
     add(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
       button('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), '3'),
     );
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-    hint.textContent = 'Buzzer ist frei.';
+    setzeText(hint, 'Buzzer ist frei.');
     for (const team of state.teams) {
       if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
       add(button(`Buzz: ${team.name}`, 'btn-ghost btn-sm', () => act('buzzFor', { teamId: team.id })));
     }
     add(button('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion'), '4'));
   } else if (q.buzzedTeamId && q.step === 'buzz') {
-    hint.textContent = `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`;
+    setzeText(hint, `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
     add(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
       button('Buzz zurücknehmen', 'btn-ghost btn-sm', () => act('resetBuzz')),
     );
   } else {
-    hint.textContent = 'Frage beendet.';
+    setzeText(hint, 'Frage beendet.');
     add(button('Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
   }
 }

@@ -2,7 +2,7 @@
 // erlaubt das Bewerten – damit die Lösung nie auf der Leinwand landet.
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
-  installAudioUnlock, keepScreenAwake, setFrageText } from '/common.js';
+  installAudioUnlock, keepScreenAwake, setFrageText, setzeText } from '/common.js';
 
 let state = null;
 
@@ -89,52 +89,52 @@ function render() {
 
   switch (state.phase) {
     case 'lobby':
-      phase.textContent = 'Lobby – Teams anlegen und starten geht am großen Screen.';
+      setzeText(phase, 'Lobby – Teams anlegen und starten geht am großen Screen.');
       break;
     case 'board':
-      phase.textContent = `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – wählt ein Feld.`;
+      setzeText(phase, `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – wählt ein Feld.`);
       setz(big('Zug überspringen', 'btn-ghost', () => {
         const next = state.teams[(state.turnIndex + 1) % state.teams.length];
         act('setTurn', { teamId: next.id });
       }));
       break;
     case 'roundEnd':
-      phase.textContent = `Runde ${state.round} beendet.`;
+      setzeText(phase, `Runde ${state.round} beendet.`);
       setz(big('Nächste Runde', 'btn-primary', () => act('nextRound')));
       break;
     case 'gameOver':
-      phase.textContent = 'Spiel beendet.';
+      setzeText(phase, 'Spiel beendet.');
       setz(big('Neues Spiel', 'btn-ghost', () => act('backToLobby')));
       break;
     case 'question':
       if (q.step === 'primary') {
-        phase.textContent = `${teamName(q.teamId)} antwortet.`;
+        setzeText(phase, `${teamName(q.teamId)} antwortet.`);
         setz(
           big('Richtig ✓', 'btn-good', () => act('judge', { correct: true })),
           big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false })),
           big('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass')),
         );
       } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-        phase.textContent = `Buzzer ist frei · ${q.halfValue} Punkte`;
+        setzeText(phase, `Buzzer ist frei · ${q.halfValue} Punkte`);
         for (const team of state.teams) {
           if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
           setz(big(`Buzz: ${team.name}`, 'btn-ghost', () => act('buzzFor', { teamId: team.id })));
         }
         setz(big('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion')));
       } else if (q.step === 'buzz' && q.buzzedTeamId) {
-        phase.textContent = `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`;
+        setzeText(phase, `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
         setz(
           big('Richtig ✓', 'btn-good', () => act('judge', { correct: true })),
           big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false })),
           big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz')),
         );
       } else {
-        phase.textContent = 'Frage beendet.';
+        setzeText(phase, 'Frage beendet.');
         setz(big('Weiter', 'btn-primary', () => act('close')));
       }
       break;
     default:
-      phase.textContent = '';
+      setzeText(phase, '');
   }
 
   const list = $('#r-teams');
@@ -147,9 +147,25 @@ function render() {
         el('li', { class: i === state.turnIndex ? 'turn' : '' },
           el('span', { class: 'dot', style: { background: team.color } }),
           el('span', { class: 'grow' }, team.name),
-          el('button', { class: 'btn btn-sm btn-ghost', onclick: () => act('adjustScore', { teamId: team.id, delta: -100 }) }, '−'),
+          // Beschriftet wie im Host-Menü: „−" allein sagt nicht, um wie viel.
+          el('button', {
+            class: 'btn btn-sm btn-ghost',
+            'aria-label': `${team.name}: 100 Punkte abziehen`,
+            onclick: () => act('adjustScore', { teamId: team.id, delta: -100 }),
+          }, '−100'),
           el('span', { class: 'sc' }, String(team.score)),
-          el('button', { class: 'btn btn-sm btn-ghost', onclick: () => act('adjustScore', { teamId: team.id, delta: 100 }) }, '+'),
+          el('button', {
+            class: 'btn btn-sm btn-ghost',
+            'aria-label': `${team.name}: 100 Punkte geben`,
+            onclick: () => act('adjustScore', { teamId: team.id, delta: 100 }),
+          }, '+100'),
+          // Den Zug direkt setzen, statt sich mit „Zug überspringen" durch die
+          // Reihe zu tippen – am Tisch ist meistens klar, wer als Nächstes soll.
+          el('button', {
+            class: 'btn btn-sm btn-ghost',
+            'aria-label': `${team.name} ist als Nächstes dran`,
+            onclick: () => act('setTurn', { teamId: team.id }),
+          }, 'dran'),
         ),
       );
     });

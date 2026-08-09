@@ -159,12 +159,15 @@ function render() {
             ),
             el('div', { class: 'img-btn' },
               q.image ? el('img', { src: q.image, alt: '' }) : null,
-              el('label', { class: 'btn btn-ghost btn-sm', style: { margin: 0, cursor: 'pointer' } },
+              // datei-knopf: Das Feld liegt unsichtbar über dem Knopf, statt
+              // per `hidden` aus dem Tabulator-Lauf zu fallen – sonst kommt man
+              // mit der Tastatur nie an die Bildauswahl.
+              el('label', { class: 'btn btn-ghost btn-sm datei-knopf', style: { margin: 0, cursor: 'pointer' } },
                 q.image ? 'Bild tauschen' : 'Bild …',
                 el('input', {
                   type: 'file',
                   accept: 'image/*',
-                  hidden: true,
+                  'aria-label': `Bild für die ${BASE_VALUES[qi] * mult}-Frage wählen`,
                   onchange: (ev) => pickImage(ev, q),
                 }),
               ),
@@ -195,6 +198,9 @@ function render() {
               });
               persist();
               render();
+              // render() baut alles neu, der Fokus fällt dabei auf <body>.
+              // Wer eine Kategorie anlegt, will sie als Nächstes benennen.
+              fokussiereKategorie(ri, round.categories.length - 1);
             },
           }, '+ Kategorie')
           : null,
@@ -203,6 +209,16 @@ function render() {
     box.append(wrap);
   });
   updateFortschritt();
+  zeigeZiel();
+}
+
+/** Wohin „Auf dem Server speichern" schreibt – vorher wusste man das erst danach. */
+function zeigeZiel() {
+  const ziel = $('#ziel-datei');
+  if (!ziel) return;
+  ziel.textContent = zielDatei
+    ? `Speichern schreibt nach data/${zielDatei}`
+    : `Speichern legt data/${slug(set.name)}.json an`;
 }
 
 /** Bilder werden als Data-URL eingebettet – der Fragensatz bleibt eine einzige Datei. */
@@ -268,13 +284,23 @@ function shrinkImage(file, maxSide) {
 
 /* ---------------------------------------------------------------- Aktionen */
 
-$('#set-name').addEventListener('input', (ev) => { set.name = ev.target.value; persistSoon(); });
+$('#set-name').addEventListener('input', (ev) => { set.name = ev.target.value; persistSoon(); zeigeZiel(); });
 
 $('#btn-add-round').addEventListener('click', () => {
   set.rounds.push(blankRound());
   persist();
   render();
+  fokussiereKategorie(set.rounds.length - 1, 0);
 });
+
+/** Nach dem Neubau den Namen der frisch angelegten Kategorie anspringen. */
+function fokussiereKategorie(rundenIndex, katIndex) {
+  const runde = document.querySelectorAll('.round')[rundenIndex];
+  const feld = runde?.querySelectorAll('.cat-head input')[katIndex];
+  if (!feld) return;
+  feld.focus();
+  feld.select(); // der Platzhaltername soll beim Tippen sofort weg sein
+}
 
 $('#btn-download').addEventListener('click', () => {
   const luecken = fehlendeFelder();
@@ -305,6 +331,7 @@ async function save(overwrite) {
     const data = await res.json();
     if (data.ok) {
       zielDatei = data.file;
+      zeigeZiel();
       toast(`Gespeichert als ${data.file}`);
       loadSetList();
     } else if (data.exists) {
@@ -338,7 +365,12 @@ $('#fortschritt').addEventListener('click', () => {
   if (!offen.length) return;
   const feld = document.querySelectorAll('.qrow')[offen[0].index];
   if (!feld) return;
-  feld.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  feld.scrollIntoView({
+    // Wer weniger Bewegung eingestellt hat, will auch nicht durch 48 Fragen
+    // gescrollt werden.
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    block: 'center',
+  });
   feld.classList.add('luecke');
   setTimeout(() => feld.classList.remove('luecke'), 1600);
   feld.querySelector('textarea')?.focus();
