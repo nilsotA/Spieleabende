@@ -154,6 +154,14 @@ async function handleAction(clientId, body) {
   const type = String(body.type || '');
 
   if (HOST_ACTIONS.has(type) && !isHost) {
+    // Ein schlafendes Handy verliert seinen Ereignisstrom. Tippt der Host gleich
+    // nach dem Aufwecken, ist die Verbindung noch nicht wieder da – das ist kein
+    // Rechteproblem, und „Nur der Host darf das“ wäre ein Schreck ohne Grund.
+    // Die Rechte selbst hängen weiterhin allein an der offenen Verbindung; hier
+    // steht nur, welche der beiden Lagen der Absender vor sich hat.
+    if (body.role === 'host' && connectionsOf(clientId).length === 0) {
+      throw new G.GameError('Verbindung wird gerade neu aufgebaut – gleich noch einmal tippen.');
+    }
     throw new G.GameError('Nur der Host darf das.');
   }
 

@@ -131,6 +131,27 @@ export async function action(type, payload = {}, role = 'player') {
   }
 }
 
+/**
+ * Aktionen des Hosts – Wertungen sind entprellt.
+ *
+ * Ein zweiter Druck kurz nach dem ersten (zitternder Finger, gehaltene Taste,
+ * ungeduldiges Nachtippen) trifft nicht mehr dieselbe Situation: Nach „Falsch“
+ * ist der Buzzer frei, und wenn in der Zwischenzeit jemand gedrückt hat, zieht
+ * der zweite Klick ausgerechnet diesem Team die halben Punkte ab. Deshalb
+ * sperrt jede Wertung kurz alle anderen – 400 ms, wie beim Spieler-Buzzer.
+ */
+const WERTUNGEN = new Set(['judge', 'pass', 'endQuestion', 'close']);
+let letzteWertung = -Infinity;
+
+export function hostAction(type, payload = {}) {
+  if (WERTUNGEN.has(type)) {
+    const jetzt = performance.now();
+    if (jetzt - letzteWertung < 400) return Promise.resolve({ ok: false, entprellt: true });
+    letzteWertung = jetzt;
+  }
+  return action(type, payload, 'host');
+}
+
 /* ---------------------------------------------------------------- Sounds */
 
 let audio = null;

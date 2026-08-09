@@ -1,6 +1,6 @@
 // Host-Fernbedienung: zeigt Frage UND Lösung auf dem Handy des Hosts und
 // erlaubt das Bewerten – damit die Lösung nie auf der Leinwand landet.
-import { $, el, connect, action, sound, installAudioUnlock, keepScreenAwake, setFrageText } from '/common.js';
+import { $, el, connect, hostAction, sound, installAudioUnlock, keepScreenAwake, setFrageText } from '/common.js';
 
 let state = null;
 
@@ -18,7 +18,7 @@ connect({
   },
 });
 
-const act = (type, payload) => action(type, payload, 'host');
+const act = hostAction;
 
 function render() {
   if (!state) return;
@@ -90,7 +90,7 @@ function render() {
           bar.append(big(`Buzz: ${team.name}`, 'btn-ghost', () => act('buzzFor', { teamId: team.id })));
         }
         bar.append(big('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion')));
-      } else if (q.buzzedTeamId) {
+      } else if (q.step === 'buzz' && q.buzzedTeamId) {
         phase.textContent = `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`;
         bar.append(
           big('Richtig ✓', 'btn-good', () => act('judge', { correct: true })),

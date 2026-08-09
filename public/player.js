@@ -7,6 +7,7 @@ let selectedTeam = localStorage.getItem('quizduell.teamId') || null;
 let pointerDown = false;
 
 installAudioUnlock();
+keepScreenAwake(); // auch nach einem Reload, nicht nur beim Beitreten
 $('#my-name').value = localStorage.getItem('quizduell.name') || '';
 
 connect({
@@ -280,7 +281,7 @@ function renderBuzzer(prev) {
     return;
   }
 
-  if (q.buzzedTeamId) {
+  if (q.step === 'buzz' && q.buzzedTeamId) {
     const team = state.teams.find((t) => t.id === q.buzzedTeamId);
     const mine = q.buzzedTeamId === you.teamId;
     buzzer.classList.add(mine ? 'won' : 'locked');

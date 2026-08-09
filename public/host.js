@@ -1,4 +1,4 @@
-import { $, el, connect, action, toast, sound, installAudioUnlock, setFrageText } from '/common.js';
+import { $, el, connect, hostAction, toast, sound, installAudioUnlock, setFrageText } from '/common.js';
 import { qrSvg } from '/qr.js';
 
 let state = null;
@@ -7,7 +7,7 @@ let dateiSatz = null;     // zuletzt geladene Datei, bleibt in der Auswahl verf�
 let lastScores = new Map();
 let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
 
-const act = (type, payload) => action(type, payload, 'host');
+const act = hostAction;
 
 installAudioUnlock();
 
@@ -662,6 +662,9 @@ function fillMenu() {
 /* ------------------------------------------------------------ Tastatur */
 
 document.addEventListener('keydown', (ev) => {
+  // Eine gehaltene Taste feuert im Sekundentakt nach. Bei „2“ hieße das: erst
+  // ist das Zugteam falsch, dann das Team, das gerade gebuzzert hat.
+  if (ev.repeat) return;
   if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
   if (!state || state.phase === 'lobby') return;
 

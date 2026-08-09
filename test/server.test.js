@@ -153,15 +153,30 @@ test('Host-Rechte hängen an der Verbindung, nicht an der Behauptung im Request'
     await rm(dir, { recursive: true, force: true });
   });
 
-  const frech = await fetch(`${base}/api/action`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clientId: 'irgendein-handy', role: 'host', type: 'addTeam', name: 'Eindringling' }),
-  }).then((r) => r.json());
+  const anmaßen = (id) =>
+    fetch(`${base}/api/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: id, role: 'host', type: 'addTeam', name: 'Eindringling' }),
+    }).then((r) => r.json());
 
+  // Ein Handy, das im Spiel sitzt, kann sich die Rechte nicht per Behauptung nehmen.
+  const spieler = await fetch(`${base}/api/events?clientId=irgendein-handy&role=player`);
+  spieler.body.getReader().read();
+  await warte(200);
+
+  const frech = await anmaßen('irgendein-handy');
   assert.equal(frech.ok, false);
   assert.match(frech.error, /Host/);
-  assert.deepEqual((await zustand(base)).teams, []);
+
+  // Ohne offene Verbindung sieht es genauso aus wie ein Host, dessen Handy gerade
+  // aufgewacht ist. Abgelehnt wird es trotzdem – nur eben mit der Erklärung, die
+  // in diesem Moment stimmt.
+  const schlafend = await anmaßen('nie-verbunden');
+  assert.equal(schlafend.ok, false);
+  assert.match(schlafend.error, /neu aufgebaut/);
+
+  assert.deepEqual((await zustand(base)).teams, [], 'kein Weg führte zu Team-Rechten');
 });
 
 test('zu großer Upload wird als lesbare JSON-Meldung abgelehnt', async (t) => {

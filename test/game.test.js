@@ -344,6 +344,42 @@ test('neues Spiel nimmt Karteileichen nicht mit', () => {
   assert.equal(fresh.teams[0].score, 0);
 });
 
+test('beendete Frage lässt keinen Buzz stehen', () => {
+  // Sonst halten Fernbedienung und Handys die Frage für offen und zeigen weiter
+  // „Bea hat gebuzzert" statt „Weiter" – der Abend bleibt an der Stelle hängen.
+  const state = setup();
+  G.joinTeam(state, 'g2', state.teams[1].id, 'Bea');
+  G.pickCell(state, 0, 3);
+  G.passQuestion(state);
+  G.buzz(state, 'g2');
+  G.judge(state, true);
+
+  assert.equal(state.current.step, 'result');
+  assert.equal(state.current.buzzedTeamId, null);
+  assert.equal(state.current.buzzedBy, null);
+  assert.equal(state.current.onTheHook, null);
+  assert.equal(G.viewFor(state, { isHost: false, clientId: 'g2' }).current.buzzedTeamId, null);
+});
+
+test('endQuestion verschluckt keinen Buzz, der im selben Moment ankommt', () => {
+  // Der Host hört den Buzzer und drückt trotzdem „keiner weiß es" – wer zuerst
+  // dran war, entscheidet der Server, nicht die Reaktionszeit des Hosts.
+  const state = setup();
+  G.joinTeam(state, 'g2', state.teams[1].id, 'Bea');
+  G.pickCell(state, 0, 3);
+  G.passQuestion(state);
+  G.buzz(state, 'g2');
+
+  assert.throws(() => G.endQuestion(state), G.GameError);
+  assert.equal(state.current.revealed, false, 'die Lösung bleibt verdeckt');
+  assert.equal(state.current.buzzedTeamId, state.teams[1].id, 'Bea ist weiter am Zug');
+
+  // Zurücknehmen ist der Weg, wenn der Host den Buzz nicht gelten lassen will.
+  G.resetBuzz(state);
+  G.endQuestion(state);
+  assert.equal(state.current.step, 'result');
+});
+
 test('Auflösen ist auch bei offenem Buzzer gesperrt', () => {
   const state = setup();
   G.pickCell(state, 0, 0);

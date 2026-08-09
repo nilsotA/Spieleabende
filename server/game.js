@@ -243,9 +243,8 @@ export function openBuzz(state) {
     (t) => t.id !== q.teamId && !q.lockedOut.includes(t.id),
   );
   if (eligible.length === 0) {
-    q.step = 'result';
     q.revealed = true;
-    q.onTheHook = null;
+    beende(q);
     return state;
   }
   q.step = 'buzz';
@@ -285,12 +284,29 @@ export function buzzFor(state, teamId) {
   return state;
 }
 
+/**
+ * Frage in den Ergebniszustand versetzen. Der Buzz wird dabei gelöscht: Sonst
+ * halten Fernbedienung und Handys die Frage für noch offen und zeigen weiter
+ * „X hat gebuzzert" statt „Weiter".
+ */
+function beende(q) {
+  q.step = 'result';
+  q.onTheHook = null;
+  q.buzzedTeamId = null;
+  q.buzzedBy = null;
+  return q;
+}
+
 /** Niemand weiß es mehr: auflösen und Frage abschließen. */
 export function endQuestion(state) {
   const q = requireQuestion(state);
+  // Ein Buzz, der im selben Moment eintrifft, darf nicht verschluckt werden –
+  // der Host hört ihn ja und sähe sonst die Lösung ohne Wertung.
+  if (q.buzzedTeamId) {
+    throw new GameError('Es hat gerade jemand gebuzzert – erst werten oder den Buzz zurücknehmen.');
+  }
   q.revealed = true;
-  q.step = 'result';
-  q.onTheHook = null;
+  beende(q);
   return state;
 }
 
@@ -322,8 +338,7 @@ export function judge(state, correct) {
       return openBuzz(state);
     }
     q.revealed = true;
-    q.step = 'result';
-    q.onTheHook = null;
+    beende(q);
     return state;
   }
 
