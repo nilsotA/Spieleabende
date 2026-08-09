@@ -1,0 +1,274 @@
+{
+  "name": "Küche & Keller",
+  "description": "Essen, Trinken und was in der Küche wirklich passiert – der Satz für den Abend, an dem sowieso alle am Buffet stehen.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Woher kommt's?",
+          "questions": [
+            {
+              "text": "Aus welchem Land stammt das Gulasch?",
+              "answer": "Aus Ungarn"
+            },
+            {
+              "text": "Welches Land hat den Nachtisch Tiramisu hervorgebracht?",
+              "answer": "Italien"
+            },
+            {
+              "text": "In welchem Land gehört die Sauce Chimichurri zu jedem Grillabend?",
+              "answer": "In Argentinien"
+            },
+            {
+              "text": "In welcher Stadt wurde die Sachertorte erfunden?",
+              "answer": "In Wien",
+              "note": "1832 von Franz Sacher, damals 16 und Lehrling am Hof des Fürsten Metternich."
+            }
+          ]
+        },
+        {
+          "name": "Süße Sünden",
+          "questions": [
+            {
+              "text": "Welche Nuss steckt im klassischen Nuss-Nougat-Aufstrich?",
+              "answer": "Die Haselnuss"
+            },
+            {
+              "text": "Wie heißt das französische Gebäck aus zwei Baiserhälften mit Creme dazwischen?",
+              "answer": "Macaron"
+            },
+            {
+              "text": "Welcher Teil vom Ei wird steif geschlagen, damit Baiser gelingt?",
+              "answer": "Das Eiweiß"
+            },
+            {
+              "text": "Welche Frucht gehört in einen klassischen französischen Clafoutis?",
+              "answer": "Kirschen",
+              "note": "Traditionell mit Kern – der soll beim Backen Aroma abgeben."
+            }
+          ]
+        },
+        {
+          "name": "Getränke",
+          "questions": [
+            {
+              "text": "Woraus wird eine Apfelschorle gemischt?",
+              "answer": "Aus Apfelsaft und Mineralwasser"
+            },
+            {
+              "text": "Aus welchem Land kommt der Matcha?",
+              "answer": "Aus Japan"
+            },
+            {
+              "text": "Welches Getränk entsteht, wenn man gesüßten Tee mit einer Pilzkultur vergären lässt?",
+              "answer": "Kombucha"
+            },
+            {
+              "text": "Welche zwei Kaffeearten machen zusammen fast den gesamten Welthandel aus?",
+              "answer": "Arabica und Robusta"
+            }
+          ]
+        },
+        {
+          "name": "Zutaten-Detektiv",
+          "questions": [
+            {
+              "text": "Woraus besteht Guacamole hauptsächlich?",
+              "answer": "Aus Avocado"
+            },
+            {
+              "text": "Welche Hülsenfrucht ist die Grundlage von Hummus?",
+              "answer": "Die Kichererbse"
+            },
+            {
+              "text": "Welches Kraut gibt dem Pesto alla genovese seine grüne Farbe?",
+              "answer": "Basilikum"
+            },
+            {
+              "text": "Welcher Fisch steckt klassischerweise im Caesar-Dressing?",
+              "answer": "Sardellen",
+              "note": "Auch Anchovis genannt – deshalb schmeckt das Dressing salzig, ohne dass Fisch draufsteht."
+            }
+          ]
+        },
+        {
+          "name": "Käse & Wurst",
+          "questions": [
+            {
+              "text": "Welcher Käse gehört klassisch auf eine Pizza Margherita?",
+              "answer": "Mozzarella"
+            },
+            {
+              "text": "Aus welcher Milch wird echter Feta gemacht?",
+              "answer": "Aus Schafsmilch",
+              "note": "Bis zu 30 Prozent Ziegenmilch sind erlaubt, Kuhmilch nicht."
+            },
+            {
+              "text": "Welcher Schweizer Käse ist für seine großen Löcher bekannt?",
+              "answer": "Emmentaler"
+            },
+            {
+              "text": "Welcher blau geäderte Schafskäse reift in französischen Kalkhöhlen?",
+              "answer": "Roquefort"
+            }
+          ]
+        },
+        {
+          "name": "Was ist die Frage?",
+          "questions": [
+            {
+              "text": "Dieses Küchenwerkzeug hat einen Stiel, einen runden Kopf voller Löcher und trennt Nudeln vom Wasser.",
+              "answer": "Was ist ein Sieb?"
+            },
+            {
+              "text": "Diese Zwiebelart bringt beim Schneiden fast jeden zum Weinen.",
+              "answer": "Was ist die Küchenzwiebel?"
+            },
+            {
+              "text": "Dieses Verfahren macht Milch länger haltbar und ist nach einem französischen Chemiker benannt.",
+              "answer": "Was ist das Pasteurisieren?"
+            },
+            {
+              "text": "Diese Reaktion sorgt dafür, dass Braten, Brotkruste und Röstzwiebeln braun werden und gut riechen.",
+              "answer": "Was ist die Maillard-Reaktion?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Kochbegriffe",
+          "questions": [
+            {
+              "text": "Was bedeutet „al dente“?",
+              "answer": "Bissfest"
+            },
+            {
+              "text": "Was passiert beim Blanchieren?",
+              "answer": "Kurz in kochendes Wasser tauchen und sofort kalt abschrecken"
+            },
+            {
+              "text": "Was tut man, wenn man einen Bratensatz ablöscht?",
+              "answer": "Man gießt Flüssigkeit in die heiße Pfanne und löst damit den Ansatz"
+            },
+            {
+              "text": "Wie sieht Gemüse aus, das julienne geschnitten ist?",
+              "answer": "In feine, gleich lange Streifen"
+            }
+          ]
+        },
+        {
+          "name": "Gewürze & Kräuter",
+          "questions": [
+            {
+              "text": "Welches Gewürz gibt Currypulver seine gelbe Farbe?",
+              "answer": "Kurkuma"
+            },
+            {
+              "text": "Von welchem Teil des Zimtbaums stammt Zimt?",
+              "answer": "Von der Rinde"
+            },
+            {
+              "text": "Welches Kraut gehört zwingend in eine Sauce béarnaise?",
+              "answer": "Estragon"
+            },
+            {
+              "text": "Zu welcher Pflanzenfamilie gehört die Vanille?",
+              "answer": "Zu den Orchideen",
+              "note": "Deshalb ist sie so teuer: Außerhalb Mittelamerikas muss jede Blüte von Hand bestäubt werden."
+            }
+          ]
+        },
+        {
+          "name": "Bier & Wein",
+          "questions": [
+            {
+              "text": "Aus welcher Frucht wird Cidre gemacht?",
+              "answer": "Aus Äpfeln"
+            },
+            {
+              "text": "Wie heißt der italienische Schaumwein aus der Glera-Traube?",
+              "answer": "Prosecco"
+            },
+            {
+              "text": "Welches der beiden ist obergärig: Kölsch oder Pils?",
+              "answer": "Kölsch"
+            },
+            {
+              "text": "Was sagt die Angabe „Spätlese“ über einen deutschen Wein aus?",
+              "answer": "Die Trauben wurden später gelesen und hatten mehr Zucker",
+              "note": "Trocken ausgebaut werden kann sie trotzdem – „Spätlese“ heißt nicht automatisch süß."
+            }
+          ]
+        },
+        {
+          "name": "Frühstück weltweit",
+          "questions": [
+            {
+              "text": "Welche Bohnen gehören neben Ei und Speck in ein englisches Full Breakfast?",
+              "answer": "Baked Beans"
+            },
+            {
+              "text": "Wie heißt das halbmondförmige Blätterteiggebäck, das in Frankreich zum Frühstück gehört?",
+              "answer": "Croissant"
+            },
+            {
+              "text": "Was ist Congee, das in China morgens auf den Tisch kommt?",
+              "answer": "Ein Reisbrei"
+            },
+            {
+              "text": "Welches fermentierte Sojagericht steht in Japan oft zum Frühstück bereit?",
+              "answer": "Nattō",
+              "note": "Berüchtigt für Geruch und Fäden – in Japan trotzdem Alltag."
+            }
+          ]
+        },
+        {
+          "name": "Obst & Gemüse",
+          "questions": [
+            {
+              "text": "Welches Gemüse treibt beim Schneiden fast jedem die Tränen in die Augen?",
+              "answer": "Die Zwiebel"
+            },
+            {
+              "text": "Welche Frucht erklärte ein US-Gericht 1893 kurzerhand zum Gemüse?",
+              "answer": "Die Tomate",
+              "note": "Es ging um Zoll: Auf Gemüse wurde welcher fällig, auf Obst nicht."
+            },
+            {
+              "text": "Warum soll man grüne Stellen an Kartoffeln großzügig wegschneiden?",
+              "answer": "Dort steckt Solanin, und das ist giftig"
+            },
+            {
+              "text": "Aus der Kreuzung welcher zwei Zitrusfrüchte entstand die Clementine?",
+              "answer": "Aus Mandarine und Bitterorange"
+            }
+          ]
+        },
+        {
+          "name": "Küchengeräte",
+          "questions": [
+            {
+              "text": "Welches Gerät gart Essen unter Druck deutlich schneller als ein normaler Topf?",
+              "answer": "Der Schnellkochtopf"
+            },
+            {
+              "text": "Wofür benutzt man in der Küche eine Mandoline?",
+              "answer": "Zum Schneiden gleichmäßig dünner Scheiben"
+            },
+            {
+              "text": "Was macht ein Sous-vide-Garer mit dem Essen?",
+              "answer": "Er gart es vakuumverpackt im Wasserbad bei genauer Temperatur"
+            },
+            {
+              "text": "Wozu dient der Aufsatz, der bei einer Küchenmaschine „Flexirührer“ heißt?",
+              "answer": "Zum Rühren dickerer Massen, dabei streift er die Schüsselwand ab"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

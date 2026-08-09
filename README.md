@@ -87,8 +87,11 @@ hat. Erst wer über zwei Stunden weg ist, wird beim nächsten Spiel aussortiert.
 ### Auch ohne Handys spielbar
 
 Wenn ihr um einen Bildschirm herumsitzt, braucht ihr keine Handys: Der Host bewertet
-alles über die Leiste unten und kann per „Buzz: <Team>“ auch stellvertretend für das
-Team buzzern, das als Erstes „hier!“ ruft.
+alles über die Leiste unten. Sobald der Buzzer frei ist, steht dort für jedes Team
+**ohne verbundenes Handy** ein kleiner Knopf mit Teamfarbe und Kurznamen – damit
+buzzert der Host für den, der als Erstes „hier!“ ruft. Teams, die ein Handy in der
+Hand haben, drücken selbst und bekommen deshalb keinen Knopf; fällt so ein Handy
+mitten in der Frage aus, taucht sein Knopf sofort wieder auf.
 
 ---
 
@@ -212,7 +215,7 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 
 ### Mitgeliefert
 
-Sieben fertige Sätze mit je 48 Fragen – zusammen 336, keine doppelt:
+Acht fertige Sätze mit je 48 Fragen – zusammen 384, keine doppelt:
 
 | Satz | Kategorien |
 |---|---|
@@ -223,10 +226,13 @@ Sieben fertige Sätze mit je 48 Fragen – zusammen 336, keine doppelt:
 | **Länder & Flaggen** | Flaggen zum Ansehen, Hauptstädte, Wahrzeichen, Währungen, Nachbarländer |
 | **Neunziger & Nuller** | Fernsehen damals, Werbung, Technik-Museum, Pausenhof, Boygroups |
 | **Kurios & Wahr** | Tierische Superkräfte, Wahr oder falsch, aus Versehen erfunden, Schätzfragen |
+| **Küche & Keller** | Herkunft von Gerichten, Zutaten, Kochbegriffe, Gewürze, Bier & Wein, Küchengeräte |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit
 dem meisten Dazwischengerufe, „Kurios & Wahr“ der, bei dem gutes Raten reicht.
+„Küche & Keller“ passt zu dem Abend, an dem sowieso alle am Buffet stehen –
+mitraten kann jeder, der schon mal gekocht hat.
 
 Dazu gibt es in der Auswahl **🎲 Zufallsmix aus allen Sätzen** – zwölf Kategorien,
 bei jedem Start neu gewürfelt. So ist kein Abend wie der andere.
