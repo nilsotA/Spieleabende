@@ -119,8 +119,12 @@ test('Server übersteht Absturz und Neustart mit vollem Spielstand', async (t) =
   );
 
   // Eingebettete Bilder liegen sonst nur im Speicher und wären nach dem
-  // Neustart kaputt.
-  const bild = await fetch(`${base}/api/bild/b1`);
+  // Neustart kaputt. Die Kennung leitet sich aus dem Bildinhalt ab, damit
+  // dieselbe URL nie ein anderes Bild meint.
+  const { createHash } = await import('node:crypto');
+  const rohbild = Buffer.from(EIN_PIXEL.split(',')[1], 'base64');
+  const id = `b${createHash('sha1').update(rohbild).digest('hex').slice(0, 16)}`;
+  const bild = await fetch(`${base}/api/bild/${id}`);
   assert.equal(bild.status, 200);
   assert.match(bild.headers.get('content-type'), /image\/png/);
 });

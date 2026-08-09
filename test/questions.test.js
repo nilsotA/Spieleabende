@@ -203,3 +203,54 @@ test('keine Frage verrät die Lösung einer anderen derselben Kategorie', async 
   }
   assert.deepEqual(verraeter, []);
 });
+
+test('Bildkennungen hängen am Inhalt, nicht an der Reihenfolge', async () => {
+  const { externalizeImages } = await import('../server/questions.js');
+  const pixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  const bau = (reihenfolge) => ({
+    name: 'x',
+    rounds: [{
+      categories: [{
+        name: 'K',
+        questions: reihenfolge.map((mitBild) => ({
+          text: 't', answer: 'a', image: mitBild ? pixel : null, note: null,
+        })),
+      }],
+    }],
+  });
+
+  const a = externalizeImages(bau([true, false, false, false]));
+  const b = externalizeImages(bau([false, false, true, false]));
+
+  const urlA = a.set.rounds[0].categories[0].questions[0].image;
+  const urlB = b.set.rounds[0].categories[0].questions[2].image;
+  assert.equal(urlA, urlB, 'dasselbe Bild muss dieselbe Adresse bekommen');
+  assert.match(urlA, /^\/api\/bild\/b[0-9a-f]{16}$/);
+
+  // Sonst zeigte der Browser im nächsten Spiel wegen des Caches das alte Bild.
+  assert.ok(a.images.has(urlA.split('/').pop()));
+});
+
+test('der Zufallsmix zieht Runde 2 aus den Runde-2-Kategorien', async () => {
+  const { mixSet } = await import('../server/questions.js');
+  const { readdir, readFile: lies } = await import('node:fs/promises');
+
+  // Welche Kategorienamen stehen in welcher Ursprungsrunde?
+  const ursprung = [new Set(), new Set()];
+  for (const datei of (await readdir(DATEN)).filter((f) => f.endsWith('.json') && !f.startsWith('.'))) {
+    const set = normalizeSet(JSON.parse(await lies(new URL(datei, DATEN), 'utf8')));
+    set.rounds.forEach((round, ri) => {
+      for (const cat of round.categories) ursprung[Math.min(ri, 1)].add(cat.name);
+    });
+  }
+
+  for (let versuch = 0; versuch < 5; versuch++) {
+    const mix = normalizeSet(await mixSet());
+    for (const cat of mix.rounds[1].categories) {
+      assert.ok(
+        ursprung[1].has(cat.name),
+        `„${cat.name}“ stammt aus Runde 1, steht im Mix aber in Runde 2 – dort zählt doppelt`,
+      );
+    }
+  }
+});

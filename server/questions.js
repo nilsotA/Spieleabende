@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -125,15 +126,18 @@ export async function loadSet(file) {
  */
 export function externalizeImages(set) {
   const images = new Map(); // id -> { type, buffer }
-  let n = 0;
   for (const round of set.rounds) {
     for (const cat of round.categories) {
       for (const q of cat.questions) {
         if (!q.image || !q.image.startsWith('data:')) continue;
         const match = /^data:([^;,]+);base64,(.*)$/s.exec(q.image);
         if (!match) continue;
-        const id = `b${++n}`;
-        images.set(id, { type: match[1], buffer: Buffer.from(match[2], 'base64') });
+        const buffer = Buffer.from(match[2], 'base64');
+        // Kennung aus dem Bildinhalt, nicht aus der Reihenfolge: sonst zeigt
+        // „/api/bild/b1“ im nächsten Spiel etwas anderes, und der Browser
+        // liefert wegen des Caches eine Stunde lang das Bild von vorhin.
+        const id = `b${createHash('sha1').update(buffer).digest('hex').slice(0, 16)}`;
+        images.set(id, { type: match[1], buffer });
         q.image = `/api/bild/${id}`;
       }
     }
@@ -157,25 +161,49 @@ export async function setExists(file) {
  */
 export async function mixSet() {
   const dateien = (await listSets()).filter((s) => !s.error);
-  const nachName = new Map(); // Name -> Liste gleichnamiger Kategorien
+  // Nach Ursprungsrunde getrennt sammeln: Runde 2 zählt doppelt, dort gehören
+  // die schwereren Kategorien hin. Ein gemeinsamer Topf würde „Flaggen für
+  // Fortgeschrittene“ für halbe und die leichten „Flaggen“ für doppelte Punkte
+  // spielen lassen.
+  const toepfe = [new Map(), new Map()];
   for (const eintrag of dateien) {
     const set = await loadSet(eintrag.file);
-    for (const round of set.rounds) {
+    set.rounds.forEach((round, ri) => {
+      const topf = toepfe[Math.min(ri, toepfe.length - 1)];
       for (const cat of round.categories) {
-        if (!nachName.has(cat.name)) nachName.set(cat.name, []);
-        nachName.get(cat.name).push(cat);
+        if (!topf.has(cat.name)) topf.set(cat.name, []);
+        topf.get(cat.name).push(cat);
       }
-    }
+    });
   }
 
-  const auswahl = [...nachName.values()].map((gleiche) => gleiche[Math.floor(Math.random() * gleiche.length)]);
-  if (auswahl.length < 12) {
-    throw new Error(`Für einen Zufallsmix braucht es mindestens 12 verschiedene Kategorien, gefunden: ${auswahl.length}.`);
+  const zufaellig = (liste) => liste[Math.floor(Math.random() * liste.length)];
+  const mischen = (liste) => {
+    for (let i = liste.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [liste[i], liste[j]] = [liste[j], liste[i]];
+    }
+    return liste;
+  };
+
+  const gezogen = [];
+  const vergeben = new Set();
+  for (const topf of toepfe) {
+    const kandidaten = mischen([...topf.entries()]
+      .filter(([name]) => !vergeben.has(name))
+      .map(([name, gleiche]) => ({ name, cat: zufaellig(gleiche) })));
+    const sechs = kandidaten.slice(0, 6);
+    for (const k of sechs) vergeben.add(k.name);
+    gezogen.push(sechs.map((k) => k.cat));
   }
-  for (let i = auswahl.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [auswahl[i], auswahl[j]] = [auswahl[j], auswahl[i]];
+
+  if (gezogen.some((runde) => runde.length < 6)) {
+    throw new Error(
+      'Für einen Zufallsmix braucht es je Runde mindestens 6 verschiedene Kategorien. '
+      + `Gefunden: ${gezogen.map((r) => r.length).join(' und ')}.`,
+    );
   }
+  const auswahl = gezogen.flat();
 
   return {
     name: 'Zufallsmix',
