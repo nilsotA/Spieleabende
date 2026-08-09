@@ -3,8 +3,9 @@ import { $, el, toast } from '/common.js';
 const BASE_VALUES = [100, 200, 300, 500];
 const STORAGE_KEY = 'quizduell.editor';
 
-let set = load() || blankSet();
-let zielDatei = null; // zuletzt geladene Datei – dorthin wird auch gespeichert
+const gemerkt = load();
+let set = gemerkt?.set || blankSet();
+let zielDatei = gemerkt?.zielDatei || null; // zuletzt geladene Datei – dorthin wird gespeichert
 
 function blankRound() {
   return {
@@ -22,7 +23,10 @@ function blankSet() {
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const daten = JSON.parse(raw);
+    // Ältere Stände enthalten nur den Satz selbst, ohne Zieldatei.
+    return Array.isArray(daten?.rounds) ? { set: daten, zielDatei: null } : daten;
   } catch {
     return null;
   }
@@ -38,19 +42,40 @@ function persistSoon() {
 window.addEventListener('blur', () => persist());
 document.addEventListener('visibilitychange', () => persist());
 
-let persistWarned = false;
 function persist() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(set));
-    persistWarned = false;
+    // Auch merken, wohin gespeichert wird: Nach einem Neuladen war das sonst
+    // vergessen, und „Speichern" legte plötzlich eine zweite Datei unter dem
+    // Namen des Satzes an, statt die geladene zu aktualisieren.
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ set, zielDatei }));
+    zeigeSpeicherwarnung(false);
   } catch {
-    // Passiert bei vielen eingebetteten Bildern. Stillschweigen wäre fatal:
-    // der Nutzer glaubt, sein Stand sei gesichert.
-    if (!persistWarned) {
-      persistWarned = true;
-      toast('Zwischenspeicher voll – bitte herunterladen oder auf dem Server speichern!', 'error');
-    }
+    // Passiert bei vielen eingebetteten Bildern. Ein Toast wäre hier fatal: Er
+    // verschwindet nach drei Sekunden, und danach sieht der Editor wieder
+    // kerngesund aus, während in Wahrheit nichts mehr gesichert wird. Deshalb
+    // ein Balken, der stehen bleibt, bis es wieder klappt.
+    zeigeSpeicherwarnung(true);
   }
+}
+
+/** Bleibt sichtbar, solange nichts mehr in den Zwischenspeicher passt. */
+function zeigeSpeicherwarnung(an) {
+  const box = $('#speicher-warnung');
+  if (box) box.hidden = !an;
+}
+
+/**
+ * Rückfrage vor dem Löschen – aber nur, wenn wirklich Arbeit dranhängt.
+ * Eine leere Kategorie wegzuklicken soll niemanden aufhalten; 24 getippte
+ * Fragen zu verlieren, weil man einmal danebengetippt hat, dagegen schon.
+ * Rückgängig gibt es nicht: Der Zwischenspeicher wird sofort überschrieben.
+ */
+function wirklichLoeschen(was, anzahlFragen) {
+  if (anzahlFragen === 0) return true;
+  return confirm(
+    `${was} entfernen?\n\n${anzahlFragen} ausgefüllte ${anzahlFragen === 1 ? 'Frage geht' : 'Fragen gehen'} `
+    + 'dabei verloren. Das lässt sich nicht rückgängig machen.',
+  );
 }
 
 /* ------------------------------------------------------------------ Render */
@@ -70,7 +95,13 @@ function render() {
         set.rounds.length > 1
           ? el('button', {
             class: 'btn btn-ghost btn-sm',
-            onclick: () => { set.rounds.splice(ri, 1); persist(); render(); },
+            onclick: () => {
+              const wieviele = round.categories.reduce((n, c) => n + c.questions.filter((q) => q.text.trim()).length, 0);
+              if (!wirklichLoeschen(`Runde ${ri + 1}`, wieviele)) return;
+              set.rounds.splice(ri, 1);
+              persist();
+              render();
+            },
           }, 'Runde entfernen')
           : null,
       ),
@@ -89,7 +120,15 @@ function render() {
           round.categories.length > 2
             ? el('button', {
               class: 'btn btn-sm btn-ghost',
-              onclick: () => { round.categories.splice(ci, 1); persist(); render(); },
+              title: 'Diese Kategorie entfernen',
+              'aria-label': `Kategorie „${cat.name}" entfernen`,
+              onclick: () => {
+                const wieviele = cat.questions.filter((q) => q.text.trim()).length;
+                if (!wirklichLoeschen(`die Kategorie „${cat.name}"`, wieviele)) return;
+                round.categories.splice(ci, 1);
+                persist();
+                render();
+              },
             }, '✕')
             : null,
         ),
@@ -167,15 +206,33 @@ function render() {
 }
 
 /** Bilder werden als Data-URL eingebettet – der Fragensatz bleibt eine einzige Datei. */
+const MAX_BILD = 12 * 1024 * 1024;
+
 async function pickImage(ev, q) {
   const file = ev.target.files?.[0];
+  const knopf = ev.target.closest('label');
   if (!file) return;
+
+  // Ein 12-MP-Handyfoto zu dekodieren und zu verkleinern dauert auf dem
+  // Hauptthread spürbar. Ohne Rückmeldung wirkt der Editor in dieser Zeit
+  // eingefroren, und viele klicken dann ein zweites Mal.
+  const beschriftung = knopf?.firstChild;
+  const alterText = beschriftung?.textContent;
+  if (beschriftung) beschriftung.textContent = 'lädt …';
+  ev.target.value = ''; // dieselbe Datei soll erneut wählbar bleiben
+
   try {
+    if (file.size > MAX_BILD) {
+      throw new Error(`Das Bild ist ${(file.size / 1024 / 1024).toFixed(1)} MB groß – bitte kleiner als 12 MB.`);
+    }
     q.image = await shrinkImage(file, 900);
     persist();
     render();
   } catch (err) {
-    toast('Bild konnte nicht geladen werden.', 'error');
+    // SVG ohne feste Größe hat naturalWidth 0 – das Ergebnis wäre eine leere
+    // weiße Fläche, also lieber ehrlich absagen.
+    toast(err.message || 'Bild konnte nicht geladen werden.', 'error');
+    if (beschriftung) beschriftung.textContent = alterText;
   }
 }
 
@@ -187,6 +244,11 @@ function shrinkImage(file, maxSide) {
       const img = new Image();
       img.onerror = reject;
       img.onload = () => {
+        // SVG ohne width/height im Markup liefert 0 – dann käme eine leere
+        // weiße Fläche heraus, und niemand wüsste, warum.
+        if (!img.width || !img.height) {
+          return reject(new Error('Dieses Bild hat keine feste Größe (bei SVG häufig). Bitte als PNG oder JPG einfügen.'));
+        }
         const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
@@ -264,7 +326,7 @@ function updateFortschritt() {
   const offen = fehlendeFelder();
   const fertig = gesamt - offen.length;
   const knopf = $('#fortschritt');
-  $('#fortschritt-balken').style.width = gesamt ? `${(fertig / gesamt) * 100}%` : '0';
+  $('#fortschritt-balken').style.transform = `scaleX(${gesamt ? fertig / gesamt : 0})`;
   $('#fortschritt-text').textContent = offen.length
     ? `${fertig} von ${gesamt} Fragen fertig · nächste Lücke: ${offen[0].label}`
     : `Alle ${gesamt} Fragen ausgefüllt`;
