@@ -112,6 +112,52 @@ test('keine Frage kommt in zwei Sätzen doppelt vor', async () => {
   assert.deepEqual(dopplungen, [], 'gleiche Frage in mehreren Sätzen');
 });
 
+test('keine Frage ist eine umformulierte Fassung einer anderen', async () => {
+  // Der Test darüber vergleicht Wortlaute. Der eigentliche Ärger sind aber
+  // gleiche Fragen in anderen Worten: „Wie viele Tasten hat ein Klavier?" gegen
+  // „Wie viele Tasten hat ein Klavier üblicherweise?". Der Zufallsmix zieht
+  // Kategorien aus allen Sätzen – dieselbe Frage käme sonst zweimal am Abend.
+  //
+  // Gesucht wird nach gleicher Antwort UND deutlich überlappendem Fragetext.
+  // Gleiche Antwort allein sagt nichts: „Sechs" ist die Lösung für Gitarrensaiten,
+  // Volleyballspieler und die Nullen einer Million, und das sind drei Fragen.
+  const kern = (a) => a.toLowerCase()
+    .replace(/^(der|die|das|ein|eine|rund|aus|im|in|nach)\s+/, '')
+    .replace(/[^\p{L}\p{N}]/gu, '');
+  const worte = (t) => new Set((t.toLowerCase().match(/[\p{L}]{4,}/gu) || []));
+
+  const nachAntwort = new Map();
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) {
+          const k = kern(q.answer);
+          if (!nachAntwort.has(k)) nachAntwort.set(k, []);
+          nachAntwort.get(k).push({ datei, text: q.text });
+        }
+      }
+    }
+  }
+
+  const umformuliert = [];
+  for (const liste of nachAntwort.values()) {
+    for (let i = 0; i < liste.length; i++) {
+      for (let j = i + 1; j < liste.length; j++) {
+        if (liste[i].datei === liste[j].datei) continue;
+        const a = worte(liste[i].text);
+        const b = worte(liste[j].text);
+        const gemeinsam = [...a].filter((w) => b.has(w)).length;
+        const anteil = gemeinsam / Math.max(1, Math.min(a.size, b.size));
+        if (anteil >= 0.6) {
+          umformuliert.push(`„${liste[i].text}" (${liste[i].datei}) ≈ „${liste[j].text}" (${liste[j].datei})`);
+        }
+      }
+    }
+  }
+  assert.deepEqual(umformuliert, [], 'dieselbe Frage in anderen Worten');
+});
+
 test('der gesicherte Spielstand taucht nicht als Fragensatz auf', async () => {
   const { listSets, DATA_DIR } = await import('../server/questions.js');
   const { writeFile, unlink } = await import('node:fs/promises');
