@@ -215,11 +215,20 @@ test('keine Frage verrät die Lösung einer anderen derselben Kategorie', async 
   // Antwortformate, die in ihrer Kategorie naturgemäß mehrfach vorkommen.
   const formatantworten = /^(wahr|falsch|ja|nein)\b/i;
 
-  const kernwoerter = (text) =>
+  const zerlege = (text, mindestens) =>
     text.toLowerCase()
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .split(/\s+/)
-      .filter((w) => w.length >= 4 && !stoppwoerter.has(w));
+      .filter((w) => w.length >= mindestens && !stoppwoerter.has(w));
+  const kernwoerter = (text) => zerlege(text, 4);
+  // Kurze Lösungen brauchen eine kürzere Latte. „SMS“ hat drei Buchstaben und
+  // fiel damit ganz aus der Prüfung – ausgerechnet in einer Kategorie, in der
+  // eine zweite Frage „Wofür steht die Abkürzung SMS?“ hieß. Abkürzungen und
+  // Zahlen sind die Lösungen, die sich am leichtesten verraten.
+  const loesungswoerter = (text) => {
+    const lang = zerlege(text, 4);
+    return lang.length ? lang : zerlege(text, 2);
+  };
 
   const verraeter = [];
   for (const datei of DATEIEN) {
@@ -228,11 +237,13 @@ test('keine Frage verrät die Lösung einer anderen derselben Kategorie', async 
       for (const cat of round.categories) {
         cat.questions.forEach((q, i) => {
           if (formatantworten.test(q.answer.trim())) return;
-          const loesung = kernwoerter(q.answer);
+          const loesung = loesungswoerter(q.answer);
           if (!loesung.length) return;
           cat.questions.forEach((andere, j) => {
             if (i === j) return;
-            const anderswo = kernwoerter(`${andere.text} ${andere.answer}`);
+            // Auch hier die kurze Latte: Sonst steht „SMS“ zwar in der Lösung,
+            // aber nicht im Vergleichstext, und das Paar bleibt unsichtbar.
+            const anderswo = zerlege(`${andere.text} ${andere.answer}`, 2);
             // Erst wenn die Lösung vollständig anderswo steht, ist sie verraten.
             // Ganze Wörter, damit „Spiel“ nicht in „Spieleabend“ anschlägt.
             const vollstaendig = loesung.every((w) => anderswo.includes(w));
