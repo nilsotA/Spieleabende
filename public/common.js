@@ -234,21 +234,30 @@ export function flash(color = 'rgba(224,27,70,.55)') {
 }
 
 /** Verhindert, dass das Handy mitten im Spiel den Bildschirm abschaltet. */
+/* Mehrfach aufrufbar, und das mit Absicht: Beim Laden fehlt die Nutzergeste, die
+   manche Browser für die Sperre verlangen – beim Beitreten ist sie da. Der
+   Horcher wird trotzdem nur einmal angemeldet, sonst sammelt jeder Beitritt
+   einen weiteren an. */
+let wachLock = null;
+let wachHorcht = false;
+
 export function keepScreenAwake() {
-  let lock = null;
-  const request = async () => {
+  const anfordern = async () => {
+    if (wachLock) return;
     try {
-      lock = await navigator.wakeLock?.request('screen');
+      wachLock = await navigator.wakeLock?.request('screen');
       // Das System gibt die Sperre beim Wegschalten von selbst frei – ohne
       // dieses Aufräumen würde sie danach nie wieder angefordert.
-      lock?.addEventListener?.('release', () => { lock = null; });
+      wachLock?.addEventListener?.('release', () => { wachLock = null; });
     } catch {
-      lock = null; // nicht überall verfügbar
+      wachLock = null; // nicht überall verfügbar
     }
   };
-  request();
+  anfordern();
+  if (wachHorcht) return;
+  wachHorcht = true;
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && !lock) request();
+    if (document.visibilityState === 'visible') anfordern();
   });
 }
 
