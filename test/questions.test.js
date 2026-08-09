@@ -121,10 +121,31 @@ test('keine Frage ist eine umformulierte Fassung einer anderen', async () => {
   // Gesucht wird nach gleicher Antwort UND deutlich überlappendem Fragetext.
   // Gleiche Antwort allein sagt nichts: „Sechs" ist die Lösung für Gitarrensaiten,
   // Volleyballspieler und die Nullen einer Million, und das sind drei Fragen.
+  // Die „Was ist die Frage?"-Kategorien drehen Frage und Antwort um, ihre
+  // Lösungen heißen deshalb „Wer ist Marie Curie?" statt „Marie Curie". Ohne
+  // das Abstreifen dieser Hülle sind zwei Fragen über dieselbe Person für den
+  // Vergleich verschieden – und genau so stand Marie Curie zweimal im Bestand,
+  // in „Kopfnuss" und in „Kurios & Wahr", mit derselben Tatsache.
   const kern = (a) => a.toLowerCase()
+    .replace(/^(was|wer|welche[rsn]?)\s+(ist|sind|war|waren)\s+/, '')
     .replace(/^(der|die|das|ein|eine|rund|aus|im|in|nach)\s+/, '')
     .replace(/[^\p{L}\p{N}]/gu, '');
-  const worte = (t) => new Set((t.toLowerCase().match(/[\p{L}]{4,}/gu) || []));
+  // Fragegerüste zählen nicht mit. „Welches Land hat die Form eines Stiefels?"
+  // und „Welches Land hat diese Flagge?" haben beide die Lösung „Italien" und
+  // teilen sich das halbe Gerüst – ohne diese Liste wären sie ein Treffer, und
+  // fünf weitere Paare dieser Art gleich mit. Übrig bleibt, worum es in der
+  // Frage wirklich geht.
+  const geruest = new Set([
+    'welche', 'welcher', 'welches', 'welchem', 'welchen',
+    'diese', 'dieser', 'dieses', 'diesem', 'viele', 'heißt', 'hieß', 'heißen',
+    'wurde', 'wird', 'kommt', 'kommen', 'steht', 'stehen', 'gehört',
+    'eine', 'einer', 'eines', 'einem', 'einen', 'hatte', 'haben',
+    'dass', 'dann', 'auch', 'noch', 'sich', 'nicht', 'seine', 'seiner', 'ihre',
+    'land', 'jahr',
+  ]);
+  const worte = (t) => new Set(
+    (t.toLowerCase().match(/[\p{L}]{4,}/gu) || []).filter((w) => !geruest.has(w)),
+  );
 
   const nachAntwort = new Map();
   for (const datei of DATEIEN) {
@@ -147,9 +168,12 @@ test('keine Frage ist eine umformulierte Fassung einer anderen', async () => {
         if (liste[i].datei === liste[j].datei) continue;
         const a = worte(liste[i].text);
         const b = worte(liste[j].text);
+        if (!a.size || !b.size) continue;
         const gemeinsam = [...a].filter((w) => b.has(w)).length;
         const anteil = gemeinsam / Math.max(1, Math.min(a.size, b.size));
-        if (anteil >= 0.6) {
+        // 0,5 statt 0,6: Ohne die Gerüstwörter reichte auch 0,4 noch ohne
+        // Fehlalarm – die Hälfte lässt Luft für künftige Fragen.
+        if (anteil >= 0.5) {
           umformuliert.push(`„${liste[i].text}" (${liste[i].datei}) ≈ „${liste[j].text}" (${liste[j].datei})`);
         }
       }

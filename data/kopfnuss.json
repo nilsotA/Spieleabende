@@ -84,8 +84,8 @@
               "answer": "Wer im Glashaus sitzt, soll nicht mit Steinen werfen"
             },
             {
-              "text": "Wie heißt es richtig? „Morgenstund hat Blei im Mund.“",
-              "answer": "Morgenstund hat Gold im Mund"
+              "text": "Wie heißt es richtig? „Lügen haben lange Beine.“",
+              "answer": "Lügen haben kurze Beine"
             }
           ]
         },
@@ -93,8 +93,8 @@
           "name": "Wer bin ich?",
           "questions": [
             {
-              "text": "Ich schrieb „Faust“ und kam in Frankfurt zur Welt.",
-              "answer": "Johann Wolfgang von Goethe"
+              "text": "Ich schrieb über ein Mädchen mit roten Zöpfen, das das stärkste der Welt ist.",
+              "answer": "Astrid Lindgren"
             },
             {
               "text": "Ich malte die Mona Lisa.",
@@ -105,8 +105,8 @@
               "answer": "Ludwig van Beethoven"
             },
             {
-              "text": "Ich bekam Nobelpreise in zwei verschiedenen Naturwissenschaften.",
-              "answer": "Marie Curie",
+              "text": "Ich schrieb 1859 ein Buch über die Entstehung der Arten.",
+              "answer": "Charles Darwin",
               "note": "Physik 1903, Chemie 1911"
             }
           ]
@@ -142,16 +142,16 @@
           "name": "Was ist die Frage?",
           "questions": [
             {
-              "text": "Dieses Organ ist das größte des Menschen.",
-              "answer": "Was ist die Haut?"
+              "text": "Dieser Winkel misst genau 90 Grad.",
+              "answer": "Was ist der rechte Winkel?"
             },
             {
-              "text": "Diese Farbe entsteht aus Blau und Gelb.",
-              "answer": "Was ist Grün?"
+              "text": "Dieses Zeichen steht für das Verhältnis von Umfang zu Durchmesser eines Kreises.",
+              "answer": "Was ist Pi?"
             },
             {
-              "text": "Bei diesem Vorgang machen Pflanzen aus Licht Energie.",
-              "answer": "Was ist die Photosynthese?"
+              "text": "Diese Zahl ist die einzige gerade Primzahl.",
+              "answer": "Was ist die Zwei?"
             },
             {
               "text": "Dieser Ozean ist der größte der Erde.",
