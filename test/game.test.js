@@ -332,16 +332,36 @@ test('getrennte Geräte blockieren keinen Platz im Team', () => {
 });
 
 test('neues Spiel nimmt Karteileichen nicht mit', () => {
+  // „Karteileiche“ heißt: seit Stunden weg. Ein Handy, das gerade in der Pause
+  // gesperrt hat, ist keine – wer nach dem Aufwecken weiterspielen will, soll
+  // sein Team noch vorfinden.
   const state = G.createState();
   G.addTeam(state, 'Team');
   G.addTeam(state, 'Zwei');
   G.joinTeam(state, 'da', state.teams[0].id, 'Da');
+  G.joinTeam(state, 'pause', state.teams[0].id, 'Pause');
   G.joinTeam(state, 'weg', state.teams[0].id, 'Weg');
+  G.setMemberOnline(state, 'pause', false); // eben erst gesperrt
   G.setMemberOnline(state, 'weg', false);
+  // Der ist vor drei Stunden nach Hause gegangen.
+  const alt = state.teams[0].members.find((m) => m.clientId === 'weg');
+  alt.wegSeit = Date.now() - 3 * 60 * 60 * 1000;
   G.adjustScore(state, state.teams[0].id, 400);
   const fresh = G.backToLobby(state);
-  assert.deepEqual(fresh.teams[0].members.map((m) => m.name), ['Da']);
+  assert.deepEqual(fresh.teams[0].members.map((m) => m.name), ['Da', 'Pause']);
   assert.equal(fresh.teams[0].score, 0);
+});
+
+test('wer zurückkommt, verliert seinen Vermerk wieder', () => {
+  // Sonst zählt beim übernächsten Neustart noch die alte Abwesenheit mit und
+  // wirft jemanden raus, der den ganzen Abend dabei war.
+  const state = G.createState();
+  G.addTeam(state, 'Team');
+  G.joinTeam(state, 'x', state.teams[0].id, 'X');
+  G.setMemberOnline(state, 'x', false);
+  assert.ok(state.teams[0].members[0].wegSeit, 'Abmeldung wird vermerkt');
+  G.setMemberOnline(state, 'x', true);
+  assert.equal(state.teams[0].members[0].wegSeit, undefined);
 });
 
 test('gelöschtes Team gibt Farbe und Namen wieder frei', () => {

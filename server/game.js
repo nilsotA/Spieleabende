@@ -183,11 +183,29 @@ export function removeMember(state, teamId, clientId) {
 export function setMemberOnline(state, clientId, online) {
   for (const team of state.teams) {
     for (const member of team.members) {
-      if (member.clientId === clientId) member.online = online;
+      if (member.clientId === clientId) {
+        member.online = online;
+        // Merken, wann jemand weggefallen ist. Ein gesperrtes iPhone und ein
+        // Gast, der vor zwei Stunden nach Hause ist, sehen im Zustand sonst
+        // exakt gleich aus – und beim Neustart fliegen beide gleich raus.
+        if (!online) member.wegSeit = Date.now();
+        else delete member.wegSeit;
+      }
     }
   }
   return state;
 }
+
+/**
+ * Wie lange ein abgemeldetes Gerät seinen Platz im Team behält.
+ *
+ * Zwischen zwei Fragensätzen wird geredet, nachgeschenkt und geraucht; die
+ * Handys sperren derweil und lassen die Verbindung fallen. Wer danach
+ * weiterspielen will, soll sein Team noch vorfinden und nicht neu beitreten
+ * müssen. Zwei Stunden decken jede Pause eines Abends ab und sind kurz genug,
+ * dass ein Gast von letzter Woche nicht mitgeschleppt wird.
+ */
+const WEG_FRIST = 2 * 60 * 60 * 1000;
 
 function countOnline(team) {
   return team.members.filter((m) => m.online !== false).length;
@@ -549,8 +567,12 @@ export function backToLobby(state) {
     serie: 0,
     serieBest: 0,
     bilanz: leereBilanz(),
-    // Karteileichen von Geräten, die längst weg sind, nicht ins nächste Spiel schleppen.
-    members: t.members.filter((m) => m.online !== false),
+    // Karteileichen von Geräten, die längst weg sind, nicht ins nächste Spiel
+    // schleppen – aber nur die wirklich alten. Wer bloß gerade ein gesperrtes
+    // Handy in der Tasche hat, bleibt in seinem Team und ist nach dem
+    // Aufwecken sofort wieder dabei.
+    members: t.members.filter((m) => m.online !== false
+      || (m.wegSeit && Date.now() - m.wegSeit < WEG_FRIST)),
   }));
   const fresh = createState();
   fresh.teams = teams;

@@ -98,9 +98,15 @@ async function restore() {
     // statt ihn ungeprüft zu übernehmen: Sonst stirbt der erste Buzz nach dem
     // Neustart an einem `state.rekorde`, das es damals noch nicht gab.
     const wieder = { ...G.createState(), ...roh.state };
-    // Kein Gerät ist nach einem Neustart noch verbunden.
+    // Kein Gerät ist nach einem Neustart noch verbunden. Als Zeitpunkt gilt,
+    // wann gespeichert wurde – die Uhr für die Karteileichen-Frist läuft also
+    // ab dem letzten Zug weiter und nicht erst ab dem Neustart. Ohne das würde
+    // ein Neustart jeden Gast von vor Stunden wieder frisch wirken lassen.
     for (const team of wieder.teams || []) {
-      for (const member of team.members || []) member.online = false;
+      for (const member of team.members || []) {
+        member.online = false;
+        member.wegSeit = member.wegSeit || roh.gespeichert || Date.now();
+      }
     }
     bilder = await restoreImages();
     return wieder;

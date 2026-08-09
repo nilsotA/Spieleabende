@@ -708,3 +708,57 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
   assert.ok(summeAntworten >= 48, `nur ${summeAntworten} verbuchte Antworten bei 48 Fragen`);
   reader.cancel();
 });
+
+test('die Pause zwischen zwei Sätzen kostet niemanden sein Team', async (t) => {
+  // Nach dem ersten Fragensatz wird geredet und nachgeschenkt, die Handys
+  // sperren. Startet der Host in dieser Pause den nächsten Satz, darf das
+  // niemanden aus seinem Team werfen: Wer aufwacht, soll weiterspielen und
+  // nicht erst wieder QR-Code, Team und Namen durchlaufen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-pause-'));
+  const port = 5900 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'pausen-host');
+  await host({ type: 'addTeam', name: 'Die Grübelmeister' });
+  const team = (await zustand(base)).teams[0];
+
+  // Zwei Handys im selben Team – eines legt gleich das Display aus der Hand.
+  const strom = await fetch(`${base}/api/events?clientId=mira&role=player`);
+  const miraLiest = strom.body.getReader();
+  miraLiest.read();
+  await warte(200);
+  const alsSpieler = (id, body) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: id, ...body }),
+  }).then((r) => r.json());
+  assert.equal((await alsSpieler('mira', { type: 'joinTeam', teamId: team.id, name: 'Mira' })).ok, true);
+
+  await host({ type: 'startGame', file: 'neunziger-nuller.json' });
+
+  // Handy gesperrt: Der Ereignisstrom fällt, der Server bucht Mira offline.
+  await miraLiest.cancel();
+  await warte(500);
+  const offline = (await zustand(base)).teams[0].members[0];
+  assert.equal(offline.online, false, 'der Server merkt die Abmeldung');
+
+  // Und jetzt der nächste Satz, während Mira noch nicht zurück ist.
+  await host({ type: 'backToLobby' });
+  const nachher = (await zustand(base)).teams[0];
+  assert.deepEqual(nachher.members.map((m) => m.name), ['Mira'],
+    'Mira steht nach dem Neustart noch in ihrem Team');
+
+  // Aufwachen: gleiche clientId, und sie ist sofort wieder dabei.
+  const zurueck = await fetch(`${base}/api/events?clientId=mira&role=player`);
+  const wachLiest = zurueck.body.getReader();
+  wachLiest.read();
+  await warte(300);
+  const wieder = (await zustand(base)).teams[0].members[0];
+  assert.equal(wieder.online, true, 'wieder online');
+  assert.equal(wieder.wegSeit, undefined, 'der Abwesenheitsvermerk ist weg');
+  await wachLiest.cancel();
+});
