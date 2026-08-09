@@ -46,6 +46,17 @@ Ohne zweites Gerät geht es auch: In der Steuerleiste des Host-Screens ist die L
 unscharf und lässt sich mit `👁` oder der Taste `L` kurz aufdecken – dann sehen sie
 allerdings alle im Raum.
 
+### Host-Screen: Beamer, MacBook oder iPad
+
+Der Host-Screen muss kein Beamer sein – ein MacBook oder ein iPad tut es genauso.
+
+- **Vollbild** mit `F` oder dem `⛶` in der Steuerleiste: Ohne Tableiste, Adresszeile
+  und Dock bleibt spürbar mehr Bühne übrig. Gerade auf einem 13-Zöller lohnt sich das.
+- **Der Bildschirm bleibt an.** Während einer Frage fasst den Host-Screen minutenlang
+  niemand an – ohne Sperre ginge er mitten im Spiel aus.
+- **Mit dem Finger bedienbar:** Auf Touchgeräten wachsen alle Knöpfe auf Fingergröße.
+  Am MacBook bleibt die Leiste kompakt, damit sie keine Bühnenhöhe frisst.
+
 ### Wenn etwas abstürzt
 
 Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Board
@@ -114,6 +125,7 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 | `4` | Keiner weiß es → auflösen |
 | `L` | Lösung kurz aufdecken (Achtung: alle sehen den Bildschirm) |
 | `Leertaste` | Weiter / nächste Runde |
+| `F` | Vollbild an/aus (geht auch schon in der Lobby) |
 | `Esc` | Menü (Punkte korrigieren, Zug setzen, Ton an/aus) |
 
 ### Ton

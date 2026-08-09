@@ -1085,6 +1085,60 @@ function fillMenu() {
   }
 }
 
+/* ------------------------------------------------------------ Vollbild */
+
+/**
+ * Vollbild – für den Fall, dass die Bühne selbst das MacBook ist.
+ *
+ * Dann schaut der ganze Tisch auf einen 13-Zöller, auf dem ein Drittel des
+ * oberen Randes aus Tableiste und Adresszeile besteht und unten das Dock
+ * hereinragt. Ein Tastendruck räumt das weg, und das Board bekommt den Platz.
+ *
+ * Safari kennt das Ganze nur mit `webkit`-Vorsilbe, und auf dem iPhone gar
+ * nicht – deshalb erscheint der Knopf nur, wo es wirklich geht, statt ins
+ * Leere zu greifen.
+ */
+const vollbildGeht = () => !!(document.documentElement.requestFullscreen
+  || document.documentElement.webkitRequestFullscreen);
+
+function imVollbild() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function schalteVollbild() {
+  try {
+    if (imVollbild()) {
+      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    } else {
+      const el = document.documentElement;
+      (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+    }
+  } catch {
+    /* Manche Browser lehnen es ohne Geste ab – dann bleibt eben alles wie es ist. */
+  }
+}
+
+function zeigeVollbildKnopf() {
+  const knopf = $('#btn-vollbild');
+  if (!knopf) return;
+  knopf.hidden = !vollbildGeht();
+  const drin = imVollbild();
+  setzeText(knopf, drin ? '⤡' : '⛶');
+  knopf.title = drin ? 'Vollbild verlassen (Taste F)' : 'Vollbild (Taste F)';
+  knopf.setAttribute('aria-label', drin ? 'Vollbild verlassen' : 'Vollbild einschalten');
+}
+
+$('#btn-vollbild').addEventListener('click', schalteVollbild);
+// Der Hinweis steht nur da, wo die Taste auch etwas tut – und nicht mehr,
+// sobald das Vollbild schon läuft.
+const vollbildTipp = () => { $('#vollbild-tipp').hidden = !vollbildGeht() || imVollbild(); };
+vollbildTipp();
+// Auch das Verlassen per Escape oder Systemtaste soll den Knopf umstellen.
+const vollbildWechsel = () => { zeigeVollbildKnopf(); vollbildTipp(); };
+document.addEventListener('fullscreenchange', vollbildWechsel);
+document.addEventListener('webkitfullscreenchange', vollbildWechsel);
+zeigeVollbildKnopf();
+
 /* ------------------------------------------------------------ Tastatur */
 
 document.addEventListener('keydown', (ev) => {
@@ -1092,10 +1146,15 @@ document.addEventListener('keydown', (ev) => {
   // ist das Zugteam falsch, dann das Team, das gerade gebuzzert hat.
   if (ev.repeat) return;
   if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+
+  const key = ev.key.toLowerCase();
+  // Vollbild schon in der Lobby: Wer die Bühne aufräumt, tut das, bevor der
+  // erste Gast auf die Leinwand schaut – nicht mittendrin.
+  if (key === 'f' && vollbildGeht()) { ev.preventDefault(); return schalteVollbild(); }
+
   if (!state || state.phase === 'lobby') return;
 
   const menuOpen = !$('#menu').hidden;
-  const key = ev.key.toLowerCase();
 
   if (key === 'escape') {
     ev.preventDefault();
