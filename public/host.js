@@ -1165,7 +1165,13 @@ function openMenu() {
   $('#menu').hidden = false;
   // Alles dahinter stilllegen, sonst wandert der Tabulator aufs Board.
   $('#view-game').inert = true;
-  $('#btn-close-menu').focus();
+  // Oben anfangen. Bei acht Teams ist die Karte länger als der Bildschirm, und
+  // „Schließen" steht ganz unten – ein schlichtes focus() hätte den Knopf ins
+  // Bild gescrollt und das Menü damit am Ende aufgemacht: Der Host sieht als
+  // Erstes „Spiel beenden" statt der Teamliste, wegen der er es geöffnet hat.
+  $('.menu-card').scrollTop = 0;
+  $('#btn-close-menu').focus({ preventScroll: true });
+  menuRandPruefen();
 }
 
 function closeMenu() {
@@ -1178,6 +1184,7 @@ function closeMenu() {
 
 function fillMenu() {
   fuelleSpickzettel();
+  menuRandPruefen();
   const list = $('#menu-teams');
   // Solange das Menü offen ist, läuft das bei jedem Broadcast – auch wenn nur
   // ein Handy aus dem Standby kommt. Ohne Schlüssel würden dabei die Knöpfe
@@ -1210,6 +1217,20 @@ function fillMenu() {
     );
   }
 }
+
+/**
+ * Blendet die Unterkante des Menüs aus, solange darunter noch etwas steht.
+ * Erst nach dem Zeichnen messen – vorher kennt der Browser die neue Höhe nicht.
+ */
+function menuRandPruefen() {
+  const karte = document.querySelector('.menu-card');
+  if (!karte) return;
+  requestAnimationFrame(() => {
+    karte.classList.toggle('mehr', karte.scrollHeight - karte.clientHeight - karte.scrollTop > 4);
+  });
+}
+document.querySelector('.menu-card')?.addEventListener('scroll', menuRandPruefen, { passive: true });
+addEventListener('resize', menuRandPruefen);
 
 /**
  * Der Spickzettel im Menü.
