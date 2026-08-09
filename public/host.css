@@ -429,6 +429,17 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 }
 .tile.used::after { display: none; }
 
+/* Das letzte offene Feld der Runde. Der Puls liegt auf dem vorgemalten
+   ::after-Rand, nicht auf der Kachel selbst: Deren transform gehört dem Hover,
+   und ausgerechnet das eine Feld, das der Host als Nächstes anklickt, soll auf
+   den Mauszeiger reagieren. */
+.board.finale .tile:not(.used)::after {
+  opacity: 1;
+  box-shadow: inset 0 0 0 3px var(--gold), 0 0 40px -4px rgba(255, 197, 49, 0.8);
+  animation: letztesFeld 1.4s ease-in-out infinite;
+}
+@keyframes letztesFeld { 50% { opacity: 0.4; } }
+
 /* Runde 2 zählt doppelt. Damit man das sieht statt es zu lesen, wechselt die
    Wand ihre Lichtfarbe: Goldkanten auf den Panels, goldener Schein über der
    Kategorienzeile. Die Ziffern bleiben weiß – Weiß auf Blau ist der beste
@@ -527,6 +538,16 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .q-panel.buzzed::after {
   opacity: 1;
   box-shadow: 0 0 0 3px var(--team, #fff), 0 0 50px -6px color-mix(in srgb, var(--team, #fff) 60%, transparent);
+}
+
+/* Und wieder zurück in dieselbe Kachel. Während der 320 ms darf das Overlay
+   keine Klicks mehr schlucken – der Host tippt sonst ins Leere, wenn er zügig
+   weiterspielt. */
+.question.zu { pointer-events: none; }
+.question.zu::before { animation: fadeAus 300ms linear forwards; }
+@keyframes fadeAus { to { opacity: 0; } }
+@keyframes panelZu {
+  to { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--fs)); }
 }
 
 /* Das Panel klappt aus genau der Kachel auf, die gewählt wurde. */
@@ -821,6 +842,29 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .ansage.an .ansage-2 { animation: ansageRein 0.55s var(--ease-snap) 0.16s both; }
 @keyframes ansageRein { from { opacity: 0; transform: translateY(22px) scale(0.9); } }
 
+/* Auszeichnungen unter dem Endstand. Sie erscheinen zuletzt, wenn die Rangliste
+   fertig aufgebaut ist – und sind bewusst nicht die kleinste Schrift im letzten
+   Bild des Abends. */
+.rekorde {
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(150, 200, 255, 0.2);
+  display: grid;
+  gap: 0.45rem;
+}
+.rekord {
+  display: flex;
+  justify-content: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  font-size: clamp(0.95rem, 1.35vw, 1.5rem);
+  animation: rekordRein 0.45s var(--ease) both;
+  animation-delay: calc(1.4s + var(--i, 0) * 200ms);
+}
+.rk-titel { font-weight: 800; color: var(--gold-hell); letter-spacing: 0.03em; }
+.rk-text { color: #e8f2ff; }
+@keyframes rekordRein { from { opacity: 0; transform: translateY(10px); } }
+
 /* ----------------------------------------------------------- Studioblitz */
 
 .stage-flash {
@@ -936,8 +980,11 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
    zurück. So sieht der Raum das Rennen, statt es nur zu ahnen. */
 .player.scharf { transform: translateY(-3px); }
 .player.scharf::after { background: var(--gold); box-shadow: 0 0 18px var(--gold); }
-.player.raus { opacity: 0.45; }
+/* „Raus" heißt: kein Licht mehr auf dem Pult. Der Punktestand bleibt trotzdem
+   voll lesbar – die Leiste ist die einzige Stelle, an der der Raum die Zahlen
+   ablesen kann, und die darf kein Zustand ausgrauen. */
 .player.raus::after { background: #3a4457; box-shadow: none; }
+.player.raus .pname, .player.raus .pmembers { opacity: 0.5; }
 
 /* Serie: erst ab drei in Folge, dafür dann unübersehbar. */
 .pserie {

@@ -295,6 +295,15 @@ function renderBuzzer(prev) {
   if (state.phase === 'gameOver') { status.textContent = 'Spiel beendet!'; lock('ENDE'); return; }
 
   if (state.phase === 'board') {
+    // Die stillste Stelle des Abends: Nach „Weiter" steht das Board wieder da,
+    // und der Tisch wartet, bis jemand merkt, dass er wählen soll – bisher
+    // musste der Host das 48-mal laut sagen. Das Handy meldet sich jetzt selbst,
+    // aber nur beim Übergang, nicht bei jedem Update derselben Lage.
+    if (you.isMyTurn && !(prev?.phase === 'board' && prev.you?.isMyTurn)) {
+      vibrate([25, 60, 25]);
+      sound('armed');
+      flash();
+    }
     status.textContent = you.isMyTurn
       ? 'Du bist dran – wähle ein Feld!'
       : `Am Zug: ${state.teams[state.turnIndex]?.name ?? '?'} …`;

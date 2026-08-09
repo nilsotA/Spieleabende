@@ -18,6 +18,13 @@ export function halfPoints(value) {
   return Math.round(value / 2);
 }
 
+function leereRekorde() {
+  return {
+    schnellsterBuzz: null, // { teamId, name, ms }
+    teuersterReinfall: null, // { teamId, delta, kategorie, wert }
+  };
+}
+
 export function createState() {
   return {
     phase: 'lobby', // lobby | board | question | roundEnd | gameOver
@@ -38,6 +45,9 @@ export function createState() {
       buzzAfterCorrect: false,
     },
     message: null,
+    // Was man sich am nächsten Tag erzählt. Reine Buchhaltung fürs Ende – auf
+    // Punkte und Ablauf hat davon nichts Einfluss.
+    rekorde: leereRekorde(),
   };
 }
 
@@ -167,6 +177,7 @@ export function startGame(state, questionSet) {
     team.serie = 0;
     team.serieBest = 0;
   }
+  state.rekorde = leereRekorde();
   return startRound(state, 1);
 }
 
@@ -272,6 +283,13 @@ export function buzz(state, clientId) {
   q.buzzedAt = Date.now();
   q.buzzQuelle = 'handy';
   q.buzzedBy = team.members.find((m) => m.clientId === clientId)?.name || team.name;
+
+  // Nur echte Handy-Buzz zählen für den Rekord: Drückt der Host stellvertretend,
+  // misst die Zahl seine Reaktion, nicht die des Tisches.
+  const ms = q.buzzedAt - q.buzzOpenedAt;
+  if (q.buzzOpenedAt && (!state.rekorde.schnellsterBuzz || ms < state.rekorde.schnellsterBuzz.ms)) {
+    state.rekorde.schnellsterBuzz = { teamId: team.id, name: q.buzzedBy, ms };
+  }
   return state;
 }
 
@@ -368,6 +386,12 @@ export function judge(state, correct) {
   team.score += delta;
   q.log.push({ teamId: team.id, result: 'wrong', delta });
   q.lastDelta = { teamId: team.id, delta };
+  // Der teuerste Reinfall des Abends – da lacht am Ende der ganze Tisch.
+  if (delta < 0 && delta < (state.rekorde.teuersterReinfall?.delta ?? 0)) {
+    state.rekorde.teuersterReinfall = {
+      teamId: team.id, delta, kategorie: q.category, wert: q.value,
+    };
+  }
   if (!isPrimary) q.lockedOut.push(team.id);
   return openBuzz(state);
 }
@@ -509,6 +533,8 @@ export function viewFor(state, { isHost, clientId }) {
     },
     current: null,
     you: null,
+    // Nur am Ende interessant, aber billig genug, um immer mitzufahren.
+    rekorde: state.rekorde || null,
   };
 
   if (state.current) {

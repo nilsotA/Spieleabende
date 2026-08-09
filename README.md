@@ -76,6 +76,20 @@ hat. Wer falsch buzzert, ist für diese Frage raus; die Übrigen dürfen weiter.
 **Runde 2** hat neue Kategorien und **doppelte Punkte** (200/400/600/1000 statt
 100/200/300/500). Wer am Ende die meisten Punkte hat, gewinnt.
 
+### Was der Screen nebenbei erzählt
+
+Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
+ändert daran nichts:
+
+- **Wie knapp war der Buzz?** Der Server misst die Zeit zwischen Freigabe und
+  Druck und zeigt sie an: „Team Rakete hat gebuzzert · 0,42 s“. Nur bei echten
+  Handy-Buzzern – drückt der Host stellvertretend, wäre es seine Reaktionszeit.
+- **Serien:** Ab drei richtigen Antworten in Folge trägt das Pult ein Abzeichen.
+- **Wer noch darf:** Bei freiem Buzzer stehen die Pulte im Licht, die noch
+  drücken dürfen; wer seinen Versuch hatte, tritt zurück.
+- **Am Ende** stehen unter dem Siegertreppchen drei Auszeichnungen des Abends:
+  schnellster Buzz, längste Serie, teuerster Reinfall.
+
 ### Einstellbar in der Lobby
 
 - **Wer ist als Nächstes dran?** Reihum (Standard) oder „wer richtig liegt, bleibt dran“.

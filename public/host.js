@@ -337,15 +337,23 @@ function renderBoard() {
     cat.cells.forEach((cell, rowIdx) => {
       const tile = board.querySelector(`[data-cell="${catIdx}-${rowIdx}"]`);
       if (!tile) return;
-      const wasUsed = tile.classList.contains('used');
-      tile.classList.toggle('used', cell.used);
+      // pickCell markiert das Feld schon beim Anklicken als gespielt. Optisch
+      // bleibt es an, solange seine Frage offen ist – sonst schaltet es hinter
+      // dem Scrim ab, wo es niemand sieht, und der Rückweg landet auf einem
+      // Feld, das längst schwarz ist. Gesperrt ist es trotzdem: `disabled`
+      // hängt unverändert an cell.used, nachfassen kann also niemand.
+      const offeneFrage = state.current?.catIdx === catIdx && state.current?.rowIdx === rowIdx;
+      tile.classList.toggle('used', cell.used && !offeneFrage);
       tile.disabled = cell.used || state.phase !== 'board';
-      if (cell.used && !wasUsed && !frischGebaut) {
-        tile.classList.add('picked');
-        setTimeout(() => tile.classList.remove('picked'), 500);
-      }
     });
   });
+
+  // Am Ende einer Runde steht ein einziges Feld auf sonst schwarzer Wand, und
+  // niemand sagt dem Raum, dass jetzt die letzte Frage kommt. Weil pickCell das
+  // Feld schon beim Anklicken als gespielt markiert, kann „genau eins offen"
+  // während einer laufenden Frage gar nicht auftreten.
+  const offen = data.categories.reduce((n, c) => n + c.cells.filter((z) => !z.used).length, 0);
+  board.classList.toggle('finale', offen === 1 && state.phase === 'board');
 
   $('#round-label').textContent = `Runde ${state.round} / ${state.roundCount}`;
   const mult = $('#round-mult');
@@ -367,6 +375,10 @@ function renderQuestion(prev) {
   const panel = box.querySelector('.q-panel');
   const q = state.current;
   if (!q) {
+    // Der Rückweg ist der meistgesehene Übergang des Abends – 24-mal pro Runde –
+    // und war der einzige harte Schnitt. Jetzt fährt das Panel in sein Feld
+    // zurück, und das Feld geht genau dabei aus.
+    if (prev?.current && !box.hidden) return schliesseFrage(box, panel, prev.current);
     box.hidden = true;
     setBuzzIndicator('aus');
     return;
@@ -497,6 +509,44 @@ function openFromTile(panel, q) {
   panel.style.animation = 'none';
   void panel.offsetWidth;
   panel.style.animation = '';
+}
+
+/**
+ * Umkehrung von openFromTile: Das Panel fährt in das Feld zurück, aus dem es
+ * kam. Erst danach schaltet die Kachel ab – vorher lag sie hinter dem Scrim
+ * bei 20 % Deckkraft, ihre Abschalt-Animation hat deshalb nie jemand gesehen.
+ *
+ * Das Board ist während der 320 ms schon wieder anklickbar: Die Klasse `zu`
+ * nimmt dem Overlay die Klicks, sonst würde der Host beim schnellen Weiterspielen
+ * ins Leere tippen.
+ */
+let schliessZeit = null;
+function schliesseFrage(box, panel, altQ) {
+  const tile = $(`[data-cell="${altQ.catIdx}-${altQ.rowIdx}"]`);
+  const p = panel.getBoundingClientRect();
+  if (!tile || !p.width) {
+    box.hidden = true;
+    setBuzzIndicator('aus');
+    return;
+  }
+  const t = tile.getBoundingClientRect();
+  panel.style.setProperty('--fx', `${t.left + t.width / 2 - (p.left + p.width / 2)}px`);
+  panel.style.setProperty('--fy', `${t.top + t.height / 2 - (p.top + p.height / 2)}px`);
+  panel.style.setProperty('--fs', (t.width / p.width).toFixed(3));
+  box.classList.add('zu');
+  panel.style.animation = 'panelZu 320ms var(--ease) forwards';
+  setBuzzIndicator('aus');
+
+  // Jetzt erst darf die Kachel ausgehen – sichtbar, vor freier Wand.
+  tile.classList.add('picked');
+
+  clearTimeout(schliessZeit);
+  schliessZeit = setTimeout(() => {
+    box.hidden = true;
+    box.classList.remove('zu');
+    panel.style.animation = '';
+    tile.classList.remove('picked');
+  }, 320);
 }
 
 function setBuzzIndicator(mode) {
@@ -680,6 +730,7 @@ function renderScoreboard() {
   if (!final) {
     standVorRunde = new Map(ranked.map((t, i) => [t.id, { score: t.score, rang: i }]));
   }
+  zeigeRekorde(final, ranked);
   $('#btn-next-round').hidden = final;
   $('#btn-new-game').hidden = !final;
   if (final && !konfettiGefallen) {
@@ -699,6 +750,47 @@ function renderScoreboard() {
     sound('rundenende');
   }
   if (!final) konfettiGefallen = false;
+}
+
+/**
+ * Drei Auszeichnungen unter dem Endstand – das, was man am nächsten Tag noch
+ * erzählt. Gezeigt wird nur, was es wirklich gab: Wo nichts passiert ist,
+ * steht auch keine Zeile.
+ */
+function zeigeRekorde(final, ranked) {
+  const box = $('#rekorde');
+  const r = state.rekorde;
+  if (!final || !r) {
+    box.hidden = true;
+    return;
+  }
+  const name = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+  const zeilen = [];
+
+  if (r.schnellsterBuzz) {
+    const s = (r.schnellsterBuzz.ms / 1000).toFixed(2).replace('.', ',');
+    zeilen.push(['⚡ Schnellster Buzz', `${r.schnellsterBuzz.name} – ${s} s`]);
+  }
+  // Die längste Serie über alle Teams; bei Gleichstand nennt sie alle.
+  const best = Math.max(0, ...ranked.map((t) => t.serieBest || 0));
+  if (best >= 3) {
+    const wer = ranked.filter((t) => (t.serieBest || 0) === best).map((t) => t.name).join(' und ');
+    zeilen.push(['🔥 Längste Serie', `${wer} – ${best}× in Folge`]);
+  }
+  if (r.teuersterReinfall) {
+    const t = r.teuersterReinfall;
+    zeilen.push(['💸 Teuerster Reinfall', `${name(t.teamId)} – ${t.delta} bei ${t.kategorie} ${t.wert}`]);
+  }
+
+  box.hidden = zeilen.length === 0;
+  if (box.dataset.key === JSON.stringify(zeilen)) return;
+  box.dataset.key = JSON.stringify(zeilen);
+  box.innerHTML = '';
+  zeilen.forEach(([titel, text], i) => {
+    box.append(el('div', { class: 'rekord', style: { '--i': i } },
+      el('span', { class: 'rk-titel' }, titel),
+      el('span', { class: 'rk-text' }, text)));
+  });
 }
 
 let konfettiGefallen = false;
