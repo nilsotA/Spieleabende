@@ -129,7 +129,10 @@ function broadcast() {
 }
 
 function sendState(conn) {
-  write(conn, 'state', G.viewFor(state, { isHost: conn.isHost, clientId: conn.clientId }));
+  const sicht = G.viewFor(state, { isHost: conn.isHost, clientId: conn.clientId });
+  // Nur der Host kann zurücknehmen, also erfährt auch nur er davon.
+  if (conn.isHost) sicht.rueckgaengig = rueckStand?.was ?? null;
+  write(conn, 'state', sicht);
 }
 
 function write(conn, event, payload) {
@@ -151,7 +154,48 @@ const HOST_ACTIONS = new Set([
   'addTeam', 'renameTeam', 'removeTeam', 'removeMember', 'adjustScore', 'setTurn',
   'startGame', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion',
   'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz', 'buzzFor',
+  'undo',
 ]);
+
+/**
+ * Zurücknehmen – eine Stufe.
+ *
+ * Am Spieleabend passiert genau ein Fehler zuverlässig: „Richtig“ statt
+ * „Falsch“, und schon hat der falsche Tisch 500 Punkte. Über das Menü ließe
+ * sich das in Hunderterschritten zurechtklopfen, aber Serie und Bilanz blieben
+ * verkehrt – und der Tisch diskutiert derweil.
+ *
+ * Gesichert wird der ganze Zustand vor jedem Zug, der das Spiel verändert. Ein
+ * Fragensatz misst rund 8 KB und Bilder liegen als Dateien daneben, das kostet
+ * also nichts. Eine Stufe genügt: Wer zwei Züge zurück will, hat ein anderes
+ * Problem, und mehr Stufen laden dazu ein, sich blind rückwärts zu klicken.
+ */
+const RUECKNEHMBAR = new Set([
+  'pick', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close',
+  'nextRound', 'adjustScore', 'setTurn', 'resetBuzz', 'buzzFor', 'buzz',
+]);
+
+let rueckStand = null; // { state, was }
+
+/** Menschenlesbar, damit der Knopf sagt, was er zurücknimmt. */
+function benenne(type, vorher) {
+  const team = vorher.current?.onTheHook
+    ? vorher.teams.find((t) => t.id === vorher.current.onTheHook)?.name
+    : null;
+  switch (type) {
+    case 'judge': return team ? `Wertung für ${team}` : 'Wertung';
+    case 'pass': return 'Weiß nicht';
+    case 'pick': return 'Feldwahl';
+    case 'close': return 'Frage abschließen';
+    case 'endQuestion': return 'Auflösen';
+    case 'nextRound': return 'Rundenwechsel';
+    case 'adjustScore': return 'Punktekorrektur';
+    case 'setTurn': return 'Zugwechsel';
+    case 'buzz': case 'buzzFor': return 'Buzz';
+    case 'resetBuzz': return 'Buzz zurücksetzen';
+    default: return 'letzte Aktion';
+  }
+}
 
 async function handleAction(clientId, body) {
   const isHost = isHostClient(clientId);
@@ -169,7 +213,27 @@ async function handleAction(clientId, body) {
     throw new G.GameError('Nur der Host darf das.');
   }
 
+  if (RUECKNEHMBAR.has(type)) {
+    // Erst sichern, dann handeln. Wirft die Aktion, bleibt der Schnappschuss
+    // stehen und zeigt weiterhin auf den letzten Zug, der wirklich durchging.
+    rueckStand = { state: structuredClone(state), was: benenne(type, state) };
+  }
+
   switch (type) {
+    case 'undo': {
+      if (!rueckStand) throw new G.GameError('Es gibt nichts zurückzunehmen.');
+      const alt = rueckStand.state;
+      // Wer inzwischen beigetreten oder rausgeflogen ist, bleibt es auch.
+      // Zurückgenommen wird der Spielzug, nicht der Raum – sonst wirft ein Undo
+      // das Handy hinaus, das sich zwei Sekunden vorher verbunden hat.
+      for (const team of alt.teams) {
+        const jetzt = state.teams.find((t) => t.id === team.id);
+        if (jetzt) team.members = jetzt.members;
+      }
+      state = alt;
+      rueckStand = null;
+      break;
+    }
     case 'joinTeam':
       G.joinTeam(state, clientId, body.teamId, body.name);
       break;
@@ -211,6 +275,9 @@ async function handleAction(clientId, body) {
           : await loadSet(body.file);
       const { set, images } = externalizeImages(roh);
       bilder = images;
+      // Über einen Spielstart hinweg zurückzunehmen, hieße das alte Spiel
+      // wiederauferstehen zu lassen – mitten in einem neuen.
+      rueckStand = null;
       G.startGame(state, set);
       await saveImages();
       break;
@@ -260,6 +327,7 @@ async function handleAction(clientId, body) {
       break;
     case 'backToLobby':
       state = G.backToLobby(state);
+      rueckStand = null;
       bilder = new Map();
       await forgetSave();
       break;

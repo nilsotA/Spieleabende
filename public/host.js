@@ -942,7 +942,42 @@ $('#btn-peek').addEventListener('click', () => {
   renderControls();
 });
 
+/**
+ * Der Knopf zum Zurücknehmen.
+ *
+ * Bewusst außerhalb der Aktionsleiste: Die baut sich bei jedem Phasenwechsel
+ * neu auf, und ein Knopf, der genau dort auftaucht, wo eben noch „Richtig“
+ * stand, fängt sich den nachtippenden Daumen ein. Aus demselben Grund ist er
+ * nach dem Erscheinen kurz taub – wer bewusst hinlangt, merkt davon nichts.
+ */
+let undoSeitWann = 0;
+let undoWas = null;
+
+function renderUndo() {
+  const knopf = $('#btn-undo');
+  const was = state.rueckgaengig;
+  knopf.hidden = !was;
+  // Neu scharf bei jeder neuen zurücknehmbaren Aktion, nicht nur beim ersten
+  // Auftauchen: Nach der Feldwahl steht der Knopf schon da, und die Wertung
+  // danach wechselt nur seine Beschriftung. Wäre nur das Erscheinen der
+  // Auslöser, wäre er den ganzen Abend über scharf – gesperrt genau einmal,
+  // beim allerersten Zug.
+  if (was !== undoWas) {
+    undoWas = was;
+    undoSeitWann = performance.now();
+  }
+  if (!was) return;
+  knopf.title = `${was} zurücknehmen`;
+  knopf.setAttribute('aria-label', `${was} zurücknehmen`);
+}
+
+$('#btn-undo').addEventListener('click', () => {
+  if (performance.now() - undoSeitWann < 400) return;
+  act('undo');
+});
+
 function renderControls() {
+  renderUndo();
   const hint = $('#control-hint');
   const bar = $('#control-buttons');
   const q = state.current;

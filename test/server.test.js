@@ -273,3 +273,126 @@ test('Spieler bekommen die Lösung nicht mitgeschickt', async (t) => {
   assert.equal((await zustand(base, false)).current.answer, null, 'Spieleransicht ohne Lösung');
   assert.equal((await zustand(base, true)).current.answer, 'Antwort 0-1', 'Host sieht sie');
 });
+
+test('Zurücknehmen macht die letzte Wertung rückgängig', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const port = 4600 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'undo-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+
+  // Vor dem ersten Zug gibt es nichts zurückzunehmen.
+  assert.equal((await zustand(base)).rueckgaengig, null);
+  assert.match((await host({ type: 'undo' })).error, /nichts zurückzunehmen/);
+
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 }); // 500 Punkte
+  await host({ type: 'judge', correct: true });
+
+  let z = await zustand(base);
+  assert.equal(z.teams[0].score, 500);
+  assert.equal(z.teams[0].serie, 1);
+  assert.equal(z.teams[0].bilanz.richtig, 1);
+  assert.match(z.rueckgaengig, /Wertung für Rot/);
+
+  await host({ type: 'undo' });
+  z = await zustand(base);
+  assert.equal(z.teams[0].score, 0, 'Punkte zurück');
+  assert.equal(z.teams[0].serie, 0, 'Serie zurück');
+  assert.equal(z.teams[0].bilanz.richtig, 0, 'Bilanz zurück');
+  assert.equal(z.current.step, 'primary', 'die Frage steht wieder offen');
+  assert.equal(z.rueckgaengig, null, 'nur eine Stufe');
+
+  // Und danach lässt sich normal weiterspielen: diesmal falsch.
+  await host({ type: 'judge', correct: false });
+  z = await zustand(base);
+  assert.equal(z.teams[0].score, 0);
+  assert.equal(z.teams[0].bilanz.falsch, 1);
+});
+
+test('Zurücknehmen wirft kein Handy aus dem Team', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const port = 4800 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'undo-host2');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });
+
+  // Jetzt kommt jemand dazu – nach der Wertung, aber vor dem Zurücknehmen.
+  // Der Schnappschuss kennt dieses Gerät nicht.
+  await host({ type: 'close' });
+  const teams = (await zustand(base)).teams;
+  await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'spaetzuender', role: 'player', type: 'joinTeam', teamId: teams[1].id, name: 'Kim' }),
+  });
+
+  await host({ type: 'undo' }); // nimmt das Abschließen zurück
+  const z = await zustand(base);
+  assert.deepEqual(
+    z.teams.map((t2) => t2.members.map((m) => m.name)),
+    [[], ['Kim']],
+    'Kim bleibt im Team, obwohl der Schnappschuss älter ist',
+  );
+});
+
+test('Ein neues Spiel löscht den Rückweg', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const port = 5000 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'undo-host3');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });
+  assert.ok((await zustand(base)).rueckgaengig);
+
+  await host({ type: 'startGame', set: SATZ });
+  assert.equal((await zustand(base)).rueckgaengig, null, 'kein Rückweg ins alte Spiel');
+  assert.match((await host({ type: 'undo' })).error, /nichts zurückzunehmen/);
+});
+
+test('Spieler dürfen nicht zurücknehmen', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const port = 5200 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'undo-host4');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });
+
+  const antwort = await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'irgendwer', role: 'player', type: 'undo' }),
+  }).then((r) => r.json());
+  assert.match(antwort.error, /Nur der Host/);
+  assert.equal((await zustand(base)).teams[0].score, 100, 'Punkte unangetastet');
+
+  // Und die Spieleransicht erfährt gar nicht erst davon.
+  assert.equal((await zustand(base, false)).rueckgaengig, undefined);
+});

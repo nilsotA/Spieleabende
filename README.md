@@ -57,6 +57,17 @@ Der Host-Screen muss kein Beamer sein – ein MacBook oder ein iPad tut es genau
 - **Mit dem Finger bedienbar:** Auf Touchgeräten wachsen alle Knöpfe auf Fingergröße.
   Am MacBook bleibt die Leiste kompakt, damit sie keine Bühnenhöhe frisst.
 
+### Verklickt?
+
+„Richtig" statt „Falsch" passiert an jedem Spieleabend genau einmal. Ein Knopf
+in der Steuerleiste – und auf der Fernbedienung – nimmt den letzten Zug wieder
+zurück, samt Punkten, Serie und Bilanz. Er sagt dabei, was er zurücknimmt
+(„Wertung für Die Grübelmeister"). Eine Stufe genügt: Wer zwei Züge zurück
+will, hat ein anderes Problem.
+
+Wer zwischendurch beigetreten ist, bleibt im Team – zurückgenommen wird der
+Spielzug, nicht der Raum.
+
 ### Wenn etwas abstürzt
 
 Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Board

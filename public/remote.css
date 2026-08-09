@@ -194,3 +194,19 @@ body.remote #app {
 @media (prefers-reduced-motion: reduce) {
   .r-bcell:active { transform: none; }
 }
+
+/* Zurücknehmen: über der Knopfleiste, nicht darin. Nach einer Wertung ist der
+   Daumen unten unterwegs – ein Korrekturknopf gehört nicht in dieselbe Bahn. */
+.r-undo {
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  border-color: rgba(255, 197, 49, 0.45);
+  color: #ffd97a;
+}
+.r-undo:active { transform: translateY(2px) scale(0.985); filter: brightness(1.15); }
+@media (prefers-reduced-motion: reduce) {
+  .r-undo:active { transform: none; }
+}

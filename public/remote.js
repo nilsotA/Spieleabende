@@ -28,6 +28,11 @@ connect({
 
 const act = hostAction;
 
+$('#r-undo').addEventListener('click', () => {
+  if (performance.now() - rueckSeitWann < 400) return;
+  act('undo');
+});
+
 function render() {
   if (!state) return;
   const q = state.current;
@@ -139,6 +144,8 @@ function render() {
       setzeText(phase, '');
   }
 
+  renderRueckgaengig();
+
   const list = $('#r-teams');
   const key = state.teams.map((t) => `${t.id}:${t.score}`).join('|') + `#${state.turnIndex}`;
   if (list.dataset.key !== key) {
@@ -172,6 +179,33 @@ function render() {
       );
     });
   }
+}
+
+/**
+ * Zurücknehmen auf dem Handy.
+ *
+ * Hier passiert die Fehlwertung am ehesten: Der Host hält das Handy in der
+ * Hand, „Richtig“ und „Falsch“ liegen nebeneinander, und ein Tisch redet
+ * dazwischen. Der Knopf steht deshalb nicht in der Knopfleiste, sondern
+ * darüber – dort, wo nach einer Wertung kein Daumen mehr unterwegs ist – und
+ * ist nach dem Erscheinen kurz taub, wie alle Knöpfe hier.
+ */
+let rueckSeitWann = 0;
+let rueckWas = null;
+
+function renderRueckgaengig() {
+  const knopf = $('#r-undo');
+  const was = state.rueckgaengig;
+  knopf.hidden = !was;
+  // Neu scharf bei jeder neuen zurücknehmbaren Aktion, nicht nur beim ersten
+  // Auftauchen – nach der Feldwahl steht der Knopf schon da, und die Wertung
+  // danach wechselt nur seine Beschriftung.
+  if (was !== rueckWas) {
+    rueckWas = was;
+    rueckSeitWann = performance.now();
+  }
+  if (!was) return;
+  setzeText(knopf, `↩ ${was} zurücknehmen`);
 }
 
 /**
