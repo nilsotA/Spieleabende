@@ -66,6 +66,7 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 .p-team { font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.phead > div:last-child { position: relative; }
 .p-score {
   font-family: var(--font-num);
   font-style: italic;
@@ -73,6 +74,30 @@ body {
   background: linear-gradient(180deg, var(--red-1), var(--red-2));
   border-radius: 999px;
   padding: 0.25rem 0.9rem;
+  display: inline-block;
+  transition: box-shadow 0.25s ease;
+}
+/* Der eigene Sprung, direkt in der Hand: Die Pille glüht kurz auf, daneben
+   fliegt der Zuwachs weg. Kein Vollbildblitz – man schaut ja schon hin. */
+.p-score.plus { box-shadow: 0 0 26px -2px rgba(55, 193, 118, 0.9); }
+.p-score.minus { box-shadow: 0 0 26px -2px rgba(255, 90, 120, 0.9); }
+.p-delta {
+  position: absolute;
+  right: 0.2rem;
+  top: -0.2rem;
+  font-family: var(--font-num);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 1.15rem;
+  pointer-events: none;
+  animation: pDeltaWeg 1.5s ease forwards;
+}
+.p-delta.plus { color: #4bdd94; }
+.p-delta.minus { color: #ff7a90; }
+@keyframes pDeltaWeg {
+  0% { opacity: 0; transform: translateY(6px); }
+  18% { opacity: 1; transform: translateY(-2px); }
+  100% { opacity: 0; transform: translateY(-30px); }
 }
 
 .p-status {
@@ -377,3 +402,22 @@ html, body { touch-action: manipulation; }
    nicht die Breite eines Buzzers bekommt. */
 .p-fuss { display: flex; gap: 0.5rem; justify-content: center; align-items: center; }
 .p-fuss #btn-ton { font-size: 1.1rem; line-height: 1; padding: 0.35rem 0.7rem; }
+
+/* Probebuzzer in der Lobby: Er sieht aus wie der echte, nur gedeckter – und er
+   meldet nichts an den Server. Warten auf den Start ist die längste tote Zeit
+   des Abends, und ein Knopf, der nichts tut, ist eine verschenkte Minute. */
+.buzzer.probe {
+  background: radial-gradient(circle at 50% 32%, #6f7f9e 0%, #46536e 45%, #222a3a 100%);
+  color: #dce7f7;
+  box-shadow:
+    0 0 0 7px #131a26,
+    0 0 0 9px rgba(190, 215, 255, 0.3),
+    0 16px 0 #2a3346,
+    0 26px 44px rgba(0, 0, 0, 0.6);
+  animation: none;
+}
+.buzzer.probe .bolt { filter: none; opacity: 0.8; }
+.buzzer.probe.probeHit { animation: probeDruck 0.28s ease; }
+@keyframes probeDruck {
+  40% { transform: translateY(12px) scale(0.98); }
+}

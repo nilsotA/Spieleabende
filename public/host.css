@@ -811,7 +811,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   text-align: center;
   background: radial-gradient(70% 55% at 50% 50%, rgba(4, 6, 11, 0.92), rgba(4, 6, 11, 0.99));
 }
-.ansage.an { animation: ansageAn 1.8s var(--ease) both; }
+.ansage.an { animation: ansageAn var(--dauer, 1800ms) var(--ease) both; }
 @keyframes ansageAn {
   0% { opacity: 0; }
   12% { opacity: 1; }
@@ -938,6 +938,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   height: 3px;
   background: var(--team);
   box-shadow: 0 0 14px var(--team);
+  transition: opacity var(--t-ui) linear;
 }
 .player.active {
   transform: translateY(-6px);
@@ -983,8 +984,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 /* „Raus" heißt: kein Licht mehr auf dem Pult. Der Punktestand bleibt trotzdem
    voll lesbar – die Leiste ist die einzige Stelle, an der der Raum die Zahlen
    ablesen kann, und die darf kein Zustand ausgrauen. */
-.player.raus::after { background: #3a4457; box-shadow: none; }
-.player.raus .pname, .player.raus .pmembers { opacity: 0.5; }
+.player.raus::after { opacity: 0.22; box-shadow: none; }
 
 /* Serie: erst ab drei in Folge, dafür dann unübersehbar. */
 .pserie {

@@ -10,6 +10,7 @@ let lastScores = new Map();
 let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
 let standVorRunde = null; // Platzierung am Ende der vorletzten Runde, für den Endstand
 let letzteRunde = null;   // zuletzt gesehene Rundennummer, für die Rundenansage
+let fuehrend = null;      // wer zuletzt allein vorne lag, für den Führungswechsel
 
 const act = hostAction;
 
@@ -38,8 +39,9 @@ connect({
  * Sekunden ist die Wand wieder frei, ohne dass jemand etwas drücken muss.
  */
 let ansageZeit = null;
-function ansagen(zeile1, zeile2 = '') {
+function ansagen(zeile1, zeile2 = '', dauer = 1800) {
   const box = $('#ansage');
+  box.style.setProperty('--dauer', `${dauer}ms`);
   $('#ansage-1').textContent = zeile1;
   $('#ansage-2').textContent = zeile2;
   $('#ansage-2').hidden = !zeile2;
@@ -51,7 +53,7 @@ function ansagen(zeile1, zeile2 = '') {
   ansageZeit = setTimeout(() => {
     box.classList.remove('an');
     box.hidden = true;
-  }, 1800);
+  }, dauer);
 }
 
 /** Kurzer Studioblitz in Teamfarbe – ein Element, kein Layout. */
@@ -223,6 +225,7 @@ function render(prev) {
     konfettiGefallen = false;
     standVorRunde = null;
     letzteRunde = null;
+    fuehrend = null;
     return renderLobby();
   }
 
@@ -629,6 +632,24 @@ function renderPlayers() {
     }
     lastScores.set(team.id, team.score);
   }
+
+  // Überholmanöver: Zwei Zahlen tauschen die Plätze, und wenn gerade niemand
+  // auf die Leiste schaut, merkt es keiner. Bewusst gedämpft – bei 48 Fragen
+  // darf so eine Ansage nicht zur Gewohnheit werden:
+  //  · erst ab 500 Punkten Vorsprungsniveau, darunter ist „Führung" eine
+  //    einzige Frage wert und wechselt in der Anfangsphase ständig,
+  //  · nur bei einem eindeutigen Wechsel, nicht bei Gleichstand,
+  //  · verzögert, damit der fliegende Punktewert und der Wertungston durch sind,
+  //  · ohne eigenen Ton, im selben Atemzug laufen schon zwei.
+  const fuehrendJetzt = bestScore > 0 && state.teams.filter((t) => t.score === bestScore).length === 1
+    ? state.teams.find((t) => t.score === bestScore)
+    : null;
+  if (fuehrendJetzt && fuehrend && fuehrendJetzt.id !== fuehrend && bestScore >= 500
+      && state.phase === 'question') {
+    const name = fuehrendJetzt.name;
+    setTimeout(() => ansagen('Führungswechsel', name, 1400), 900);
+  }
+  if (fuehrendJetzt) fuehrend = fuehrendJetzt.id;
 
   // Der Scheinwerfer liegt auf der Leiste und wandert zum Pult, das dran ist.
   // Am Pult selbst könnte er nicht hängen: Dessen clip-path (das Trapez)

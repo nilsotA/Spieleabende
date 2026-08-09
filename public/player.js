@@ -69,6 +69,17 @@ let buzzLock = false;
 async function pressBuzzer() {
   if (buzzLock) return;
 
+  // Probelauf in der Lobby: alles fühlt sich echt an, nur der Server erfährt
+  // nichts davon.
+  if (state?.phase === 'lobby') {
+    vibrate(45);
+    sound('buzz');
+    buzzer.classList.remove('probeHit');
+    void buzzer.offsetWidth;
+    buzzer.classList.add('probeHit');
+    return;
+  }
+
   if (!state?.you?.canBuzz) {
     // Bewusst kein disabled-Attribut: deaktivierte Buttons feuern gar keine
     // Events, dann bliebe ein zu früher Druck völlig unkommentiert.
@@ -141,7 +152,15 @@ function render(prev) {
   const me = state.teams.find((t) => t.id === state.you.teamId);
   $('#p-team').textContent = me?.name || '—';
   $('#p-name').textContent = (me?.members || []).map((m) => m.name).join(', ');
-  $('#p-score').textContent = me?.score ?? 0;
+
+  // Der eigene Punktestand sprang lautlos von 0 auf 250 – der Moment, um den
+  // das ganze Spiel geht, kam am Handy gar nicht an. Ausgelöst wird nur bei
+  // einer echten Wertung: Beim Start eines neuen Spiels setzt der Server alle
+  // Punkte auf 0, und dann soll nicht jedes Handy ein dickes Minus anzeigen.
+  const vorher = prev?.teams?.find((t) => t.id === state.you.teamId);
+  const gewertet = state.phase === 'question' && vorher && vorher.score !== me?.score;
+  if (gewertet) punktesprung(me.score - vorher.score, vorher.score, me.score);
+  else $('#p-score').textContent = me?.score ?? 0;
   // Teamwechsel lehnt der Server während einer Frage ab – Knopf dann ausblenden.
   $('#btn-leave').hidden = state.phase === 'question';
 
@@ -154,8 +173,43 @@ function render(prev) {
   // ohnehin nichts tun kann: beim Feldwählen (dort standen von sechs Kategorien
   // zwei im Bild), nach dem Auflösen und an den Rundenenden. Nur wenn wirklich
   // nichts anderes zu zeigen ist, bleibt er groß – dann ist er die Ansage.
-  const wartetAufFrage = state.phase === 'question' && state.current?.step !== 'result';
-  $('#view-play').classList.toggle('knopf-ruht', !wartetAufFrage);
+  // In der Lobby bleibt er ebenfalls groß: Ein Probeknopf von 88 Pixeln wäre
+  // kein Spielzeug, und etwas anderes ist dort ohnehin nicht zu sehen.
+  const grosserKnopf = state.phase === 'lobby'
+    || (state.phase === 'question' && state.current?.step !== 'result');
+  $('#view-play').classList.toggle('knopf-ruht', !grosserKnopf);
+}
+
+/**
+ * Der eigene Punktesprung, direkt in der Hand: Die Zahl läuft hoch statt zu
+ * springen, daneben fliegt der Zuwachs weg, und das Handy summt kurz. Ein
+ * Vollbildblitz wäre hier zu viel – man schaut ohnehin schon auf das Gerät.
+ */
+let sprungZeit = null;
+function punktesprung(delta, von, bis) {
+  const feld = $('#p-score');
+  const start = performance.now();
+  const schritt = (jetzt) => {
+    const t = Math.min(1, (jetzt - start) / 500);
+    feld.textContent = Math.round(von + (bis - von) * (1 - (1 - t) ** 3));
+    if (t < 1) requestAnimationFrame(schritt);
+  };
+  requestAnimationFrame(schritt);
+
+  feld.classList.remove('plus', 'minus');
+  void feld.offsetWidth;
+  feld.classList.add(delta > 0 ? 'plus' : 'minus');
+
+  const flieger = el('span', { class: `p-delta ${delta > 0 ? 'plus' : 'minus'}` },
+    `${delta > 0 ? '+' : ''}${delta}`);
+  feld.parentElement.append(flieger);
+  clearTimeout(sprungZeit);
+  sprungZeit = setTimeout(() => {
+    flieger.remove();
+    feld.classList.remove('plus', 'minus');
+  }, 1600);
+
+  vibrate(delta > 0 ? [30, 40, 30] : 120);
 }
 
 function renderJoin() {
@@ -272,7 +326,7 @@ function renderBuzzer(prev) {
   const status = $('#p-status');
   const label = $('#buzzer-label');
 
-  buzzer.classList.remove('armed', 'won', 'locked', 'fremd');
+  buzzer.classList.remove('armed', 'won', 'locked', 'fremd', 'probe');
   label.textContent = 'BUZZ';
   status.classList.remove('you');
 
@@ -287,8 +341,13 @@ function renderBuzzer(prev) {
     return;
   }
   if (state.phase === 'lobby') {
-    status.textContent = 'Warten auf den Start …';
-    lock('BEREIT');
+    // Warten auf den Start ist die längste tote Zeit des Abends. Der Knopf darf
+    // hier ausprobiert werden – er meldet nichts an den Server, aber er drückt
+    // sich, summt und leuchtet. Nebenbei entsperrt das erste Antippen den Ton
+    // auf iPhones, wo das ohne echte Geste nicht geht.
+    buzzer.classList.add('probe');
+    status.textContent = 'Warten auf den Start – Buzzer ausprobieren?';
+    label.textContent = 'PROBE';
     return;
   }
   if (state.phase === 'roundEnd') { status.textContent = 'Runde vorbei – gleich geht’s weiter.'; lock('PAUSE'); return; }
@@ -340,9 +399,14 @@ function renderBuzzer(prev) {
     label.textContent = mine ? 'DU!' : (team?.name || '').toUpperCase();
     // Wie knapp war es? Das Rennen endete für die Verlierer bisher wortlos.
     const knapp = q.buzzMs != null ? ` (${(q.buzzMs / 1000).toFixed(2).replace('.', ',')} s)` : '';
+    // Wer genau gedrückt hat, steht in q.buzzedBy – bei Zweierteams ist das die
+    // interessantere Angabe. Der Teamname steht ohnehin groß auf dem Knopf, also
+    // hier nicht doppelt. Beim Host-Buzz trägt buzzedBy den Teamnamen; dann
+    // bleibt es beim Team, sonst stünde dort „Team Rakete war schneller" zweimal.
+    const wer = q.buzzedBy && q.buzzedBy !== team?.name ? q.buzzedBy : team?.name;
     status.textContent = mine
       ? `Du warst zuerst${knapp} – antworte!`
-      : `${team?.name} war schneller${knapp}.`;
+      : `${wer} war schneller${knapp}.`;
     status.classList.toggle('you', mine);
     // Nur beim Übergang tönen, nicht bei jedem Update derselben Lage.
     if (prev && !(prev.current?.step === 'buzz' && prev.current?.buzzedTeamId)) {
