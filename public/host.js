@@ -815,6 +815,18 @@ function renderScoreboard() {
     sieger.classList.toggle('geteilt', geteilt);
   }
 
+  // Geteilte Plätze: Bei gleichem Punktestand steht dieselbe Zahl davor, und
+  // der nächste Platz überspringt entsprechend (1, 1, 3). Vorher zählte die
+  // Liste stur die Position durch – bei Gleichstand widersprach der Bildschirm
+  // sich selbst: Die Ansage sagte „Unentschieden", die Liste kürte einen davon
+  // mit Krone zum Ersten und setzte den anderen auf Platz 2. Die Pulte unten
+  // hatten es die ganze Zeit richtig, dort leuchteten beide.
+  const raenge = ranked.map((t, i) => i);
+  for (let i = 1; i < ranked.length; i++) {
+    raenge[i] = ranked[i].score === ranked[i - 1].score ? raenge[i - 1] : i;
+  }
+  const platz = (i) => raenge[i] + 1;
+
   const key = ranked.map((t) => `${t.id}:${t.score}`).join('|') + `#${state.phase}`;
   if (list.dataset.key !== key) {
     list.dataset.key = key;
@@ -827,10 +839,10 @@ function renderScoreboard() {
       // nackten Zahlen wird eine Geschichte, wenn danebensteht, wer sich um
       // wie viele Plätze geschoben hat.
       const vorher = final ? standVorRunde?.get(team.id) : null;
-      const sprung = vorher ? vorher.rang - i : 0;
+      const sprung = vorher ? vorher.rang - raenge[i] : 0;
       list.append(
-        el('li', { class: i === 0 ? 'first' : '', style: { '--i': stufe, '--team': team.color } },
-          el('span', { class: 'rank' }, `${i + 1}`),
+        el('li', { class: raenge[i] === 0 ? 'first' : '', style: { '--i': stufe, '--team': team.color } },
+          el('span', { class: 'rank' }, `${platz(i)}`),
           el('span', { class: 'sname' }, team.name),
           // Nur wer sich bewegt hat, bekommt einen Pfeil. Vier Punkte für „nichts
           // passiert" wären bloß Rauschen in der wichtigsten Tabelle des Abends.
@@ -847,7 +859,7 @@ function renderScoreboard() {
   // Der Stand am Ende der vorletzten Runde ist die Vergleichsmarke. Der Server
   // kennt ihn nicht – der Host-Screen merkt ihn sich einfach beim Durchlaufen.
   if (!final) {
-    standVorRunde = new Map(ranked.map((t, i) => [t.id, { score: t.score, rang: i }]));
+    standVorRunde = new Map(ranked.map((t, i) => [t.id, { score: t.score, rang: raenge[i] }]));
   }
   zeigeRekorde(final, ranked);
   $('#btn-next-round').hidden = final;
