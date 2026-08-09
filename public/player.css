@@ -27,6 +27,18 @@ body {
   gap: 0.8rem;
   -webkit-overflow-scrolling: touch;
 }
+/* Andeutung, dass unten noch etwas kommt.
+
+   Bei acht Teams braucht die Punkteleiste fünf Zeilen, und die letzte wird vom
+   unteren Rand mittendurch geschnitten – gemessen lagen 380 Pixel unterhalb der
+   Sichtkante. Erreichbar war das immer, es sah nur nach Darstellungsfehler aus
+   statt nach „hier geht es weiter". Die Maske sitzt am Sichtfenster, nicht am
+   Inhalt, und wird abgeschaltet, sobald man unten angekommen ist – sonst bliebe
+   die letzte Zeile für immer blass. */
+.pscroll.mehr {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.2rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2.2rem), transparent);
+}
 
 /* ------------------------------------------------------------ Anmeldung */
 

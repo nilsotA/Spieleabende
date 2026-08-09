@@ -172,6 +172,7 @@ function render(prev) {
   renderBuzzer(prev);
   renderBilanz(me);
   renderScores();
+  zeigeMehr();
 
   // Der Buzzer tritt zurück, wann immer etwas anderes den Platz braucht und er
   // ohnehin nichts tun kann: beim Feldwählen (dort standen von sechs Kategorien
@@ -183,6 +184,21 @@ function render(prev) {
     || (state.phase === 'question' && state.current?.step !== 'result');
   $('#view-play').classList.toggle('knopf-ruht', !grosserKnopf);
 }
+
+/**
+ * Blendet die Unterkante aus, solange unterhalb noch etwas steht – die einzige
+ * Andeutung, dass sich das Scrollen lohnt. Erst nach dem Zeichnen messen: Vorher
+ * hat der Browser die neuen Zeilen noch nicht gesetzt.
+ */
+function zeigeMehr() {
+  const sc = document.querySelector('.pscroll');
+  if (!sc) return;
+  requestAnimationFrame(() => {
+    sc.classList.toggle('mehr', sc.scrollHeight - sc.clientHeight - sc.scrollTop > 4);
+  });
+}
+document.querySelector('.pscroll')?.addEventListener('scroll', zeigeMehr, { passive: true });
+addEventListener('resize', zeigeMehr);
 
 /**
  * Der eigene Punktesprung, direkt in der Hand: Die Zahl läuft hoch statt zu
@@ -246,10 +262,14 @@ function renderJoin() {
       );
     }
   }
+  // Während einer offenen Frage steht die Teamzuordnung still. „Du kannst
+  // trotzdem einsteigen" wäre dann ein Versprechen, das der Knopf gleich bricht.
   $('#join-hint').textContent =
     state.phase === 'lobby'
       ? 'Für Zweierteams wählt ihr beide dasselbe Team.'
-      : 'Das Spiel läuft schon – du kannst trotzdem einsteigen.';
+      : state.phase === 'question'
+        ? 'Gerade läuft eine Frage – gleich danach kannst du einsteigen.'
+        : 'Das Spiel läuft schon – du kannst trotzdem einsteigen.';
 }
 
 function renderQuestion() {

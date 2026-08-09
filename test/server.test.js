@@ -448,3 +448,82 @@ test('bei gleichzeitigem Buzz gewinnt genau einer', async (t) => {
   assert.ok(nachher.current.buzzedTeamId, 'ein Team hat den Buzz');
   assert.notEqual(nachher.current.buzzedTeamId, zugTeam, 'nicht das Zugteam');
 });
+
+test('acht Teams mit je zwei Handys überstehen Abbruch und Rückkehr', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const port = 5600 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'party-host');
+  const namen = ['Rot', 'Blau', 'Grün', 'Gelb', 'Lila', 'Türkis', 'Orange', 'Pink'];
+  for (const name of namen) await host({ type: 'addTeam', name });
+  const teams = (await zustand(base)).teams;
+
+  // 16 Geräte, zwei je Team – jedes mit eigenem Ereignisstrom.
+  const stroeme = [];
+  const geraete = [];
+  for (const [i, team] of teams.entries()) {
+    for (const zweit of [0, 1]) {
+      const clientId = `handy-${i}-${zweit}`;
+      const res = await fetch(`${base}/api/events?clientId=${clientId}&role=player`);
+      const reader = res.body.getReader();
+      reader.read(); // Strom offen halten
+      stroeme.push({ clientId, reader });
+      geraete.push({ clientId, teamId: team.id });
+    }
+  }
+  await warte(300);
+  for (const g of geraete) {
+    await fetch(`${base}/api/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: g.clientId, role: 'player', type: 'joinTeam', teamId: g.teamId, name: g.clientId }),
+    });
+  }
+  await warte(300);
+
+  let z = await zustand(base);
+  assert.deepEqual(z.teams.map((x) => x.members.length), new Array(8).fill(2), 'alle 16 sind drin');
+  assert.ok(z.teams.every((x) => x.members.every((m) => m.online)), 'und alle online');
+
+  await host({ type: 'startGame', set: SATZ });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'pass' });
+
+  // Mitten im offenen Buzzer verliert ein Gerät die Verbindung.
+  const opfer = stroeme.find((s) => s.clientId === 'handy-3-0');
+  await opfer.reader.cancel();
+  await warte(400);
+
+  z = await zustand(base);
+  const teamDesOpfers = z.teams.find((x) => x.members.some((m) => m.clientId === 'handy-3-0'));
+  assert.ok(teamDesOpfers, 'das Gerät bleibt im Team stehen');
+  assert.equal(teamDesOpfers.members.find((m) => m.clientId === 'handy-3-0').online, false, 'aber als offline');
+  assert.equal(teamDesOpfers.members.find((m) => m.clientId === 'handy-3-1').online, true, 'das zweite Handy bleibt online');
+
+  // Das zweite Handy desselben Teams kann weiter buzzern – der Ausfall des
+  // ersten darf das Team nicht aus dem Rennen nehmen.
+  const gebuzzert = await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'handy-3-1', role: 'player', type: 'buzz' }),
+  }).then((r) => r.json());
+  assert.ok(!gebuzzert.error, `Buzz sollte durchgehen, kam aber: ${gebuzzert.error}`);
+
+  await host({ type: 'judge', correct: true });
+  z = await zustand(base);
+  assert.equal(z.teams.find((x) => x.id === teamDesOpfers.id).score, 50, 'halbe Punkte für den Buzz');
+
+  // Und das abgestürzte Handy kommt zurück – mitten im Spiel, ohne neu beizutreten.
+  const zurueck = await fetch(`${base}/api/events?clientId=handy-3-0&role=player`);
+  zurueck.body.getReader().read();
+  await warte(400);
+  z = await zustand(base);
+  const wieder = z.teams.find((x) => x.id === teamDesOpfers.id).members.find((m) => m.clientId === 'handy-3-0');
+  assert.equal(wieder.online, true, 'wieder online, ohne erneut beizutreten');
+  assert.equal(wieder.name, 'handy-3-0', 'und mit demselben Namen');
+});

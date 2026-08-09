@@ -142,7 +142,7 @@ export function teamOfClient(state, clientId) {
  * gebuzzert hat, einfach das Team wechseln und es nochmal versuchen.
  */
 export function joinTeam(state, clientId, teamId, name) {
-  requireNotMidQuestion(state);
+  requireNotMidQuestion(state, clientId);
   const target = findTeam(state, teamId);
   const alreadyIn = target.members.some((m) => m.clientId === clientId);
   // Kapazität VOR dem Entfernen prüfen – sonst steht der Spieler bei einem Fehler
@@ -193,10 +193,19 @@ function countOnline(team) {
   return team.members.filter((m) => m.online !== false).length;
 }
 
-function requireNotMidQuestion(state) {
-  if (state.phase === 'question') {
-    throw new GameError('Teamwechsel geht erst wieder, wenn die Frage durch ist.');
-  }
+/**
+ * Während einer laufenden Frage bleibt die Teamzuordnung fest – sonst könnte ein
+ * Gerät, das schon falsch gebuzzert hat, das Team wechseln und es nochmal
+ * versuchen. Der Text unterscheidet, wen es trifft: Wer noch in keinem Team
+ * steht, will einsteigen und nicht wechseln, und „Teamwechsel geht nicht" wäre
+ * für ihn eine Antwort auf eine Frage, die er nie gestellt hat.
+ */
+function requireNotMidQuestion(state, clientId = null) {
+  if (state.phase !== 'question') return;
+  const drin = clientId ? !!teamOfClient(state, clientId) : true;
+  throw new GameError(drin
+    ? 'Teamwechsel geht erst wieder, wenn die Frage durch ist.'
+    : 'Gleich – sobald die laufende Frage durch ist, kannst du einsteigen.');
 }
 
 export function adjustScore(state, teamId, delta) {
