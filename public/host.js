@@ -331,10 +331,10 @@ function renderBoard() {
             'data-cell': `${catIdx}-${rowIdx}`,
             // --r ist die Zeile: Je teurer das Feld, desto größer die Ziffer.
             style: { gridColumn: catIdx + 1, gridRow: rowIdx + 2, '--i': catIdx + rowIdx, '--r': rowIdx },
-            onclick: () => {
-              sound('pick');
-              act('pick', { catIdx, rowIdx });
-            },
+            // Der Ton hängt am Zustandswechsel, nicht am Klick: Das Feld lässt
+            // sich auch vom Handy des Hosts aus wählen, und dann klappte das
+            // Panel auf der Leinwand stumm auf.
+            onclick: () => act('pick', { catIdx, rowIdx }),
           }, el('span', {}, String(cell.value))),
         );
       });
@@ -393,6 +393,11 @@ function renderQuestion(prev) {
   }
   const neu = !prev?.current || prev.current.catIdx !== q.catIdx || prev.current.rowIdx !== q.rowIdx;
   box.hidden = false;
+  // Das Feld ist gewählt – egal ob auf der Leinwand angeklickt oder auf dem
+  // Handy angetippt. `prev` ist nur beim allerersten Zustand leer: Ein Reload
+  // des Host-Screens mitten in einer Frage baut das Panel ebenfalls neu auf,
+  // und dann wäre der Ton gelogen.
+  if (neu && prev) sound('pick');
   if (neu) {
     peek = false; // die Lösung nicht von der Vorfrage her offen lassen
     // Das Wackeln von einer falschen Antwort blieb sonst als Klasse hängen –

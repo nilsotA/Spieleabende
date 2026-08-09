@@ -143,3 +143,54 @@ body.remote #app {
   line-height: 1.4;
   color: #b9d8f6;
 }
+
+/* ------------------------------------------------------- Feldwahl am Handy */
+
+/* Eine Zeile je Kategorie: Der Name steht ganz da, und die Werte darunter sind
+   groß genug, um sie im abgedunkelten Wohnzimmer sicher zu treffen. */
+.r-board h2 {
+  margin: 0 0 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.r-bcat {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9fd4ff;
+  margin-top: 0.7rem;
+}
+.r-bcat:first-child { margin-top: 0; }
+.r-brow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(3.2rem, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+}
+.r-bcell {
+  min-height: 2.9rem; /* Daumenbreite, nicht Zeigefingerspitze */
+  border: 1px solid rgba(120, 170, 235, 0.4);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(32, 62, 108, 0.9), rgba(10, 20, 38, 0.95));
+  color: #eaf3ff;
+  font-family: var(--font);
+  font-weight: 900;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.r-bcell:active { transform: translateY(2px) scale(0.97); filter: brightness(1.2); }
+/* Gespielte Felder bleiben stehen, statt zu verschwinden: Die Reihe behält ihre
+   Ordnung, und man sieht auf einen Blick, was von der Kategorie noch übrig ist.
+   Nur ausgegraut – der Wert bleibt lesbar, sonst rät man beim Vergleich. */
+.r-bcell.used {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(120, 170, 235, 0.16);
+  color: #64748b;
+  text-decoration: line-through;
+}
+@media (prefers-reduced-motion: reduce) {
+  .r-bcell:active { transform: none; }
+}

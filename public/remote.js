@@ -55,6 +55,8 @@ function render() {
   }
   const setz = (...knoepfe) => { if (neueLeiste) bar.append(...knoepfe); };
 
+  renderFeldwahl();
+
   box.hidden = !q;
   if (q) {
     $('#r-cat').textContent = `${q.category} · ${q.value} Punkte`;
@@ -169,6 +171,52 @@ function render() {
         ),
       );
     });
+  }
+}
+
+/**
+ * Feldwahl auf dem Handy.
+ *
+ * Bisher konnte der Host alles von der Couch aus: vorlesen, werten, auflösen –
+ * nur für das nächste Feld musste er jedes Mal zum Laptop. Das ist 24-mal pro
+ * Runde und der einzige Grund, überhaupt aufzustehen.
+ *
+ * Eine Zeile je Kategorie statt eines Rasters wie auf der Leinwand: Sechs
+ * Spalten nebeneinander ergeben auf einem 360er Handy Knöpfe von 50 Pixeln,
+ * und die Kategorienamen wären nicht mehr zu lesen. Untereinander bleibt Platz
+ * für den ganzen Namen und für Tippflächen, die man auch im Halbdunkel trifft.
+ */
+function renderFeldwahl() {
+  const karte = $('#r-board');
+  const liste = $('#r-board-list');
+  const zeigen = state.phase === 'board' && !!state.board;
+  karte.hidden = !zeigen;
+  if (!zeigen) {
+    // Schlüssel löschen, damit die Wahl beim nächsten Auftauchen sicher neu
+    // gebaut wird – zwischendurch kann eine ganze Runde gewechselt haben.
+    liste.dataset.key = '';
+    return;
+  }
+
+  const key = [state.setName, state.round, state.turnIndex, state.board.categories
+    .map((c) => `${c.name}:${c.cells.map((z) => (z.used ? '1' : '0')).join('')}`).join('|')].join('#');
+  if (liste.dataset.key === key) return;
+  liste.dataset.key = key;
+  liste.innerHTML = '';
+
+  for (const [catIdx, cat] of state.board.categories.entries()) {
+    liste.append(
+      el('div', { class: 'r-bcat' }, cat.name),
+      el('div', { class: 'r-brow' }, ...cat.cells.map((cell, rowIdx) => el('button', {
+        class: `r-bcell${cell.used ? ' used' : ''}`,
+        type: 'button',
+        disabled: cell.used,
+        // Ohne Beschriftung liest ein Screenreader nur „300" – bei sechs
+        // Kategorien untereinander sagt das nichts.
+        'aria-label': `${cat.name}, ${cell.value} Punkte${cell.used ? ' – schon gespielt' : ''}`,
+        onclick: () => act('pick', { catIdx, rowIdx }),
+      }, String(cell.value)))),
+    );
   }
 }
 
