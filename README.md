@@ -131,13 +131,14 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   Stimmt die Anzahl nicht, sagt das die Fragensatz-Auswahl im Host-Screen direkt –
   nichts wird stillschweigend abgeschnitten.
 - `image` ist optional: eine URL, ein `data:`-URI oder ein Dateiname aus `data/bilder/`
-  (dann als `"/bilder/foto.jpg"` eintragen).
+  (dann als `"/bilder/foto.jpg"` eintragen). Bei Bildfragen tritt der Buzzer auf dem
+  Handy zurück, damit das Bild vollständig sichtbar bleibt.
 - `note` ist optional und erscheint beim Auflösen als kleiner Zusatz.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.
 
 ### Mitgeliefert
 
-Vier fertige Sätze mit je 48 Fragen – zusammen 192, keine doppelt:
+Fünf fertige Sätze mit je 48 Fragen – zusammen 240, keine doppelt:
 
 | Satz | Kategorien |
 |---|---|
@@ -145,6 +146,7 @@ Vier fertige Sätze mit je 48 Fragen – zusammen 192, keine doppelt:
 | **Popkultur & Emoji** | Emoji-Rätsel, Filmzitate, Werbeslogans, Serien, Musik, Gaming |
 | **Kopfnuss** | Anagramme, Geheimschrift, Schätzfragen, Logik, Wahr oder falsch |
 | **Deutschland-Duell** | KFZ-Kennzeichen, Bundesländer, Dialekt, Marken, Erfindungen |
+| **Länder & Flaggen** | Flaggen zum Ansehen, Hauptstädte, Wahrzeichen, Währungen, Nachbarländer |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen.
@@ -154,6 +156,9 @@ bei jedem Start neu gewürfelt. So ist kein Abend wie der andere.
 
 Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
 `Welcher Film?\n🦁 👑` sind die Symbole ja die eigentliche Frage.
+
+Die Flaggen in „Länder & Flaggen“ sind als SVG gezeichnet und liegen in `data/bilder/`.
+Keine Downloads, keine externen Bilder – das Quiz läuft auch ohne Internet.
 
 ---
 
@@ -176,6 +181,8 @@ Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
 - **Tests:** `npm test` (Node-Testrunner). Neben den Punkte- und Buzzer-Regeln,
   der Fragensatz-Prüfung und dem QR-Encoder laufen Integrationstests gegen einen
   echten Server – inklusive `SIGKILL` mitten im Spiel und anschließendem Neustart.
+  Ein Test prüft außerdem, dass innerhalb einer Kategorie keine Frage die Lösung
+  einer anderen verrät – so etwas verschenkt sonst ausgerechnet die teuerste Frage.
 
 ```
 server/   game.js (Spielregeln) · questions.js (Fragensätze) · index.js (HTTP/SSE)

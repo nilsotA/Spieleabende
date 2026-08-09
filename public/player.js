@@ -163,7 +163,11 @@ function renderJoin() {
 function renderQuestion() {
   const box = $('#p-question');
   const q = state.current;
-  if (!q) { box.hidden = true; return; }
+  if (!q) {
+    box.hidden = true;
+    $('#view-play').classList.remove('hat-bild');
+    return;
+  }
   box.hidden = false;
   $('#p-q-head').textContent = `${q.category} · ${q.value} Punkte`;
   setFrageText($('#p-q-text'), q.text);
@@ -175,6 +179,9 @@ function renderQuestion() {
     img.hidden = true;
     img.removeAttribute('src');
   }
+  // Bei Bildfragen tritt der Buzzer-Kreis zurück, damit das Bild ganz sichtbar bleibt.
+  $('#view-play').classList.toggle('hat-bild', !!q.image);
+
   const answer = $('#p-q-answer');
   answer.hidden = !q.revealed;
   answer.textContent = q.answer || '';

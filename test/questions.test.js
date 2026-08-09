@@ -152,3 +152,54 @@ test('zwei Mixe unterscheiden sich', async () => {
   for (let i = 0; i < 10; i++) proben.add(await alsText());
   assert.ok(proben.size > 1, 'der Mix würfelt nicht');
 });
+
+/**
+ * Innerhalb einer Kategorie darf keine Frage die Lösung einer anderen verraten.
+ * Genau das war passiert: Die 100er-Frage nannte den Mount Everest als Antwort,
+ * die 500er fragte nach dessen Gebirge – damit war die teuerste Frage geschenkt.
+ */
+test('keine Frage verrät die Lösung einer anderen derselben Kategorie', async () => {
+  const stoppwoerter = new Set([
+    'der', 'die', 'das', 'des', 'dem', 'den', 'ein', 'eine', 'einer', 'eines',
+    'und', 'oder', 'aus', 'von', 'für', 'mit', 'auf', 'ist', 'sind', 'was',
+    'wer', 'wie', 'wo', 'welche', 'welcher', 'welches', 'welchem', 'welchen',
+    'in', 'im', 'am', 'an', 'zu', 'zum', 'zur', 'es', 'man', 'sich', 'nicht',
+    'heißt', 'nennt', 'gibt', 'hat', 'haben', 'seit', 'auch', 'noch', 'aber',
+  ]);
+  // Antwortformate, die in ihrer Kategorie naturgemäß mehrfach vorkommen.
+  const formatantworten = /^(wahr|falsch|ja|nein)\b/i;
+
+  const kernwoerter = (text) =>
+    text.toLowerCase()
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length >= 4 && !stoppwoerter.has(w));
+
+  const verraeter = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    set.rounds.forEach((round, ri) => {
+      for (const cat of round.categories) {
+        cat.questions.forEach((q, i) => {
+          if (formatantworten.test(q.answer.trim())) return;
+          const loesung = kernwoerter(q.answer);
+          if (!loesung.length) return;
+          cat.questions.forEach((andere, j) => {
+            if (i === j) return;
+            const anderswo = kernwoerter(`${andere.text} ${andere.answer}`);
+            // Erst wenn die Lösung vollständig anderswo steht, ist sie verraten.
+            // Ganze Wörter, damit „Spiel“ nicht in „Spieleabend“ anschlägt.
+            const vollstaendig = loesung.every((w) => anderswo.includes(w));
+            if (vollstaendig) {
+              verraeter.push(
+                `${datei} R${ri + 1} „${cat.name}“: Lösung von Frage ${i + 1} („${q.answer}“) `
+                + `steht schon in Frage ${j + 1} („${andere.text}“)`,
+              );
+            }
+          });
+        });
+      }
+    });
+  }
+  assert.deepEqual(verraeter, []);
+});

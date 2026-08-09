@@ -84,7 +84,12 @@ body {
 }
 .p-status.you { color: #f8d548; }
 
+/* Ohne min-height/overflow staucht der Flex-Container den Kasten unter seinen
+   Inhalt, und die Buzz-Zone legt sich über die untere Bildhälfte. */
 .p-question {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   border-radius: 14px;
   background: radial-gradient(130% 90% at 50% -18%, #235c9e 0%, #123566 44%, #0a1e3a 100%);
   box-shadow: inset 0 0 0 1px rgba(150, 200, 255, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -141,8 +146,8 @@ body {
    Deshalb zählt die ganze freie Fläche, und der Knopf nimmt sie so weit wie
    möglich ein. */
 .buzz-zone {
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 7rem;
   display: grid;
   place-items: center;
   padding-bottom: 1.7rem; /* Platz für den Sockelschatten */
@@ -151,7 +156,10 @@ body {
 .buzzer {
   appearance: none;
   border: none;
-  width: min(86vw, 46dvh);
+  /* An die Zone gebunden, nicht an feste Viewport-Anteile: dadurch bleibt der
+     Kreis rund und passt sich an, wenn die Frage darüber mehr Platz braucht. */
+  height: min(100%, 86vw);
+  width: auto;
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 32%, #3b4762 0%, #232c3d 45%, #131a26 100%);
@@ -249,3 +257,29 @@ html, body { touch-action: manipulation; }
 
 /* Emoji-Rätsel: die Symbole sind die Frage, nicht Beiwerk. */
 .p-q-text .symbolzeile { display: inline-block; font-size: 1.9em; line-height: 1.3; letter-spacing: 0.1em; }
+
+
+/* Bildfragen: Alle müssen das Bild sehen können, sonst ist die Frage wertlos.
+   Der sichtbare Buzzer-Kreis darf dafür kleiner werden – getroffen wird ohnehin
+   die ganze Zone drumherum. */
+/* Bei Bildfragen bekommt der Buzzer eine feste Höhe und der Fragenkasten den
+   ganzen Rest – das Bild ist hier der Inhalt, der Buzzer nur der Knopf. Getroffen
+   wird ohnehin die ganze Zone, nicht nur der Kreis. */
+.hat-bild .p-question {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.hat-bild .buzz-zone { flex: 0 0 auto; height: 32dvh; }
+/* Feste Bildhöhe statt Flex-Wettstreit mit dem Buzzer: sonst quetscht ein
+   knapper Bildschirm das Bild zu einem Streifen. object-fit hält das
+   Seitenverhältnis, egal ob die Flagge quadratisch oder 3:2 ist. */
+.hat-bild .p-q-image {
+  flex: 1 1 auto;
+  min-height: 5rem;
+  max-height: none;
+  width: 100%;
+  object-fit: contain;
+}

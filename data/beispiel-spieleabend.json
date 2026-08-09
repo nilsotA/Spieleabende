@@ -8,9 +8,8 @@
           "name": "Erdkunde",
           "questions": [
             {
-              "text": "Wie heißt die Hauptstadt von Australien?",
-              "answer": "Canberra",
-              "note": "Nicht Sydney – der häufigste Irrtum."
+              "text": "Welches Land hat die Form eines Stiefels?",
+              "answer": "Italien"
             },
             {
               "text": "Welcher Fluss fließt durch Wien, Budapest und Belgrad?",

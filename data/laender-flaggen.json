@@ -1,0 +1,285 @@
+{
+  "name": "Länder & Flaggen",
+  "description": "Flaggen zum Ansehen, Hauptstädte, Wahrzeichen und Nachbarländer – der Satz für alle, die gern auf Karten schauen.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Flaggen",
+          "questions": [
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Japan",
+              "image": "/bilder/flagge-japan.svg"
+            },
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Italien",
+              "note": "Irland sieht fast gleich aus – dort ist der dritte Streifen aber orange, nicht rot",
+              "image": "/bilder/flagge-italien.svg"
+            },
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Die Schweiz",
+              "note": "Als einzige Nationalflagge quadratisch – Dänemark ist länglich und hat das Kreuz zum Mast versetzt",
+              "image": "/bilder/flagge-schweiz.svg"
+            },
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Schweden",
+              "image": "/bilder/flagge-schweden.svg"
+            }
+          ]
+        },
+        {
+          "name": "Hauptstädte",
+          "questions": [
+            {
+              "text": "Wie heißt die Hauptstadt von Italien?",
+              "answer": "Rom"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Portugal?",
+              "answer": "Lissabon"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Kroatien?",
+              "answer": "Zagreb"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Slowenien?",
+              "answer": "Ljubljana"
+            }
+          ]
+        },
+        {
+          "name": "Wahrzeichen",
+          "questions": [
+            {
+              "text": "In welcher Stadt steht der Eiffelturm?",
+              "answer": "In Paris"
+            },
+            {
+              "text": "In welchem Land liegt Machu Picchu?",
+              "answer": "In Peru"
+            },
+            {
+              "text": "In welcher Stadt steht die Christusstatue auf dem Berg Corcovado?",
+              "answer": "In Rio de Janeiro"
+            },
+            {
+              "text": "In welchem Land steht die Tempelanlage Angkor Wat?",
+              "answer": "In Kambodscha"
+            }
+          ]
+        },
+        {
+          "name": "Währungen",
+          "questions": [
+            {
+              "text": "Womit bezahlt man in Japan?",
+              "answer": "Mit Yen"
+            },
+            {
+              "text": "Womit bezahlt man in Großbritannien?",
+              "answer": "Mit Pfund Sterling"
+            },
+            {
+              "text": "Womit bezahlt man in Polen?",
+              "answer": "Mit Złoty"
+            },
+            {
+              "text": "Womit bezahlt man in Indien?",
+              "answer": "Mit Rupien"
+            }
+          ]
+        },
+        {
+          "name": "Nachbarländer",
+          "questions": [
+            {
+              "text": "Welches Land umschließt San Marino vollständig?",
+              "answer": "Italien"
+            },
+            {
+              "text": "Welches Land ist Portugals einziger Nachbar zu Lande?",
+              "answer": "Spanien"
+            },
+            {
+              "text": "Welches Land umschließt Lesotho vollständig?",
+              "answer": "Südafrika"
+            },
+            {
+              "text": "Wie viele Nachbarländer hat Deutschland?",
+              "answer": "Neun",
+              "note": "Dänemark, Polen, Tschechien, Österreich, Schweiz, Frankreich, Luxemburg, Belgien, Niederlande"
+            }
+          ]
+        },
+        {
+          "name": "Inseln & Meere",
+          "questions": [
+            {
+              "text": "Zu welchem Land gehört Mallorca?",
+              "answer": "Zu Spanien"
+            },
+            {
+              "text": "In welchem Meer liegt Kreta?",
+              "answer": "Im Mittelmeer",
+              "note": "„Ägäis“ oder „Kretisches Meer“ zählt auch – beides gehört zum Mittelmeer"
+            },
+            {
+              "text": "Wie heißt die größte Insel der Erde?",
+              "answer": "Grönland"
+            },
+            {
+              "text": "Zu welchem Land gehört die Osterinsel?",
+              "answer": "Zu Chile"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Flaggen für Fortgeschrittene",
+          "questions": [
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Griechenland",
+              "image": "/bilder/flagge-griechenland.svg"
+            },
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Belgien",
+              "note": "Deutschland hat dieselben Farben, aber waagerecht – hier stehen sie senkrecht",
+              "image": "/bilder/flagge-belgien.svg"
+            },
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Tschechien",
+              "note": "Die Tschechoslowakei hatte dieselbe Flagge – Tschechien behielt sie 1993",
+              "image": "/bilder/flagge-tschechien.svg"
+            },
+            {
+              "text": "Welches Land hat diese Flagge?",
+              "answer": "Vietnam",
+              "image": "/bilder/flagge-vietnam.svg"
+            }
+          ]
+        },
+        {
+          "name": "Hauptstädte für Fortgeschrittene",
+          "questions": [
+            {
+              "text": "Wie heißt die Hauptstadt von Australien?",
+              "answer": "Canberra",
+              "note": "Nicht Sydney"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Kanada?",
+              "answer": "Ottawa",
+              "note": "Nicht Toronto"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Neuseeland?",
+              "answer": "Wellington",
+              "note": "Nicht Auckland"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Marokko?",
+              "answer": "Rabat",
+              "note": "Nicht Casablanca"
+            }
+          ]
+        },
+        {
+          "name": "Was ist die Frage?",
+          "questions": [
+            {
+              "text": "Dieser Fluss ist der längste Afrikas.",
+              "answer": "Was ist der Nil?"
+            },
+            {
+              "text": "Diese Meerenge trennt Europa von Afrika.",
+              "answer": "Was ist die Straße von Gibraltar?"
+            },
+            {
+              "text": "Dieser Staat ist der kleinste der Welt.",
+              "answer": "Was ist der Vatikan?"
+            },
+            {
+              "text": "Dieses Land besteht aus mehr als 17.000 Inseln.",
+              "answer": "Was ist Indonesien?"
+            }
+          ]
+        },
+        {
+          "name": "Sprachen der Welt",
+          "questions": [
+            {
+              "text": "In welchem Land ist Hindi eine der Amtssprachen?",
+              "answer": "In Indien"
+            },
+            {
+              "text": "Welche Sprache spricht man in Brasilien?",
+              "answer": "Portugiesisch"
+            },
+            {
+              "text": "Welche zwei Amtssprachen hat Kanada?",
+              "answer": "Englisch und Französisch"
+            },
+            {
+              "text": "In welchem südamerikanischen Land ist Niederländisch Amtssprache?",
+              "answer": "In Suriname"
+            }
+          ]
+        },
+        {
+          "name": "Städte der Welt",
+          "questions": [
+            {
+              "text": "Welche Millionenstadt teilt der Bosporus in einen europäischen und einen asiatischen Teil?",
+              "answer": "Istanbul"
+            },
+            {
+              "text": "In welchem Land liegt die Stadt Kyoto?",
+              "answer": "In Japan"
+            },
+            {
+              "text": "Wie hieß New York, bevor es New York hieß?",
+              "answer": "Neu-Amsterdam"
+            },
+            {
+              "text": "Welche Hauptstadt eines souveränen Staates liegt am weitesten nördlich?",
+              "answer": "Reykjavík",
+              "note": "Nuuk in Grönland liegt noch nördlicher, ist aber nicht Hauptstadt eines eigenen Staates"
+            }
+          ]
+        },
+        {
+          "name": "Berge & Flüsse",
+          "questions": [
+            {
+              "text": "Wie heißt der höchste Berg der Erde?",
+              "answer": "Der Mount Everest"
+            },
+            {
+              "text": "Welcher Fluss fließt durch Paris?",
+              "answer": "Die Seine"
+            },
+            {
+              "text": "Wie heißt der längste Fluss Südamerikas?",
+              "answer": "Der Amazonas"
+            },
+            {
+              "text": "Wie heißt der längste Fluss Europas?",
+              "answer": "Die Wolga"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
