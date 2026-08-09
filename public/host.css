@@ -1221,6 +1221,52 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   padding: 1rem;
 }
 .menu-card { width: min(600px, 100%); max-height: 90vh; overflow: auto; }
+
+/* Spickzettel im Menü.
+
+   Die Punkteregeln standen nur in der Lobby – mitten im Abend musste der Host
+   sie aus dem Kopf erklären, und bei acht Leuten fragt garantiert jemand nach.
+   Bewusst aus dem Zustand gebaut statt fest getextet: Abzug, Zugfolge und
+   „Buzzern nach richtig" sind einstellbar, ein starrer Zettel wäre für die
+   halben Runden schlicht falsch. */
+.spick {
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.spick h3 {
+  margin: 0 0 0.5rem;
+  /* Nicht kleiner als der Rest des Menüs: 0.72rem wie sonst bei Abschnitts-
+     überschriften wären hier 11,5px und damit das Kleinste auf dem Schirm –
+     ausgerechnet auf dem Zettel, den man im Halbdunkel überfliegt. */
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.spick h3 + .spick-liste { margin-bottom: 1rem; }
+.spick-liste {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.9rem;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.spick-liste dt { font-weight: 800; color: #9fd4ff; white-space: nowrap; }
+.spick-liste dd { margin: 0; }
+.spick-liste .jetzt { color: var(--gold-hell); }
+/* Die Taste sieht aus wie eine Taste – wie unten in der Steuerleiste. Dort darf
+   sie klein sein, weil sie neben der Beschriftung nur mitläuft; hier ist sie
+   das, was man sucht. */
+.spick-taste {
+  font: inherit;
+  font-size: 0.92em;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 0.35em;
+  opacity: 0.8;
+}
 .menu-teams { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 .menu-teams li { display: flex; align-items: center; gap: 0.5rem; }
 .menu-teams .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }

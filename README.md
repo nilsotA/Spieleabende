@@ -141,7 +141,15 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 | `L` | Lösung kurz aufdecken (Achtung: alle sehen den Bildschirm) |
 | `Leertaste` | Weiter / nächste Runde |
 | `F` | Vollbild an/aus (geht auch schon in der Lobby) |
-| `Esc` | Menü (Punkte korrigieren, Zug setzen, Ton an/aus) |
+| `Esc` | Menü (Punkte korrigieren, Zug setzen, Ton an/aus, Spickzettel) |
+
+### Spickzettel
+
+Im Menü (`Esc`) stehen die Punkteregeln so, **wie sie für diese Runde eingestellt
+sind** – samt der Zahlen der gerade laufenden Frage. Wer Abzug oder Zugfolge
+umstellt, sieht das dort sofort; ein fest getexteter Zettel wäre für die halben
+Runden falsch, und ein falscher Spickzettel ist schlimmer als keiner. Darunter
+liegen die Tastenkürzel, damit man sie nicht im README suchen muss.
 
 ### Ton
 

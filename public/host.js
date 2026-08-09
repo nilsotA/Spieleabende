@@ -1177,6 +1177,7 @@ function closeMenu() {
 }
 
 function fillMenu() {
+  fuelleSpickzettel();
   const list = $('#menu-teams');
   // Solange das Menü offen ist, läuft das bei jedem Broadcast – auch wenn nur
   // ein Handy aus dem Standby kommt. Ohne Schlüssel würden dabei die Knöpfe
@@ -1206,6 +1207,79 @@ function fillMenu() {
           })
           : null,
       ),
+    );
+  }
+}
+
+/**
+ * Der Spickzettel im Menü.
+ *
+ * Die Punkteregeln standen nur in der Lobby. Mitten im Abend musste der Host
+ * sie aus dem Kopf erklären – und bei acht Leuten fragt garantiert jemand nach,
+ * meistens genau dann, wenn gerade jemand gebuzzert hat.
+ *
+ * Gebaut wird er aus dem Zustand, nicht aus festem Text: Abzug, Zugfolge und
+ * „Buzzern nach richtiger Antwort" sind einstellbar. Ein starrer Zettel wäre
+ * für jede Runde falsch, in der jemand etwas anderes gewählt hat – und ein
+ * falscher Spickzettel ist schlimmer als keiner.
+ *
+ * Wenn eine Frage offensteht, stehen ihre echten Zahlen oben: Zur Diskussion
+ * kommt es immer bei der konkreten Frage, nicht bei der Regel im Allgemeinen.
+ */
+function fuelleSpickzettel() {
+  const s = state.settings || {};
+  const q = state.current;
+  const zeilen = [];
+
+  if (q) {
+    zeilen.push(['Diese Frage', `${q.category} ${q.value} · gebuzzert ${q.halfValue}`, true]);
+  }
+  zeilen.push(['Zugteam richtig', 'volle Punkte']);
+  zeilen.push(['Zugteam falsch', {
+    none: 'kein Abzug',
+    half: 'halbe Punkte Abzug',
+    full: 'volle Punkte Abzug',
+  }[s.wrongPenalty] || 'kein Abzug']);
+  zeilen.push(['Danach buzzern', 'richtig gibt die Hälfte, falsch kostet die Hälfte']);
+  zeilen.push(['Vor der Antwort', 'ist der Buzzer für alle anderen gesperrt']);
+  zeilen.push(['Nächster Zug', s.turnMode === 'keepOnCorrect'
+    ? 'wer richtig liegt, bleibt dran'
+    : 'reihum']);
+  if (s.buzzAfterCorrect) {
+    zeilen.push(['Nach richtig', 'die anderen dürfen trotzdem noch buzzern']);
+  }
+  zeilen.push(['Runde 2', state.round >= 2 ? 'läuft – alles zählt doppelt' : 'zählt doppelt',
+    state.round >= 2]);
+
+  const liste = $('#spick-regeln');
+  const key = JSON.stringify(zeilen);
+  if (liste.dataset.key !== key) {
+    liste.dataset.key = key;
+    liste.innerHTML = '';
+    for (const [wort, text, jetzt] of zeilen) {
+      liste.append(
+        el('dt', { class: jetzt ? 'jetzt' : '' }, wort),
+        el('dd', { class: jetzt ? 'jetzt' : '' }, text),
+      );
+    }
+  }
+
+  const tasten = $('#spick-tasten');
+  if (tasten.dataset.key) return;
+  tasten.dataset.key = 'fest';
+  for (const [taste, was] of [
+    ['1', 'Richtig'],
+    ['2', 'Falsch'],
+    ['3', 'Zugteam weiß es nicht → Buzzer frei'],
+    ['4', 'Keiner weiß es → auflösen'],
+    ['L', 'Lösung kurz aufdecken (alle sehen sie)'],
+    ['Leer', 'Weiter / nächste Runde'],
+    ['F', 'Vollbild'],
+    ['Esc', 'dieses Menü'],
+  ]) {
+    tasten.append(
+      el('dt', {}, el('span', { class: 'spick-taste' }, taste)),
+      el('dd', {}, was),
     );
   }
 }
