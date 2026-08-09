@@ -50,7 +50,10 @@ function render() {
   const barKey = [
     state.phase, q?.step, q?.buzzedTeamId, q?.teamId,
     (q?.lockedOut || []).join(','),
-    state.teams.map((t) => `${t.id}:${t.name}`).join('|'),
+    // Ob ein Team ein Handy am Netz hat, entscheidet über seinen
+    // Vertreterknopf – ohne das im Schlüssel bliebe die Leiste stehen, wenn
+    // jemand mitten in der Frage aufwacht oder wegfällt.
+    state.teams.map((t) => `${t.id}:${t.name}:${t.members.some((m) => m.online !== false) ? 1 : 0}`).join('|'),
     state.turnIndex,
   ].join('#');
   const neueLeiste = bar.dataset.key !== barKey;
@@ -123,11 +126,16 @@ function render() {
         );
       } else if (q.step === 'buzz' && !q.buzzedTeamId) {
         setzeText(phase, `Buzzer ist frei · ${q.halfValue} Punkte`);
+        // „Keiner weiß es" zuerst: Das ist der Knopf, der die Frage beendet,
+        // und bei acht Teams stand er vorher unter sieben Vertreterknöpfen –
+        // also außerhalb des Bildschirms, obwohl der Tisch längst wartet.
+        setz(big('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion')));
+        // Vertreten wird nur, wer keinen eigenen Buzzer in der Hand hat.
         for (const team of state.teams) {
           if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
+          if (team.members.some((m) => m.online !== false)) continue;
           setz(big(`Buzz: ${team.name}`, 'btn-ghost', () => act('buzzFor', { teamId: team.id })));
         }
-        setz(big('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion')));
       } else if (q.step === 'buzz' && q.buzzedTeamId) {
         setzeText(phase, `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
         setz(
