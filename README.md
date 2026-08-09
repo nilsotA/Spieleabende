@@ -135,7 +135,8 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   (dann als `"/bilder/foto.jpg"` eintragen). Bei Bildfragen tritt der Buzzer auf dem
   Handy zurück, damit das Bild vollständig sichtbar bleibt. Fehlt eine Bilddatei,
   sagt das die Fragensatz-Auswahl – sonst wäre die Frage im Spiel stumm verbrannt.
-- `note` ist optional und erscheint beim Auflösen als kleiner Zusatz.
+- `note` ist optional und erscheint beim Auflösen als kleiner Zusatz – auf der
+  Leinwand und auf den Handys. Genau darüber redet die Runde danach.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.
 
 ### Mitgeliefert

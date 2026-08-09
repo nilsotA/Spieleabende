@@ -99,6 +99,12 @@ body {
 .p-q-head { color: #9fd4ff; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 .p-q-text { margin-top: 0.5rem; font-weight: 800; font-size: 1.2rem; line-height: 1.35; text-transform: uppercase; }
 .p-q-image { margin-top: 0.7rem; max-width: 100%; max-height: 30dvh; border-radius: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.16); }
+.p-q-note {
+  margin: 0.7rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: #b9d8f6;
+}
 .p-q-answer {
   margin-top: 0.8rem;
   display: inline-block;
@@ -282,4 +288,34 @@ html, body { touch-action: manipulation; }
   max-height: none;
   width: 100%;
   object-fit: contain;
+}
+
+/* Ist die Frage durch, hat der Knopf nichts mehr zu tun. Statt als grauer Teller
+   das halbe Handy zu belegen, schrumpft er auf Anzeigegröße – der Platz gehört
+   jetzt Lösung und Punktestand. Nur der Kreis wird kleiner, die Zone behält ihre
+   Fläche: So bleibt der Abstand zum Fragenkasten gleich und nichts springt.
+   Nach .hat-bild notiert, damit die Regel bei beendeten Bildfragen gewinnt. */
+.frage-durch .buzz-zone {
+  flex: 0 0 auto;
+  height: 7rem;
+  min-height: 0;
+  place-items: end center;
+}
+.frage-durch .buzzer {
+  height: min(100%, 5.5rem);
+  animation: none;
+}
+.frage-durch .buzzer .buzzer-label { font-size: 0.42em; }
+/* Lösung und Zusatz stehen unten im Kasten. Behält das Bild seine volle Höhe,
+   rutschen sie unter die Kante – und zwar lautlos, weil .hat-bild abschneidet
+   statt zu scrollen. Genau das, wofür man auf die Frage gewartet hat. */
+.frage-durch.hat-bild .p-q-image { flex: 0 1 auto; max-height: 26dvh; }
+/* Der Kasten schrumpft jetzt nicht mehr, und abgeschnitten wird gar nichts:
+   Passt ein langer Zusatz auf einem schmalen Handy nicht mehr aufs Bild, scrollt
+   die Seite. Ein Scrollbalken ist ein Hinweis – ein weggeschnittener Satz nicht,
+   und bei eigenen Fragensätzen weiß niemand, wie lang der Zusatz wird. */
+.frage-durch .p-question,
+.frage-durch.hat-bild .p-question {
+  flex: 0 0 auto;
+  overflow: visible;
 }

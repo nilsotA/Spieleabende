@@ -166,7 +166,7 @@ function renderQuestion() {
   const q = state.current;
   if (!q) {
     box.hidden = true;
-    $('#view-play').classList.remove('hat-bild');
+    $('#view-play').classList.remove('hat-bild', 'frage-durch');
     return;
   }
   box.hidden = false;
@@ -180,12 +180,20 @@ function renderQuestion() {
     img.hidden = true;
     img.removeAttribute('src');
   }
-  // Bei Bildfragen tritt der Buzzer-Kreis zurück, damit das Bild ganz sichtbar bleibt.
+  // Bei Bildfragen tritt der Buzzer-Kreis zurück, damit das Bild ganz sichtbar
+  // bleibt – und wenn die Frage durch ist, erst recht.
   $('#view-play').classList.toggle('hat-bild', !!q.image);
+  $('#view-play').classList.toggle('frage-durch', q.step === 'result');
 
   const answer = $('#p-q-answer');
   answer.hidden = !q.revealed;
   answer.textContent = q.answer || '';
+
+  // Der Zusatz stand bisher nur auf der Leinwand. Auf dem Handy ist er besser
+  // aufgehoben: Genau darüber redet die Runde nach dem Auflösen.
+  const note = $('#p-q-note');
+  note.hidden = !(q.revealed && q.note);
+  note.textContent = q.note || '';
 }
 
 function renderPicker() {
@@ -309,7 +317,14 @@ function renderBuzzer(prev) {
     return;
   }
 
-  status.textContent = q.revealed ? `Lösung: ${q.answer ?? ''}` : '…';
+  // Die Lösung steht schon groß im Kasten – hier stattdessen das, was man sonst
+  // nirgends sieht: was die Frage dem eigenen Team gebracht hat.
+  const eigen = q.log.reduce((summe, e) => (e.teamId === you.teamId ? summe + e.delta : summe), 0);
+  status.textContent = !you.teamId ? 'Frage beendet.'
+    : eigen > 0 ? `+${eigen} Punkte für euch!`
+    : eigen < 0 ? `${eigen} Punkte für euch.`
+    : 'Diesmal nichts für euch.';
+  status.classList.toggle('you', eigen > 0);
   lock('DURCH');
 }
 
