@@ -34,6 +34,16 @@ function render() {
   if (q) {
     $('#r-cat').textContent = `${q.category} · ${q.value} Punkte`;
     setFrageText($('#r-text'), q.text);
+    // Ohne Bild müsste der Host sich zur Leinwand umdrehen – genau das soll
+    // die Fernbedienung ja ersparen.
+    const bild = $('#r-image');
+    if (q.image) {
+      if (bild.getAttribute('src') !== q.image) bild.src = q.image;
+      bild.hidden = false;
+    } else {
+      bild.hidden = true;
+      bild.removeAttribute('src');
+    }
     $('#r-answer').textContent = q.answer ?? '—';
     const log = $('#r-log');
     log.innerHTML = '';

@@ -89,6 +89,7 @@ export async function listSets() {
         continue;
       }
       const set = normalizeSet(JSON.parse(await readFile(full, 'utf8')), file.replace(/\.json$/, ''));
+      await pruefeBilder(set, file);
       const entry = {
         file,
         name: set.name,
@@ -110,11 +111,41 @@ export async function listSets() {
   return out.sort((a, b) => a.name.localeCompare(b.name, 'de'));
 }
 
+/**
+ * Prüft, ob alle Bilder aus data/bilder wirklich da sind. Ohne das startet das
+ * Spiel klaglos und die Frage ist mit einem leeren Kasten verbrannt – etwa wenn
+ * jemand nur die JSON-Datei weitergegeben hat.
+ */
+async function pruefeBilder(set, quelle) {
+  const fehlend = new Set();
+  for (const round of set.rounds) {
+    for (const cat of round.categories) {
+      for (const q of cat.questions) {
+        if (!q.image || !q.image.startsWith('/bilder/')) continue;
+        const datei = path.basename(q.image);
+        try {
+          await stat(path.join(DATA_DIR, 'bilder', datei));
+        } catch {
+          fehlend.add(datei);
+        }
+      }
+    }
+  }
+  if (fehlend.size) {
+    throw new Error(
+      `${quelle}: ${fehlend.size === 1 ? 'Das Bild fehlt' : 'Diese Bilder fehlen'} in data/bilder – `
+      + [...fehlend].join(', '),
+    );
+  }
+}
+
 export async function loadSet(file) {
   const safe = path.basename(String(file || ''));
   if (!safe.endsWith('.json')) throw new Error('Ungültige Datei.');
   const raw = JSON.parse(await readFile(path.join(DATA_DIR, safe), 'utf8'));
-  return normalizeSet(raw, safe.replace(/\.json$/, ''));
+  const set = normalizeSet(raw, safe.replace(/\.json$/, ''));
+  await pruefeBilder(set, safe);
+  return set;
 }
 
 /**

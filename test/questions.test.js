@@ -254,3 +254,35 @@ test('der Zufallsmix zieht Runde 2 aus den Runde-2-Kategorien', async () => {
     }
   }
 });
+
+test('ein Satz mit fehlender Bilddatei wird gemeldet statt still gespielt', async () => {
+  const { loadSet, DATA_DIR } = await import('../server/questions.js');
+  const { writeFile, unlink } = await import('node:fs/promises');
+  const path = await import('node:path');
+
+  const datei = path.join(DATA_DIR, '.test-bildsatz.json');
+  const satz = {
+    name: 'Bildtest',
+    description: 'x',
+    rounds: [{
+      categories: [{
+        name: 'K',
+        questions: Array.from({ length: 4 }, (_, i) => ({
+          text: `Frage ${i}`,
+          answer: `Antwort ${i}`,
+          image: i === 0 ? '/bilder/gibt-es-nicht.svg' : null,
+        })),
+      }],
+    }],
+  };
+  await writeFile(datei, JSON.stringify(satz), 'utf8');
+  try {
+    await assert.rejects(
+      () => loadSet('.test-bildsatz.json'),
+      /gibt-es-nicht\.svg/,
+      'sonst startet das Spiel und die Frage ist mit leerem Kasten verbrannt',
+    );
+  } finally {
+    await unlink(datei).catch(() => {});
+  }
+});

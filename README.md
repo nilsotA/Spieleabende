@@ -34,8 +34,9 @@ Anderer Port: `PORT=8080 node server/index.js`
 ### Fernbedienung: `/remote`
 
 Der große Screen ist für alle sichtbar – die Lösung darf da nicht draufstehen. Öffne
-deshalb als Host **`/remote` auf deinem eigenen Handy**. Dort stehen Frage *und Lösung*,
-und du bewertest von dort mit großen Knöpfen. Auf der Leinwand bleibt die Lösung verdeckt.
+deshalb als Host **`/remote` auf deinem eigenen Handy**. Dort stehen Frage, Bild *und
+Lösung*, und du bewertest von dort mit großen Knöpfen. Auf der Leinwand bleibt die
+Lösung verdeckt, und du musst dich nicht umdrehen.
 
 Ohne zweites Gerät geht es auch: In der Steuerleiste des Host-Screens ist die Lösung
 unscharf und lässt sich mit `👁` oder der Taste `L` kurz aufdecken – dann sehen sie
@@ -132,7 +133,8 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   nichts wird stillschweigend abgeschnitten.
 - `image` ist optional: eine URL, ein `data:`-URI oder ein Dateiname aus `data/bilder/`
   (dann als `"/bilder/foto.jpg"` eintragen). Bei Bildfragen tritt der Buzzer auf dem
-  Handy zurück, damit das Bild vollständig sichtbar bleibt.
+  Handy zurück, damit das Bild vollständig sichtbar bleibt. Fehlt eine Bilddatei,
+  sagt das die Fragensatz-Auswahl – sonst wäre die Frage im Spiel stumm verbrannt.
 - `note` ist optional und erscheint beim Auflösen als kleiner Zusatz.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.
 
