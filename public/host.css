@@ -41,8 +41,18 @@
   --chrom: linear-gradient(160deg, #f2f7ff 0%, #8fa3bd 28%, #dfe9f7 52%, #5b6a80 78%, #c8d6e8 100%);
 }
 
+/* Feste Fensterhöhe, nicht `min-height`.
+
+   Mit `min-height: 100vh` wächst der Body über das Fenster hinaus, sobald der
+   Inhalt länger wird – und weil er zugleich `overflow: hidden` trägt, war
+   alles darunter schlicht unerreichbar. In der Lobby lag auf einem 1280×720er
+   Laptop genau der Startknopf dort: gemessen bei 769–821px in einem 720px
+   hohen Fenster, und kein Mausrad half. Mit fester Höhe bleibt die Bühne
+   gedeckelt, `.view` wird gestaucht, und die Lobby scrollt in sich selbst –
+   wofür sie ihr `overflow: auto` immer schon hatte. */
 body.host {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -77,12 +87,20 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .lobby-head { text-align: center; margin-bottom: 2rem; }
 .lobby-head p { margin: 0.9rem 0 0; letter-spacing: 0.3em; text-transform: uppercase; font-size: clamp(0.85rem, 1vw, 1.15rem); color: #a8bad4; }
 
+/* `width: 100%` ist hier nicht überflüssig: #view-lobby ist ein Flexcontainer
+   (Spalte), und ein Kind mit automatischem Rand in der Querachse wird nicht
+   mehr gedehnt, sondern nach seinem Inhalt bemessen. Das Gitter nahm sich
+   damit seine max-content-Breite – auf einem 1280er Laptop vier Spalten à
+   320px, zusammen 1338px –, und die vierte Karte mit den Regeln stand
+   gemessen bis 1386px, also außerhalb des Bildes. Mit fester Breite entscheidet
+   wieder der Platz: vier Spalten auf der Leinwand, drei auf dem Laptop. */
 .lobby-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.2rem;
+  width: 100%;
   max-width: 1400px;
-  margin: 0 auto;
+  margin-inline: auto;
 }
 .settings { display: grid; gap: 0.7rem; }
 
@@ -103,7 +121,23 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .lobby-teams .tmembers { font-size: clamp(0.82rem, 0.95vw, 1.1rem); color: #a8b8cf; }
 
 .join-urls { display: grid; gap: 0.4rem; margin: 0.7rem 0; }
-.lobby-start { text-align: center; margin-top: 1.6rem; }
+/* Der Startknopf klebt am unteren Rand.
+
+   Er ist der einzige Knopf, den man in der Lobby wirklich braucht, und stand
+   bisher ganz unten hinter allen vier Karten: auf einem 1280×720er Laptop
+   gemessen bei 1098px in einem 720px hohen Fenster. Wer nicht auf die Idee kam
+   zu scrollen, fand ihn nicht – und das Spiel ließ sich schlicht nicht starten.
+   Nach oben ausgeblendet, damit der durchscrollende Inhalt nicht an einer
+   harten Kante abreißt. Genau wie die Wertungsknöpfe der Fernbedienung. */
+.lobby-start {
+  text-align: center;
+  margin-top: 1.6rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  padding: 1.6rem 0 0.7rem;
+  background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, 0.82) 34%, var(--ink-900) 58%);
+}
 .btn-big { font-size: 1.15rem; padding: 0.9rem 2.4rem; border-radius: 12px; }
 
 /* ------------------------------------------------------------------ Bühne */
@@ -1174,7 +1208,9 @@ body.host.flat .tile {
 }
 
 @media (max-width: 820px) {
-  body.host { overflow: auto; }
+  /* Auf dem Handy scrollt die ganze Seite, nicht die Bühne in sich – deshalb
+     hier die feste Höhe wieder aufgeben. */
+  body.host { height: auto; min-height: 100dvh; overflow: auto; }
   .stage-top .logo { font-size: 1.7rem !important; }
   .player { min-width: 104px; clip-path: none; }
 }
