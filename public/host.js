@@ -1065,7 +1065,10 @@ function renderControls() {
   const key = [
     state.phase, q?.step, q?.buzzedTeamId, q?.teamId,
     (q?.lockedOut || []).join(','),
-    state.teams.map((t) => `${t.id}:${t.name}`).join('|'),
+    // Ob ein Team ein Handy am Netz hat, entscheidet über seinen Vertreterknopf –
+    // ohne das im Schlüssel bliebe die Leiste stehen, wenn jemand mitten in der
+    // Frage aufwacht oder wegfällt.
+    state.teams.map((t) => `${t.id}:${t.name}:${t.members.some((m) => m.online !== false) ? 1 : 0}`).join('|'),
   ].join('#');
   const neu = bar.dataset.key !== key;
   if (neu) {
@@ -1109,9 +1112,14 @@ function renderControls() {
     );
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
     setzeText(hint, 'Buzzer ist frei.');
+    // Vertreterknöpfe für alle, die keinen eigenen Buzzer in der Hand haben.
+    // Wer ein Handy am Netz hat, drückt selbst – und mit acht Teams standen hier
+    // sonst sieben Knöpfe voller Teamnamen, die die Leiste auf vier Reihen
+    // aufgeblasen und der Bühne über 70px geklaut haben.
     for (const team of state.teams) {
       if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
-      add(button(`Buzz: ${team.name}`, 'btn-ghost btn-sm', () => act('buzzFor', { teamId: team.id })));
+      if (team.members.some((m) => m.online !== false)) continue;
+      add(buzzKnopf(team));
     }
     add(button('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion'), '4'));
   } else if (q.buzzedTeamId && q.step === 'buzz') {
@@ -1131,6 +1139,35 @@ function button(label, cls, onclick, key) {
   const node = el('button', { class: `btn ${cls}`, onclick }, label);
   if (key) node.append(el('kbd', {}, key));
   return node;
+}
+
+/**
+ * Der Knopf, mit dem der Host für ein Team ohne Handy buzzert.
+ *
+ * Er zeigt die Teamfarbe und einen Kurznamen statt „Buzz: Die Unbestechlichen".
+ * Die Farbe steht auch am Pult, das ist aus zwei Metern der schnellere Weg zum
+ * richtigen Knopf als ein langer Name – und acht davon passen in eine Reihe.
+ * Der volle Name bleibt als Titel dran, für den Fall, dass zwei Teams sich
+ * ähnlich nennen.
+ */
+function buzzKnopf(team) {
+  const node = el('button', {
+    class: 'btn btn-ghost btn-sm buzz-fuer',
+    title: `Buzz für ${team.name}`,
+    'aria-label': `Buzz für ${team.name}`,
+    onclick: () => act('buzzFor', { teamId: team.id }),
+  },
+    el('span', { class: 'dot', style: { background: team.color } }),
+    kurzTeam(team.name),
+  );
+  return node;
+}
+
+/** „Die Grübelmeister" → „Grübelmeister", „Team Donnerbalken" → „Donnerbalken". */
+function kurzTeam(name) {
+  const ohneArtikel = String(name).replace(/^(die|der|das|team)\s+/i, '');
+  const wort = ohneArtikel.split(/\s+/)[0] || name;
+  return wort.length > 13 ? `${wort.slice(0, 12)}…` : wort;
 }
 
 $('#btn-next-round').addEventListener('click', () => act('nextRound'));

@@ -77,6 +77,13 @@ hergestellt. Der Host-Screen sagt dann oben, von wann der Stand ist, und bietet
 kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand,
 und „Spiel beenden“ im Host-Menü verwirft ihn sofort.
 
+### Noch ein Satz?
+
+Nach dem Endstand führt „Spiel beenden“ im Menü zurück in die Lobby: Punkte auf
+null, Board neu, aber **die Teams und ihre Handys bleiben stehen**. Niemand muss
+den QR-Code noch einmal scannen – auch nicht, wer sein Handy in der Pause weggelegt
+hat. Erst wer über zwei Stunden weg ist, wird beim nächsten Spiel aussortiert.
+
 ### Auch ohne Handys spielbar
 
 Wenn ihr um einen Bildschirm herumsitzt, braucht ihr keine Handys: Der Host bewertet
@@ -205,7 +212,7 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 
 ### Mitgeliefert
 
-Fünf fertige Sätze mit je 48 Fragen – zusammen 240, keine doppelt:
+Sieben fertige Sätze mit je 48 Fragen – zusammen 336, keine doppelt:
 
 | Satz | Kategorien |
 |---|---|

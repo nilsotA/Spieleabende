@@ -1180,9 +1180,35 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   position: relative;
   z-index: 3;
 }
-.controls-inner { display: flex; align-items: center; gap: 0.8rem; max-width: 1700px; margin: 0 auto; }
-.control-hint { flex: 1; font-size: 0.85rem; color: var(--muted); min-height: 1.2rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.control-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
+.controls-inner { display: flex; align-items: center; gap: 0.8rem; max-width: 1700px; margin: 0 auto; flex-wrap: wrap; }
+/* Der Hinweis darf schrumpfen, aber nicht zu einer Buchstabensäule: Unter
+   15rem klappt lieber die ganze Leiste um, als dass „Buzzer ist frei." in drei
+   Zeilen untereinandersteht. */
+.control-hint {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--muted);
+  min-height: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: min(100%, 15rem);
+}
+/* Die Knöpfe geben nicht nach. Vorher gewann der Hinweistext den Platzkampf –
+   er wächst mit `flex: 1`, während die Knopfleiste als Flex-Element schrumpfen
+   durfte und intern umbrach. Ergebnis: „Keiner weiß es → auflösen" stand in
+   einer eigenen Reihe, und die Leiste war doppelt so hoch wie nötig. Jetzt
+   nehmen sich die Knöpfe ihre Breite, und wenn es wirklich eng wird, klappt
+   der Hinweis in eine eigene Zeile statt die Aktionen zu zerreißen. */
+.control-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
 .control-buttons kbd {
   font: inherit;
   font-size: 0.7em;
@@ -1191,6 +1217,17 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   border-radius: 4px;
   padding: 0 0.25em;
   margin-left: 0.4em;
+}
+
+/* Buzz stellvertretend für ein Team ohne Handy: Farbpunkt plus Kurzname. Acht
+   davon müssen in eine Reihe passen, sonst wächst die Leiste in die Bühne. */
+.buzz-fuer { display: inline-flex; align-items: center; gap: 0.35rem; padding-inline: 0.45rem; }
+.buzz-fuer .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 6px currentColor;
 }
 
 /* Zurücknehmen ist eine Korrektur, keine Spielaktion – gedämpft, damit der
