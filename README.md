@@ -38,6 +38,10 @@ deshalb als Host **`/remote` auf deinem eigenen Handy**. Dort stehen Frage, Bild
 Lösung*, und du bewertest von dort mit großen Knöpfen. Auf der Leinwand bleibt die
 Lösung verdeckt, und du musst dich nicht umdrehen.
 
+Auch das nächste Feld rufst du von dort auf: Solange das Board steht, listet die
+Fernbedienung alle Kategorien mit ihren noch offenen Werten. Gespielte Felder bleiben
+ausgegraut stehen, damit die Reihe ihre Ordnung behält.
+
 Ohne zweites Gerät geht es auch: In der Steuerleiste des Host-Screens ist die Lösung
 unscharf und lässt sich mit `👁` oder der Taste `L` kurz aufdecken – dann sehen sie
 allerdings alle im Raum.
@@ -89,6 +93,10 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   drücken dürfen; wer seinen Versuch hatte, tritt zurück.
 - **Am Ende** stehen unter dem Siegertreppchen drei Auszeichnungen des Abends:
   schnellster Buzz, längste Serie, teuerster Reinfall.
+- **Eigene Bilanz:** In den Pausen – am Rundenende und zum Schluss – zeigt jedes Handy
+  seinem Team, wie der Punktestand zustande kam: richtig, daneben, „weiß nicht“, dazu
+  Geklautes und Verbuzzertes. Das steht bewusst auf dem Handy und nicht auf der
+  Leinwand, wo alle auf den Sieger schauen.
 
 ### Einstellbar in der Lobby
 
