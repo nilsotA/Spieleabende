@@ -81,10 +81,18 @@ async function restoreImages() {
   }
 }
 
+/* Wann der wiederhergestellte Stand gesichert wurde – bis der Host das erste
+   Mal etwas tut. Der Hinweis stand bisher nur im Terminal, und das ist beim
+   Spieleabend minimiert oder steht auf einem anderen Rechner: Wer den
+   Host-Screen aufmachte, sah das Board vom letzten Mal samt Punkten und keine
+   Erklärung dazu. */
+let wiederhergestelltAm = null;
+
 async function restore() {
   try {
     const roh = JSON.parse(await readFile(SAVE_FILE, 'utf8'));
     if (!roh?.state || Date.now() - (roh.gespeichert || 0) > SAVE_MAX_AGE_MS) return null;
+    wiederhergestelltAm = roh.gespeichert || null;
     // Ein Stand von der Platte kann aus einer älteren Fassung stammen und neue
     // Felder gar nicht kennen. Deshalb gegen einen frischen Zustand auffüllen,
     // statt ihn ungeprüft zu übernehmen: Sonst stirbt der erste Buzz nach dem
@@ -131,7 +139,10 @@ function broadcast() {
 function sendState(conn) {
   const sicht = G.viewFor(state, { isHost: conn.isHost, clientId: conn.clientId });
   // Nur der Host kann zurücknehmen, also erfährt auch nur er davon.
-  if (conn.isHost) sicht.rueckgaengig = rueckStand?.was ?? null;
+  if (conn.isHost) {
+    sicht.rueckgaengig = rueckStand?.was ?? null;
+    sicht.wiederhergestellt = wiederhergestelltAm;
+  }
   write(conn, 'state', sicht);
 }
 
@@ -212,6 +223,10 @@ async function handleAction(clientId, body) {
     }
     throw new G.GameError('Nur der Host darf das.');
   }
+
+  // Sobald der Host etwas tut, ist der Stand nicht mehr „von letztem Mal",
+  // sondern der laufende Abend.
+  wiederhergestelltAm = null;
 
   if (RUECKNEHMBAR.has(type)) {
     // Erst sichern, dann handeln. Wirft die Aktion, bleibt der Schnappschuss

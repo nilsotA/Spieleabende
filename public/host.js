@@ -270,6 +270,7 @@ function render(prev) {
   renderPlayers();
   renderScoreboard();
   renderControls();
+  renderWiederhergestellt();
   if (!$('#menu').hidden) fillMenu();
 }
 
@@ -1208,6 +1209,48 @@ function fillMenu() {
     );
   }
 }
+
+/* ------------------------------- Hinweis auf einen alten Spielstand ------ */
+
+/**
+ * Der Server holt den letzten Stand von der Platte zurück – gedacht für den
+ * Absturz mitten im Abend. Wer aber am nächsten Wochenende aufmacht, sah das
+ * alte Board samt Punkten und keine Erklärung dazu: Der Hinweis stand nur im
+ * Terminal, und das ist beim Spieleabend minimiert oder läuft auf einem anderen
+ * Rechner. Der Balken sagt, von wann der Stand ist, und bietet beides an.
+ */
+let wiederWeggeklickt = false;
+
+function zeitwort(ms) {
+  const dann = new Date(ms);
+  const jetzt = new Date();
+  const uhr = dann.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const tage = Math.round((new Date(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate())
+    - new Date(dann.getFullYear(), dann.getMonth(), dann.getDate())) / 86400000);
+  if (tage === 0) return `von heute, ${uhr} Uhr`;
+  if (tage === 1) return `von gestern, ${uhr} Uhr`;
+  return `vom ${dann.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}, ${uhr} Uhr`;
+}
+
+function renderWiederhergestellt() {
+  const balken = $('#wiederhergestellt');
+  const wann = state.wiederhergestellt;
+  balken.hidden = !wann || wiederWeggeklickt;
+  if (balken.hidden) return;
+  const punkte = state.teams.map((t) => `${t.name} ${t.score}`).join(' · ');
+  setzeText($('#wieder-text'),
+    `Spielstand ${zeitwort(wann)} wiederhergestellt${punkte ? ` – ${punkte}` : ''}`);
+}
+
+$('#btn-wieder-zu').addEventListener('click', () => {
+  wiederWeggeklickt = true;
+  $('#wiederhergestellt').hidden = true;
+});
+$('#btn-wieder-neu').addEventListener('click', () => {
+  if (!confirm('Alten Spielstand verwerfen und neu anfangen?')) return;
+  wiederWeggeklickt = true;
+  act('backToLobby');
+});
 
 /* ------------------------------------------------------------ Vollbild */
 

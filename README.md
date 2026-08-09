@@ -72,7 +72,8 @@ Spielzug, nicht der Raum.
 
 Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Board
 und sogar eine offen stehende Frage werden laufend gesichert und beim Start wieder
-hergestellt. Ein versehentlich geschlossenes Terminal oder ein abgestürzter Rechner
+hergestellt. Der Host-Screen sagt dann oben, von wann der Stand ist, und bietet
+„Neues Spiel" gleich daneben an – der Hinweis verschwindet beim ersten Zug. Ein versehentlich geschlossenes Terminal oder ein abgestürzter Rechner
 kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand,
 und „Spiel beenden“ im Host-Menü verwirft ihn sofort.
 

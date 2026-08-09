@@ -12,6 +12,14 @@
 
 <div id="offline" class="offline" role="status" aria-live="polite" hidden>Verbindung verloren – versuche neu zu verbinden …</div>
 
+<!-- Steht nur da, wenn der Server beim Start einen alten Spielstand zurückgeholt
+     hat, und verschwindet beim ersten Zug. -->
+<div id="wiederhergestellt" class="wiederbanner" role="status" hidden>
+  <span id="wieder-text"></span>
+  <button id="btn-wieder-neu" class="btn btn-sm">Neues Spiel</button>
+  <button id="btn-wieder-zu" class="btn btn-sm btn-ghost" aria-label="Hinweis ausblenden">Weiterspielen</button>
+</div>
+
 <!-- ================================================== LOBBY ============ -->
 <section id="view-lobby" class="view">
   <header class="lobby-head">

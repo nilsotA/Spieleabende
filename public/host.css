@@ -1288,6 +1288,34 @@ body.host.flat .tile {
   .player { min-width: 104px; clip-path: none; }
 }
 
+/* Hinweis auf einen wiederhergestellten Spielstand.
+
+   Der Server holt den letzten Stand von der Platte zurück – gedacht für den
+   Absturz mitten im Abend. Wer aber eine Woche später aufmacht, sah das alte
+   Board samt Punkten und keine Erklärung; der Hinweis stand nur im Terminal,
+   und das ist minimiert oder steht auf einem anderen Rechner. Bewusst oben und
+   schmal: Er gehört dem Host, nicht der Runde, und geht beim ersten Zug weg. */
+.wiederbanner {
+  position: fixed;
+  top: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: min(92vw, 900px);
+  padding: 0.5rem 0.6rem 0.5rem 1rem;
+  border-radius: 999px;
+  background: rgba(10, 16, 28, 0.96);
+  box-shadow: 0 0 0 1px rgba(255, 197, 49, 0.5), 0 12px 34px -10px #000;
+  color: #ffe6a8;
+  font-size: clamp(0.85rem, 1vw, 1.05rem);
+  font-weight: 700;
+}
+.wiederbanner[hidden] { display: none; }
+.wiederbanner .btn { white-space: nowrap; }
+
 /* Beitreten per Scan – eine IP abzutippen ist der lästigste Teil des Abends. */
 .join-box { display: grid; justify-items: center; gap: 0.7rem; margin: 0.8rem 0; }
 /* Groß genug, um vom Sofa aus scharfgestellt zu werden – das Beitreten ist der
