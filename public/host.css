@@ -327,6 +327,13 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   position: relative;
   z-index: 2;
   /* Kein Glühen auf dem Text – bei dieser Größe matscht es die Buchstaben zu. */
+  /* Die Schilder gehen von links nach rechts an. Zweimal pro Abend, jeweils
+     eine knappe halbe Sekunde – dafür weiß der Raum, dass es losgeht. */
+  animation: schildAn 400ms var(--ease) both;
+  animation-delay: calc(var(--c, 0) * 70ms);
+}
+@keyframes schildAn {
+  from { opacity: 0; transform: translateY(-16px); }
 }
 .cat > span { position: relative; z-index: 1; }
 .cat::after {
@@ -375,7 +382,8 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   cursor: pointer;
   transition: transform var(--t-micro) var(--ease);
   animation: panelBoot 380ms var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 18ms);
+  /* Erst die Schilder, dann die Wand – deshalb der Vorlauf. */
+  animation-delay: calc(260ms + var(--i, 0) * 20ms);
 }
 /* Hover-Kante vorgemalt: so wird nie ein box-shadow animiert. */
 .tile::after {
@@ -617,6 +625,20 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   padding: 0.55rem 1.7rem;
 }
 
+/* Der gemeinsame Reinfall: Zugteam passt, alle anderen liegen daneben. Am Tisch
+   ist das der Moment mit dem größten Gelächter – auf der Leinwand sah er aus wie
+   jede andere Auflösung. */
+.q-keiner {
+  margin: clamp(0.8rem, 2vh, 1.2rem) auto 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: clamp(1rem, 1.7vw, 1.7rem);
+  color: var(--gold-hell);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  animation: snapIn 0.3s cubic-bezier(0.2, 1.4, 0.5, 1);
+}
+
 /* Die Lösung ist der Moment, auf den alle gewartet haben – sie war kleiner als
    die Frage, die sie beantwortet (34px gegen 48px). Jetzt ist sie das Größte
    im Bild. Umbruch erlaubt, damit auch „Englisch und Französisch" hineinpasst,
@@ -749,6 +771,56 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 }
 .scores-panel.final .score-list li.first { font-size: clamp(1.2rem, 2.6vw, 2rem); }
 
+/* ------------------------------------------------------------ Rundenansage
+
+   Runde 2 ist die Runde, in der sich der Abend entscheidet – bisher wechselten
+   nur die Zahlen auf den Kacheln. Wer gerade Getränke geholt hat, bekam die
+   doppelten Punkte gar nicht mit. Die Ansage blendet auf und wieder weg, ganz
+   ohne Knopf: Zweimal pro Abend knapp zwei Sekunden. */
+.ansage {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  pointer-events: none;
+  text-align: center;
+  background: radial-gradient(70% 55% at 50% 50%, rgba(4, 6, 11, 0.92), rgba(4, 6, 11, 0.99));
+}
+.ansage.an { animation: ansageAn 1.8s var(--ease) both; }
+@keyframes ansageAn {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.ansage-1 {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: clamp(2.4rem, 7vw, 6.5rem);
+  line-height: 1;
+  color: #f2f7ff;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.6);
+}
+.ansage-2 {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: clamp(1.1rem, 2.6vw, 2.4rem);
+  color: #3a2a00;
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  border-radius: 999px;
+  padding: 0.35em 1.4em;
+  box-shadow: 0 0 40px -6px rgba(255, 197, 49, 0.8);
+}
+.ansage.an .ansage-1 { animation: ansageRein 0.55s var(--ease-snap) both; }
+.ansage.an .ansage-2 { animation: ansageRein 0.55s var(--ease-snap) 0.16s both; }
+@keyframes ansageRein { from { opacity: 0; transform: translateY(22px) scale(0.9); } }
+
 /* ----------------------------------------------------------- Studioblitz */
 
 .stage-flash {
@@ -859,6 +931,33 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .players .player { transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.25s ease; }
 .player.gain { box-shadow: 0 -14px 40px rgba(34, 224, 138, 0.4); }
 .player.loss { box-shadow: 0 -14px 40px rgba(255, 59, 92, 0.4); }
+
+/* Buzzer frei: Wer noch darf, steht im Licht – wer seinen Versuch hatte, tritt
+   zurück. So sieht der Raum das Rennen, statt es nur zu ahnen. */
+.player.scharf { transform: translateY(-3px); }
+.player.scharf::after { background: var(--gold); box-shadow: 0 0 18px var(--gold); }
+.player.raus { opacity: 0.45; }
+.player.raus::after { background: #3a4457; box-shadow: none; }
+
+/* Serie: erst ab drei in Folge, dafür dann unübersehbar. */
+.pserie {
+  position: absolute;
+  top: 0.15rem;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: clamp(0.62rem, 0.72vw, 0.85rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3a2a00;
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  border-radius: 999px;
+  padding: 0.1em 0.7em;
+  box-shadow: 0 0 16px rgba(255, 197, 49, 0.5);
+  animation: serieAn 0.4s var(--ease-snap) both;
+}
+@keyframes serieAn { from { opacity: 0; transform: translate(-50%, -8px) scale(0.8); } }
 
 .player .pname {
   grid-area: name;

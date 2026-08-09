@@ -162,7 +162,11 @@ export function startGame(state, questionSet) {
   state.questionSet = questionSet;
   state.round = 0;
   state.turnIndex = 0;
-  for (const team of state.teams) team.score = 0;
+  for (const team of state.teams) {
+    team.score = 0;
+    team.serie = 0;
+    team.serieBest = 0;
+  }
   return startRound(state, 1);
 }
 
@@ -266,6 +270,7 @@ export function buzz(state, clientId) {
   q.buzzedTeamId = team.id;
   q.onTheHook = team.id;
   q.buzzedAt = Date.now();
+  q.buzzQuelle = 'handy';
   q.buzzedBy = team.members.find((m) => m.clientId === clientId)?.name || team.name;
   return state;
 }
@@ -283,6 +288,7 @@ export function buzzFor(state, teamId) {
   q.buzzedTeamId = team.id;
   q.onTheHook = team.id;
   q.buzzedAt = Date.now();
+  q.buzzQuelle = 'host';
   q.buzzedBy = team.name;
   return state;
 }
@@ -329,6 +335,12 @@ export function judge(state, correct) {
   const isPrimary = q.step === 'primary';
   const full = q.value;
   const half = halfPoints(full);
+
+  // Serie richtiger Antworten – reine Anzeige, sie bringt keine Punkte und
+  // ändert an den Regeln nichts. Sie zählt für das Team, das gerade antwortet:
+  // beim Zugteam wie beim Team, das sich reingebuzzert hat.
+  team.serie = correct ? (team.serie || 0) + 1 : 0;
+  if (team.serie > (team.serieBest || 0)) team.serieBest = team.serie;
 
   if (correct) {
     const delta = isPrimary ? full : half;
@@ -380,6 +392,7 @@ export function resetBuzz(state) {
   if (q.step !== 'buzz') throw new GameError('Der Buzzer ist gerade nicht offen.');
   q.buzzedTeamId = null;
   q.buzzedBy = null;
+  q.buzzQuelle = null;
   q.onTheHook = null;
   return openBuzz(state);
 }
@@ -435,6 +448,8 @@ export function backToLobby(state) {
   const teams = state.teams.map((t) => ({
     ...t,
     score: 0,
+    serie: 0,
+    serieBest: 0,
     // Karteileichen von Geräten, die längst weg sind, nicht ins nächste Spiel schleppen.
     members: t.members.filter((m) => m.online !== false),
   }));
@@ -477,6 +492,8 @@ export function viewFor(state, { isHost, clientId }) {
       name: t.name,
       color: t.color,
       score: t.score,
+      serie: t.serie || 0,
+      serieBest: t.serieBest || 0,
       members: t.members.map((m) => ({
         name: m.name,
         clientId: m.clientId,
@@ -508,6 +525,13 @@ export function viewFor(state, { isHost, clientId }) {
       onTheHook: q.onTheHook,
       buzzedTeamId: q.buzzedTeamId,
       buzzedBy: q.buzzedBy || null,
+      // Wie knapp war das Rennen? Der Server weiß es längst, hat es aber für
+      // sich behalten – dabei ist genau das der Moment, über den danach geredet
+      // wird. Nur bei einem echten Handy-Buzz: Wenn der Host stellvertretend
+      // drückt, misst die Zahl seine Reaktion, nicht die des Tisches.
+      buzzMs: q.buzzedAt && q.buzzOpenedAt && q.buzzQuelle === 'handy'
+        ? q.buzzedAt - q.buzzOpenedAt
+        : null,
       lockedOut: q.lockedOut,
       revealed: q.revealed,
       lastDelta: q.lastDelta || null,

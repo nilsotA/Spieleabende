@@ -92,7 +92,14 @@ hat. Wer falsch buzzert, ist für diese Frage raus; die Übrigen dürfen weiter.
 | `4` | Keiner weiß es → auflösen |
 | `L` | Lösung kurz aufdecken (Achtung: alle sehen den Bildschirm) |
 | `Leertaste` | Weiter / nächste Runde |
-| `Esc` | Menü (Punkte korrigieren, Zug setzen, Offline-Geräte entfernen) |
+| `Esc` | Menü (Punkte korrigieren, Zug setzen, Ton an/aus) |
+
+### Ton
+
+Alle Klänge entstehen im Browser aus Oszillatoren – keine Datei, kein Download.
+Jedes Gerät lässt sich einzeln stummschalten: auf dem Host-Screen im Menü (`Esc`),
+auf dem Handy über das Lautsprechersymbol unten. Der Beamer darf also tönen,
+während die Handys still bleiben.
 
 ---
 

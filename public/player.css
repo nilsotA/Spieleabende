@@ -372,3 +372,8 @@ html, body { touch-action: manipulation; }
   .buzzer.armed, .buzzer.won, .buzzer.tooearly { animation: none; }
   .buzzer { transition-duration: 0.01ms; }
 }
+
+/* Fußzeile: Teamwechsel und Stummschalter nebeneinander, damit der Ton-Knopf
+   nicht die Breite eines Buzzers bekommt. */
+.p-fuss { display: flex; gap: 0.5rem; justify-content: center; align-items: center; }
+.p-fuss #btn-ton { font-size: 1.1rem; line-height: 1; padding: 0.35rem 0.7rem; }

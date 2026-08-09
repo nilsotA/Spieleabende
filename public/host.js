@@ -1,4 +1,6 @@
-import { $, el, connect, hostAction, toast, sound, installAudioUnlock, setFrageText } from '/common.js';
+import {
+  $, el, connect, hostAction, toast, sound, installAudioUnlock, setFrageText,
+  istStumm, setzeStumm } from '/common.js';
 import { qrSvg } from '/qr.js';
 
 let state = null;
@@ -7,6 +9,7 @@ let dateiSatz = null;     // zuletzt geladene Datei, bleibt in der Auswahl verf�
 let lastScores = new Map();
 let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
 let standVorRunde = null; // Platzierung am Ende der vorletzten Runde, für den Endstand
+let letzteRunde = null;   // zuletzt gesehene Rundennummer, für die Rundenansage
 
 const act = hostAction;
 
@@ -28,6 +31,28 @@ connect({
     }
   },
 });
+
+/**
+ * Kurze Ansage quer über die Leinwand. Die einzige Stelle, an der das Spiel den
+ * Raum unterbricht – deshalb nur zum Rundenwechsel und deshalb kurz: Nach 1,8
+ * Sekunden ist die Wand wieder frei, ohne dass jemand etwas drücken muss.
+ */
+let ansageZeit = null;
+function ansagen(zeile1, zeile2 = '') {
+  const box = $('#ansage');
+  $('#ansage-1').textContent = zeile1;
+  $('#ansage-2').textContent = zeile2;
+  $('#ansage-2').hidden = !zeile2;
+  box.hidden = false;
+  box.classList.remove('an');
+  void box.offsetWidth; // Neustart der Animation erzwingen
+  box.classList.add('an');
+  clearTimeout(ansageZeit);
+  ansageZeit = setTimeout(() => {
+    box.classList.remove('an');
+    box.hidden = true;
+  }, 1800);
+}
 
 /** Kurzer Studioblitz in Teamfarbe – ein Element, kein Layout. */
 function stageFlash(color) {
@@ -197,6 +222,7 @@ function render(prev) {
     // Konfetti deshalb aus.
     konfettiGefallen = false;
     standVorRunde = null;
+    letzteRunde = null;
     return renderLobby();
   }
 
@@ -265,13 +291,30 @@ function renderBoard() {
   // dann für jedes Feld falsch, und ohne diese Merkung würde nach einem Reload
   // des Host-Screens das halbe Board gleichzeitig abschalten.
   const frischGebaut = board.dataset.key !== key;
+  // Nur bei einer wirklich neuen Runde tönen, nicht bei jedem Neuaufbau: Ein
+  // Reload des Host-Screens baut das Board ebenfalls neu, und dann wäre die
+  // Ansage gelogen.
+  // Zwei Fälle sollen tönen: der Spielstart und jeder Rundenwechsel. Nicht
+  // tönen darf ein Reload des Host-Screens – der baut das Board ebenfalls neu.
+  // Unterschieden wird am Board selbst: Beim echten Anfang ist noch kein Feld
+  // gespielt, nach einem Reload mittendrin schon.
+  const nochNichtsGespielt = data.categories.every((c) => c.cells.every((z) => !z.used));
+  const neueRunde = frischGebaut && letzteRunde !== null && letzteRunde !== state.round;
+  const spielStart = frischGebaut && letzteRunde === null && state.round === 1 && nochNichtsGespielt;
+  if (neueRunde || spielStart) {
+    sound('rundenstart');
+    ansagen(`Runde ${state.round}`, data.multiplier > 1 ? 'Ab jetzt zählt alles doppelt' : 'Los geht’s!');
+  }
+  letzteRunde = state.round;
   if (frischGebaut) {
     board.dataset.key = key;
     board.innerHTML = '';
     board.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
     board.style.gridTemplateRows = `auto repeat(${rows}, minmax(0, 1fr))`;
     data.categories.forEach((cat, catIdx) => {
-      board.append(el('div', { class: 'cat', style: { gridColumn: catIdx + 1, gridRow: 1 } },
+      // --c ist die Spalte: Die Schilder gehen von links nach rechts an, erst
+      // danach klappen die Panels auf. Vorhang auf statt „alles ist plötzlich da".
+      board.append(el('div', { class: 'cat', style: { gridColumn: catIdx + 1, gridRow: 1, '--c': catIdx } },
         el('span', {}, cat.name)));
       cat.cells.forEach((cell, rowIdx) => {
         board.append(
@@ -379,7 +422,9 @@ function renderQuestion(prev) {
     status.append(el('div', { class: 'chip buzzopen' }, `⚡ Buzzer frei · ${q.halfValue} Punkte`));
     setBuzzIndicator('armed');
   } else if (q.buzzedTeamId) {
-    status.append(el('div', { class: 'chip buzzed' }, `${teamName(q.buzzedTeamId)} hat gebuzzert!`));
+    // Wie knapp war es? Das Buzzer-Rennen endete bisher ohne Ergebnis.
+    const zeit = q.buzzMs != null ? ` · ${(q.buzzMs / 1000).toFixed(2).replace('.', ',')} s` : '';
+    status.append(el('div', { class: 'chip buzzed' }, `${teamName(q.buzzedTeamId)} hat gebuzzert!${zeit}`));
     setBuzzIndicator(q.step === 'buzz' ? 'hit' : 'idle');
   } else {
     setBuzzIndicator('idle');
@@ -396,6 +441,12 @@ function renderQuestion(prev) {
   const answer = $('#q-answer');
   answer.hidden = !q.revealed;
   answer.textContent = q.revealed ? q.answer : '';
+  // Wenn erst das Zugteam passt und danach alle anderen danebenliegen, ist das
+  // der Moment, in dem der ganze Raum lacht. Auf der Leinwand sah er bisher aus
+  // wie jede andere Auflösung.
+  const keiner = q.revealed && q.log.length > 0 && !q.log.some((e) => e.result === 'correct');
+  $('#q-keiner').hidden = !keiner;
+
   const note = $('#q-note');
   note.hidden = !(q.revealed && q.note);
   note.textContent = q.note || '';
@@ -405,7 +456,9 @@ function renderQuestion(prev) {
   const sameQuestion = prevQ && prev.round === state.round && prevQ.catIdx === q.catIdx && prevQ.rowIdx === q.rowIdx;
   if (sameQuestion && prevQ.log.length < q.log.length) {
     const letzte = q.log[q.log.length - 1];
-    sound(letzte.result === 'correct' ? 'correct' : 'wrong');
+    // Drei sehr verschiedene Ausgänge hatten denselben Ton. „Wusste es nicht"
+    // kostet standardmäßig nichts und darf nicht klingen wie ein Fehlgriff.
+    sound(letzte.result === 'correct' ? 'correct' : letzte.result === 'pass' ? 'passt' : 'wrong');
     if (letzte.result === 'wrong') {
       panel.classList.remove('wrong');
       void panel.offsetWidth;
@@ -467,6 +520,7 @@ function renderPlayers() {
           el('div', { class: 'pname' }, team.name),
           el('div', { class: 'pmembers' }, ''),
           el('div', { class: 'pscore' }, '0'),
+          el('div', { class: 'pserie', hidden: true }, ''),
         ),
       );
     }
@@ -499,6 +553,19 @@ function renderPlayers() {
     // Wer führt, war an den Pulten nicht zu erkennen – alle Punktepillen sahen
     // gleich aus, ob 0 oder 3950. Bei Gleichstand leuchten eben mehrere.
     node.classList.toggle('leader', state.teams.length > 1 && bestScore > 0 && team.score === bestScore);
+
+    // Beim freien Buzzer sitzen mehrere Tische mit dem Finger über dem Handy.
+    // Auf der Leinwand war davon nichts zu sehen – dabei ist das das Rennen.
+    const q = state.current;
+    const buzzOffen = q?.step === 'buzz' && !q.buzzedTeamId;
+    node.classList.toggle('scharf', !!buzzOffen && team.id !== q.teamId && !q.lockedOut.includes(team.id));
+    node.classList.toggle('raus', !!q && q.step === 'buzz' && q.lockedOut.includes(team.id));
+
+    // Serie: erst ab drei richtigen in Folge, sonst klebt bei zwei Teams
+    // dauernd ein Abzeichen an irgendeinem Pult.
+    const serie = node.querySelector('.pserie');
+    serie.hidden = (team.serie || 0) < 3;
+    serie.textContent = `${team.serie || 0}× in Folge`;
 
     const before = lastScores.get(team.id);
     if (before != null && before !== team.score) {
@@ -557,7 +624,10 @@ function renderScoreboard() {
   const box = $('#scoreboard');
   const show = state.phase === 'roundEnd' || state.phase === 'gameOver';
   box.hidden = !show;
-  if (!show) return;
+  if (!show) {
+    rundeAbgepfiffen = false; // vor dem Aussteigen, sonst wird nie zurückgesetzt
+    return;
+  }
 
   const final = state.phase === 'gameOver';
   $('#score-title').textContent = final ? 'Endstand' : `Runde ${state.round} beendet`;
@@ -614,12 +684,25 @@ function renderScoreboard() {
   $('#btn-new-game').hidden = !final;
   if (final && !konfettiGefallen) {
     konfettiGefallen = true;
-    konfetti(ranked[0]?.color);
+    // Der Endstand baut sich von unten auf – erst rollt die Trommel, und wenn
+    // der Sieger oben ankommt, kommt die Fanfare samt Konfetti dazu.
+    sound('trommel');
+    const bisSieger = Math.max(0, (ranked.length - 1) * 280 + 250);
+    setTimeout(() => {
+      sound('fanfare');
+      konfetti(ranked[0]?.color);
+    }, bisSieger);
+  }
+  // Das Rundenende war völlig stumm – nur der Endstand bekam etwas zu hören.
+  if (!final && !rundeAbgepfiffen) {
+    rundeAbgepfiffen = true;
+    sound('rundenende');
   }
   if (!final) konfettiGefallen = false;
 }
 
 let konfettiGefallen = false;
+let rundeAbgepfiffen = false;
 
 /** Einmalig beim Sieg – 60 Schnipsel, danach werden die Elemente entfernt. */
 function konfetti(farbe) {
@@ -743,8 +826,21 @@ $('#btn-abort').addEventListener('click', () => {
   }
 });
 
+/* Der Ton hängt am Gerät, nicht am Spiel: Der Beamer steht im Wohnzimmer, die
+   Handys liegen zwischen den Leuten – wer stumm will, stellt sein eigenes stumm. */
+function zeigeTonSchalter() {
+  $('#btn-ton').textContent = istStumm() ? '🔇 Ton aus' : '🔊 Ton an';
+}
+$('#btn-ton').addEventListener('click', () => {
+  setzeStumm(!istStumm());
+  zeigeTonSchalter();
+  if (!istStumm()) sound('pick'); // kurz hören, dass er wieder da ist
+});
+zeigeTonSchalter();
+
 function openMenu() {
   fillMenu();
+  zeigeTonSchalter();
   $('#menu').hidden = false;
   // Alles dahinter stilllegen, sonst wandert der Tabulator aufs Board.
   $('#view-game').inert = true;

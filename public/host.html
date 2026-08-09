@@ -129,6 +129,7 @@
         <div id="q-text" class="q-text"></div>
         <img id="q-image" class="q-image" alt="" hidden>
         <div id="q-status" class="q-status"></div>
+        <div id="q-keiner" class="q-keiner" hidden>Das wusste keiner!</div>
         <div id="q-answer" class="q-answer" hidden></div>
         <div id="q-note" class="q-note" hidden></div>
       </div>
@@ -146,6 +147,12 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Rundenansage: blendet kurz auf und gibt die Wand wieder frei -->
+  <div id="ansage" class="ansage" hidden aria-hidden="true">
+    <div id="ansage-1" class="ansage-1"></div>
+    <div id="ansage-2" class="ansage-2"></div>
   </div>
 
   <div id="stage-flash" class="stage-flash" aria-hidden="true"></div>
@@ -177,6 +184,7 @@
       <h2>Punkte &amp; Steuerung</h2>
       <ul id="menu-teams" class="menu-teams"></ul>
       <div class="row" style="margin-top:1rem">
+        <button id="btn-ton" class="btn" title="Töne auf diesem Gerät an oder aus">🔊 Ton an</button>
         <button id="btn-close-menu" class="btn grow">Schließen</button>
         <button id="btn-abort" class="btn btn-bad">Spiel beenden</button>
       </div>

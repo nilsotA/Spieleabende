@@ -185,33 +185,210 @@ export function installAudioUnlock() {
   });
 }
 
+/* Die ganze Tonspur entsteht im Browser aus Oszillatoren und einer Handvoll
+   Rauschen. Keine Datei, kein Download – das Quiz klingt auch ohne Internet.
+
+   Ein Ton ist eine Liste von Stimmen. Jede Stimme:
+     f     Frequenz in Hz (oder [von, bis] für einen Glissando-Rutsch)
+     at    Startzeit in Sekunden, relativ zum Auslösen
+     d     Dauer
+     v     Lautstärke 0..1
+     t     Wellenform – 'triangle' weich, 'square' blechern, 'sawtooth' scharf
+     rausch  statt Oszillator ein Rauschimpuls (Perkussion)
+   Nichts dauert länger als eine Sekunde: Am Spieleabend wartet niemand auf
+   einen Jingle. Die einzige Ausnahme ist die Fanfare am Spielende. */
+
+const TON = 'triangle';
+
+// Halbtonabstände auf eine Grundfrequenz – so bleiben Akkorde sauber gestimmt.
+const halbton = (grund, n) => grund * 2 ** (n / 12);
+const C5 = 523.25;
+
+const KLAENGE = {
+  // Feld gewählt: kurzer Doppelblip, mehr nicht.
+  pick: [
+    { f: 520, at: 0, d: 0.09, v: 0.2 },
+    { f: 780, at: 0.06, d: 0.1, v: 0.2 },
+  ],
+  // Buzzer freigegeben: die Treppe hinauf, das Signal zum Losdrücken.
+  armed: [
+    { f: 520, at: 0, d: 0.11, v: 0.28 },
+    { f: 780, at: 0.09, d: 0.11, v: 0.3 },
+    { f: 1040, at: 0.18, d: 0.11, v: 0.32 },
+    { f: 1300, at: 0.27, d: 0.2, v: 0.3 },
+  ],
+  // Jemand hat gedrückt: harter Anschlag mit Rauschkante, dann abwärts.
+  buzz: [
+    { rausch: true, at: 0, d: 0.06, v: 0.35 },
+    { f: 880, at: 0, d: 0.1, v: 0.3, t: 'square' },
+    { f: 660, at: 0.08, d: 0.1, v: 0.3, t: 'square' },
+    { f: 520, at: 0.16, d: 0.18, v: 0.28, t: 'square' },
+  ],
+  // Richtig: Dur-Dreiklang aufwärts, oben bleibt die Oktave stehen.
+  correct: [
+    { f: halbton(C5, 0), at: 0, d: 0.12, v: 0.26 },
+    { f: halbton(C5, 4), at: 0.08, d: 0.12, v: 0.26 },
+    { f: halbton(C5, 7), at: 0.16, d: 0.12, v: 0.28 },
+    { f: halbton(C5, 12), at: 0.24, d: 0.34, v: 0.3 },
+    { f: halbton(C5, 7), at: 0.24, d: 0.34, v: 0.16 },
+  ],
+  // Falsch: der Rutsch nach unten, den jede Show für den Fehlgriff hat.
+  wrong: [
+    { f: [320, 150], at: 0, d: 0.38, v: 0.3, t: 'sawtooth' },
+    { f: [160, 78], at: 0.02, d: 0.38, v: 0.2, t: 'sawtooth' },
+  ],
+  // Auflösen ohne Gewinner: sachlich, kein Triumph.
+  reveal: [
+    { f: 740, at: 0, d: 0.12, v: 0.22 },
+    { f: 990, at: 0.08, d: 0.26, v: 0.24 },
+  ],
+  // „Wusste es nicht": Das kostet standardmäßig nichts und darf deshalb auch
+  // nicht klingen wie ein Fehlgriff – zwei weiche Töne abwärts, mehr nicht.
+  passt: [
+    { f: 440, at: 0, d: 0.14, v: 0.2 },
+    { f: 370, at: 0.1, d: 0.26, v: 0.2 },
+  ],
+  // Zu spät gedrückt: ein kurzer, dumpfer Anschlag. Kein Strafton – verloren
+  // hat man ja nur das Rennen.
+  zuspaet: [
+    { f: 220, at: 0, d: 0.16, v: 0.22, t: 'sawtooth' },
+    { rausch: true, at: 0, d: 0.08, v: 0.16 },
+  ],
+  // Rundenende: das Spiegelbild des Rundenstarts, ruhiger und abwärts.
+  rundenende: [
+    { f: halbton(C5, 12), at: 0, d: 0.16, v: 0.24, t: 'square' },
+    { f: halbton(C5, 7), at: 0.14, d: 0.16, v: 0.22, t: 'square' },
+    { f: halbton(C5, 0), at: 0.28, d: 0.44, v: 0.24, t: 'square' },
+    { f: halbton(C5, -12), at: 0.28, d: 0.44, v: 0.16 },
+  ],
+  // Neue Runde: aufsteigender Rutsch und zwei Schläge – Vorhang auf.
+  rundenstart: [
+    { f: [220, 660], at: 0, d: 0.34, v: 0.22, t: 'sawtooth' },
+    { rausch: true, at: 0.3, d: 0.12, v: 0.3 },
+    { f: halbton(C5, 0), at: 0.32, d: 0.16, v: 0.3, t: 'square' },
+    { f: halbton(C5, 7), at: 0.32, d: 0.16, v: 0.22, t: 'square' },
+    { f: halbton(C5, 12), at: 0.48, d: 0.4, v: 0.3, t: 'square' },
+  ],
+  // Trommelwirbel: Rauschschläge, die schneller und lauter werden.
+  trommel: Array.from({ length: 16 }, (_, i) => ({
+    rausch: true,
+    at: (i / 16) ** 1.5 * 1.1,
+    d: 0.05,
+    v: 0.1 + (i / 16) * 0.28,
+  })),
+  // Sieg: die einzige Stelle, an der eine ganze Sekunde erlaubt ist.
+  fanfare: [
+    { f: halbton(C5, -5), at: 0, d: 0.16, v: 0.28, t: 'square' },
+    { f: halbton(C5, 0), at: 0.14, d: 0.16, v: 0.28, t: 'square' },
+    { f: halbton(C5, 4), at: 0.28, d: 0.16, v: 0.28, t: 'square' },
+    { f: halbton(C5, 7), at: 0.42, d: 0.5, v: 0.26, t: 'square' },
+    // Der Schlussakkord liegt darunter und trägt.
+    { f: halbton(C5, 0), at: 0.42, d: 0.85, v: 0.2 },
+    { f: halbton(C5, 4), at: 0.42, d: 0.85, v: 0.16 },
+    { f: halbton(C5, 12), at: 0.42, d: 0.85, v: 0.14 },
+    { rausch: true, at: 0.42, d: 0.2, v: 0.22 },
+  ],
+};
+
+/* Ton lässt sich abschalten – auf jedem Gerät für sich, denn der Beamer steht
+   im Wohnzimmer und die Handys liegen zwischen den Leuten. */
+const TON_AUS = 'quizduell.stumm';
+let stumm = localStorage.getItem(TON_AUS) === '1';
+
+export function istStumm() {
+  return stumm;
+}
+
+export function setzeStumm(an) {
+  stumm = !!an;
+  localStorage.setItem(TON_AUS, stumm ? '1' : '0');
+  return stumm;
+}
+
+/* Alle Stimmen laufen über einen Summenregler. Ohne ihn addieren sich die vier
+   Stimmen der Fanfare auf über 1.0 und der Lautsprecher verzerrt – gemessen,
+   nicht vermutet. Hier ist außerdem die eine Stelle, an der die Gesamtlautstärke
+   später verändert werden könnte. */
+export const TON_PEGEL = 0.6;
+
+let summe = null;
+
+function ausgang(ac) {
+  if (!summe || summe.context !== ac) {
+    summe = ac.createGain();
+    summe.gain.value = TON_PEGEL;
+    // Ein Begrenzer dahinter: Gemessen bleibt jeder einzelne Ton im Rahmen,
+    // aber zwei überlappende – ein Buzz mitten in die Wertung – könnten sich
+    // trotzdem addieren. Der Kompressor fängt genau das ab.
+    const bremse = ac.createDynamicsCompressor();
+    bremse.threshold.value = -12;
+    bremse.ratio.value = 6;
+    bremse.attack.value = 0.003;
+    bremse.release.value = 0.18;
+    summe.connect(bremse).connect(ac.destination);
+  }
+  return summe;
+}
+
+let rauschPuffer = null;
+
+/** Ein kurzer Rauschimpuls als Perkussion – einmal erzeugt, danach geliehen. */
+function rauschen(ac) {
+  if (rauschPuffer) return rauschPuffer;
+  const laenge = Math.floor(ac.sampleRate * 0.25);
+  rauschPuffer = ac.createBuffer(1, laenge, ac.sampleRate);
+  const daten = rauschPuffer.getChannelData(0);
+  for (let i = 0; i < laenge; i++) {
+    // Nach hinten leiser: so klingt es nach Schlag und nicht nach Zischen.
+    daten[i] = (Math.random() * 2 - 1) * (1 - i / laenge) ** 2;
+  }
+  return rauschPuffer;
+}
+
 /** Kurze Töne ohne externe Dateien – funktioniert auch offline. */
 export function sound(kind) {
   try {
+    if (stumm) return;
     if (!audio) return; // noch keine Nutzergeste, also auch kein Ton
     if (audio.state === 'suspended') audio.resume();
     const ac = audio;
-    const now = ac.currentTime;
-    const notes = {
-      buzz: [[880, 0, 0.3], [660, 0.09, 0.3], [520, 0.18, 0.3]],
-      armed: [[520, 0, 0.3], [780, 0.1, 0.32], [1040, 0.2, 0.34], [1300, 0.3, 0.3]],
-      correct: [[660, 0, 0.3], [880, 0.1, 0.3], [1180, 0.2, 0.32]],
-      wrong: [[300, 0, 0.3], [200, 0.14, 0.3]],
-      pick: [[520, 0, 0.22], [780, 0.06, 0.22]],
-      reveal: [[740, 0, 0.26], [990, 0.08, 0.26]],
-    }[kind];
-    if (!notes) return;
-    for (const [freq, at, vol] of notes) {
-      const osc = ac.createOscillator();
+    const jetzt = ac.currentTime;
+    const stimmen = KLAENGE[kind];
+    if (!stimmen) return;
+
+    for (const s of stimmen) {
+      const start = jetzt + s.at;
       const gain = ac.createGain();
-      osc.type = kind === 'wrong' ? 'sawtooth' : 'triangle';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, now + at);
-      gain.gain.exponentialRampToValueAtTime(vol, now + at + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + at + 0.24);
-      osc.connect(gain).connect(ac.destination);
-      osc.start(now + at);
-      osc.stop(now + at + 0.27);
+      // Exponentiell, aber nie auf echte Null – sonst knackt es.
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(s.v, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + s.d);
+      gain.connect(ausgang(ac));
+
+      if (s.rausch) {
+        const quelle = ac.createBufferSource();
+        quelle.buffer = rauschen(ac);
+        // Ohne Tiefpass klingt Rauschen nach Radio zwischen zwei Sendern.
+        const filter = ac.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 1800;
+        quelle.connect(filter).connect(gain);
+        quelle.start(start);
+        quelle.stop(start + s.d + 0.02);
+        continue;
+      }
+
+      const osc = ac.createOscillator();
+      osc.type = s.t || TON;
+      if (Array.isArray(s.f)) {
+        osc.frequency.setValueAtTime(s.f[0], start);
+        osc.frequency.exponentialRampToValueAtTime(s.f[1], start + s.d);
+      } else {
+        osc.frequency.value = s.f;
+      }
+      osc.connect(gain);
+      osc.start(start);
+      osc.stop(start + s.d + 0.03);
     }
   } catch {
     /* Ton ist nur Beiwerk */

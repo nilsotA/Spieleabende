@@ -1,6 +1,7 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash,
-  installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText } from '/common.js';
+  installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText,
+  istStumm, setzeStumm } from '/common.js';
 
 let state = null;
 let selectedTeam = localStorage.getItem('quizduell.teamId') || null;
@@ -44,6 +45,21 @@ $('#join-form').addEventListener('submit', async (ev) => {
 });
 
 $('#btn-leave').addEventListener('click', () => action('leaveTeam'));
+
+/* Stumm gilt pro Gerät: Wer neben dem Beamer sitzt, braucht seinen Buzzerton
+   nicht doppelt – und das Handy vibriert ja ohnehin. */
+const tonKnopf = $('#btn-ton');
+function zeigeTon() {
+  tonKnopf.textContent = istStumm() ? '🔇' : '🔊';
+  tonKnopf.title = istStumm() ? 'Töne sind aus' : 'Töne sind an';
+}
+tonKnopf.addEventListener('click', () => {
+  unlockAudio(); // echte Nutzergeste – sonst bleibt es auf iOS stumm
+  setzeStumm(!istStumm());
+  zeigeTon();
+  if (!istStumm()) sound('pick');
+});
+zeigeTon();
 
 /* ------------------------------------------------------------------ Buzzer */
 
@@ -313,8 +329,17 @@ function renderBuzzer(prev) {
     buzzer.classList.add(mine ? 'won' : 'fremd');
     if (!mine) buzzer.style.setProperty('--fremd', team?.color || '#55617a');
     label.textContent = mine ? 'DU!' : (team?.name || '').toUpperCase();
-    status.textContent = mine ? 'Du warst zuerst – antworte!' : `${team?.name} war schneller.`;
+    // Wie knapp war es? Das Rennen endete für die Verlierer bisher wortlos.
+    const knapp = q.buzzMs != null ? ` (${(q.buzzMs / 1000).toFixed(2).replace('.', ',')} s)` : '';
+    status.textContent = mine
+      ? `Du warst zuerst${knapp} – antworte!`
+      : `${team?.name} war schneller${knapp}.`;
     status.classList.toggle('you', mine);
+    // Nur beim Übergang tönen, nicht bei jedem Update derselben Lage.
+    if (prev && !(prev.current?.step === 'buzz' && prev.current?.buzzedTeamId)) {
+      if (mine) { vibrate([40, 40, 80]); sound('correct'); }
+      else if (!q.lockedOut.includes(you.teamId) && q.teamId !== you.teamId) sound('zuspaet');
+    }
     return;
   }
 
