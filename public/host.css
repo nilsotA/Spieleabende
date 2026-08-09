@@ -1014,7 +1014,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   grid-area: name;
   align-self: end;
   font-weight: 800;
-  font-size: clamp(0.8rem, 1vw, 1.05rem);
+  font-size: var(--pult-name);
   line-height: 1.35; /* sonst schneidet overflow die Umlautpunkte ab */
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1037,6 +1037,27 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   text-overflow: ellipsis;
   min-height: 0.9rem;
 }
+/* Der Schriftgrad der Punktepille steht als angemeldete Eigenschaft da, damit
+   host.js ihn in Pixeln ablesen kann: Die Leiste entscheidet daraus, ob Name
+   und Zahl noch nebeneinanderpassen. Ohne `@property` liefert getComputedStyle
+   den unausgerechneten clamp()-Text zurück, und ohne eigene Eigenschaft müsste
+   die Rechnung den Schriftgrad des gestapelten Pults ablesen – der ist kleiner,
+   womit die Leiste zwischen beiden Zuständen hin und her springen würde. */
+@property --pult-zahl {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 32px;
+}
+@property --pult-name {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 16px;
+}
+:root {
+  --pult-zahl: clamp(1.5rem, 2.5vw, 2.9rem);
+  --pult-name: clamp(0.8rem, 1vw, 1.05rem);
+}
+
 /* Namensschild aus Chrom mit rotem Punktestand – wie am echten Pult. */
 /* Zählende Zahlen aufrecht und tabellarisch – sonst zappelt die Breite beim
    Hochzählen. Die Kachelziffern bleiben kursiv, das ist die Signatur der Vorlage. */
@@ -1050,12 +1071,35 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   font-weight: 900;
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.02em;
-  font-size: clamp(1.5rem, 2.5vw, 2.9rem);
+  font-size: var(--pult-zahl);
   line-height: 1.15;
   background: linear-gradient(180deg, var(--neon-1), var(--neon-3));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 0 0 1px rgba(220, 235, 255, 0.22);
 }
 .player .pscore.neg { background: linear-gradient(180deg, #4a4f5c, #23262e); }
+/* Enge Pulte stellen sich auf: Name oben über die volle Breite, Zahl darunter.
+   Nebeneinander blieben dem Namen bei acht Teams auf 1280px 78 Pixel – „DIE
+   GRÜ…" für alle acht. Gestapelt bekommt er die ganze Pultbreite, und die
+   Punktzahl muss nicht schrumpfen. Wann gestapelt wird, misst host.js.
+   Warum nicht einfach die Schrift verkleinern: Die Leinwand steht vier Meter
+   weg – kleiner heißt hier unlesbar, nicht kompakter. */
+.players.eng .player {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'name' 'members' 'score';
+  text-align: center;
+  padding-inline: 0.5rem;
+}
+/* Zentriert wird der Text, nicht das Feld. Ein per `justify-items: center`
+   ausgerichtetes Grid-Kind bemisst sich nach fit-content – und weil der Name
+   `white-space: nowrap` trägt, ist seine Mindestbreite die volle Textbreite.
+   Das Feld wuchs dann über das Pult hinaus, `overflow: hidden` kam nie zum
+   Zug, und stattdessen schnitt der clip-path des Trapezes die Ränder ab: „Die
+   Unbestechlichen" ragte gemessen 46 Pixel raus und stand links wie rechts
+   ohne Auslassungspunkte mittendrin abgeschnitten da. Gedehnt bleibt das Feld
+   in der Spalte, und die Auslassungspunkte greifen wie vorgesehen. */
+.players.eng .player .pname { align-self: center; min-width: 0; letter-spacing: 0.02em; }
+.players.eng .player .pmembers { align-self: center; }
+.players.eng .player .pscore { justify-self: center; font-size: clamp(1.5rem, 2.2vw, 2.4rem); }
 /* Wer führt, trägt Gold. Vorher waren 0 und 3950 dieselbe rote Pille – man
    musste die Zahlen lesen und vergleichen, statt es zu sehen. */
 .player.leader .pscore {

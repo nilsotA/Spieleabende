@@ -660,6 +660,8 @@ function renderPlayers() {
   // Am Pult selbst könnte er nicht hängen: Dessen clip-path (das Trapez)
   // schneidet auch die eigenen Pseudo-Elemente ab.
   // Am Ende gehört der Scheinwerfer dem Sieger – vorher dem, der reden muss.
+  pruefeEnge(box);
+
   const imLicht = box.querySelector('.player.buzzed')
     || box.querySelector('.player.active')
     || (state.phase === 'gameOver' ? box.querySelector('.player.leader') : null);
@@ -669,6 +671,64 @@ function renderPlayers() {
     box.style.setProperty('--spot-w', `${imLicht.offsetWidth}px`);
   }
 }
+
+/**
+ * Nebeneinander oder übereinander?
+ *
+ * Am Pult stehen Name und Punktzahl normalerweise nebeneinander – aus vier
+ * Metern liest man dann beides in einem Blick. Bei acht Pulten auf einem
+ * 1280er Beamer bleiben davon rund 140 Pixel pro Pult, und die Punktepille
+ * nimmt sich zuerst, was sie braucht: gemessen blieben dem Namen 78 Pixel,
+ * aus „Die Grübelmeister" wurde „DIE GRÜ…". Alle acht Namen waren so
+ * verstümmelt, dass man die Teams nicht mehr auseinanderhalten konnte.
+ *
+ * Nur die Schrift zu verkleinern hilft nicht – dann sind beide unlesbar. Wird
+ * es zu eng, stellt sich das Pult deshalb auf: Name oben über die volle
+ * Breite, Punktzahl darunter, beide in voller Größe. Das kostet gut zwanzig
+ * Pixel Höhe und gibt dem Namen die dreifache Breite.
+ *
+ * Entschieden wird nach der gemessenen Breite, nicht nach der Teamzahl: Sechs
+ * Pulte auf 1920px haben reichlich Platz, sechs auf 1280px nicht.
+ *
+ * Gerechnet wird mit dem größten Punktestand, der kommen kann, nicht mit dem
+ * aktuellen. Sonst stünde die Leiste den halben Abend nebeneinander und
+ * klappte mitten im Spiel um, sobald jemand vierstellig wird – ausgerechnet
+ * im Moment, in dem alle auf die Zahl schauen.
+ */
+function pruefeEnge(box) {
+  const n = box.children.length;
+  if (!n) return;
+  const stil = getComputedStyle(box);
+  const innen = box.clientWidth - parseFloat(stil.paddingLeft) - parseFloat(stil.paddingRight);
+  const proPult = (innen - parseFloat(stil.columnGap || 0) * (n - 1)) / n;
+
+  // Was ein Pult nebeneinander mindestens braucht. Beide Schriftgrade hängen an
+  // der Fensterbreite, deshalb werden sie aus den angemeldeten Eigenschaften
+  // abgelesen statt geschätzt – und zwar an der Wurzel, nicht am Pult: Im
+  // gestapelten Pult steht ein kleinerer Grad, mit dem die Leiste sich selbst
+  // zurückschalten und dann endlos flackern würde.
+  const wurzel = getComputedStyle(document.documentElement);
+  const zahlGrad = parseFloat(wurzel.getPropertyValue('--pult-zahl'));
+  const nameGrad = parseFloat(wurzel.getPropertyValue('--pult-name'));
+
+  // Vierzehn Zeichen des Teamnamens sollen stehen bleiben. Die Zahl ist nicht
+  // gegriffen: „Die Grübelmeister", „Die Unbestechlichen" und „Die Nachzügler"
+  // gehen erst ab dem fünften Zeichen auseinander, und wer sich einen Namen
+  // ausdenkt, stellt gern etwas Gemeinsames voran. Bei elf Zeichen – der alten
+  // Annahme – standen an allen drei Pulten „DIE …" und sonst nichts.
+  // Großbuchstabe in Halbfett plus Sperrung misst 0,67 em, eine tabellarische
+  // Ziffer der Pille 0,62 em, und der größte Punktestand („-1000") sind fünf.
+  const noetig = 14 * 0.67 * nameGrad + 11 /* Spalte */ + 27 /* Pillenpolster */
+    + 32 /* Pultpolster */ + 5 * 0.62 * zahlGrad;
+  box.classList.toggle('eng', proPult < noetig);
+}
+
+// Beim Ziehen des Fensters ändert sich die Breite, ohne dass ein neuer
+// Spielstand kommt – sonst bliebe die Leiste bis zum nächsten Zug falsch.
+addEventListener('resize', () => {
+  const box = $('#players');
+  if (box) pruefeEnge(box);
+});
 
 /**
  * Die Punktzahl steigt groß auf – aber über dem Pult des Teams, das sie bekommt,
