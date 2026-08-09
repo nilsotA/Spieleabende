@@ -421,3 +421,63 @@ html, body { touch-action: manipulation; }
 @keyframes probeDruck {
   40% { transform: translateY(12px) scale(0.98); }
 }
+
+/* ---------------------------------------------------- Eigene Bilanz */
+
+/* Nur in den Pausen sichtbar – am Rundenende und zum Schluss. Bewusst auf dem
+   Handy und nicht auf der Leinwand: Dort schaut der Raum auf den Sieger, und
+   acht Tabellen daneben liest niemand. */
+.p-bilanz {
+  margin-top: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.9rem 1rem;
+}
+.p-bilanz h2 {
+  margin: 0 0 0.7rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.p-bilanz-gitter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4.2rem, 1fr));
+  gap: 0.5rem;
+}
+.p-bilanz-feld {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 0.3rem;
+}
+.p-bilanz-zahl {
+  font-family: var(--font);
+  font-weight: 900;
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1;
+}
+.p-bilanz-wort {
+  /* 0.72rem ist die kleinste Schrift, die es auf dieser Seite sonst gibt –
+     darunter zu gehen, nur damit „Weiß nicht" in eine Zeile passt, wäre der
+     falsche Tausch. Es darf umbrechen. */
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+.p-bilanz-summe {
+  margin: 0.7rem 0 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #b9d8f6;
+}
+.p-bilanz-leer { margin: 0; color: var(--muted); font-size: 0.92rem; }

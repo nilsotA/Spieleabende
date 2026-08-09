@@ -25,6 +25,34 @@ function leereRekorde() {
   };
 }
 
+/**
+ * Die Bilanz eines Teams – reine Buchhaltung für den Rückblick am Ende.
+ * Auf Punkte und Ablauf hat davon nichts Einfluss.
+ */
+function leereBilanz() {
+  return {
+    richtig: 0,
+    falsch: 0,
+    gepasst: 0, // „weiß nicht" abgegeben
+    geklaut: 0, // per Buzzer beim fremden Feld gepunktet
+    daneben: 0, // per Buzzer danebengelegen
+    geholt: 0, // Summe der gewonnenen Punkte
+    verloren: 0, // Summe der verlorenen Punkte, positiv gezählt
+  };
+}
+
+/**
+ * Bilanz eines Teams, notfalls frisch angelegt.
+ *
+ * Ein Spielstand, der vor dieser Buchhaltung gespeichert wurde, bringt sie
+ * nicht mit – und der Server stellt beim Start den letzten Stand wieder her.
+ * Ohne diese Stelle stürbe der Abend beim ersten Punkt an einem `undefined`.
+ */
+function bilanzVon(team) {
+  if (!team.bilanz) team.bilanz = leereBilanz();
+  return team.bilanz;
+}
+
 export function createState() {
   return {
     phase: 'lobby', // lobby | board | question | roundEnd | gameOver
@@ -71,6 +99,7 @@ export function addTeam(state, name) {
       || TEAM_COLORS[state.teams.length % TEAM_COLORS.length],
     score: 0,
     members: [],
+    bilanz: leereBilanz(),
   });
   return state;
 }
@@ -183,6 +212,7 @@ export function startGame(state, questionSet) {
     team.score = 0;
     team.serie = 0;
     team.serieBest = 0;
+    team.bilanz = leereBilanz();
   }
   state.rekorde = leereRekorde();
   return startRound(state, 1);
@@ -254,6 +284,7 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
 export function passQuestion(state) {
   const q = requireQuestion(state);
   if (q.step !== 'primary') throw new GameError('Das geht nur, solange das Zugteam dran ist.');
+  bilanzVon(findTeam(state, q.teamId)).gepasst += 1;
   q.log.push({ teamId: q.teamId, result: 'pass', delta: 0 });
   return openBuzz(state);
 }
@@ -367,9 +398,15 @@ export function judge(state, correct) {
   team.serie = correct ? (team.serie || 0) + 1 : 0;
   if (team.serie > (team.serieBest || 0)) team.serieBest = team.serie;
 
+  const bilanz = bilanzVon(team);
+
   if (correct) {
     const delta = isPrimary ? full : half;
     team.score += delta;
+    bilanz.richtig += 1;
+    bilanz.geholt += delta;
+    // Am fremden Feld gepunktet – die Zahl, mit der am Ende geprahlt wird.
+    if (!isPrimary) bilanz.geklaut += 1;
     q.log.push({ teamId: team.id, result: 'correct', delta });
     q.lastDelta = { teamId: team.id, delta };
     // Achtung: erst aufdecken, wenn die Frage wirklich durch ist. Sonst könnten
@@ -391,6 +428,9 @@ export function judge(state, correct) {
     delta = -half;
   }
   team.score += delta;
+  bilanz.falsch += 1;
+  bilanz.verloren += -delta; // positiv gezählt, damit die Zahl für sich steht
+  if (!isPrimary) bilanz.daneben += 1;
   q.log.push({ teamId: team.id, result: 'wrong', delta });
   q.lastDelta = { teamId: team.id, delta };
   // Der teuerste Reinfall des Abends – da lacht am Ende der ganze Tisch.
@@ -486,6 +526,7 @@ export function backToLobby(state) {
     score: 0,
     serie: 0,
     serieBest: 0,
+    bilanz: leereBilanz(),
     // Karteileichen von Geräten, die längst weg sind, nicht ins nächste Spiel schleppen.
     members: t.members.filter((m) => m.online !== false),
   }));
@@ -530,6 +571,9 @@ export function viewFor(state, { isHost, clientId }) {
       score: t.score,
       serie: t.serie || 0,
       serieBest: t.serieBest || 0,
+      // Alte Spielstände kennen die Bilanz nicht – dann steht eine leere da,
+      // statt dass das Handy auf `undefined.richtig` läuft.
+      bilanz: t.bilanz || leereBilanz(),
       members: t.members.map((m) => ({
         name: m.name,
         clientId: m.clientId,

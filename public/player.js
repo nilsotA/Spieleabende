@@ -170,6 +170,7 @@ function render(prev) {
   renderQuestion();
   renderPicker();
   renderBuzzer(prev);
+  renderBilanz(me);
   renderScores();
 
   // Der Buzzer tritt zurück, wann immer etwas anderes den Platz braucht und er
@@ -446,6 +447,67 @@ function renderBuzzer(prev) {
     : 'Diesmal nichts für euch.');
   status.classList.toggle('you', eigen > 0);
   lock('DURCH');
+}
+
+/**
+ * Die eigene Bilanz – nur am Rundenende und zum Schluss.
+ *
+ * Auf der Leinwand steht der Punktestand, und der sagt am Ende des Abends
+ * nicht, wie er zustande kam: Wer viel geraten und viel danebengelegen hat,
+ * steht dort gleich neben dem, der zweimal aufgemacht hat und sonst nichts.
+ * Das gehört aufs eigene Handy, nicht auf den Beamer – dort schaut man auf
+ * den Sieger, und sieben Tabellen daneben schaut sich niemand an.
+ *
+ * Nur in den Pausen: Während einer Frage will niemand Statistik lesen, und
+ * unter dem Buzzer hat sie ohnehin keinen Platz.
+ */
+function renderBilanz(me) {
+  const box = $('#p-bilanz');
+  const zeigen = (state.phase === 'roundEnd' || state.phase === 'gameOver') && !!me;
+  box.hidden = !zeigen;
+  if (!zeigen) { box.dataset.key = ''; return; }
+
+  // Ein Spielstand von vor dieser Buchhaltung bringt keine Bilanz mit.
+  const b = me.bilanz || {};
+  const zahl = (x) => Number(x) || 0;
+  const gestellt = zahl(b.richtig) + zahl(b.falsch) + zahl(b.gepasst);
+
+  const key = [state.phase, state.round, me.id, JSON.stringify(b)].join('#');
+  if (box.dataset.key === key) return;
+  box.dataset.key = key;
+  box.innerHTML = '';
+
+  if (!gestellt) {
+    box.append(el('p', { class: 'p-bilanz-leer' }, 'Noch nichts zu erzählen – die nächste Runde kommt.'));
+    return;
+  }
+
+  const zeilen = [
+    ['Richtig', zahl(b.richtig)],
+    ['Daneben', zahl(b.falsch)],
+    ['Weiß nicht', zahl(b.gepasst)],
+    // Nur zeigen, wenn es das überhaupt gab: Eine Reihe Nullen liest sich wie
+    // ein Vorwurf, und beim Buzzern ist Nichtstun eine legitime Taktik.
+    ...(zahl(b.geklaut) ? [['Geklaut', zahl(b.geklaut)]] : []),
+    ...(zahl(b.daneben) ? [['Verbuzzert', zahl(b.daneben)]] : []),
+  ];
+
+  box.append(
+    el('h2', {}, state.phase === 'gameOver' ? 'Euer Abend' : `Eure Runde ${state.round}`),
+    el('div', { class: 'p-bilanz-gitter' }, ...zeilen.map(([wort, n]) => el('div', { class: 'p-bilanz-feld' },
+      el('span', { class: 'p-bilanz-zahl' }, String(n)),
+      el('span', { class: 'p-bilanz-wort' }, wort),
+    ))),
+    el('p', { class: 'p-bilanz-summe' }, summenzeile(zahl(b.geholt), zahl(b.verloren))),
+  );
+}
+
+/** „−0 verloren" ist kein Satz, den jemand sagen würde. */
+function summenzeile(geholt, verloren) {
+  if (geholt && verloren) return `+${geholt} geholt · −${verloren} verloren`;
+  if (geholt) return `+${geholt} geholt, nichts abgegeben`;
+  if (verloren) return `−${verloren} verloren, noch nichts geholt`;
+  return 'Noch keine Punkte bewegt';
 }
 
 function renderScores() {

@@ -435,3 +435,96 @@ test('Auflösen ist auch bei offenem Buzzer gesperrt', () => {
   G.revealAnswer(state);
   assert.equal(state.current.revealed, true);
 });
+
+/* ------------------------------------------------------------------ Bilanz */
+
+test('Bilanz zählt richtig, falsch und „weiß nicht"', () => {
+  const state = setup();
+  const [a, b] = state.teams;
+
+  // Team A antwortet richtig.
+  G.pickCell(state, 0, 0);
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(a.bilanz.richtig, 1);
+  assert.equal(a.bilanz.geholt, 100);
+  assert.equal(a.bilanz.geklaut, 0, 'am eigenen Feld ist nichts geklaut');
+
+  // Team B passt, Team C buzzert sich rein und trifft.
+  G.pickCell(state, 0, 1);
+  G.passQuestion(state);
+  assert.equal(b.bilanz.gepasst, 1);
+  G.buzzFor(state, state.teams[2].id);
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(state.teams[2].bilanz.geklaut, 1, 'am fremden Feld geholt');
+  assert.equal(state.teams[2].bilanz.geholt, 100, 'halbe Punkte von 200');
+});
+
+test('Bilanz zählt verlorene Punkte positiv und trennt Verbuzzern', () => {
+  const state = setup();
+  state.settings.wrongPenalty = 'full';
+  const [a, b] = state.teams;
+
+  G.pickCell(state, 0, 3); // 500 Punkte
+  G.judge(state, false); // Zugteam daneben
+  assert.equal(a.bilanz.falsch, 1);
+  assert.equal(a.bilanz.verloren, 500, 'positiv gezählt');
+  assert.equal(a.bilanz.daneben, 0, 'am eigenen Feld ist es kein Verbuzzern');
+
+  G.buzzFor(state, b.id);
+  G.judge(state, false);
+  assert.equal(b.bilanz.falsch, 1);
+  assert.equal(b.bilanz.daneben, 1, 'per Buzzer danebengelegen');
+  assert.equal(b.bilanz.verloren, 250, 'die Hälfte von 500');
+});
+
+test('ein neues Spiel setzt die Bilanz zurück', () => {
+  const state = setup();
+  G.pickCell(state, 0, 0);
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(state.teams[0].bilanz.richtig, 1);
+
+  G.startGame(state, SET);
+  assert.deepEqual(
+    state.teams.map((t) => t.bilanz.richtig + t.bilanz.geholt),
+    [0, 0, 0],
+  );
+
+  // Und auch der Weg über die Lobby räumt auf.
+  G.pickCell(state, 0, 0);
+  G.judge(state, true);
+  G.closeQuestion(state);
+  const frisch = G.backToLobby(state);
+  assert.deepEqual(frisch.teams.map((t) => t.bilanz.richtig), [0, 0, 0]);
+});
+
+test('ein Spielstand ohne Bilanz überlebt die erste Wertung', () => {
+  // Genau die Lage nach einem Update: Der Server stellt einen Stand wieder her,
+  // der vor dieser Buchhaltung gespeichert wurde. Kein Team bringt eine Bilanz
+  // mit – die Wertung darf daran nicht sterben.
+  const state = setup();
+  for (const team of state.teams) delete team.bilanz;
+
+  G.pickCell(state, 0, 0);
+  assert.doesNotThrow(() => G.judge(state, true));
+  assert.equal(state.teams[0].bilanz.richtig, 1);
+  G.closeQuestion(state);
+
+  // Auch „weiß nicht" und ein falscher Buzz legen die Bilanz sauber an.
+  for (const team of state.teams) delete team.bilanz;
+  G.pickCell(state, 0, 1);
+  assert.doesNotThrow(() => G.passQuestion(state));
+  // Nicht das Zugteam – das darf sich bei seiner eigenen Frage nicht reinbuzzern.
+  const fremd = state.teams.find((t) => t.id !== state.current.teamId);
+  G.buzzFor(state, fremd.id);
+  assert.doesNotThrow(() => G.judge(state, false));
+  assert.equal(fremd.bilanz.daneben, 1);
+
+  // Und die Sicht aufs Handy liefert trotzdem eine vollständige Bilanz.
+  for (const team of state.teams) delete team.bilanz;
+  const sicht = G.viewFor(state, { isHost: false, clientId: 'x' });
+  assert.equal(sicht.teams[0].bilanz.richtig, 0);
+  assert.equal(sicht.teams[0].bilanz.geholt, 0);
+});
