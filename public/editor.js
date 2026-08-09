@@ -317,6 +317,16 @@ $('#btn-download').addEventListener('click', () => {
 $('#btn-save').addEventListener('click', () => save(false));
 
 async function save(overwrite) {
+  // Ohne Namen landete der Satz als „fragensatz.json" auf der Platte und hieß
+  // in der Lobby „Fragensatz“. Wer 48 Fragen geschrieben hat, findet ihn dann
+  // zwischen den anderen nicht wieder – und der nächste namenlose Satz will
+  // dieselbe Datei. Der Name ist das Einzige, woran man einen Satz später
+  // erkennt, also wird hier danach gefragt statt still etwas zu erfinden.
+  if (!String(set.name || '').trim()) {
+    toast('Der Fragensatz braucht einen Namen – daran erkennst du ihn später in der Lobby.', 'error');
+    $('#set-name').focus();
+    return;
+  }
   const luecken = fehlendeFelder();
   if (luecken.length) {
     toast(`Noch unvollständig: ${luecken.slice(0, 3).map((l) => l.label).join(', ')}${luecken.length > 3 ? ` und ${luecken.length - 3} weitere` : ''}`, 'error');
@@ -335,7 +345,10 @@ async function save(overwrite) {
       toast(`Gespeichert als ${data.file}`);
       loadSetList();
     } else if (data.exists) {
+      // Wer hier abbricht, hat auf „Speichern“ gedrückt und sieht sonst gar
+      // nichts passieren – und weiß nicht, ob der Klick angekommen ist.
       if (confirm(`„${data.file}" gibt es schon. Überschreiben?`)) save(true);
+      else toast('Nicht gespeichert – der Satz behält seinen bisherigen Stand auf der Platte.');
     } else {
       toast(data.error || 'Speichern fehlgeschlagen.', 'error');
     }
