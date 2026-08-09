@@ -528,3 +528,49 @@ test('ein Spielstand ohne Bilanz überlebt die erste Wertung', () => {
   assert.equal(sicht.teams[0].bilanz.richtig, 0);
   assert.equal(sicht.teams[0].bilanz.geholt, 0);
 });
+
+test('geklaute Punkte werden getrennt gezählt', () => {
+  const state = setup();
+  const [a, b] = state.teams;
+
+  // Team A punktet am eigenen Feld – das ist nichts Geklautes.
+  G.pickCell(state, 0, 3); // 500
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(a.bilanz.geholt, 500);
+  assert.equal(a.bilanz.geklautPunkte, 0);
+
+  // Team B passt, A buzzert sich rein und trifft: halbe Punkte, und die zählen.
+  G.pickCell(state, 1, 3); // 500, Team B ist dran
+  assert.equal(state.current.teamId, b.id);
+  G.passQuestion(state);
+  G.buzzFor(state, a.id);
+  G.judge(state, true);
+  assert.equal(a.bilanz.geklautPunkte, 250, 'die Hälfte von 500');
+  assert.equal(a.bilanz.geholt, 750, 'die Gesamtsumme enthält beides');
+  assert.equal(a.bilanz.geklaut, 2 - 1, 'einmal geklaut');
+});
+
+test('eine Bilanz ohne die neueren Felder wird ergänzt statt zu NaN', () => {
+  // Genau der Spielstand, der zwischen zwei Fassungen gespeichert wurde: Die
+  // Bilanz ist da, kennt aber ein später hinzugekommenes Feld noch nicht.
+  const state = setup();
+  for (const team of state.teams) {
+    team.bilanz = { richtig: 3, falsch: 1, gepasst: 0, geklaut: 0, daneben: 0, geholt: 900, verloren: 0 };
+    delete team.bilanz.geklautPunkte;
+  }
+  const [a, b] = state.teams;
+  G.pickCell(state, 0, 0);
+  assert.equal(state.current.teamId, a.id);
+  G.passQuestion(state);
+  G.buzzFor(state, b.id);
+  G.judge(state, true);
+
+  assert.equal(b.bilanz.geklautPunkte, 50, 'das fehlende Feld wurde ergänzt, nicht zu NaN addiert');
+  assert.ok(Number.isFinite(b.bilanz.geholt), 'und die alten Werte bleiben Zahlen');
+  assert.equal(b.bilanz.richtig, 4, 'die vorhandene Zählung läuft weiter');
+
+  // Auch die Sicht aufs Handy liefert das neue Feld.
+  const sicht = G.viewFor(state, { isHost: false, clientId: 'x' });
+  assert.equal(typeof sicht.teams[0].bilanz.geklautPunkte, 'number');
+});

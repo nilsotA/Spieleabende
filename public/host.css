@@ -910,6 +910,27 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .rk-text { color: #e8f2ff; }
 @keyframes rekordRein { from { opacity: 0; transform: translateY(10px); } }
 
+/* Volles Panel: viele Teams und viele Auszeichnungen zugleich.
+
+   Gemessen auf einem MacBook Air mit acht Teams und fünf Auszeichnungen: Das
+   Panel war 990 Pixel hoch in einem 900er Fenster – die letzten drei
+   Auszeichnungen und der Knopf standen unter dem Bildrand, lautlos
+   abgeschnitten, weil die Bühne auf Fensterhöhe gedeckelt ist.
+
+   Enger gerückt wird über Abstände, nicht über die Schriftgröße: Der Endstand
+   ist der Moment, in dem der ganze Raum hinschaut. Die Auszeichnungen stehen
+   dafür zweispaltig – sie sind kurz genug und brauchen die volle Breite nicht. */
+/* Auch das Polster des Panels selbst zurücknehmen – oben sitzt es am
+   großzügigsten und wird hier am wenigsten vermisst. */
+.scores-panel.voll { padding-block: clamp(1rem, 2.2vh, 1.6rem) clamp(0.9rem, 2vh, 1.4rem); }
+.scores-panel.voll .score-list { gap: 0.3rem; margin-top: 0.4rem; }
+.scores-panel.voll .score-list li { padding: 0.35rem 1.1rem; }
+/* Einspaltig bleiben: Zwei Spalten waren gemessen schlechter, nicht besser –
+   die Einträge sind unterschiedlich lang, brachen unabhängig voneinander um und
+   verhakten sich ineinander. Stattdessen enger stellen und die Zahl deckeln. */
+.scores-panel.voll .rekorde { margin-top: 0.7rem; padding-top: 0.6rem; gap: 0.25rem; }
+.scores-panel.voll .score-winner { margin-bottom: 0.4rem; }
+
 /* ----------------------------------------------------------- Studioblitz */
 
 .stage-flash {

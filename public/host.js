@@ -898,6 +898,14 @@ function zeigeRekorde(final, ranked) {
   const name = (id) => state.teams.find((t) => t.id === id)?.name || '?';
   const zeilen = [];
 
+  /** „A und B" – ab drei wird gezählt, sonst sprengt eine Zeile das Panel. */
+  const nenne = (teams) => {
+    const n = teams.map((t) => t.name);
+    if (n.length <= 2) return n.join(' und ');
+    return `${n[0]}, ${n[1]} und ${n.length - 2} weitere`;
+  };
+
+
   if (r.schnellsterBuzz) {
     const s = (r.schnellsterBuzz.ms / 1000).toFixed(2).replace('.', ',');
     zeilen.push(['⚡ Schnellster Buzz', `${r.schnellsterBuzz.name} – ${s} s`]);
@@ -905,15 +913,69 @@ function zeigeRekorde(final, ranked) {
   // Die längste Serie über alle Teams; bei Gleichstand nennt sie alle.
   const best = Math.max(0, ...ranked.map((t) => t.serieBest || 0));
   if (best >= 3) {
-    const wer = ranked.filter((t) => (t.serieBest || 0) === best).map((t) => t.name).join(' und ');
-    zeilen.push(['🔥 Längste Serie', `${wer} – ${best}× in Folge`]);
+    zeilen.push(['🔥 Längste Serie',
+      `${nenne(ranked.filter((t) => (t.serieBest || 0) === best))} – ${best}× in Folge`]);
   }
   if (r.teuersterReinfall) {
     const t = r.teuersterReinfall;
     zeilen.push(['💸 Teuerster Reinfall', `${name(t.teamId)} – ${t.delta} bei ${t.kategorie} ${t.wert}`]);
   }
 
+  /* Die drei oben brauchen alle einen Sonderfall: einen echten Handy-Buzz, drei
+     richtige in Folge oder einen Abzug. Bei acht Teams tritt keiner davon
+     zuverlässig ein – dann stand am Ende des Abends gar nichts da, ausgerechnet
+     bei der größten Runde. Die folgenden rechnen aus der Bilanz, die jedes Team
+     ohnehin führt, und finden fast immer jemanden. */
+
+  const bilanz = (t) => t.bilanz || {};
+  const zahl = (x) => Number(x) || 0;
+
+  /** Bestenauslese mit geteiltem Platz – „und" statt eines willkürlichen Ersten. */
+  const spitze = (teams, wert, mindestens) => {
+    const infrage = teams.filter((t) => wert(t) >= mindestens);
+    if (!infrage.length) return null;
+    const best = Math.max(...infrage.map(wert));
+    if (best < mindestens) return null;
+    return { best, wer: infrage.filter((t) => wert(t) === best) };
+  };
+
+  // Wer sich die meisten Punkte am fremden Feld geholt hat. Genau die Zahl, mit
+  // der am Tisch geprahlt wird – und sie hat nichts damit zu tun, wer gewinnt.
+  const dieb = spitze(ranked, (t) => zahl(bilanz(t).geklautPunkte), 1);
+  if (dieb) {
+    zeilen.push(['🥷 Bester Dieb', `${nenne(dieb.wer)} – ${dieb.best} Punkte per Buzzer`]);
+  }
+
+  // Trefferquote statt Trefferzahl: Wer selten, aber sicher antwortet, taucht
+  // sonst nirgends auf. Mindestens fünf Antworten, sonst gewinnt ein Zufall.
+  const quote = (t) => {
+    const b = bilanz(t);
+    const versuche = zahl(b.richtig) + zahl(b.falsch);
+    return versuche >= 5 ? zahl(b.richtig) / versuche : 0;
+  };
+  const bank = spitze(ranked, quote, 0.5);
+  if (bank) {
+    const prozent = Math.round(bank.best * 100);
+    zeilen.push(['🎯 Sicherste Bank', `${nenne(bank.wer)} – ${prozent} % richtig`]);
+  }
+
+  // Ab zwei Mal, damit ein einzelnes „weiß nicht" niemanden zum Titelträger macht.
+  const ehrlich = spitze(ranked, (t) => zahl(bilanz(t).gepasst), 2);
+  if (ehrlich) {
+    zeilen.push(['🤷 Ehrlichste Haut', `${nenne(ehrlich.wer)} – ${ehrlich.best}× „weiß nicht"`]);
+  }
+
+  // Bei vielen Teams frisst die Rangliste den Platz. Vier Auszeichnungen sind
+  // dann genug – gekürzt wird am Ende, wo die am wenigsten überraschenden
+  // stehen. Vorne bleibt, was der Abend Besonderes hergab.
+  const voll = ranked.length + zeilen.length >= 11;
+  if (voll) zeilen.length = Math.min(zeilen.length, 4);
+
   box.hidden = zeilen.length === 0;
+  // Acht Teams und fünf Auszeichnungen passen nicht mehr locker untereinander –
+  // dann rücken Zeilen und Auszeichnungen zusammen. Die Schwelle liegt beim
+  // gemessenen Fall: darunter bleibt das Panel großzügig.
+  document.querySelector('.scores-panel').classList.toggle('voll', voll);
   if (box.dataset.key === JSON.stringify(zeilen)) return;
   box.dataset.key = JSON.stringify(zeilen);
   box.innerHTML = '';

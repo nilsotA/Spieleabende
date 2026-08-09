@@ -38,6 +38,7 @@ function leereBilanz() {
     daneben: 0, // per Buzzer danebengelegen
     geholt: 0, // Summe der gewonnenen Punkte
     verloren: 0, // Summe der verlorenen Punkte, positiv gezählt
+    geklautPunkte: 0, // davon am fremden Feld per Buzzer geholt
   };
 }
 
@@ -49,7 +50,16 @@ function leereBilanz() {
  * Ohne diese Stelle stürbe der Abend beim ersten Punkt an einem `undefined`.
  */
 function bilanzVon(team) {
-  if (!team.bilanz) team.bilanz = leereBilanz();
+  if (!team.bilanz) {
+    team.bilanz = leereBilanz();
+    return team.bilanz;
+  }
+  // Auch eine vorhandene Bilanz kann Felder nicht kennen, die erst später
+  // dazugekommen sind – ein `+=` darauf ergäbe NaN und der Punktestand wäre
+  // für den Rest des Abends kaputt.
+  for (const [feld, leer] of Object.entries(leereBilanz())) {
+    if (team.bilanz[feld] === undefined) team.bilanz[feld] = leer;
+  }
   return team.bilanz;
 }
 
@@ -406,7 +416,10 @@ export function judge(state, correct) {
     bilanz.richtig += 1;
     bilanz.geholt += delta;
     // Am fremden Feld gepunktet – die Zahl, mit der am Ende geprahlt wird.
-    if (!isPrimary) bilanz.geklaut += 1;
+    if (!isPrimary) {
+      bilanz.geklaut += 1;
+      bilanz.geklautPunkte += delta;
+    }
     q.log.push({ teamId: team.id, result: 'correct', delta });
     q.lastDelta = { teamId: team.id, delta };
     // Achtung: erst aufdecken, wenn die Frage wirklich durch ist. Sonst könnten
@@ -571,9 +584,9 @@ export function viewFor(state, { isHost, clientId }) {
       score: t.score,
       serie: t.serie || 0,
       serieBest: t.serieBest || 0,
-      // Alte Spielstände kennen die Bilanz nicht – dann steht eine leere da,
-      // statt dass das Handy auf `undefined.richtig` läuft.
-      bilanz: t.bilanz || leereBilanz(),
+      // Alte Spielstände kennen die Bilanz nicht oder nur teilweise – fehlende
+      // Felder werden aufgefüllt, statt dass das Handy auf `undefined` läuft.
+      bilanz: { ...leereBilanz(), ...(t.bilanz || {}) },
       members: t.members.map((m) => ({
         name: m.name,
         clientId: m.clientId,

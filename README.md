@@ -113,8 +113,11 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 - **Serien:** Ab drei richtigen Antworten in Folge trägt das Pult ein Abzeichen.
 - **Wer noch darf:** Bei freiem Buzzer stehen die Pulte im Licht, die noch
   drücken dürfen; wer seinen Versuch hatte, tritt zurück.
-- **Am Ende** stehen unter dem Siegertreppchen drei Auszeichnungen des Abends:
-  schnellster Buzz, längste Serie, teuerster Reinfall.
+- **Am Ende** stehen unter dem Siegertreppchen die Auszeichnungen des Abends:
+  schnellster Buzz, längste Serie, teuerster Reinfall, bester Dieb (die meisten
+  per Buzzer geholten Punkte), sicherste Bank (beste Trefferquote) und
+  ehrlichste Haut (die meisten „weiß nicht“). Gezeigt wird nur, was jemand sich
+  auch verdient hat; bei vielen Teams rückt die Tafel enger zusammen.
 - **Eigene Bilanz:** In den Pausen – am Rundenende und zum Schluss – zeigt jedes Handy
   seinem Team, wie der Punktestand zustande kam: richtig, daneben, „weiß nicht“, dazu
   Geklautes und Verbuzzertes. Das steht bewusst auf dem Handy und nicht auf der
