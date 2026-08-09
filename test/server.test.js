@@ -396,3 +396,55 @@ test('Spieler dürfen nicht zurücknehmen', async (t) => {
   // Und die Spieleransicht erfährt gar nicht erst davon.
   assert.equal((await zustand(base, false)).rueckgaengig, undefined);
 });
+
+test('bei gleichzeitigem Buzz gewinnt genau einer', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const port = 5400 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'buzz-host');
+  for (const name of ['Rot', 'Blau', 'Grün', 'Gelb']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+
+  const teams = (await zustand(base)).teams;
+  // Je ein Handy in jedem Team, das nicht die Frage hat.
+  const geraete = [];
+  for (const [i, team] of teams.entries()) {
+    const clientId = `handy${i}`;
+    await fetch(`${base}/api/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId, role: 'player', type: 'joinTeam', teamId: team.id, name: `Spieler ${i}` }),
+    });
+    geraete.push(clientId);
+  }
+
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  const zugTeam = (await zustand(base)).current.teamId;
+  await host({ type: 'pass' }); // Buzzer für alle anderen frei
+
+  // Alle gleichzeitig losdrücken, ohne dazwischen zu warten.
+  const drueckende = geraete.filter((_, i) => teams[i].id !== zugTeam);
+  const antworten = await Promise.all(drueckende.map((clientId) =>
+    fetch(`${base}/api/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId, role: 'player', type: 'buzz' }),
+    }).then((r) => r.json())));
+
+  const durch = antworten.filter((a) => !a.error);
+  const abgewiesen = antworten.filter((a) => a.error);
+  assert.equal(durch.length, 1, `genau ein Buzz darf durchgehen, es waren ${durch.length}`);
+  assert.equal(abgewiesen.length, drueckende.length - 1);
+  for (const a of abgewiesen) {
+    assert.match(a.error, /zu spät|schneller/i, `verständliche Absage statt „${a.error}"`);
+  }
+
+  const nachher = await zustand(base);
+  assert.ok(nachher.current.buzzedTeamId, 'ein Team hat den Buzz');
+  assert.notEqual(nachher.current.buzzedTeamId, zugTeam, 'nicht das Zugteam');
+});
