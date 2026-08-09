@@ -1,6 +1,6 @@
 import {
-  $, el, connect, hostAction, toast, sound, installAudioUnlock, setFrageText, setzeText,
-  istStumm, setzeStumm } from '/common.js';
+  $, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
+  setFrageText, setzeText, istStumm, setzeStumm } from '/common.js';
 import { qrSvg } from '/qr.js';
 
 let state = null;
@@ -15,6 +15,10 @@ let fuehrend = null;      // wer zuletzt allein vorne lag, für den Führungswec
 const act = hostAction;
 
 installAudioUnlock();
+// Der Host-Screen ist oft ein MacBook oder iPad, und während einer Frage fasst
+// ihn niemand an – die Leinwand ging mitten im Spiel schwarz. Handy und
+// Fernbedienung hielten sich längst wach, ausgerechnet die Bühne nicht.
+keepScreenAwake();
 
 /* --------------------------------------------------------------- Verbindung */
 
@@ -714,9 +718,16 @@ function pruefeEnge(box) {
   // abgelesen statt geschätzt – und zwar an der Wurzel, nicht am Pult: Im
   // gestapelten Pult steht ein kleinerer Grad, mit dem die Leiste sich selbst
   // zurückschalten und dann endlos flackern würde.
+  // Ohne @property (Safari vor 16.4) liefert getComputedStyle das unausgerechnete
+  // clamp() als Text zurück – parseFloat macht daraus NaN, und jeder Vergleich
+  // damit ist falsch. Dann lieber am Pult selbst messen: Der Wert stimmt im
+  // nebeneinanderstehenden Zustand, und aus dem heraus wird ja entschieden.
   const wurzel = getComputedStyle(document.documentElement);
-  const zahlGrad = parseFloat(wurzel.getPropertyValue('--pult-zahl'));
-  const nameGrad = parseFloat(wurzel.getPropertyValue('--pult-name'));
+  const proPultZahl = parseFloat(getComputedStyle(box.querySelector('.pscore')).fontSize);
+  const proPultName = parseFloat(getComputedStyle(box.querySelector('.pname')).fontSize);
+  const zahlGrad = parseFloat(wurzel.getPropertyValue('--pult-zahl')) || proPultZahl;
+  const nameGrad = parseFloat(wurzel.getPropertyValue('--pult-name')) || proPultName;
+  if (!zahlGrad || !nameGrad) return;
 
   // Vierzehn Zeichen des Teamnamens sollen stehen bleiben. Die Zahl ist nicht
   // gegriffen: „Die Grübelmeister", „Die Unbestechlichen" und „Die Nachzügler"

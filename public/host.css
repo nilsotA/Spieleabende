@@ -1207,7 +1207,42 @@ body.host.flat .tile {
   .stage.focused .board-wrap { transform: none; }
 }
 
-@media (max-width: 820px) {
+/* ------------------------------------------------- Host-Screen zum Antippen
+
+   Der Host-Screen hängt nicht immer am Beamer: Oft ist er ein MacBook, manchmal
+   ein iPad. Auf dem iPad wird er mit dem Finger bedient, und dafür waren die
+   kleinen Knöpfe gebaut wie für eine Maus – gemessen 32×28px für „Team
+   löschen“ und 34×28px für das Menü, bei 44px als Untergrenze für einen
+   Fingertipp. Nur auf groben Zeigern vergrößern: Am MacBook bleibt die Leiste
+   so kompakt wie bisher, sonst frisst sie unnötig Bühnenhöhe. */
+@media (pointer: coarse) {
+  .btn,
+  .controls button,
+  .lobby-teams button,
+  .settings select,
+  #team-name,
+  #set-select,
+  .datei-knopf {
+    min-height: 44px;
+  }
+  /* Quadratische Symbolknöpfe brauchen auch die Breite: „×“, „↻“, „⋯“, „👁“. */
+  .btn-sm,
+  #btn-menu,
+  #btn-reload-sets,
+  .peek-btn {
+    min-width: 44px;
+  }
+  .btn-sm { padding-inline: 0.7rem; }
+  /* Ein Doppeltipp auf einen Knopf zoomte sonst die ganze Bühne heran. Nur auf
+     den Bedienelementen – die Seite selbst darf weiter aufgezogen werden. */
+  .btn, button, select, input { touch-action: manipulation; }
+}
+
+/* Erst unterhalb echter Handybreite auf „ganze Seite scrollt“ umstellen. Bei
+   820px lag die Grenze genau auf der Breite eines hochkant gehaltenen iPads –
+   das bekam damit das Handy-Layout, und der Startknopf stand außerhalb des
+   Bildes, obwohl darunter 1180px Höhe frei waren. */
+@media (max-width: 700px) {
   /* Auf dem Handy scrollt die ganze Seite, nicht die Bühne in sich – deshalb
      hier die feste Höhe wieder aufgeben. */
   body.host { height: auto; min-height: 100dvh; overflow: auto; }

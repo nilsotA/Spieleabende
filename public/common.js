@@ -460,6 +460,12 @@ export function keepScreenAwake() {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') anfordern();
   });
+  // Safari verweigert die Sperre, solange noch keine echte Geste kam. Ohne
+  // diesen zweiten Anlauf bliebe sie den ganzen Abend aus – ausgerechnet auf
+  // dem iPad, das nach zwei Minuten von selbst zumacht. Die Horcher bleiben
+  // hängen, weil das System die Sperre jederzeit wieder abgeben kann.
+  document.addEventListener('pointerdown', anfordern, { passive: true });
+  document.addEventListener('keydown', anfordern);
 }
 
 /**
