@@ -18,7 +18,9 @@ body.remote #app {
 
 .rhead { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
 .rtag {
-  font-size: 0.68rem;
+  /* 0.68rem waren 10.9px und damit die kleinste Schrift im ganzen Haus – auf
+     einem Handy in Armlänge liest das niemand mehr. */
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -47,8 +49,11 @@ body.remote #app {
   padding: 0.9rem 1rem;
 }
 
+/* Die Fernbedienung ist ein Handy in der Hand des Hosts – er liest Kategorie,
+   Punktwert und Lösung hier ab und sagt sie in den Raum. Unter 12px wird das
+   bei Kerzenlicht zum Raten; die Zeilen sind kurz, der Platz ist da. */
 .r-cat {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -64,7 +69,7 @@ body.remote #app {
   padding: 0.6rem 0.8rem;
 }
 .r-answer-label {
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -74,7 +79,7 @@ body.remote #app {
 
 .r-log { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.7rem; }
 .r-chip {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
   border-radius: 999px;
   padding: 0.2rem 0.6rem;
@@ -102,12 +107,28 @@ body.remote #app {
 .r-buttons:empty { display: none; }
 .r-big { padding: 1rem; font-size: 1.05rem; border-radius: 14px; }
 
+/* Liegt das Handy quer, stapeln sich drei Knöpfe zu je 56 Pixeln über die halbe
+   Höhe – und die Lösung, die der Host in genau diesem Moment vorlesen will,
+   verschwindet dahinter. Quer ist Breite im Überfluss da: „Richtig" und „Falsch"
+   nebeneinander geben die Zeile frei, in der die Antwort steht. Ein einzelner
+   oder ungerade übrig gebliebener Knopf nimmt weiter die volle Breite – der
+   letzte in ungerader Position ist genau der, der sonst allein halb dastünde. */
+@media (max-height: 520px) and (min-width: 560px) {
+  .r-buttons { grid-template-columns: 1fr 1fr; }
+  .r-buttons .r-big:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  /* Auf 375 Pixeln Höhe reichte auch das noch nicht: Bei einer langen Frage lag
+     die Lösung weiter unter der Leiste. Der Schriftzug und das Schildchen
+     „Fernbedienung" kosten zusammen 86 Pixel und sagen dem Host nichts, was er
+     nicht wüsste – er hält das Gerät ja in der Hand. Quer treten sie ab. */
+  .rhead { display: none; }
+}
+
 /* Auf dem Handy des Hosts ist der Tap-Highlight aus (kommt aus player.css, die
    remote.html mitlädt) – ohne Ersatz fühlt sich kein Tipp bestätigt an. */
 .r-big:active { transform: translateY(2px) scale(0.985); filter: brightness(1.15); }
 .r-teams .btn:active { transform: translateY(1px); filter: brightness(1.3); }
 
-.r-scores h2 { margin: 0 0 0.5rem; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.r-scores h2 { margin: 0 0 0.5rem; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .r-teams { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
 .r-teams li {
   display: flex;
@@ -139,6 +160,15 @@ body.remote #app {
   .r-teams li .btn { flex: 1; }
   .r-teams .sc { min-width: 2.6rem; }
 }
+/* Quer gehaltenes Handy: Über 560px greift die gestapelte Fassung nicht mehr,
+   die Reihe bleibt flach – und dann sind „−100", „+100" und „dran" nur 28 Pixel
+   hoch. Am Tisch wird hier aber getippt, nicht geklickt, und danebentippen heißt
+   an dieser Stelle: 100 Punkte verschoben oder der Zug beim falschen Team. Auf
+   Zeigergeräten bleibt die flache Reihe, dort ist die Maus genau genug. */
+@media (pointer: coarse) {
+  .r-teams li .btn { min-height: 44px; }
+}
+
 .r-teams .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 /* Auf breiten Screens ist die Hülle um Punkt und Name unsichtbar – die Zeile
    bleibt genau die flache Reihe, die sie vorher war. */
@@ -178,7 +208,7 @@ body.remote #app {
    groß genug, um sie im abgedunkelten Wohnzimmer sicher zu treffen. */
 .r-board h2 {
   margin: 0 0 0.6rem;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
