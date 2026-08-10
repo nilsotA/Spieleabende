@@ -726,7 +726,13 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .q-image {
   display: block;
   margin: clamp(0.8rem, 2vh, 1.4rem) auto 0;
-  max-width: min(100%, 520px);
+  /* Die Leinwand steht am anderen Ende des Zimmers, und „welche Flagge ist
+     das?" entscheidet sich an Details – dem Kreuz der Seychellen, den Zacken
+     von Katar. 520 feste Pixel waren auf einem 1440er Screen ein gutes Drittel
+     der Breite und auf einem Beamer noch weniger. Jetzt wächst das Bild mit dem
+     Raum mit; die Höhe bleibt der Zügel, damit der Kasten nicht aus dem Bild
+     läuft, und bei 900 ist Schluss – darüber würden die Vorlagen weich. */
+  max-width: min(100%, 46vw, 900px);
   max-height: 38vh;
   border: 0;
   border-radius: 8px;

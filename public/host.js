@@ -1363,11 +1363,11 @@ function renderControls() {
     // Wer ein Handy am Netz hat, drückt selbst – und mit acht Teams standen hier
     // sonst sieben Knöpfe voller Teamnamen, die die Leiste auf vier Reihen
     // aufgeblasen und der Bühne über 70px geklaut haben.
-    for (const team of state.teams) {
-      if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
-      if (team.members.some((m) => m.online !== false)) continue;
-      add(buzzKnopf(team));
-    }
+    const vertreten = state.teams.filter((team) => team.id !== q.teamId
+      && !q.lockedOut.includes(team.id)
+      && !team.members.some((m) => m.online !== false));
+    const aufschriften = knopfAufschriften(vertreten);
+    vertreten.forEach((team, i) => add(buzzKnopf(team, aufschriften[i])));
     add(button(q.stechen ? 'Keiner weiß es → nächste Frage' : 'Keiner weiß es → auflösen',
       'btn-primary', () => act('endQuestion'), '4'));
   } else if (q.buzzedTeamId && q.step === 'buzz') {
@@ -1408,7 +1408,7 @@ function button(label, cls, onclick, key) {
  * Der volle Name bleibt als Titel dran, für den Fall, dass zwei Teams sich
  * ähnlich nennen.
  */
-function buzzKnopf(team) {
+function buzzKnopf(team, aufschrift) {
   const node = el('button', {
     class: 'btn btn-ghost btn-sm buzz-fuer',
     title: `Buzz für ${team.name}`,
@@ -1416,7 +1416,7 @@ function buzzKnopf(team) {
     onclick: () => act('buzzFor', { teamId: team.id }),
   },
     el('span', { class: 'dot', style: { background: team.color } }),
-    kurzTeam(team.name),
+    aufschrift,
   );
   return node;
 }
@@ -1426,6 +1426,25 @@ function kurzTeam(name) {
   const ohneArtikel = String(name).replace(/^(die|der|das|team)\s+/i, '');
   const wort = ohneArtikel.split(/\s+/)[0] || name;
   return wort.length > 13 ? `${wort.slice(0, 12)}…` : wort;
+}
+
+/**
+ * Aufschriften für eine Reihe Vertreterknöpfe – so kurz wie möglich, aber
+ * unterscheidbar.
+ *
+ * „Solo Sarah" und „Solo Timo" wurden beide zu „Solo": zwei gleich beschriftete
+ * Knöpfe nebeneinander, an denen nur der Farbpunkt hing. Kollidiert das erste
+ * Wort, steht bei den Betroffenen der ganze Name.
+ */
+function knopfAufschriften(teams) {
+  const kurz = teams.map((t) => kurzTeam(t.name));
+  const wieOft = new Map();
+  for (const k of kurz) wieOft.set(k, (wieOft.get(k) || 0) + 1);
+  return teams.map((t, i) => {
+    if (wieOft.get(kurz[i]) === 1) return kurz[i];
+    const voll = String(t.name);
+    return voll.length > 16 ? `${voll.slice(0, 15)}…` : voll;
+  });
 }
 
 $('#btn-next-round').addEventListener('click', () => act('nextRound'));

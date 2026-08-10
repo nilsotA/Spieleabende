@@ -34,7 +34,11 @@ $('#join-form').addEventListener('submit', async (ev) => {
   unlockAudio(); // echte Nutzergeste – ab jetzt darf iOS Töne abspielen
   keepScreenAwake();
   const name = $('#my-name').value.trim();
-  if (!name) return;
+  if (!name) {
+    // Vorher passierte hier gar nichts sichtbar außer der Browserblase.
+    $('#my-name').focus();
+    return toast('Bitte trag deinen Namen ein.', 'error');
+  }
   if (!selectedTeam) return toast('Bitte ein Team auswählen.', 'error');
   document.activeElement?.blur?.(); // Tastatur wegräumen
   const res = await action('joinTeam', { teamId: selectedTeam, name });

@@ -19,7 +19,12 @@
   <!-- Anmeldung -->
   <section id="view-join" class="screen">
     <div class="logo" style="font-size:2.4rem"><span>Quiz</span><span>Duell</span></div>
-    <form id="join-form" class="card join-card">
+    <!-- novalidate: Die Blase des Browsers spricht die Sprache seiner
+         Oberfläche, nicht die der Seite – auf einem englisch eingestellten
+         Handy stand mitten im deutschen Formular „Please fill out this field.".
+         Den fehlenden Namen meldet stattdessen derselbe Hinweis wie das
+         fehlende Team. `required` bleibt für Vorlesehilfen stehen. -->
+    <form id="join-form" class="card join-card" novalidate>
       <div>
         <label for="my-name">Dein Name</label>
         <input id="my-name" maxlength="24" autocomplete="nickname" placeholder="z.B. Nils" required>
