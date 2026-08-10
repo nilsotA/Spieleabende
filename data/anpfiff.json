@@ -1,0 +1,277 @@
+{
+  "name": "Anpfiff",
+  "description": "Sport von der Regelkunde bis zum Rekord: Fußball, Olympia, Wintersport und die Fragen, bei denen auch Zuschauer mitreden können.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Regelkunde",
+          "questions": [
+            {
+              "text": "Wie viele Spieler einer Mannschaft stehen beim Fußball gleichzeitig auf dem Feld?",
+              "answer": "11"
+            },
+            {
+              "text": "Welche Karte zeigt der Schiedsrichter beim Platzverweis?",
+              "answer": "Die rote"
+            },
+            {
+              "text": "Wie viele Sätze muss man beim Tennis bei den Damen gewinnen, um ein Match zu holen?",
+              "answer": "2",
+              "note": "Bei den Herren sind es bei Grand Slams drei."
+            },
+            {
+              "text": "Wie nennt man es beim Basketball, wenn ein Spieler mit dem Ball läuft, ohne zu dribbeln?",
+              "answer": "Schrittfehler"
+            }
+          ]
+        },
+        {
+          "name": "Maße & Zahlen",
+          "questions": [
+            {
+              "text": "Wie hoch hängt ein Basketballkorb über dem Boden – in Metern?",
+              "answer": "3,05",
+              "note": "Genau zehn Fuß – die Höhe stammt aus der Turnhalle von 1891."
+            },
+            {
+              "text": "Wie lang ist eine Bahn im olympischen Schwimmbecken – in Metern?",
+              "answer": "50"
+            },
+            {
+              "text": "Wie viele Löcher hat ein normaler Golfplatz?",
+              "answer": "18"
+            },
+            {
+              "text": "Wie breit ist ein Fußballtor zwischen den Pfosten – in Metern?",
+              "answer": "7,32",
+              "note": "Acht Yards – auch dieses Maß ist ein Erbe der Engländer."
+            }
+          ]
+        },
+        {
+          "name": "Olympia",
+          "questions": [
+            {
+              "text": "Wie viele Ringe zeigt das olympische Symbol?",
+              "answer": "5"
+            },
+            {
+              "text": "In welchem Land fanden die ersten Olympischen Spiele der Neuzeit statt?",
+              "answer": "In Griechenland",
+              "note": "1896 in Athen."
+            },
+            {
+              "text": "Alle wie viele Jahre finden die Sommerspiele statt?",
+              "answer": "Alle 4 Jahre"
+            },
+            {
+              "text": "Welche Farbe hat die Medaille für den zweiten Platz?",
+              "answer": "Silber"
+            }
+          ]
+        },
+        {
+          "name": "Sportarten erkennen",
+          "questions": [
+            {
+              "text": "In welcher Sportart gibt es einen Schmetterball, einen Aufschlag und einen Block über dem Netz?",
+              "answer": "Volleyball"
+            },
+            {
+              "text": "Welche Sportart verbindet Langlauf mit Schießen?",
+              "answer": "Biathlon"
+            },
+            {
+              "text": "In welcher Sportart kämpft man um den Stanley Cup?",
+              "answer": "Eishockey"
+            },
+            {
+              "text": "Welche Sportart wird auf einem Pferd mit langen Schlägern gespielt?",
+              "answer": "Polo"
+            }
+          ]
+        },
+        {
+          "name": "Vereine & Farben",
+          "questions": [
+            {
+              "text": "Welcher Bundesligist spielt in Schwarz und Gelb und trägt „Borussia“ im Namen?",
+              "answer": "Borussia Dortmund"
+            },
+            {
+              "text": "Wie heißt das Stadion des FC Barcelona?",
+              "answer": "Camp Nou"
+            },
+            {
+              "text": "Welcher deutsche Verein wird „die Werkself“ genannt?",
+              "answer": "Bayer 04 Leverkusen",
+              "note": "Der Klub entstand aus der Belegschaft des Chemiewerks."
+            },
+            {
+              "text": "In welcher Stadt spielt der Verein mit dem Spitznamen „die Fohlen“?",
+              "answer": "In Mönchengladbach"
+            }
+          ]
+        },
+        {
+          "name": "Sportdeutsch",
+          "questions": [
+            {
+              "text": "Wie heißt der Sprung mit gegrätschten Beinen über den Bock im Turnunterricht?",
+              "answer": "Die Grätsche"
+            },
+            {
+              "text": "Wie nennt man beim Fußball drei Tore eines Spielers in einem Spiel?",
+              "answer": "Hattrick"
+            },
+            {
+              "text": "Wie heißt der Ausdruck für den Punkt, an dem ein Läufer plötzlich kaum noch kann?",
+              "answer": "Der Mann mit dem Hammer"
+            },
+            {
+              "text": "Wie nennt man im Handball den Wurf von der Sieben-Meter-Linie?",
+              "answer": "Siebenmeter"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Wintersport",
+          "questions": [
+            {
+              "text": "Wie viele der vier Schanzen der Vierschanzentournee stehen in Deutschland?",
+              "answer": "2",
+              "note": "Oberstdorf und Garmisch-Partenkirchen; Innsbruck und Bischofshofen liegen in Österreich."
+            },
+            {
+              "text": "Welches Gerät braucht man beim Curling, um das Eis vor dem Stein zu bearbeiten?",
+              "answer": "Einen Besen"
+            },
+            {
+              "text": "Wie heißt die Abfahrt, bei der die Tore eng nebeneinander stehen?",
+              "answer": "Slalom"
+            },
+            {
+              "text": "Welche Sportart fährt kopfüber und mit den Armen voran einen Eiskanal hinunter?",
+              "answer": "Skeleton"
+            }
+          ]
+        },
+        {
+          "name": "Leichtathletik",
+          "questions": [
+            {
+              "text": "Wie viele Disziplinen umfasst der Zehnkampf der Männer?",
+              "answer": "10"
+            },
+            {
+              "text": "Über welche Strecke geht der klassische Marathon?",
+              "answer": "42,195 Kilometer"
+            },
+            {
+              "text": "Welcher Jamaikaner hält den Weltrekord über 100 Meter?",
+              "answer": "Usain Bolt",
+              "note": "9,58 Sekunden, aufgestellt 2009 in Berlin."
+            },
+            {
+              "text": "Wie heißt die Technik, mit der Hochspringer heute rücklings über die Latte gehen?",
+              "answer": "Fosbury-Flop"
+            }
+          ]
+        },
+        {
+          "name": "Sportgeschichte",
+          "questions": [
+            {
+              "text": "In welchem Jahr wurde Deutschland zum bislang letzten Mal Fußballweltmeister?",
+              "answer": "2014"
+            },
+            {
+              "text": "Wie heißt das Fußballspiel von 1954, das als „Wunder von Bern“ in die Geschichte einging?",
+              "answer": "Das WM-Finale gegen Ungarn"
+            },
+            {
+              "text": "Welche deutsche Tennisspielerin gewann 1988 alle vier Grand-Slam-Turniere und Olympia-Gold?",
+              "answer": "Steffi Graf",
+              "note": "Der Golden Slam – bis heute einmalig."
+            },
+            {
+              "text": "Welcher deutsche Rennfahrer holte sieben Weltmeistertitel in der Formel 1?",
+              "answer": "Michael Schumacher"
+            }
+          ]
+        },
+        {
+          "name": "Ball ist nicht gleich Ball",
+          "questions": [
+            {
+              "text": "Welcher Sportball hat Grübchen in der Oberfläche?",
+              "answer": "Der Golfball",
+              "note": "Die Dellen sorgen dafür, dass er weiter fliegt als eine glatte Kugel."
+            },
+            {
+              "text": "In welcher Sportart spielt man mit einem Ball, der nicht rund, sondern eiförmig ist?",
+              "answer": "Rugby"
+            },
+            {
+              "text": "Welcher Ball ist im Spiel der leichteste: Tischtennis, Tennis oder Handball?",
+              "answer": "Der Tischtennisball",
+              "note": "Er wiegt 2,7 Gramm."
+            },
+            {
+              "text": "Wie viele Nähte hat ein klassischer Baseball – 108 oder 216?",
+              "answer": "108"
+            }
+          ]
+        },
+        {
+          "name": "Von der Bank",
+          "questions": [
+            {
+              "text": "Welcher Bundestrainer führte Deutschland 1954 zum ersten WM-Titel?",
+              "answer": "Sepp Herberger"
+            },
+            {
+              "text": "Wie geht der berühmteste Fußballsatz weiter: „Der Ball ist rund und ein Spiel dauert …“?",
+              "answer": "… 90 Minuten"
+            },
+            {
+              "text": "Welcher Trainerposten wird in England „the hot seat“ genannt?",
+              "answer": "Der Trainerstuhl"
+            },
+            {
+              "text": "Wie heißt der Trainer, der eine Mannschaft nur für kurze Zeit übernimmt?",
+              "answer": "Interimstrainer"
+            }
+          ]
+        },
+        {
+          "name": "Sport & Körper",
+          "questions": [
+            {
+              "text": "Welche Sehne reißt Sportlern am Sprunggelenk besonders oft?",
+              "answer": "Die Achillessehne"
+            },
+            {
+              "text": "Welcher Stoff galt lange als Ursache von Muskelkater, ist es aber nicht?",
+              "answer": "Milchsäure",
+              "note": "Heute weiß man: Es sind winzige Risse in den Muskelfasern."
+            },
+            {
+              "text": "Welches Organ pumpt bei Ausdauersport pro Minute deutlich mehr Blut als in Ruhe?",
+              "answer": "Das Herz"
+            },
+            {
+              "text": "Wie heißt das Aufwärmen vor dem Sport auf Englisch?",
+              "answer": "Warm-up"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

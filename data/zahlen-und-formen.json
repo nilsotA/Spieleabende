@@ -1,0 +1,277 @@
+{
+  "name": "Zahlen & Formen",
+  "description": "Mathe, wie man sie am Küchentisch erzählt: berühmte Zahlen, Formen, Wahrscheinlichkeiten und die Leute dahinter – zum Mitraten braucht es kein Studium.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Berühmte Zahlen",
+          "questions": [
+            {
+              "text": "Welche Zahl steht für das Verhältnis von Umfang zu Durchmesser eines Kreises?",
+              "answer": "Pi (π)",
+              "note": "Rund 3,14159 – und die Nachkommastellen hören nie auf."
+            },
+            {
+              "text": "Wie heißt die Zahl, mit der man 0 nicht teilen darf?",
+              "answer": "Die Null selbst",
+              "note": "Durch null teilen ist nicht unendlich, sondern gar nicht definiert."
+            },
+            {
+              "text": "Welche Zahl nennt man den „Goldenen Schnitt“ – rund 1,618?",
+              "answer": "Phi (φ)"
+            },
+            {
+              "text": "Welche Zahl ist die Basis des natürlichen Logarithmus, rund 2,718?",
+              "answer": "Die eulersche Zahl e"
+            }
+          ]
+        },
+        {
+          "name": "Formen & Körper",
+          "questions": [
+            {
+              "text": "Wie viele Ecken hat ein Würfel?",
+              "answer": "8"
+            },
+            {
+              "text": "Wie heißt ein Dreieck, bei dem alle drei Seiten gleich lang sind?",
+              "answer": "Gleichseitig"
+            },
+            {
+              "text": "Wie viele Flächen hat ein klassischer Fußball aus Fünf- und Sechsecken?",
+              "answer": "32",
+              "note": "12 Fünfecke und 20 Sechsecke."
+            },
+            {
+              "text": "Welcher geometrische Körper hat genau eine Fläche, keine Ecke und keine Kante?",
+              "answer": "Die Kugel"
+            }
+          ]
+        },
+        {
+          "name": "Im Kopf gerechnet",
+          "questions": [
+            {
+              "text": "Was ergibt 25 mal 4?",
+              "answer": "100"
+            },
+            {
+              "text": "Wie viel sind 15 Prozent von 200?",
+              "answer": "30"
+            },
+            {
+              "text": "Ein Pullover kostet 80 Euro und wird um 25 Prozent reduziert. Was zahlt man?",
+              "answer": "60 Euro"
+            },
+            {
+              "text": "Was ist die Hälfte von drei Vierteln?",
+              "answer": "Drei Achtel"
+            }
+          ]
+        },
+        {
+          "name": "Wer war das?",
+          "questions": [
+            {
+              "text": "Nach wem ist der Satz benannt, mit dem man im rechtwinkligen Dreieck die Seiten berechnet?",
+              "answer": "Pythagoras"
+            },
+            {
+              "text": "Welcher Deutsche addierte als Schulkind blitzschnell die Zahlen von 1 bis 100?",
+              "answer": "Carl Friedrich Gauß",
+              "note": "Die Geschichte ist überliefert, aber nicht sicher belegt – der Trick funktioniert trotzdem."
+            },
+            {
+              "text": "Welche Mathematikerin aus Erlangen gilt als Begründerin der modernen Algebra?",
+              "answer": "Emmy Noether"
+            },
+            {
+              "text": "Welcher Grieche schrieb „Die Elemente“, das jahrhundertelang das Geometriebuch schlechthin war?",
+              "answer": "Euklid"
+            }
+          ]
+        },
+        {
+          "name": "Wie wahrscheinlich?",
+          "questions": [
+            {
+              "text": "Wie groß ist die Chance, mit einem Würfel eine Sechs zu werfen?",
+              "answer": "1 zu 6"
+            },
+            {
+              "text": "Man wirft zwei Würfel. Welche Augensumme kommt am häufigsten vor?",
+              "answer": "7",
+              "note": "Für die 7 gibt es sechs Kombinationen – mehr als für jede andere Summe."
+            },
+            {
+              "text": "Wie viele Zahlen kreuzt man beim deutschen Lotto auf einem Tippfeld an?",
+              "answer": "6",
+              "note": "6 aus 49 – knapp 14 Millionen mögliche Tipps."
+            },
+            {
+              "text": "Eine Münze fiel fünfmal auf Kopf. Wie wahrscheinlich ist beim sechsten Wurf Kopf?",
+              "answer": "Immer noch 50 Prozent",
+              "note": "Die Münze hat kein Gedächtnis."
+            }
+          ]
+        },
+        {
+          "name": "Mathe im Alltag",
+          "questions": [
+            {
+              "text": "Wie viele Quadratmeter hat ein Zimmer von 4 mal 5 Metern?",
+              "answer": "20"
+            },
+            {
+              "text": "Ein Rezept für 4 Personen braucht 300 Gramm Mehl. Wie viel braucht man für 6?",
+              "answer": "450 Gramm"
+            },
+            {
+              "text": "Wie viel Prozent Trinkgeld gibt man, wenn man auf 42 Euro glatt 46 Euro zahlt?",
+              "answer": "Knapp 10 Prozent"
+            },
+            {
+              "text": "Wie viele Minuten sind drei Viertel einer Stunde?",
+              "answer": "45"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Sehr große Zahlen",
+          "questions": [
+            {
+              "text": "Wie viele Nullen hat eine Milliarde?",
+              "answer": "9"
+            },
+            {
+              "text": "Wie heißt die Zahl mit hundert Nullen, nach der eine Suchmaschine benannt wurde?",
+              "answer": "Googol"
+            },
+            {
+              "text": "Welche ist die kleinste Primzahl?",
+              "answer": "2",
+              "note": "Und die einzige gerade."
+            },
+            {
+              "text": "Wie viele Sekunden hat ein Tag?",
+              "answer": "86.400"
+            }
+          ]
+        },
+        {
+          "name": "Geometrie",
+          "questions": [
+            {
+              "text": "Wie viel Grad ergeben die drei Winkel eines Dreiecks zusammen?",
+              "answer": "180"
+            },
+            {
+              "text": "Wie nennt man den längsten Abstand quer durch einen Kreis?",
+              "answer": "Durchmesser"
+            },
+            {
+              "text": "Wie heißt ein Winkel, der größer als ein rechter, aber kleiner als ein gestreckter ist?",
+              "answer": "Stumpf"
+            },
+            {
+              "text": "Wie viele Symmetrieachsen hat ein Quadrat?",
+              "answer": "4"
+            }
+          ]
+        },
+        {
+          "name": "Maße & Einheiten",
+          "questions": [
+            {
+              "text": "Wie viele Milliliter passen in einen Liter?",
+              "answer": "1000"
+            },
+            {
+              "text": "Wie viele Zentimeter sind ein Zoll?",
+              "answer": "2,54"
+            },
+            {
+              "text": "In welcher Einheit misst man Kraft?",
+              "answer": "Newton"
+            },
+            {
+              "text": "Wie viele Quadratmeter hat ein Hektar?",
+              "answer": "10.000",
+              "note": "Ein Quadrat von 100 mal 100 Metern."
+            }
+          ]
+        },
+        {
+          "name": "Woher kommt das Wort?",
+          "questions": [
+            {
+              "text": "Aus welcher Sprache stammt das Wort „Algebra“?",
+              "answer": "Aus dem Arabischen"
+            },
+            {
+              "text": "Was bedeutet „Geometrie“ wörtlich übersetzt?",
+              "answer": "Erdmessung"
+            },
+            {
+              "text": "Welches Wort beschreibt eine Zahl, die sich nicht als Bruch schreiben lässt?",
+              "answer": "Irrational"
+            },
+            {
+              "text": "Wie nennt man in der Mathematik eine Aussage, die noch bewiesen werden muss?",
+              "answer": "Vermutung"
+            }
+          ]
+        },
+        {
+          "name": "Zahlen mit Geschichte",
+          "questions": [
+            {
+              "text": "Welche Ziffer fehlte den Römern in ihrem Zahlensystem?",
+              "answer": "Die Null"
+            },
+            {
+              "text": "Welche römische Zahl steht für 50?",
+              "answer": "L"
+            },
+            {
+              "text": "In welchem Zahlensystem rechnen Computer?",
+              "answer": "Im Zweiersystem",
+              "note": "Auch Binärsystem – nur Nullen und Einsen."
+            },
+            {
+              "text": "Aus welchem Land kamen die Ziffern, die wir heute benutzen, nach Europa?",
+              "answer": "Aus Indien",
+              "note": "Über die arabische Welt – deshalb heißen sie indisch-arabische Ziffern."
+            }
+          ]
+        },
+        {
+          "name": "Zum Knobeln",
+          "questions": [
+            {
+              "text": "Ein Buch und ein Stift kosten zusammen 11 Euro. Das Buch kostet 10 Euro mehr. Was kostet der Stift?",
+              "answer": "50 Cent"
+            },
+            {
+              "text": "Ein Zug fährt um 14 Uhr los und braucht 90 Minuten. Wann kommt er an?",
+              "answer": "Um 15:30 Uhr"
+            },
+            {
+              "text": "Auf einem Bauernhof gibt es Hühner und Kühe, zusammen 10 Köpfe und 28 Beine. Wie viele Kühe sind es?",
+              "answer": "4"
+            },
+            {
+              "text": "Was ist größer: die Hälfte von 60 oder ein Drittel von 90?",
+              "answer": "Beide sind 30 – gleich groß"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

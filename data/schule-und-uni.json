@@ -1,0 +1,268 @@
+{
+  "name": "Schule & Uni",
+  "description": "Vom Pausenhof bis zur Prüfungsordnung: Fächer, Fremdwörter, Notenkunde und Uni-Latein – der Satz für alle, die im Klassenzimmer zu Hause sind.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Welches Fach ist das?",
+          "questions": [
+            {
+              "text": "In welchem Fach lernt man über Ströme, Kräfte und Wellen?",
+              "answer": "Physik"
+            },
+            {
+              "text": "Welches Fach beschäftigt sich mit Karten, Klima und Ländern?",
+              "answer": "Erdkunde"
+            },
+            {
+              "text": "Wie heißt das Fach, in dem es um Staat, Recht und Gesellschaft geht?",
+              "answer": "Politik oder Sozialkunde"
+            },
+            {
+              "text": "In welchem Fach lernt man Molekülformeln und das Periodensystem?",
+              "answer": "Chemie"
+            }
+          ]
+        },
+        {
+          "name": "Aus dem Lateinischen",
+          "questions": [
+            {
+              "text": "Was bedeutet „Abitur“ wörtlich – aus dem Lateinischen übersetzt?",
+              "answer": "Er wird weggehen",
+              "note": "Von „abire“, weggehen: das Zeugnis für den Abgang von der Schule."
+            },
+            {
+              "text": "Was heißt „curriculum“ auf Deutsch?",
+              "answer": "Lauf oder Umlauf"
+            },
+            {
+              "text": "Woher kommt das Wort „Klasse“ und was bedeutete es bei den Römern?",
+              "answer": "Eine Abteilung der Bürgerschaft"
+            },
+            {
+              "text": "Was bedeutet „Gymnasium“ im Ursprung, dem Griechischen?",
+              "answer": "Ort für Leibesübungen"
+            }
+          ]
+        },
+        {
+          "name": "Notenkunde",
+          "questions": [
+            {
+              "text": "Welche Schulnote ist in Deutschland die beste?",
+              "answer": "Die 1"
+            },
+            {
+              "text": "Wie viele Punkte kann man in der Oberstufe für einen Kurs höchstens bekommen?",
+              "answer": "15"
+            },
+            {
+              "text": "Welchen Notenschnitt hat ein Abitur mit der Bestnote?",
+              "answer": "1,0"
+            },
+            {
+              "text": "Ab welcher Schulnote gilt eine Arbeit als nicht mehr ausreichend?",
+              "answer": "Ab der 5"
+            }
+          ]
+        },
+        {
+          "name": "Pausenhof",
+          "questions": [
+            {
+              "text": "Welches Spiel spielt man mit Kreidefeldern auf dem Boden und einem Stein?",
+              "answer": "Himmel und Hölle"
+            },
+            {
+              "text": "Wie heißt das Fangspiel, bei dem Gefangene erstarren, bis jemand sie befreit?",
+              "answer": "Versteinern"
+            },
+            {
+              "text": "Welches Signal beendet in vielen Schulen die Pause?",
+              "answer": "Die Klingel"
+            },
+            {
+              "text": "Wie nennt man den Dienst, bei dem eine Lehrkraft in der Pause auf dem Hof aufpasst?",
+              "answer": "Die Pausenaufsicht"
+            }
+          ]
+        },
+        {
+          "name": "Uni-Latein",
+          "questions": [
+            {
+              "text": "Wofür steht „c.t.“ in einer Vorlesungsankündigung?",
+              "answer": "Cum tempore",
+              "note": "Das akademische Viertel: Es geht 15 Minuten später los. Das Gegenstück ist s.t. – sine tempore, pünktlich."
+            },
+            {
+              "text": "Wie heißt an der Uni die Veranstaltung, in der man selbst vorträgt statt nur zuzuhören?",
+              "answer": "Das Seminar"
+            },
+            {
+              "text": "Wie heißt die höchste Auszeichnung einer Doktorarbeit?",
+              "answer": "Summa cum laude"
+            },
+            {
+              "text": "Wofür steht die Abkürzung „WS“ im Vorlesungsverzeichnis?",
+              "answer": "Wintersemester"
+            }
+          ]
+        },
+        {
+          "name": "Berühmte Lehrmeister",
+          "questions": [
+            {
+              "text": "Welcher Grieche unterrichtete Platon und musste den Schierlingsbecher trinken?",
+              "answer": "Sokrates"
+            },
+            {
+              "text": "Wer war der Lehrer Alexanders des Großen?",
+              "answer": "Aristoteles"
+            },
+            {
+              "text": "Welcher Pädagoge gründete 1840 den ersten Kindergarten?",
+              "answer": "Friedrich Fröbel"
+            },
+            {
+              "text": "Welche italienische Ärztin entwickelte eine bis heute verbreitete Pädagogik?",
+              "answer": "Maria Montessori"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Schulsystem",
+          "questions": [
+            {
+              "text": "Wer entscheidet in Deutschland über Lehrpläne – Bund oder Länder?",
+              "answer": "Die Länder"
+            },
+            {
+              "text": "Wie viele Schuljahre umfasst die Grundschule in den meisten Bundesländern?",
+              "answer": "4"
+            },
+            {
+              "text": "Wie heißt die Schulform, die Haupt-, Real- und Gymnasialzweig unter einem Dach vereint?",
+              "answer": "Die Gesamtschule"
+            },
+            {
+              "text": "Wie nennt man die Zeit, in der angehende Lehrkräfte nach dem Studium an einer Schule arbeiten?",
+              "answer": "Das Referendariat"
+            }
+          ]
+        },
+        {
+          "name": "Was liest die Klasse?",
+          "questions": [
+            {
+              "text": "Welches Drama von Friedrich Schiller handelt von einem Schweizer Freiheitskämpfer mit Armbrust?",
+              "answer": "Wilhelm Tell"
+            },
+            {
+              "text": "In welchem Werk von Goethe schließt ein Gelehrter einen Pakt mit dem Teufel?",
+              "answer": "Faust"
+            },
+            {
+              "text": "Welcher Roman von Erich Kästner spielt in einem Internat und heißt nach einer Klasse?",
+              "answer": "Das fliegende Klassenzimmer"
+            },
+            {
+              "text": "Wie heißt Bertolt Brechts Stück über einen Physiker und seine Verantwortung?",
+              "answer": "Leben des Galilei"
+            }
+          ]
+        },
+        {
+          "name": "Abkürzungen",
+          "questions": [
+            {
+              "text": "Wofür steht die Abkürzung „AG“ im Stundenplan einer Schule?",
+              "answer": "Arbeitsgemeinschaft"
+            },
+            {
+              "text": "Was bedeutet „ECTS“ im Studium?",
+              "answer": "Ein Punktesystem für Studienleistungen"
+            },
+            {
+              "text": "Wofür steht das „G“ in „G8“ und „G9“?",
+              "answer": "Gymnasium"
+            },
+            {
+              "text": "Wofür steht „BAföG“ dem Sinn nach?",
+              "answer": "Die staatliche Ausbildungsförderung"
+            }
+          ]
+        },
+        {
+          "name": "Im Klassenzimmer",
+          "questions": [
+            {
+              "text": "Welches Schreibgerät machte die Kreide an vielen Schulen überflüssig?",
+              "answer": "Der Whiteboard-Marker"
+            },
+            {
+              "text": "Wie heißt das Gerät, das Folien an die Wand wirft?",
+              "answer": "Der Overheadprojektor"
+            },
+            {
+              "text": "Wie nennt man das Buch, in dem Anwesenheit und Stoff eingetragen werden?",
+              "answer": "Das Klassenbuch"
+            },
+            {
+              "text": "Wie heißt die Sitzordnung, bei der die Tische im offenen Halbkreis zur Tafel stehen?",
+              "answer": "Die Hufeisenform"
+            }
+          ]
+        },
+        {
+          "name": "Schule anderswo",
+          "questions": [
+            {
+              "text": "In welchem Land beginnt das Schuljahr im April?",
+              "answer": "In Japan"
+            },
+            {
+              "text": "Welches skandinavische Land gilt seit Jahren als Vorbild für sein Schulsystem?",
+              "answer": "Finnland"
+            },
+            {
+              "text": "Wie heißt die Abschlussprüfung in Frankreich, die dem Abitur entspricht?",
+              "answer": "Das Baccalauréat"
+            },
+            {
+              "text": "In welchem Land tragen Schulkinder besonders häufig Uniform?",
+              "answer": "In Großbritannien"
+            }
+          ]
+        },
+        {
+          "name": "Prüfungszeit",
+          "questions": [
+            {
+              "text": "Wie nennt man eine Prüfung, die mündlich vor mehreren Prüfern stattfindet?",
+              "answer": "Ein Kolloquium"
+            },
+            {
+              "text": "Wie heißt die schriftliche Abschlussarbeit eines Bachelorstudiums?",
+              "answer": "Die Bachelorarbeit"
+            },
+            {
+              "text": "Wie viele Versuche hat man an deutschen Hochschulen für eine Prüfung meist höchstens?",
+              "answer": "3"
+            },
+            {
+              "text": "Wie heißt das Verfahren, mit dem Hochschulen Texte auf Abschreiben prüfen?",
+              "answer": "Plagiatsprüfung"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

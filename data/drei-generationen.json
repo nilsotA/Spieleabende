@@ -1,0 +1,269 @@
+{
+  "name": "Drei Generationen",
+  "description": "Der Satz für den Familienabend: Bei jeder Kategorie weiß jemand anders Bescheid – die Eltern beim Wohnzimmer von früher, die Jüngeren beim Handy von heute.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Früher im Wohnzimmer",
+          "questions": [
+            {
+              "text": "Womit spulte man eine Musikkassette zurück, wenn keine Batterien mehr da waren?",
+              "answer": "Mit einem Stift",
+              "note": "Sechseckiger Bleistift ins Loch, drehen – das ganze Land konnte das."
+            },
+            {
+              "text": "Wie nannte man die Möbel, in denen Fernseher, Platten und Gläser gemeinsam standen?",
+              "answer": "Die Schrankwand"
+            },
+            {
+              "text": "Was musste man bei einer Schallplatte tun, damit die zweite Hälfte lief?",
+              "answer": "Sie umdrehen"
+            },
+            {
+              "text": "Welches Gerät stand früher auf dem Fernseher und empfing das Bild?",
+              "answer": "Die Antenne"
+            }
+          ]
+        },
+        {
+          "name": "Schule von damals",
+          "questions": [
+            {
+              "text": "Womit schrieben Grundschüler früher, bevor es Hefte für alle gab?",
+              "answer": "Mit Griffel auf Schiefertafel"
+            },
+            {
+              "text": "Wie hieß das Gerät, mit dem Lehrer Arbeitsblätter in blauer Schrift vervielfältigten?",
+              "answer": "Der Matrizendrucker",
+              "note": "Die frisch abgezogenen Blätter rochen scharf nach Spiritus."
+            },
+            {
+              "text": "Was benutzte man im Matheunterricht, bevor der Taschenrechner erlaubt war?",
+              "answer": "Den Rechenschieber"
+            },
+            {
+              "text": "Wie nennt man das Zeugnis am Ende der Schulzeit am Gymnasium?",
+              "answer": "Das Abitur"
+            }
+          ]
+        },
+        {
+          "name": "Was kostete das?",
+          "questions": [
+            {
+              "text": "Welche Währung gab es in Deutschland vor dem Euro?",
+              "answer": "Die Deutsche Mark"
+            },
+            {
+              "text": "Wie hieß die kleine Münze, von der hundert Stück eine Mark ergaben?",
+              "answer": "Der Pfennig"
+            },
+            {
+              "text": "In welchem Jahr kam der Euro als Bargeld nach Deutschland?",
+              "answer": "2002"
+            },
+            {
+              "text": "Wie viel Pfand kostet heute eine Einweg-Plastikflasche?",
+              "answer": "25 Cent"
+            }
+          ]
+        },
+        {
+          "name": "Erfindungen im Haushalt",
+          "questions": [
+            {
+              "text": "Welches Küchengerät erwärmt Essen mit Strahlung statt mit Hitze von außen?",
+              "answer": "Die Mikrowelle"
+            },
+            {
+              "text": "Welches Gerät ersetzte den Teppichklopfer?",
+              "answer": "Der Staubsauger"
+            },
+            {
+              "text": "Wie nennt man die Maschine, die Wäsche trocknet, ohne dass man sie aufhängt?",
+              "answer": "Der Trockner"
+            },
+            {
+              "text": "Welche Kanne hält Kaffee stundenlang warm, ganz ohne Strom?",
+              "answer": "Die Thermoskanne"
+            }
+          ]
+        },
+        {
+          "name": "Musik der Eltern",
+          "questions": [
+            {
+              "text": "Welche britische Band aus Liverpool bestand aus John, Paul, George und Ringo?",
+              "answer": "Die Beatles"
+            },
+            {
+              "text": "Welcher Sänger wird bis heute „der King“ genannt?",
+              "answer": "Elvis Presley"
+            },
+            {
+              "text": "Welche schwedische Popgruppe der 1970er bestand aus zwei Paaren?",
+              "answer": "ABBA",
+              "note": "Der Name setzt sich aus den Anfangsbuchstaben der vier Vornamen zusammen."
+            },
+            {
+              "text": "Welche deutsche Sängerin sang 1982 „Ein bisschen Frieden“ und gewann damit?",
+              "answer": "Nicole"
+            }
+          ]
+        },
+        {
+          "name": "Sagt man das noch?",
+          "questions": [
+            {
+              "text": "Was meint jemand, der sagt, etwas sei „cringe“?",
+              "answer": "Peinlich"
+            },
+            {
+              "text": "Was bedeutet es, wenn jemand „ghosted“ wurde?",
+              "answer": "Der Kontakt brach ohne Erklärung ab"
+            },
+            {
+              "text": "Wofür steht die Abkürzung „lol“?",
+              "answer": "Laughing out loud"
+            },
+            {
+              "text": "Was ist gemeint, wenn etwas „gehypt“ wird?",
+              "answer": "Es wird stark angepriesen"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Fernsehen früher",
+          "questions": [
+            {
+              "text": "Wie viele Programme konnte man in Westdeutschland in den 1970ern meist empfangen?",
+              "answer": "3"
+            },
+            {
+              "text": "Welche Sendung mit der Maus erklärt seit 1971 sonntags die Welt?",
+              "answer": "Die Sendung mit der Maus"
+            },
+            {
+              "text": "In welcher Quizshow von Wim Thoelke traten Loriots Zeichenfiguren Wum und Wendelin auf?",
+              "answer": "Der Große Preis"
+            },
+            {
+              "text": "Was zeigte der Bildschirm nach Sendeschluss die ganze Nacht?",
+              "answer": "Das Testbild"
+            }
+          ]
+        },
+        {
+          "name": "Telefon & Post",
+          "questions": [
+            {
+              "text": "Was musste man bei einem alten Telefon drehen, um zu wählen?",
+              "answer": "Die Wählscheibe"
+            },
+            {
+              "text": "Wie hieß das dicke Buch, in dem alle Telefonnummern eines Ortes standen?",
+              "answer": "Das Telefonbuch"
+            },
+            {
+              "text": "Welches Gerät nahm Anrufe entgegen, wenn niemand zu Hause war?",
+              "answer": "Der Anrufbeantworter"
+            },
+            {
+              "text": "Wie viel kostet heute eine Standardpostkarte innerhalb Deutschlands – über oder unter einem Euro?",
+              "answer": "Unter einem Euro"
+            }
+          ]
+        },
+        {
+          "name": "Auto & Straße",
+          "questions": [
+            {
+              "text": "Welches deutsche Auto heißt auf Englisch „Beetle“?",
+              "answer": "Der VW Käfer"
+            },
+            {
+              "text": "Was musste man früher an der Tankstelle bei jedem Halt kontrollieren lassen?",
+              "answer": "Den Ölstand"
+            },
+            {
+              "text": "Wie heißt die Plakette an der Windschutzscheibe, die die Abgasklasse zeigt?",
+              "answer": "Die Umweltplakette"
+            },
+            {
+              "text": "Ab welchem Alter darf man in Deutschland begleitet Auto fahren?",
+              "answer": "Ab 17"
+            }
+          ]
+        },
+        {
+          "name": "Feste & Bräuche",
+          "questions": [
+            {
+              "text": "An welchem Tag stellen Kinder in Deutschland ihre Stiefel vor die Tür?",
+              "answer": "Am 6. Dezember"
+            },
+            {
+              "text": "Wie viele Türchen hat ein klassischer Adventskalender?",
+              "answer": "24"
+            },
+            {
+              "text": "Welches Fest feiert man in Bayern im September und Oktober auf der Theresienwiese?",
+              "answer": "Das Oktoberfest"
+            },
+            {
+              "text": "Was wird an Silvester um Mitternacht traditionell gesungen oder gerufen?",
+              "answer": "Prosit Neujahr"
+            }
+          ]
+        },
+        {
+          "name": "Marken & Slogans",
+          "questions": [
+            {
+              "text": "Welche Zahnpasta kommt seit den 1970ern dreifarbig gestreift aus der Tube?",
+              "answer": "Aquafresh"
+            },
+            {
+              "text": "Welcher Süßwarenhersteller aus Bonn verspricht, Kinder und Erwachsene froh zu machen?",
+              "answer": "Haribo"
+            },
+            {
+              "text": "Welche Automarke warb mit „Vorsprung durch Technik“?",
+              "answer": "Audi"
+            },
+            {
+              "text": "Welche Brause wirbt damit, Flügel zu verleihen?",
+              "answer": "Red Bull"
+            }
+          ]
+        },
+        {
+          "name": "Heute erklärt",
+          "questions": [
+            {
+              "text": "Wie nennt man kurze Hochkant-Videos, die man endlos weiterwischen kann?",
+              "answer": "Reels oder Shorts"
+            },
+            {
+              "text": "Was ist ein Streamingdienst im Unterschied zur Videothek?",
+              "answer": "Man leiht nichts aus, sondern schaut sofort online"
+            },
+            {
+              "text": "Wofür steht das Wort „Podcast“ im Kern – Radio zum Abrufen oder Musik zum Kaufen?",
+              "answer": "Radio zum Abrufen"
+            },
+            {
+              "text": "Was macht eine Smartwatch, was eine normale Armbanduhr nicht kann?",
+              "answer": "Sie misst zum Beispiel Schritte und Puls"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
