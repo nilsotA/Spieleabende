@@ -1,7 +1,7 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash,
   installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
-  istStumm, setzeStumm } from '/common.js';
+  istStumm, setzeStumm, punkte, delta as vorzeichen } from '/common.js';
 
 let state = null;
 let selectedTeam = localStorage.getItem('quizduell.teamId') || null;
@@ -163,7 +163,7 @@ function render(prev) {
   const vorher = prev?.teams?.find((t) => t.id === state.you.teamId);
   const gewertet = state.phase === 'question' && vorher && vorher.score !== me?.score;
   if (gewertet) punktesprung(me.score - vorher.score, vorher.score, me.score);
-  else $('#p-score').textContent = me?.score ?? 0;
+  else $('#p-score').textContent = punkte(me?.score ?? 0);
   // Teamwechsel lehnt der Server während einer Frage ab – Knopf dann ausblenden.
   $('#btn-leave').hidden = state.phase === 'question';
 
@@ -252,7 +252,7 @@ function punktesprung(delta, von, bis) {
   const start = performance.now();
   const schritt = (jetzt) => {
     const t = Math.min(1, (jetzt - start) / 500);
-    feld.textContent = Math.round(von + (bis - von) * (1 - (1 - t) ** 3));
+    feld.textContent = punkte(Math.round(von + (bis - von) * (1 - (1 - t) ** 3)));
     if (t < 1) requestAnimationFrame(schritt);
   };
   requestAnimationFrame(schritt);
@@ -262,7 +262,7 @@ function punktesprung(delta, von, bis) {
   feld.classList.add(delta > 0 ? 'plus' : 'minus');
 
   const flieger = el('span', { class: `p-delta ${delta > 0 ? 'plus' : 'minus'}` },
-    `${delta > 0 ? '+' : ''}${delta}`);
+    vorzeichen(delta));
   feld.parentElement.append(flieger);
   clearTimeout(sprungZeit);
   sprungZeit = setTimeout(() => {
@@ -616,6 +616,6 @@ function renderScores() {
       team.id === state.you.teamId ? 'me' : '',
       team.id === activeId ? 'turn' : '',
     ].join(' ');
-    box.append(el('span', { class: cls }, `${team.name}: ${team.score}`));
+    box.append(el('span', { class: cls }, `${team.name}: ${punkte(team.score)}`));
   }
 }

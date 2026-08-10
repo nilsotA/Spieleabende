@@ -1,6 +1,7 @@
 import {
   $, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
-  setFrageText, setzeText, istStumm, setzeStumm, anschlussStand } from '/common.js';
+  setFrageText, setzeText, istStumm, setzeStumm, anschlussStand,
+  punkte, delta as vorzeichen } from '/common.js';
 import { qrSvg } from '/qr.js';
 
 let state = null;
@@ -595,9 +596,9 @@ function renderQuestion(prev) {
     // deshalb auch dahinter – sonst sieht der Tisch die Punkte wandern und
     // findet im Protokoll keinen Grund dafür.
     const label =
-      entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${entry.delta}` : 'wusste es nicht')
+      entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${punkte(entry.delta)}` : 'wusste es nicht')
         : entry.result === 'correct' ? `richtig +${entry.delta}`
-          : entry.delta ? `falsch ${entry.delta}` : 'falsch';
+          : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
     status.append(el('div', { class: `chip log ${entry.result}` }, `${teamName(entry.teamId)}: ${label}`));
   }
 
@@ -763,7 +764,7 @@ function renderPlayers() {
     const scoreNode = node.querySelector('.pscore');
     const vorher = lastScores.get(team.id);
     if (vorher != null && vorher !== team.score) countUp(scoreNode, vorher, team.score);
-    else scoreNode.textContent = team.score;
+    else scoreNode.textContent = punkte(team.score);
     scoreNode.classList.toggle('neg', team.score < 0);
     node.classList.toggle('active', team.id === activeId);
     node.classList.toggle('buzzed', state.current?.buzzedTeamId === team.id && state.current?.step === 'buzz');
@@ -905,7 +906,7 @@ addEventListener('resize', () => {
  * ausserdem nicht, wem sie gehört.
  */
 function hitmark(delta, karte) {
-  const mark = el('div', { class: `hitmark ${delta > 0 ? '' : 'minus'}` }, `${delta > 0 ? '+' : ''}${delta}`);
+  const mark = el('div', { class: `hitmark ${delta > 0 ? '' : 'minus'}` }, vorzeichen(delta));
   const kasten = karte.getBoundingClientRect();
   mark.style.left = `${kasten.left + kasten.width / 2}px`;
   mark.style.top = `${kasten.top}px`;
@@ -919,7 +920,7 @@ function countUp(node, von, bis, dauer = 600) {
   const schritt = (jetzt) => {
     const t = Math.min(1, (jetzt - start) / dauer);
     const ease = 1 - (1 - t) ** 3;
-    node.textContent = Math.round(von + (bis - von) * ease);
+    node.textContent = punkte(Math.round(von + (bis - von) * ease));
     if (t < 1) requestAnimationFrame(schritt);
   };
   requestAnimationFrame(schritt);
@@ -986,7 +987,7 @@ function renderScoreboard() {
             ? el('span', { class: `sprung ${sprung > 0 ? 'hoch' : 'runter'}` },
               sprung > 0 ? `▲ ${sprung}` : `▼ ${-sprung}`)
             : null,
-          el('span', { class: 'pts' }, String(team.score)),
+          el('span', { class: 'pts' }, punkte(team.score)),
         ),
       );
     });
@@ -1054,7 +1055,7 @@ function zeigeRekorde(final, ranked) {
   }
   if (r.teuersterReinfall) {
     const t = r.teuersterReinfall;
-    zeilen.push(['💸 Teuerster Reinfall', `${name(t.teamId)} – ${t.delta} bei ${t.kategorie} ${t.wert}`]);
+    zeilen.push(['💸 Teuerster Reinfall', `${name(t.teamId)} – ${punkte(t.delta)} bei ${t.kategorie} ${t.wert}`]);
   }
 
   /* Die drei oben brauchen alle einen Sonderfall: einen echten Handy-Buzz, drei
@@ -1386,7 +1387,7 @@ function fillMenu() {
           offline.length
             ? el('span', { class: 'muted small' }, ` · ${offline.length} offline`)
             : null),
-        el('span', { class: 'sc' }, String(team.score)),
+        el('span', { class: 'sc' }, punkte(team.score)),
         button('−100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: -100 })),
         button('+100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: 100 })),
         button('dran', 'btn-sm btn-ghost', () => act('setTurn', { teamId: team.id })),

@@ -2,7 +2,8 @@
 // erlaubt das Bewerten – damit die Lösung nie auf der Leinwand landet.
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
-  installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand } from '/common.js';
+  installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand,
+  punkte } from '/common.js';
 
 let state = null;
 
@@ -90,9 +91,9 @@ function render() {
     log.innerHTML = '';
     for (const entry of q.log) {
       const label =
-        entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${entry.delta}` : 'wusste es nicht')
+        entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${punkte(entry.delta)}` : 'wusste es nicht')
           : entry.result === 'correct' ? `richtig +${entry.delta}`
-            : entry.delta ? `falsch ${entry.delta}` : 'falsch';
+            : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
       log.append(el('span', { class: `r-chip ${entry.result}` }, `${teamName(entry.teamId)}: ${label}`));
     }
   }
@@ -186,7 +187,7 @@ function render() {
             'aria-label': `${team.name}: 100 Punkte abziehen`,
             onclick: () => act('adjustScore', { teamId: team.id, delta: -100 }),
           }, '−100'),
-          el('span', { class: 'sc' }, String(team.score)),
+          el('span', { class: 'sc' }, punkte(team.score)),
           el('button', {
             class: 'btn btn-sm btn-ghost',
             'aria-label': `${team.name}: 100 Punkte geben`,

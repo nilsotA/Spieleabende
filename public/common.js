@@ -45,6 +45,29 @@ export function clientId() {
 }
 
 /**
+ * Punktzahlen fürs Auge: echtes Minuszeichen statt Bindestrich.
+ *
+ * Auf der Fernbedienung stehen „−100" (Knopf) und „-1100" (Punktestand) direkt
+ * nebeneinander – der Bindestrich ist in der kursiven Ziffernschrift ein
+ * tiefsitzender Strich halber Länge und sieht daneben aus wie ein Fleck. Seit
+ * der halbe Abzug voreingestellt ist, stehen Minuszahlen den ganzen Abend da,
+ * nicht nur als Ausnahme.
+ *
+ * U+2212 hat die Breite und die Höhe der Ziffern; damit sitzt das Vorzeichen
+ * auf derselben Linie wie der Querstrich einer 4.
+ */
+export function punkte(n) {
+  return String(n).replace('-', '\u2212');
+}
+
+/**
+ * Dasselbe mit Vorzeichen, für Punktesprünge: „+250" oder „−250".
+ */
+export function delta(n) {
+  return (n > 0 ? '+' : '') + punkte(n);
+}
+
+/**
  * Text nur schreiben, wenn er sich geändert hat.
  *
  * Klingt nach Mikrooptimierung, ist aber der Unterschied zwischen einer
