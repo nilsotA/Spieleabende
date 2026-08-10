@@ -120,7 +120,12 @@ a { color: #79b6ff; }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-primary { background: linear-gradient(180deg, #3f8de0, #1c4f8f); border-color: #4f9bec; }
-.btn-good { background: linear-gradient(180deg, #35bb6c, #1a7a44); border-color: #46d283; }
+/* Dunkler als das ursprüngliche #35bb6c → #1a7a44: Unter der weißen Schrift lag
+   dort rgb(39,153,87), das sind 3,3:1 – zu wenig für 15px, und beim Überfahren
+   hellt `:hover` den Knopf noch um ein Viertel auf. Jetzt liegen unter der
+   Schrift rgb(28,128,69), also 5,0:1. „Richtig" ist der Knopf, den der Host den
+   ganzen Abend trifft, oft im Augenwinkel und aus dem Sitzen. */
+.btn-good { background: linear-gradient(180deg, #249c55, #146336); border-color: #46d283; }
 .btn-bad { background: linear-gradient(180deg, #e2455f, #93122e); border-color: #f26d84; }
 .btn-ghost { background: rgba(255, 255, 255, 0.04); }
 .btn-sm { padding: 0.35rem 0.6rem; font-size: 0.8rem; border-radius: 8px; }

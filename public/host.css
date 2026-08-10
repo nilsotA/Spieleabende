@@ -264,7 +264,11 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   gap: 0.1rem;
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 2px 0 rgba(255, 255, 255, 0.1);
-  color: #55617a;
+  /* Heller als das frühere #55617a: Das ergab für die 10px kleine Beschriftung
+     „BUZZ" 3,3:1 – auf einem Beamer aus vier Metern nicht mehr zu entziffern.
+     Jetzt sind es 5,8:1. Gedämpft bleibt der Kreis trotzdem deutlich: Der
+     scharfe Zustand darunter bringt goldenen Grund, Leuchten und Puls mit. */
+  color: #7c89a3;
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 .buzz-circle span { font-size: 1.5rem; line-height: 1; filter: grayscale(1); opacity: 0.5; }
