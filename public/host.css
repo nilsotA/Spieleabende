@@ -1252,6 +1252,10 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   margin-left: 0.4em;
 }
 
+/* Zurücknehmen, Vollbild und Menü halten zusammen und sitzen am rechten Ende
+   der Zeile, in der sie landen. */
+.control-neben { display: flex; align-items: center; gap: 0.5rem; flex: 0 0 auto; margin-left: auto; }
+
 /* Buzz stellvertretend für ein Team ohne Handy: Farbpunkt plus Kurzname. Acht
    davon müssen in eine Reihe passen, sonst wächst die Leiste in die Bühne. */
 .buzz-fuer { display: inline-flex; align-items: center; gap: 0.35rem; padding-inline: 0.45rem; }

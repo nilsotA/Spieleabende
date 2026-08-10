@@ -205,9 +205,16 @@
         </span>
       </div>
       <div id="control-buttons" class="control-buttons"></div>
-      <button id="btn-undo" class="btn btn-ghost btn-sm btn-undo" hidden>↩ Zurücknehmen</button>
-      <button id="btn-vollbild" class="btn btn-ghost btn-sm" title="Vollbild (Taste F)" aria-label="Vollbild einschalten" hidden>⛶</button>
-      <button id="btn-menu" class="btn btn-ghost btn-sm" title="Punkte korrigieren / Spiel beenden" aria-label="Menü: Punkte korrigieren, Zug setzen, Ton, Spiel beenden">⋯</button>
+      <!-- Die Nebenknöpfe als eine Gruppe: Bricht die Leiste um (acht Teams,
+           Vertreter-Buzzer, langer Hinweis), rutschten „Zurücknehmen", Vollbild
+           und Menü sonst einzeln in verschiedene Zeilen – zwei davon landeten
+           unten links unter dem Hinweistext. Zusammen bleiben sie zusammen und
+           halten sich rechts. -->
+      <div class="control-neben">
+        <button id="btn-undo" class="btn btn-ghost btn-sm btn-undo" hidden>↩ Zurücknehmen</button>
+        <button id="btn-vollbild" class="btn btn-ghost btn-sm" title="Vollbild (Taste F)" aria-label="Vollbild einschalten" hidden>⛶</button>
+        <button id="btn-menu" class="btn btn-ghost btn-sm" title="Punkte korrigieren / Spiel beenden" aria-label="Menü: Punkte korrigieren, Zug setzen, Ton, Spiel beenden">⋯</button>
+      </div>
     </div>
   </div>
 
