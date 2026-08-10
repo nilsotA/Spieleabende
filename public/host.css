@@ -117,6 +117,15 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .lobby-spalte { display: flex; flex-direction: column; gap: 1.2rem; min-width: 0; }
 .settings { display: grid; gap: 0.7rem; }
 
+/* Auf einem iPad mini blieben von dem Feld 105 Pixel übrig – „Die Grübelme"
+   und der Rest lief nach links raus, während man tippte. Unter 13rem wandert
+   der Knopf lieber in die zweite Zeile und das Feld bekommt die ganze Breite.
+   Der Platzhalter ist ein Beispiel und kein Etikett mehr; den Namen des Feldes
+   trägt jetzt aria-label, damit die Vorlesehilfe nichts verliert. */
+#team-form { row-gap: 0.5rem; }
+#team-form #team-name { flex: 1 1 13rem; min-width: 0; }
+#team-form .btn { flex: 1 0 auto; }
+
 .lobby-teams { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 .lobby-teams li {
   display: flex;
@@ -142,14 +151,24 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
    zu scrollen, fand ihn nicht – und das Spiel ließ sich schlicht nicht starten.
    Nach oben ausgeblendet, damit der durchscrollende Inhalt nicht an einer
    harten Kante abreißt. Genau wie die Wertungsknöpfe der Fernbedienung. */
+/* Die Leiste klebt unten und die Karten scrollen darunter durch. Der Verlauf
+   war erst bei 58 % deckend – die Statuszeile begann aber schon bei 19 %, also
+   auf halbdurchsichtigem Grund. Gemessen schien der Kartentext mit
+   Helligkeit 125 gegen einen Untergrund von 11 hindurch: Auf einem iPad mini
+   stand „der Host drückt dann die Knöpfe" quer über „falsch kostet die Hälfte".
+   Der Verlauf ist jetzt kurz und sitzt ganz im oberen Polster – wo die eigene
+   Schrift beginnt, ist der Grund deckend. */
 .lobby-start {
   text-align: center;
   margin-top: 1.6rem;
   position: sticky;
   bottom: 0;
   z-index: 3;
-  padding: 1.6rem 0 0.7rem;
-  background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, 0.82) 34%, var(--ink-900) 58%);
+  padding: 2.6rem 0 0.7rem;
+  background: linear-gradient(180deg,
+    rgba(5, 8, 15, 0) 0%,
+    rgba(5, 8, 15, 0.85) 14%,
+    var(--ink-900) 25%);
 }
 .btn-big { font-size: 1.15rem; padding: 0.9rem 2.4rem; border-radius: 12px; }
 /* Der Anschlussstand über dem Startknopf. Bewusst in Fließtextgröße und nicht
@@ -338,6 +357,11 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   min-height: 0;
   position: relative;
   z-index: 1;
+  /* Die unterste Reihe endete auf den Pixel genau da, wo die Pulte anfangen –
+     gemessen null Luft auf allen Größen. Abgeschnitten war nichts, aber die
+     500er sahen aus, als wären sie es: Zwischen den Reihen sitzt eine Fuge,
+     darunter stieß die Kachel stumpf an die Punkteleiste. */
+  margin-bottom: clamp(0.35rem, 0.9vh, 0.7rem);
   display: flex;
   flex-direction: column;
   /* Der Bühnenwechsel: das Board tritt zurück, wenn die Frage nach vorn kommt.

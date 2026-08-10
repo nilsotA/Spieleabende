@@ -9,6 +9,9 @@
 <style>
   main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.2rem 5rem; }
   h1 { font-size: 1.6rem; margin: 0 0 .3rem; }
+  /* Der Schriftzug ist hier Herkunftszeichen, nicht Bühne: eine Spur größer als
+     die Überschrift, sonst hält er sich zurück. */
+  .editor-logo { font-size: 1.5rem; flex: none; margin-right: .5rem; }
   .bar { position: sticky; top: 0; z-index: 10; background: rgba(5,7,12,.94);
          backdrop-filter: blur(6px); padding: .8rem 0; margin-bottom: 1.2rem;
          border-bottom: 1px solid var(--line); }
@@ -85,6 +88,11 @@
 <main>
   <div class="bar">
     <div class="row">
+      <!-- Der Editor sah aus wie ein anderes Programm: nackte Überschrift, sonst
+           nichts vom Haus. Der Schriftzug steht auch hier – klein, damit er
+           nicht mit der Arbeit konkurriert, und beim Scrollen blendet er sich
+           mit der übrigen Kopfzeile ohnehin aus. -->
+      <div class="logo editor-logo" aria-hidden="true"><span>Quiz</span><span>Duell</span></div>
       <div class="grow">
         <h1>Fragen-Editor</h1>
         <p class="muted small" style="margin:0">6 Kategorien × 4 Fragen pro Runde. Runde 2 zählt automatisch doppelt.</p>
