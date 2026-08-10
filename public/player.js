@@ -183,6 +183,11 @@ function render(prev) {
   const grosserKnopf = state.phase === 'lobby'
     || (state.phase === 'question' && state.current?.step !== 'result');
   $('#view-play').classList.toggle('knopf-ruht', !grosserKnopf);
+  // Während die Feldwahl offensteht, hat der Buzzer nichts zu tun – er zeigt
+  // „DU WÄHLST" und wiederholt damit die Zeile darüber. Auf einem iPhone SE
+  // kostet er dabei ein Sechstel der Fläche, und von sechs Kategorien waren
+  // dreieinhalb zu sehen. Bei der Wahl gehört der Platz den Feldern.
+  $('#view-play').classList.toggle('waehlt', !$('#p-picker').hidden);
   frageInsBild();
 }
 

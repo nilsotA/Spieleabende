@@ -164,6 +164,11 @@ body {
 
 /* --------------------------------------------------------- Feldauswahl */
 
+/* Beim Feldwählen tritt der Buzzer ganz ab: Er ist gesperrt, sagt nur noch,
+   dass man wählen soll, und das steht schon in der Zeile darüber. Die Fußzeile
+   mit „Team wechseln" bleibt – sie ist der einzige Weg zurück. */
+.knopf-ruht.waehlt .buzz-zone { display: none; }
+
 .picker { display: grid; gap: 0.5rem; }
 .picker .pick-cat { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .picker .pick-cat > h3 {
@@ -483,6 +488,18 @@ html, body { touch-action: manipulation; }
   }
   /* Ist die Frage durch, hat der Knopf auch quer nichts mehr zu tun. */
   #view-play.knopf-ruht .buzzer { width: min(100%, 5.5rem); height: auto; }
+
+  /* Beim Feldwählen fällt der Buzzer weg – dann gehört die ganze Breite der
+     Auswahl. Untereinander waren quer nur zwei von sechs Kategorien zu sehen;
+     zweispaltig sind es alle. */
+  #view-play.waehlt { grid-template-columns: minmax(0, 1fr); }
+  #view-play.waehlt .pscroll { grid-column: 1 / -1; }
+  /* So viele Spalten, wie nebeneinander passen: Auf 844 Pixeln Breite sind das
+     drei, und damit stehen alle sechs Kategorien ohne Scrollen da. */
+  #view-play.waehlt .picker {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    align-content: start;
+  }
 }
 
 /* Fußzeile: Teamwechsel und Stummschalter nebeneinander, damit der Ton-Knopf
