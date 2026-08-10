@@ -112,6 +112,10 @@
   </div>
 
   <div class="lobby-start">
+    <!-- Beantwortet die Frage, die der Host beim Blick auf diesen Knopf hat:
+         Sind alle da? `aria-live`, weil sich der Satz von selbst ändert, während
+         nach und nach Handys dazukommen. -->
+    <p id="lobby-stand" class="lobby-stand" role="status" aria-live="polite"></p>
     <button id="btn-start" class="btn btn-primary btn-big">Spiel starten</button>
   </div>
 </section>

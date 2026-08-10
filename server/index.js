@@ -142,12 +142,34 @@ function broadcast() {
   saveSoon();
 }
 
+/**
+ * Wie viele Handys hängen dran, ohne in einem Team zu stehen?
+ *
+ * Der Zustand kennt nur Teams und ihre Mitglieder – ein Gast, der den QR-Code
+ * gescannt hat und noch beim Namen tippt, kommt darin nicht vor. Genau der ist
+ * aber der Grund, warum der Host noch nicht starten sollte. Diese Zahl weiß nur
+ * der Server, weil nur er die offenen Verbindungen kennt.
+ *
+ * Host-Verbindungen (Leinwand, Fernbedienung) zählen nicht mit: Die warten auf
+ * nichts.
+ */
+function warteschlange() {
+  const imTeam = new Set(state.teams.flatMap((t) => t.members.map((m) => m.clientId)));
+  const offen = new Set();
+  for (const conn of connections.values()) {
+    if (conn.isHost || imTeam.has(conn.clientId)) continue;
+    offen.add(conn.clientId); // ein Gerät, nicht eine Verbindung
+  }
+  return offen.size;
+}
+
 function sendState(conn) {
   const sicht = G.viewFor(state, { isHost: conn.isHost, clientId: conn.clientId });
   // Nur der Host kann zurücknehmen, also erfährt auch nur er davon.
   if (conn.isHost) {
     sicht.rueckgaengig = rueckStand?.was ?? null;
     sicht.wiederhergestellt = wiederhergestelltAm;
+    sicht.wartende = warteschlange();
   }
   write(conn, 'state', sicht);
 }

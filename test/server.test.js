@@ -762,3 +762,56 @@ test('die Pause zwischen zwei Sätzen kostet niemanden sein Team', async (t) => 
   assert.equal(wieder.wegSeit, undefined, 'der Abwesenheitsvermerk ist weg');
   await wachLiest.cancel();
 });
+
+test('der Host sieht, wie viele Handys noch auf ein Team warten', async (t) => {
+  // Die Teamliste kann das nicht zeigen: Wer den QR-Code gerade gescannt hat und
+  // den Namen tippt, steht in keinem Team – ist aber genau der Grund, mit dem
+  // Start noch zu warten. Nur der Server kennt diese Geräte.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-warte-'));
+  const port = 6100 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  const offen = [];
+  t.after(async () => {
+    for (const r of offen) await r.cancel().catch(() => {});
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+  const strom = async (id, rolle) => {
+    const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
+    const r = res.body.getReader();
+    r.read();
+    offen.push(r);
+    await warte(150);
+    return r;
+  };
+
+  const host = await alsHost(base, 'warte-host');
+  await host({ type: 'addTeam', name: 'Rot' });
+  await host({ type: 'addTeam', name: 'Blau' });
+  assert.equal((await zustand(base)).wartende, 0, 'am Anfang wartet niemand');
+
+  // Zwei Gäste haben gescannt, aber noch kein Team gewählt.
+  await strom('gast1', 'player');
+  await strom('gast2', 'player');
+  assert.equal((await zustand(base)).wartende, 2);
+
+  // Zwei Tabs auf demselben Handy sind ein Gerät, nicht zwei.
+  await strom('gast2', 'player');
+  assert.equal((await zustand(base)).wartende, 2, 'gezählt werden Geräte, nicht Verbindungen');
+
+  // Die Fernbedienung des Hosts wartet auf nichts.
+  await strom('host-handy', 'host');
+  assert.equal((await zustand(base)).wartende, 2);
+
+  // Einer tritt bei.
+  const teams = (await zustand(base)).teams;
+  await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'gast1', type: 'joinTeam', teamId: teams[0].id, name: 'Mira' }),
+  });
+  assert.equal((await zustand(base)).wartende, 1);
+
+  // Spieler bekommen die Zahl nicht – sie ist eine Host-Angabe.
+  assert.equal((await zustand(base, false)).wartende, undefined);
+});

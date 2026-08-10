@@ -31,6 +31,28 @@ Fragen-Editor:            http://localhost:3000/editor
 
 Anderer Port: `PORT=8080 node server/index.js`
 
+### Wann kann ich starten?
+
+Über dem Startknopf steht, wie es um die Handys steht – und zwar das, was die
+Teamliste daneben nicht zeigen kann:
+
+```
+3 Handys verbunden · ohne Handy: Die Grübelmeister, Solo Sarah · 1 noch ohne Team
+5 Handys verbunden – alle 3 Teams sind dabei.
+```
+
+- **Die Kopfzahl** zählt alle verbundenen Handys, auch die zweiten Geräte in
+  Zweierteams. Ein Team gilt schon mit einem Handy als dabei – ob der Partner
+  auch drauf ist, sieht man nur an dieser Zahl.
+- **„Ohne Handy“** nennt die Teams beim Namen, damit du sie ansprechen kannst,
+  statt „irgendwer fehlt noch“ in den Raum zu rufen.
+- **„Noch ohne Team“** sind Handys, die den QR-Code schon gescannt haben und
+  gerade den Namen tippen. Die stehen in keinem Team und wären sonst unsichtbar –
+  dabei sind sie der Grund, noch zehn Sekunden zu warten.
+
+Sind alle dabei, wird die Zeile grün. Ohne Handys zu spielen bleibt erlaubt: Dann
+steht dort nur, dass der Host die Knöpfe drückt, und der Start ist nicht gesperrt.
+
 ### Fernbedienung: `/remote`
 
 Der große Screen ist für alle sichtbar – die Lösung darf da nicht draufstehen. Öffne

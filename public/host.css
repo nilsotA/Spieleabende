@@ -152,6 +152,16 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, 0.82) 34%, var(--ink-900) 58%);
 }
 .btn-big { font-size: 1.15rem; padding: 0.9rem 2.4rem; border-radius: 12px; }
+/* Der Anschlussstand über dem Startknopf. Bewusst in Fließtextgröße und nicht
+   kleiner: Auch das liest der halbe Raum von der Leinwand mit, und wer noch
+   nicht verbunden ist, soll seinen Teamnamen darin finden. */
+.lobby-stand {
+  margin: 0 0 0.7rem;
+  font-size: clamp(0.9rem, 1vw, 1.1rem);
+  color: #a8bad4;
+  min-height: 1.3em;
+}
+.lobby-stand.bereit { color: #7ff0b8; font-weight: 700; }
 /* Die Startleiste klebt unten und liegt über dem Inhalt. Ab dem siebten Team
    reichte die Teamkarte darunter, und vom gerade eingetippten Team blieb nur
    ein verblasster Rest – ausgerechnet in dem Moment, in dem der Host wissen
