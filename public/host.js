@@ -177,6 +177,13 @@ async function loadSets() {
 function describeSet(set) {
   if (!set) return;
   $('#set-info').innerHTML = '';
+  // Zuerst der Satz über den Satz: Beim Auswählen ist die Frage „passt der zu
+  // dieser Runde?", nicht „wie heißen die zwölf Kategorien". Seit es zwölf
+  // Sätze sind, entscheidet sich das hier – und die Beschreibung stand bisher
+  // nur auf der Startseite, die beim Spielen niemand offen hat.
+  if (set.description) {
+    $('#set-info').append(el('div', { class: 'satz-beschreibung' }, set.description));
+  }
   (set.rounds || []).forEach((r, i) => {
     $('#set-info').append(
       el('div', {}, `Runde ${i + 1}: ${r.categories.map((c) => c.name).join(' · ')}`),

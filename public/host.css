@@ -117,6 +117,14 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .lobby-spalte { display: flex; flex-direction: column; gap: 1.2rem; min-width: 0; }
 .settings { display: grid; gap: 0.7rem; }
 
+/* Die Beschreibung des Fragensatzes steht über den Kategorien und trägt die
+   Entscheidung – deshalb in Textfarbe statt gedämpft, und mit etwas Luft
+   darunter, damit sie sich von der Kategorienliste absetzt. */
+.satz-beschreibung {
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
 /* Auf einem iPad mini blieben von dem Feld 105 Pixel übrig – „Die Grübelme"
    und der Rest lief nach links raus, während man tippte. Unter 13rem wandert
    der Knopf lieber in die zweite Zeile und das Feld bekommt die ganze Breite.
