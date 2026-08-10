@@ -451,9 +451,23 @@ function renderBuzzer(prev) {
   }
 
   if (q.step === 'buzz') {
-    setzeText(status, q.lockedOut.includes(you.teamId)
-      ? 'Ihr hattet euren Versuch.'
-      : 'Deine Frage – die anderen sind dran.');
+    // Was der Fehlversuch gekostet hat, gehört hierher und nicht erst ans Ende
+    // der Frage. Bisher hieß es nur „Ihr hattet euren Versuch." – während oben
+    // still eine rote Zahl auftauchte, deren Grund nirgends stand. Gewinne
+    // wurden benannt („+150 Punkte für euch!"), Verluste nicht.
+    //
+    // Ohne Abzug ist der Satz weiterhin richtig: Dann kostet „falsch" nichts,
+    // und die Summe ist null.
+    // Der Verlust zuerst, egal aus welchem Grund man draußen ist: Das Zugteam
+    // steht gar nicht in `lockedOut` (es ist über `q.teamId` ausgeschlossen),
+    // hat mit eingestelltem Abzug aber genauso Punkte verloren wie ein Team,
+    // das danebengebuzzert hat.
+    const eigen = q.log.reduce((summe, e) => (e.teamId === you.teamId ? summe + e.delta : summe), 0);
+    setzeText(status, eigen < 0
+      ? `Daneben – das kostet euch ${-eigen} Punkte. Die anderen sind noch dran.`
+      : q.lockedOut.includes(you.teamId)
+        ? 'Ihr hattet euren Versuch.'
+        : 'Deine Frage – die anderen sind dran.');
     lock('GESPERRT');
     return;
   }
