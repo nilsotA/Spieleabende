@@ -9,25 +9,27 @@
           "questions": [
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Japan",
-              "image": "/bilder/flagge-japan.svg"
+              "answer": "Jamaika",
+              "image": "/bilder/flagge-jamaika.svg",
+              "note": "Die einzige Nationalflagge, in der weder Rot noch Weiß noch Blau vorkommt."
             },
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Italien",
-              "note": "Irland sieht fast gleich aus – dort ist der dritte Streifen aber orange, nicht rot",
-              "image": "/bilder/flagge-italien.svg"
+              "answer": "Tansania",
+              "image": "/bilder/flagge-tansania.svg",
+              "note": "Grün für die Vegetation, Blau für die Seen und den Indischen Ozean."
             },
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Die Schweiz",
-              "note": "Quadratisch – zusammen mit der Flagge der Vatikanstadt die einzige quadratische Nationalflagge. Dänemark ist länglich und hat das Kreuz zum Mast versetzt",
-              "image": "/bilder/flagge-schweiz.svg"
+              "answer": "Die Bahamas",
+              "image": "/bilder/flagge-bahamas.svg",
+              "note": "Das schwarze Dreieck steht für die Entschlossenheit der Bevölkerung."
             },
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Schweden",
-              "image": "/bilder/flagge-schweden.svg"
+              "answer": "Katar",
+              "image": "/bilder/flagge-katar.svg",
+              "note": "Neun Zacken – Bahrains sehr ähnliche Flagge hat fünf und ist rot statt kastanienbraun."
             }
           ]
         },
@@ -147,25 +149,26 @@
           "questions": [
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Griechenland",
-              "image": "/bilder/flagge-griechenland.svg"
+              "answer": "Trinidad und Tobago",
+              "image": "/bilder/flagge-trinidad-und-tobago.svg"
             },
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Belgien",
-              "note": "Deutschland hat dieselben Farben, aber waagerecht – hier stehen sie senkrecht",
-              "image": "/bilder/flagge-belgien.svg"
+              "answer": "Dschibuti",
+              "image": "/bilder/flagge-dschibuti.svg",
+              "note": "Am Horn von Afrika, zwischen Eritrea, Äthiopien und Somalia."
             },
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Tschechien",
-              "note": "Die Tschechoslowakei hatte dieselbe Flagge – Tschechien behielt sie 1993",
-              "image": "/bilder/flagge-tschechien.svg"
+              "answer": "Guyana",
+              "image": "/bilder/flagge-guyana.svg",
+              "note": "„Golden Arrow“ – entworfen vom Flaggenkundler Whitney Smith."
             },
             {
               "text": "Welches Land hat diese Flagge?",
-              "answer": "Vietnam",
-              "image": "/bilder/flagge-vietnam.svg"
+              "answer": "Die Seychellen",
+              "image": "/bilder/flagge-seychellen.svg",
+              "note": "Fünf Strahlen aus der unteren Ecke am Mast – sonst gibt es das bei keiner Nationalflagge."
             }
           ]
         },

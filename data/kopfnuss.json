@@ -106,8 +106,7 @@
             },
             {
               "text": "Ich schrieb 1859 ein Buch über die Entstehung der Arten.",
-              "answer": "Charles Darwin",
-              "note": "Physik 1903, Chemie 1911"
+              "answer": "Charles Darwin"
             }
           ]
         },
@@ -146,8 +145,8 @@
               "answer": "Was ist der rechte Winkel?"
             },
             {
-              "text": "Dieses Zeichen steht für das Verhältnis von Umfang zu Durchmesser eines Kreises.",
-              "answer": "Was ist Pi?"
+              "text": "Diese Zahl ist weder eine Primzahl noch aus Primzahlen zusammengesetzt.",
+              "answer": "Was ist die Eins?"
             },
             {
               "text": "Diese Zahl ist die einzige gerade Primzahl.",
@@ -256,8 +255,9 @@
               "answer": "32"
             },
             {
-              "text": "Wie viele Kammern hat das menschliche Herz?",
-              "answer": "Vier"
+              "text": "Wie viele Vorhöfe und Kammern hat das menschliche Herz zusammen?",
+              "answer": "Vier",
+              "note": "Zwei Vorhöfe und zwei Kammern."
             },
             {
               "text": "Welches Organ stellt Insulin her?",

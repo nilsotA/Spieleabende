@@ -182,8 +182,8 @@
           "name": "Städte",
           "questions": [
             {
-              "text": "In welcher Stadt steht das Brandenburger Tor?",
-              "answer": "In Berlin"
+              "text": "Welche Stadt hat den größten Binnenhafen Deutschlands?",
+              "answer": "Duisburg"
             },
             {
               "text": "In welcher Stadt steht der größte Flughafen Deutschlands?",

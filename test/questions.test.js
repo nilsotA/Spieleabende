@@ -112,6 +112,67 @@ test('keine Frage kommt in zwei Sätzen doppelt vor', async () => {
   assert.deepEqual(dopplungen, [], 'gleiche Frage in mehreren Sätzen');
 });
 
+/**
+ * Zwei Fragen mit derselben Lösung sind meistens Zufall – „Italien" ist die
+ * Antwort auf vieles, und „4" erst recht. Teilen sich die beiden Fragen aber
+ * auch noch zwei Inhaltswörter, ist es keine Lösung, die zufällig doppelt
+ * vorkommt, sondern zweimal dieselbe Frage.
+ *
+ * Genau so ist eine Dopplung durchgerutscht, die die Ähnlichkeitsprüfung
+ * darüber nicht gefunden hat, weil sie auf Wortüberschneidung im Fragetext
+ * allein schaut und „Fußball-Weltmeister" anders zerlegt als
+ * „Fußballweltmeister":
+ *
+ *   „In welchem Jahr wurde Deutschland zuletzt Fußball-Weltmeister?"
+ *   „In welchem Jahr wurde Deutschland zum bislang letzten Mal Fußballweltmeister?"
+ *
+ * Über die gemeinsame Lösung fällt das Paar sofort auf. Zwei gemeinsame Wörter
+ * sind die Schwelle, bei der aus Zufall Absicht wird: Bei einem gemeinsamen
+ * Wort stehen zwölf einwandfreie Paare in den Sätzen, bei zweien keines.
+ */
+test('gleiche Lösung heißt nicht zweimal dieselbe Frage', async () => {
+  const stopp = new Set([
+    'der', 'die', 'das', 'des', 'dem', 'den', 'ein', 'eine', 'einer', 'eines',
+    'und', 'oder', 'aus', 'von', 'für', 'mit', 'auf', 'ist', 'sind', 'was',
+    'wer', 'wie', 'wo', 'welche', 'welcher', 'welches', 'welchem', 'welchen',
+    'in', 'im', 'am', 'an', 'zu', 'zum', 'zur', 'es', 'man', 'sich', 'nicht',
+    'heißt', 'nennt', 'gibt', 'hat', 'haben', 'seit', 'auch', 'noch', 'aber',
+    'viele', 'einem', 'einen', 'beim', 'bei', 'nach', 'vor', 'über', 'unter',
+    'wurde', 'wird',
+  ]);
+  const glatt = (t) => t.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+  const woerter = (t) => glatt(t).split(' ').filter((w) => w.length >= 4 && !stopp.has(w));
+  // „Wahr" und „falsch" sind Antwortformate, keine Lösungen – in einer
+  // Kategorie „Wahr oder falsch" stehen sie zwangsläufig mehrfach.
+  const formatantwort = (a) => /^(wahr|falsch|ja|nein)\b/.test(glatt(a));
+
+  const alle = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) alle.push({ datei, text: q.text, answer: q.answer });
+      }
+    }
+  }
+
+  const paare = [];
+  for (let i = 0; i < alle.length; i++) {
+    for (let j = i + 1; j < alle.length; j++) {
+      const a = alle[i]; const b = alle[j];
+      if (a.datei === b.datei) continue;
+      if (glatt(a.answer) !== glatt(b.answer)) continue;
+      if (formatantwort(a.answer)) continue;
+      const ausA = new Set(woerter(a.text));
+      const gemeinsam = woerter(b.text).filter((w) => ausA.has(w));
+      if (gemeinsam.length >= 2) {
+        paare.push(`„${a.answer}" – ${a.datei} / ${b.datei}\n     ${a.text}\n     ${b.text}`);
+      }
+    }
+  }
+  assert.deepEqual(paare, []);
+});
+
 test('keine Frage ist eine umformulierte Fassung einer anderen', async () => {
   // Der Test darüber vergleicht Wortlaute. Der eigentliche Ärger sind aber
   // gleiche Fragen in anderen Worten: „Wie viele Tasten hat ein Klavier?" gegen

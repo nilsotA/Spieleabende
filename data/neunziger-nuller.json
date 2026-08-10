@@ -211,8 +211,9 @@
           "name": "Handy-Zeitalter",
           "questions": [
             {
-              "text": "Wie hieß die Funktechnik, mit der man Dateien direkt von Handy zu Handy schickte?",
-              "answer": "Bluetooth"
+              "text": "Welche Funktechnik für kurze Strecken ist nach einem dänischen Wikingerkönig benannt?",
+              "answer": "Bluetooth",
+              "note": "Harald Blauzahn – das Zeichen sind seine verbundenen Initialen in Runen."
             },
             {
               "text": "Welches Spiel war auf den alten Nokia-Handys vorinstalliert und wurde immer länger?",

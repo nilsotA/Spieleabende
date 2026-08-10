@@ -187,8 +187,9 @@
           "name": "Sportgeschichte",
           "questions": [
             {
-              "text": "In welchem Jahr wurde Deutschland zum bislang letzten Mal Fußballweltmeister?",
-              "answer": "2014"
+              "text": "Wer schoss im WM-Finale 2014 das Tor zum deutschen Titel?",
+              "answer": "Mario Götze",
+              "note": "In der Verlängerung gegen Argentinien, 113. Minute."
             },
             {
               "text": "Wie heißt das Fußballspiel von 1954, das als „Wunder von Bern“ in die Geschichte einging?",

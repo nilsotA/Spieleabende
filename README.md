@@ -277,7 +277,7 @@ Zwölf fertige Sätze mit je 48 Fragen – zusammen 576, keine doppelt:
 | **Popkultur & Emoji** | Emoji-Rätsel, Filmzitate, Werbeslogans, Serien, Musik, Gaming |
 | **Kopfnuss** | Anagramme, Geheimschrift, Schätzfragen, Logik, Wahr oder falsch |
 | **Deutschland-Duell** | KFZ-Kennzeichen, Bundesländer, Dialekt, Marken, Erfindungen |
-| **Länder & Flaggen** | Flaggen zum Ansehen, Hauptstädte, Wahrzeichen, Währungen, Nachbarländer |
+| **Länder & Flaggen** | Flaggen für Fortgeschrittene, Hauptstädte, Wahrzeichen, Währungen, Nachbarländer |
 | **Neunziger & Nuller** | Fernsehen damals, Werbung, Technik-Museum, Pausenhof, Boygroups |
 | **Kurios & Wahr** | Tierische Superkräfte, Wahr oder falsch, aus Versehen erfunden, Schätzfragen |
 | **Küche & Keller** | Herkunft von Gerichten, Zutaten, Kochbegriffe, Gewürze, Bier & Wein, Küchengeräte |
@@ -312,6 +312,12 @@ Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
 
 Die Flaggen in „Länder & Flaggen“ sind als SVG gezeichnet und liegen in `data/bilder/`.
 Keine Downloads, keine externen Bilder – das Quiz läuft auch ohne Internet.
+
+Sie sind bewusst schwer: Jamaika, Tansania, die Bahamas und Katar in Runde 1,
+Trinidad und Tobago, Dschibuti, Guyana und die Seychellen in Runde 2. Deutschland,
+Italien oder Japan kennt jeder – interessant wird es bei den Flaggen, über die man
+danach noch redet. Katar liefert die Pointe gleich mit: Bahrain sieht fast genauso
+aus, hat aber fünf Zacken statt neun.
 
 ---
 
