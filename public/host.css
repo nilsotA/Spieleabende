@@ -888,6 +888,14 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 }
 /* Bei Gleichstand ist niemand Sieger – dann bleibt es sachlich und weiß. */
 .score-winner.geteilt { color: #e8f2ff; font-size: clamp(1.3rem, 2.6vw, 2.4rem); }
+/* Die Halbzeitzeile unter der Tabelle: Sie ordnet den Rückstand ein und ist
+   deshalb Fließtext, keine Schlagzeile. */
+.halbzeit-hinweis {
+  margin: 1rem 0 0;
+  text-align: center;
+  color: #b9d8f6;
+  font-size: clamp(0.95rem, 1.5vw, 1.25rem);
+}
 @keyframes siegerIn { from { opacity: 0; transform: scale(0.86); } }
 
 /* Der Endstand baut sich von unten auf: Letzter zuerst, Sieger zuletzt.

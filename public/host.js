@@ -951,12 +951,47 @@ function renderScoreboard() {
   // Sieg heißt mehr Punkte als alle anderen – bei Gleichstand gibt es keinen.
   const geteilt = ranked.length > 1 && ranked[1].score === ranked[0].score;
   const sieger = $('#score-winner');
-  sieger.hidden = !final;
+  sieger.hidden = false;
   if (final) {
+    // „Die Grübelmeister gewinnt!" – die meisten Teamnamen sind Plural, und ob
+    // einer es ist, weiß man einem frei getippten Namen nicht an. Statt zu
+    // raten eine Form, die für jeden Namen stimmt: „Sieg für …" braucht kein
+    // Verb, das sich nach der Zahl richtet.
     sieger.textContent = geteilt
       ? `Unentschieden – ${aufzaehlung(ranked.filter((t) => t.score === ranked[0].score).map((t) => t.name))}`
-      : `${ranked[0].name} gewinnt!`;
-    sieger.classList.toggle('geteilt', geteilt);
+      : `Sieg für ${ranked[0].name}!`;
+  } else {
+    // Halbzeit hatte bisher keine Überschrift – nur eine Liste und einen Knopf.
+    // Dabei ist das der Moment, in dem der Raum Luft holt und darüber redet,
+    // wer vorn liegt. Der Bildschirm darf das aussprechen.
+    sieger.textContent = geteilt
+      ? `Kopf an Kopf – ${aufzaehlung(ranked.filter((t) => t.score === ranked[0].score).map((t) => t.name))}`
+      : `Zur Halbzeit vorn: ${ranked[0].name}`;
+  }
+  // Die Schlagzeile des Endstands ist die größte Schrift des Abends. Zur
+  // Halbzeit ist es eine Zwischenmeldung und keine Krönung – deshalb eine
+  // Nummer kleiner, in derselben Form wie ein geteilter Sieg.
+  sieger.classList.toggle('geteilt', geteilt || !final);
+
+  // Was auf dem Brett der nächsten Runde noch liegt. Ohne diese Zeile liest
+  // sich ein Rückstand von 3300 wie ein verlorener Abend – dabei zählt Runde 2
+  // doppelt, und meistens ist noch alles offen. Gerechnet, nicht behauptet.
+  const halbzeit = $('#halbzeit-hinweis');
+  if (halbzeit) {
+    halbzeit.hidden = final;
+    if (!final) {
+      const jetzigeSumme = (state.board?.categories || [])
+        .reduce((n, c) => n + c.cells.reduce((m, z) => m + z.value, 0), 0);
+      const jetzigerMult = state.board?.multiplier || 1;
+      const naechsterMult = state.round + 1 <= 1 ? 1 : 2;
+      const naechsteSumme = Math.round(jetzigeSumme * (naechsterMult / jetzigerMult));
+      const rueckstand = ranked.length > 1 ? ranked[0].score - ranked[ranked.length - 1].score : 0;
+      const zahl = (n) => n.toLocaleString('de-DE');
+      setzeText(halbzeit, naechsteSumme
+        ? `In Runde ${state.round + 1} liegen ${zahl(naechsteSumme)} Punkte auf dem Brett`
+          + `${rueckstand > 0 && rueckstand < naechsteSumme ? ` – der Rückstand von ${zahl(rueckstand)} ist aufholbar.` : '.'}`
+        : '');
+    }
   }
 
   // Geteilte Plätze: Bei gleichem Punktestand steht dieselbe Zahl davor, und
