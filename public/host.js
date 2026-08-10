@@ -744,6 +744,14 @@ function renderPlayers() {
   const amZug = state.phase === 'board' || state.phase === 'question';
   const activeId = amZug ? state.teams[state.turnIndex]?.id : null;
   const bestScore = Math.max(...state.teams.map((t) => t.score));
+  // Wie weit liegt das Feld auseinander? Früher hing „führt" an `bestScore > 0`
+  // – gemeint war „es hat noch niemand gepunktet, da führt auch keiner". Seit
+  // der halbe Abzug voreingestellt ist, steht nach der ersten Runde aber
+  // regelmäßig der ganze Tisch im Minus, und dann verschwand die Markierung,
+  // obwohl mit −300 gegen −1500 sehr wohl jemand vorne liegt. Die Spanne sagt
+  // dasselbe, ohne aufs Vorzeichen hereinzufallen: Zu Beginn stehen alle auf 0,
+  // die Spanne ist 0, und niemand leuchtet.
+  const spanne = bestScore - Math.min(...state.teams.map((t) => t.score));
   const gebuzzert = state.current?.step === 'buzz' && state.current?.buzzedTeamId;
   box.classList.toggle('someone-buzzed', !!gebuzzert);
   for (const team of state.teams) {
@@ -761,7 +769,7 @@ function renderPlayers() {
     node.classList.toggle('buzzed', state.current?.buzzedTeamId === team.id && state.current?.step === 'buzz');
     // Wer führt, war an den Pulten nicht zu erkennen – alle Punktepillen sahen
     // gleich aus, ob 0 oder 3950. Bei Gleichstand leuchten eben mehrere.
-    node.classList.toggle('leader', state.teams.length > 1 && bestScore > 0 && team.score === bestScore);
+    node.classList.toggle('leader', state.teams.length > 1 && spanne > 0 && team.score === bestScore);
 
     // Beim freien Buzzer sitzen mehrere Tische mit dem Finger über dem Handy.
     // Auf der Leinwand war davon nichts zu sehen – dabei ist das das Rennen.
@@ -792,15 +800,18 @@ function renderPlayers() {
   // Überholmanöver: Zwei Zahlen tauschen die Plätze, und wenn gerade niemand
   // auf die Leiste schaut, merkt es keiner. Bewusst gedämpft – bei 48 Fragen
   // darf so eine Ansage nicht zur Gewohnheit werden:
-  //  · erst ab 500 Punkten Vorsprungsniveau, darunter ist „Führung" eine
-  //    einzige Frage wert und wechselt in der Anfangsphase ständig,
+  //  · erst wenn das Feld 500 Punkte auseinanderliegt, darunter ist „Führung"
+  //    eine einzige Frage wert und wechselt in der Anfangsphase ständig,
   //  · nur bei einem eindeutigen Wechsel, nicht bei Gleichstand,
   //  · verzögert, damit der fliegende Punktewert und der Wertungston durch sind,
   //  · ohne eigenen Ton, im selben Atemzug laufen schon zwei.
-  const fuehrendJetzt = bestScore > 0 && state.teams.filter((t) => t.score === bestScore).length === 1
+  const fuehrendJetzt = spanne > 0 && state.teams.filter((t) => t.score === bestScore).length === 1
     ? state.teams.find((t) => t.score === bestScore)
     : null;
-  if (fuehrendJetzt && fuehrend && fuehrendJetzt.id !== fuehrend && bestScore >= 500
+  // Auch die Schwelle geht über die Spanne statt über den Höchststand: Ein Feld,
+  // das 500 Punkte auseinanderliegt, hat seine Anfangsphase hinter sich – egal,
+  // ob das oben oder unten von der Null passiert.
+  if (fuehrendJetzt && fuehrend && fuehrendJetzt.id !== fuehrend && spanne >= 500
       && state.phase === 'question') {
     const name = fuehrendJetzt.name;
     setTimeout(() => ansagen('Führungswechsel', name, 1400), 900);
