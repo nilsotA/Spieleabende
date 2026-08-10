@@ -695,3 +695,44 @@ test('die Einstellungen gelten ab sofort, auch mitten im Spiel', () => {
   G.judge(state, false);
   assert.equal(state.teams[1].score, -500, 'die neue Regel greift sofort');
 });
+
+test('„nur der Host wählt" hält das Handy vom Feldaufruf ab', () => {
+  // Manche Runden laufen besser, wenn der Host die Felder aufruft: Er sieht das
+  // Brett, der Tisch ruft zu, und niemand tippt versehentlich das teuerste Feld
+  // an. Das Handy muss dann abprallen – aber mit einer Erklärung.
+  const state = setup();
+  G.startGame(state, SET);
+  const dran = state.teams[state.turnIndex];
+
+  // Voreinstellung: Das Zugteam darf selbst.
+  assert.equal(state.settings.feldwahl, 'team');
+  G.pickCell(state, 0, 0, dran.id);
+  assert.equal(state.phase, 'question');
+  G.endQuestion(state);
+  G.closeQuestion(state);
+
+  state.settings.feldwahl = 'host';
+  const jetztDran = state.teams[state.turnIndex];
+  assert.throws(
+    () => G.pickCell(state, 0, 1, jetztDran.id),
+    /Host ruft die Fragen auf/,
+    'auch das Zugteam kommt jetzt nicht mehr durch',
+  );
+  assert.equal(state.phase, 'board', 'und das Brett bleibt unangetastet');
+  assert.equal(state.board.categories[0].cells[1].used, false, 'das Feld ist nicht verbraucht');
+
+  // Der Host selbst ruft ohne Team-Kennung auf – der geht durch.
+  G.pickCell(state, 0, 1);
+  assert.equal(state.phase, 'question');
+  assert.equal(state.current.teamId, jetztDran.id, 'und zwar für das Team, das dran ist');
+});
+
+test('die Feldwahl lässt sich mitten im Spiel umstellen', () => {
+  const state = setup();
+  G.startGame(state, SET);
+  state.settings.feldwahl = 'host';
+  assert.throws(() => G.pickCell(state, 0, 0, state.teams[state.turnIndex].id), /Host ruft/);
+  state.settings.feldwahl = 'team';
+  G.pickCell(state, 0, 0, state.teams[state.turnIndex].id);
+  assert.equal(state.phase, 'question', 'zurückgestellt geht es sofort wieder');
+});

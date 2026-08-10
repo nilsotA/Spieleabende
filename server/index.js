@@ -400,6 +400,7 @@ function pickSettings(s = {}) {
   if (['rotate', 'keepOnCorrect'].includes(s.turnMode)) out.turnMode = s.turnMode;
   if (['none', 'half', 'full'].includes(s.wrongPenalty)) out.wrongPenalty = s.wrongPenalty;
   if (typeof s.buzzAfterCorrect === 'boolean') out.buzzAfterCorrect = s.buzzAfterCorrect;
+  if (['team', 'host'].includes(s.feldwahl)) out.feldwahl = s.feldwahl;
   return out;
 }
 

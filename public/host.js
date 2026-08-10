@@ -141,6 +141,7 @@ for (const [id, key, parse] of [
   ['#set-turnmode', 'turnMode', (v) => v],
   ['#set-penalty', 'wrongPenalty', (v) => v],
   ['#set-buzzcorrect', 'buzzAfterCorrect', (v) => v === 'true'],
+  ['#set-feldwahl', 'feldwahl', (v) => v],
 ]) {
   $(id).addEventListener('change', (ev) => act('settings', { settings: { [key]: parse(ev.target.value) } }));
 }
@@ -309,6 +310,7 @@ function renderLobby() {
   $('#set-turnmode').value = state.settings.turnMode;
   $('#set-penalty').value = state.settings.wrongPenalty;
   $('#set-buzzcorrect').value = String(state.settings.buzzAfterCorrect);
+  $('#set-feldwahl').value = state.settings.feldwahl || 'team';
   $('#btn-start').disabled = state.teams.length < 2;
   renderAnschluss();
   // Das frisch angelegte Team ins Bild holen. Ab dem siebten Team reicht die
@@ -1396,6 +1398,9 @@ function fuelleSpickzettel() {
   }[s.wrongPenalty] || 'kein Abzug']);
   zeilen.push(['Danach buzzern', 'richtig gibt die Hälfte, falsch kostet die Hälfte']);
   zeilen.push(['Vor der Antwort', 'ist der Buzzer für alle anderen gesperrt']);
+  zeilen.push(['Feld aufrufen', s.feldwahl === 'host'
+    ? 'nur der Host – die Teams sagen an'
+    : 'das Team am Zug, auf seinem Handy']);
   zeilen.push(['Nächster Zug', s.turnMode === 'keepOnCorrect'
     ? 'wer richtig liegt, bleibt dran'
     : 'reihum']);

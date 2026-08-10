@@ -308,7 +308,11 @@ function renderQuestion() {
 
 function renderPicker() {
   const box = $('#p-picker');
-  const canPick = state.phase === 'board' && state.you.isMyTurn && state.board;
+  // Steht die Feldwahl auf „nur Host", gibt es hier nichts anzutippen – ein
+  // Raster, das bei jedem Tipp mit einer Absage antwortet, wäre schlimmer als
+  // keins.
+  const canPick = state.phase === 'board' && state.you.isMyTurn && state.board
+    && state.settings.feldwahl !== 'host';
   box.hidden = !canPick;
   if (!canPick) return;
 
@@ -387,11 +391,14 @@ function renderBuzzer(prev) {
       sound('armed');
       flash();
     }
+    // Ruft nur der Host die Felder auf, gibt es hier nichts zu wählen – dann
+    // wäre „wähle ein Feld!" eine Aufforderung, die das Handy gleich abweist.
+    const selbstWaehlen = state.settings.feldwahl !== 'host';
     setzeText(status, you.isMyTurn
-      ? 'Du bist dran – wähle ein Feld!'
+      ? (selbstWaehlen ? 'Du bist dran – wähle ein Feld!' : 'Ihr seid dran – sagt dem Host euer Feld!')
       : `Am Zug: ${state.teams[state.turnIndex]?.name ?? '?'} …`);
     status.classList.toggle('you', you.isMyTurn);
-    lock(you.isMyTurn ? 'DU WÄHLST' : 'GESPERRT');
+    lock(you.isMyTurn ? (selbstWaehlen ? 'DU WÄHLST' : 'IHR SEID DRAN') : 'GESPERRT');
     return;
   }
 

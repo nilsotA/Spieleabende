@@ -171,6 +171,11 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 - **Wer ist als Nächstes dran?** Reihum (Standard) oder „wer richtig liegt, bleibt dran“.
 - **Abzug bei falscher Antwort des Zugteams:** keiner (Standard), halbe oder volle Punkte.
 - **Buzzern nach richtiger Antwort:** normalerweise aus – die Frage ist dann durch.
+- **Wer ruft das Feld auf?** Standard: das Team am Zug tippt es auf seinem Handy an.
+  Auf **„Nur der Host"** verschwindet das Raster von den Handys – dann rufen die Teams
+  ihr Feld zu und du klickst es an. Das lohnt sich, wenn ihr sowieso alle auf die
+  Leinwand schaut, oder wenn zu oft versehentlich das teuerste Feld angetippt wird.
+  Das Handy sagt dem Zugteam trotzdem, dass es dran ist.
 
 ### Tastenkürzel auf dem Host-Screen
 

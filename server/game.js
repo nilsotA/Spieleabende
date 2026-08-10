@@ -81,6 +81,10 @@ export function createState() {
       wrongPenalty: 'none',
       // Buzzern erlauben, nachdem das Zugteam richtig geantwortet hat?
       buzzAfterCorrect: false,
+      // Wer ruft das Feld auf?
+      // 'team' = das Team, das dran ist, tippt es auf seinem Handy an
+      // 'host' = nur der Host, über Leinwand oder Fernbedienung
+      feldwahl: 'team',
     },
     message: null,
     // Was man sich am nächsten Tag erzählt. Reine Buchhaltung fürs Ende – auf
@@ -301,6 +305,12 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
   if (cell.used) throw new GameError('Dieses Feld wurde schon gespielt.');
 
   const activeTeam = state.teams[state.turnIndex];
+  // `byTeamId` ist gesetzt, wenn der Aufruf von einem Spielerhandy kommt; der
+  // Host ruft ohne auf. Steht die Feldwahl auf „nur Host", ist das der Punkt,
+  // an dem ein Handy abprallt – und zwar mit einer Erklärung, nicht stumm.
+  if (byTeamId && state.settings.feldwahl === 'host') {
+    throw new GameError('Der Host ruft die Fragen auf – sagt ihm einfach, welches Feld ihr wollt.');
+  }
   if (byTeamId && byTeamId !== activeTeam.id) {
     throw new GameError('Nur das Team, das dran ist, darf ein Feld wählen.');
   }
