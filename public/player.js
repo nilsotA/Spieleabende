@@ -183,6 +183,47 @@ function render(prev) {
   const grosserKnopf = state.phase === 'lobby'
     || (state.phase === 'question' && state.current?.step !== 'result');
   $('#view-play').classList.toggle('knopf-ruht', !grosserKnopf);
+  frageInsBild();
+}
+
+/**
+ * Holt die Frage an den oberen Rand des scrollenden Teils, wenn sie sonst nicht
+ * ganz hineinpasst.
+ *
+ * Auf einem iPhone SE braucht eine sechszeilige Frage mehr Platz, als über dem
+ * Buzzer übrig ist – gemessen stand die letzte Zeile im ausgeblendeten Rand,
+ * ausgerechnet die mit dem Fragezeichen. Darüber steht die Teamkarte, die man
+ * in genau diesem Moment am wenigsten braucht: Sie darf hinaufrutschen.
+ * Erreichbar bleibt sie, es wird ja nur gescrollt.
+ *
+ * Angesteuert wird die Statuszeile, nicht der Fragenkasten: Darin steht, was der
+ * Buzz einbringt und was er kostet. Genau die Zeile verschwand, als zuerst der
+ * Kasten selbst nach oben geholt wurde.
+ *
+ * Nur beim Wechsel der Frage und beim Auflösen, nie bei jedem Update: Sonst
+ * springt der Text unter dem Daumen weg, während jemand zurückgescrollt hat.
+ */
+let letzteFrageKennung = null;
+function frageInsBild() {
+  const sc = document.querySelector('.pscroll');
+  const box = $('#p-question');
+  const q = state.current;
+  const kennung = q && !box.hidden ? `${q.category}#${q.value}#${q.revealed ? 'auf' : 'zu'}` : null;
+  if (kennung === letzteFrageKennung) return;
+  letzteFrageKennung = kennung;
+  if (!sc) return;
+  // Frage vorbei: zurück nach oben. Sonst steht man beim Feldwählen vor einem
+  // Ausschnitt, dessen Kopfzeile irgendwo darüber hängt.
+  if (!kennung) { sc.scrollTop = 0; zeigeMehr(); return; }
+  requestAnimationFrame(() => {
+    if (box.hidden) return;
+    // Passt ohnehin alles, bleibt der Kopf stehen – ein Sprung ohne Gewinn wäre
+    // nur Unruhe.
+    if (sc.scrollHeight <= sc.clientHeight + 4) return;
+    const ziel = $('#p-status');
+    sc.scrollTop += ziel.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+    zeigeMehr();
+  });
 }
 
 /**

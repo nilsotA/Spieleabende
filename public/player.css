@@ -221,6 +221,12 @@ body {
 .buzz-zone {
   flex: 1 1 auto;
   min-height: 7rem;
+  /* Gedeckelt, weil der Knopf sich sonst die Hälfte des Handys nimmt und eine
+     lange Frage darunter mitten im Satz aus dem Sichtfenster läuft: Auf einem
+     iPhone SE war ab der dritten Zeile Schluss, und wer die Frage lesen wollte,
+     musste bei offenem Buzzer erst scrollen. Ein Kreis von 40 % Höhe ist immer
+     noch ein Handteller – getroffen wird ohnehin die ganze Zone. */
+  max-height: 40dvh;
   display: grid;
   place-items: center;
   padding-bottom: 1.7rem; /* Platz für den Sockelschatten */
@@ -438,6 +444,45 @@ html, body { touch-action: manipulation; }
 @media (prefers-reduced-motion: reduce) {
   .buzzer.armed, .buzzer.won, .buzzer.tooearly { animation: none; }
   .buzzer { transition-duration: 0.01ms; }
+}
+
+/* Liegt das Handy quer auf dem Tisch, bleiben keine 400 Pixel Höhe. Untereinander
+   nahm der Buzzer davon zwei Drittel, und vom Fragenkasten war nichts mehr zu
+   sehen – gemessen blieben dem scrollenden Teil 87 von 249 nötigen Pixeln, und
+   die zeigten die Teamkarte. Wer sein Handy hinlegt, konnte die Frage also gar
+   nicht lesen, ohne vorher zu scrollen. Quer ist aber Breite im Überfluss da:
+   links und rechts vom Kreis stand alles leer. Also nebeneinander statt
+   untereinander – die Frage bekommt die volle Höhe, der Buzzer eine eigene
+   Spalte. Nichts wird kleiner, es wird nur anders verteilt. */
+@media (max-height: 520px) and (min-width: 560px) {
+  #view-play.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(7rem, 32%);
+    grid-template-rows: minmax(0, 1fr) auto;
+    column-gap: 0.9rem;
+  }
+  #view-play .pscroll { grid-column: 1; grid-row: 1; }
+  #view-play .p-fuss { grid-column: 1; grid-row: 2; }
+  /* Über beide Zeilen: So bleibt der Kreis mittig neben der Frage stehen und
+     wird nicht von der Fußzeile nach oben geschoben. */
+  #view-play .buzz-zone,
+  #view-play.hat-bild .buzz-zone,
+  #view-play.knopf-ruht .buzz-zone {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    height: auto;
+    min-height: 0;
+    place-items: center;
+  }
+  /* Hochkant begrenzt die Zonenhöhe den Kreis, quer die Spaltenbreite. Deshalb
+     hier über die Breite gehen – sonst wächst der Kreis aus seiner Spalte
+     heraus und schiebt die Frage zusammen. */
+  #view-play .buzzer {
+    width: min(100%, calc(100dvh - 6rem));
+    height: auto;
+  }
+  /* Ist die Frage durch, hat der Knopf auch quer nichts mehr zu tun. */
+  #view-play.knopf-ruht .buzzer { width: min(100%, 5.5rem); height: auto; }
 }
 
 /* Fußzeile: Teamwechsel und Stummschalter nebeneinander, damit der Ton-Knopf
