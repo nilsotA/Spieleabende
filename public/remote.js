@@ -111,7 +111,9 @@ function render() {
       break;
     }
     case 'board':
-      setzeText(phase, `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – wählt ein Feld.`);
+      setzeText(phase, state.settings.feldwahl === 'host'
+        ? `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – sie sagen an, du rufst auf.`
+        : `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – wählt ein Feld.`);
       setz(big('Zug überspringen', 'btn-ghost', () => {
         const next = state.teams[(state.turnIndex + 1) % state.teams.length];
         act('setTurn', { teamId: next.id });

@@ -1186,7 +1186,11 @@ function renderControls() {
   }
 
   if (state.phase === 'board') {
-    setzeText(hint, `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – Feld anklicken oder auf dem Handy antippen.`);
+    // Steht die Feldwahl auf „nur Host", wäre „oder auf dem Handy antippen" eine
+    // Zusage, die das Handy gleich zurücknimmt.
+    setzeText(hint, state.settings.feldwahl === 'host'
+      ? `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – sie sagen an, du klickst das Feld.`
+      : `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – Feld anklicken oder auf dem Handy antippen.`);
     add(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];
       act('setTurn', { teamId: next.id });
