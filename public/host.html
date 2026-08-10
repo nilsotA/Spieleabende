@@ -23,7 +23,7 @@
 <!-- ================================================== LOBBY ============ -->
 <section id="view-lobby" class="view">
   <header class="lobby-head">
-    <div class="logo" style="font-size:3.2rem"><span>Quiz</span><span>Duell</span></div>
+    <div class="logo"><span>Quiz</span><span>Duell</span></div>
     <p class="muted">Spieleabend-Edition</p>
   </header>
 
@@ -46,13 +46,19 @@
         <div id="join-urls" class="join-urls"></div>
       </div>
       <p class="muted small">Dort Namen eingeben, Team wählen – fertig. Ohne Handy geht’s auch: dann buzzert ihr per Zuruf und der Host drückt hier die Knöpfe.</p>
-      <p class="muted small" style="margin-bottom:0">
-        <b>Tipp für den Host:</b> Auf deinem eigenen Handy <code id="remote-url">…/remote</code> öffnen.
-        Dort stehen Frage <i>und Lösung</i>, und du bewertest von dort – so steht die Lösung nie auf der Leinwand.
-      </p>
-      <p id="vollbild-tipp" class="muted small" hidden>
-        <b>Taste F</b> schaltet auf Vollbild – ohne Tableiste und Adresszeile bleibt mehr Bühne übrig.
-      </p>
+      <!-- Zwei Hinweise, die man einmal liest und danach kennt. Ausgeklappt
+           nahmen sie ein Sechstel der Lobby ein – und schoben die Karten unter
+           den Startbalken. Zugeklappt bleibt der Weg dorthin eine Zeile weit. -->
+      <details class="lobby-tipps">
+        <summary>Tipps für den Host</summary>
+        <p class="muted small">
+          <b>Fernbedienung:</b> Auf deinem eigenen Handy <code id="remote-url">…/remote</code> öffnen.
+          Dort stehen Frage <i>und Lösung</i>, und du bewertest von dort – so steht die Lösung nie auf der Leinwand.
+        </p>
+        <p id="vollbild-tipp" class="muted small" hidden>
+          <b>Taste F</b> schaltet auf Vollbild – ohne Tableiste und Adresszeile bleibt mehr Bühne übrig.
+        </p>
+      </details>
     </div>
 
     <!-- Fragen und Regeln teilen sich eine Spalte. Als vierte eigene Spalte
@@ -81,9 +87,12 @@
       <div class="settings">
         <div>
           <label for="set-turnmode">Wer ist als Nächstes dran?</label>
+          <!-- Kurze Antworten auf die Frage darüber: Der lange Zusatz („jeder
+               kommt gleich oft dran") wiederholte nur, was „Reihum" sagt – und
+               wurde im Feld ohnehin abgeschnitten. -->
           <select id="set-turnmode">
-            <option value="rotate">Reihum – jeder kommt gleich oft dran</option>
-            <option value="keepOnCorrect">Wer richtig liegt, bleibt dran</option>
+            <option value="rotate">Reihum</option>
+            <option value="keepOnCorrect">Wer trifft, bleibt dran</option>
           </select>
         </div>
         <div>
@@ -97,23 +106,26 @@
         <div>
           <label for="set-buzzcorrect">Buzzern nach richtiger Antwort?</label>
           <select id="set-buzzcorrect">
-            <option value="false">Nein – Frage ist dann durch</option>
-            <option value="true">Ja – andere dürfen trotzdem noch</option>
+            <option value="false">Nein, Frage ist durch</option>
+            <option value="true">Ja, alle dürfen noch</option>
           </select>
         </div>
         <div>
           <label for="set-feldwahl">Wer ruft das Feld auf?</label>
           <select id="set-feldwahl">
-            <option value="team">Das Team am Zug, auf seinem Handy</option>
+            <option value="team">Das Team am Zug</option>
             <option value="host">Nur der Host</option>
           </select>
         </div>
       </div>
-      <p class="muted small" style="margin-top:0.8rem">
-        Fest eingebaut: Zugteam bekommt <b>volle Punkte</b>. Erst wenn es geantwortet hat, ist der
-        Buzzer frei – richtig gebuzzert gibt <b>die Hälfte</b>, falsch kostet <b>die Hälfte</b>.
-        Runde 2 zählt doppelt.
-      </p>
+      <details class="lobby-tipps">
+        <summary>Was fest eingebaut ist</summary>
+        <p class="muted small">
+          Das Zugteam bekommt <b>volle Punkte</b>. Erst wenn es geantwortet hat, ist der
+          Buzzer frei – richtig gebuzzert gibt <b>die Hälfte</b>, falsch kostet <b>die Hälfte</b>.
+          Runde 2 zählt doppelt.
+        </p>
+      </details>
     </div>
     </div><!-- /lobby-spalte -->
   </div>

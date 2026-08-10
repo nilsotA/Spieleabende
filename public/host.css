@@ -83,9 +83,27 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 
 /* ------------------------------------------------------------------ Lobby */
 
-.view#view-lobby { overflow: auto; padding: 2rem clamp(1rem, 4vw, 3rem) 3rem; }
-.lobby-head { text-align: center; margin-bottom: 2rem; }
-.lobby-head p { margin: 0.9rem 0 0; letter-spacing: 0.3em; text-transform: uppercase; font-size: clamp(0.85rem, 1vw, 1.15rem); color: #a8bad4; }
+/* Unten kein Polster: Der Startbalken klebt mit `bottom: 0` am Ende des
+   Scrollbereichs, und ein Innenabstand der Karte schiebt ihn genau um seinen
+   Betrag nach oben. Gemessen waren das 48 Pixel, in denen der Text der Karten
+   unter dem Balken weiterlief – halbe Sätze unter dem Startknopf. Die Luft
+   nach unten trägt jetzt der Balken selbst. */
+.view#view-lobby {
+  overflow: auto;
+  padding: clamp(0.9rem, 2.4vh, 2rem) clamp(1rem, 4vw, 3rem) 0;
+}
+/* Kopf und Logo hängen an der Fensterhöhe, nicht an der Breite: Auf einem
+   Laptopfenster von 680 Pixeln nahm der Schriftzug samt Zeile darunter ein
+   gutes Drittel der Höhe – und die Karten mussten dafür scrollen. */
+.lobby-head { text-align: center; margin-bottom: clamp(0.8rem, 2.6vh, 2rem); }
+.lobby-head .logo { font-size: min(3.2rem, 6.4vh); }
+.lobby-head p {
+  margin: clamp(0.35rem, 1.2vh, 0.9rem) 0 0;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-size: clamp(0.85rem, 1vw, 1.15rem);
+  color: #a8bad4;
+}
 
 /* `width: 100%` ist hier nicht überflüssig: #view-lobby ist ein Flexcontainer
    (Spalte), und ein Kind mit automatischem Rand in der Querachse wird nicht
@@ -111,11 +129,39 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   width: 100%;
   max-width: 1600px;
   margin-inline: auto;
+  /* Passt alles ins Fenster, bleibt zwischen Karten und Startbalken Luft übrig.
+     Sie gehört zu gleichen Teilen über und unter den Block, sonst steht die
+     Kartenreihe oben angeklebt und darunter klafft es. Wird gescrollt, sind
+     beide `auto` gleich null. */
+  margin-block: auto;
 }
 /* Die dritte Spalte trägt zwei Karten übereinander (Fragen, Regeln). Sie muss
    sich verhalten wie eine Karte: gleiche Höhe wie die Nachbarn, Inhalt oben. */
 .lobby-spalte { display: flex; flex-direction: column; gap: 1.2rem; min-width: 0; }
-.settings { display: grid; gap: 0.7rem; }
+/* Vier Einstellungen mit der Beschriftung darüber waren 280 Pixel hoch – und
+   die Spalte aus Fragen- und Regelkarte damit das höchste Element der Lobby;
+   alle anderen Karten wurden auf diese Höhe gezogen und die unteren Ränder
+   verschwanden unter dem Startbalken. Beschriftung und Feld nebeneinander
+   halbiert das, ohne dass ein Auswahltext schmaler wird – und es liest sich
+   als das, was es ist: eine Zeile pro Regel.
+   Nur im Zweispalten-Fenster geht es wieder untereinander: Dort ist die Karte
+   rund 340 Pixel breit, und neben dem Feld blieben der Beschriftung 127 – der
+   Abzug-Satz stünde dreizeilig da und wäre am Ende höher als vorher. */
+.settings { display: grid; gap: 0.55rem; }
+.settings > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(10.5rem, 55%);
+  align-items: center;
+  gap: 0.2rem 0.7rem;
+}
+.settings > div > label { margin: 0; }
+.settings > div > select { min-width: 0; }
+/* Bis 1339 px stehen drei Karten nebeneinander, von denen jede rund 400 Pixel
+   breit ist – daneben blieben dem Auswahlfeld 132, und „Wer trifft, bleibt
+   dran" braucht 160. Erst darüber lohnt die Zeile. */
+@media (min-width: 730px) and (max-width: 1339px) {
+  .settings > div { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* Die Beschreibung des Fragensatzes steht über den Kategorien und trägt die
    Entscheidung – deshalb in Textfarbe statt gedämpft, und mit etwas Luft
@@ -168,11 +214,15 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
    Schrift beginnt, ist der Grund deckend. */
 .lobby-start {
   text-align: center;
-  margin-top: 1.6rem;
+  /* `auto` statt eines festen Abstands: Passt die Lobby ins Fenster, wandert
+     der Startknopf an die Unterkante, statt mit einem Streifen Leere darunter
+     in der Luft zu hängen. Muss gescrollt werden, ist `auto` gleich null und
+     der Balken klebt wie zuvor am unteren Rand. */
+  margin-top: auto;
   position: sticky;
   bottom: 0;
   z-index: 3;
-  padding: 2.6rem 0 0.7rem;
+  padding: 2.6rem 0 1.4rem;
   background: linear-gradient(180deg,
     rgba(5, 8, 15, 0) 0%,
     rgba(5, 8, 15, 0.85) 14%,
@@ -1554,12 +1604,40 @@ body.host.flat .tile {
 
 /* Beitreten per Scan – eine IP abzutippen ist der lästigste Teil des Abends. */
 .join-box { display: grid; justify-items: center; gap: 0.7rem; margin: 0.8rem 0; }
+
+/* Hinweise, die man einmal liest. Der Aufklapper ist bewusst kein grauer
+   Kleintext: Er ist anklickbar, also sieht er auch so aus – Textfarbe,
+   Fingerzeiger, sichtbarer Fokusring. */
+.lobby-tipps { margin-top: 0.7rem; }
+.lobby-tipps > summary {
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.92rem;
+  padding: 0.25rem 0;
+  border-radius: 6px;
+  list-style: none;
+}
+.lobby-tipps > summary::-webkit-details-marker { display: none; }
+.lobby-tipps > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  color: var(--akzent, #6ea8ff);
+  transition: transform var(--t-ui, 0.18s) ease;
+}
+.lobby-tipps[open] > summary::before { transform: rotate(90deg); }
+.lobby-tipps > summary:focus-visible { outline: 2px solid #6ea8ff; outline-offset: 2px; }
+.lobby-tipps p { margin: 0.5rem 0 0; }
+.lobby-tipps p:last-child { margin-bottom: 0.2rem; }
 /* Groß genug, um vom Sofa aus scharfgestellt zu werden – das Beitreten ist der
    einzige Moment, in dem alle gleichzeitig auf die Leinwand starren müssen.
    Die Ruhezone liegt im SVG (quiet: 4), nicht im Padding: Scanner brauchen sie
    im Bild, und ein weißer Rahmen drumherum ist etwas anderes. */
+/* Auch die Höhe zählt mit: In einem 680 Pixel hohen Fenster nahm der Code
+   allein ein Drittel der Karte, und der Rest rutschte unter den Startbalken.
+   Ein Handy stellt auch auf 165 Pixel scharf. */
 .join-qr {
-  width: clamp(190px, 15vw, 290px);
+  width: clamp(150px, min(15vw, 24vh), 290px);
   max-width: 100%;
   border-radius: 10px;
   background: #fff;
