@@ -108,6 +108,12 @@ export function addTeam(state, name) {
     color: TEAM_COLORS.find((f) => !state.teams.some((t) => t.color === f))
       || TEAM_COLORS[state.teams.length % TEAM_COLORS.length],
     score: 0,
+    // Von Anfang an vollständig. Serie und Bestserie entstanden früher erst bei
+    // der ersten Wertung; bis dahin stand dort `undefined`. Gelesen wurde das
+    // überall mit `|| 0` abgefangen, aber ein Zustand, der je nach Alter des
+    // Teams anders aussieht, ist eine Falle für den nächsten Handgriff.
+    serie: 0,
+    serieBest: 0,
     members: [],
     bilanz: leereBilanz(),
   });
@@ -123,6 +129,12 @@ export function renameTeam(state, teamId, name) {
 export function removeTeam(state, teamId) {
   if (state.phase !== 'lobby') throw new GameError('Teams können nur in der Lobby geändert werden.');
   state.teams = state.teams.filter((t) => t.id !== teamId);
+  // Der Zeiger aufs Zugteam muss mitschrumpfen. Über die Fernbedienung lässt
+  // sich „dran" auch in der Lobby setzen; stand er danach auf dem entfernten
+  // Team, zeigte er hinter das Ende der Liste. `state.teams[turnIndex]` war
+  // dann `undefined`, und der nächste Feldaufruf wäre kein abgelehnter Zug
+  // gewesen, sondern ein Absturz.
+  if (state.turnIndex >= state.teams.length) state.turnIndex = 0;
   return state;
 }
 

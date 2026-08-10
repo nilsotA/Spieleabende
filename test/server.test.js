@@ -12,24 +12,46 @@ import { fileURLToPath } from 'node:url';
 const SERVER = fileURLToPath(new URL('../server/index.js', import.meta.url));
 const warte = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** Startet einen Server auf eigenem Port mit eigenem Spielstand-Pfad. */
-async function starteServer(port, stateFile) {
-  const proc = spawn(process.execPath, [SERVER], {
-    env: { ...process.env, PORT: String(port), QUIZDUELL_STATE_FILE: stateFile },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  const base = `http://127.0.0.1:${port}`;
-  for (let i = 0; i < 100; i++) {
-    try {
-      const res = await fetch(`${base}/api/info`);
-      if (res.ok) return { proc, base };
-    } catch {
-      /* noch nicht oben */
+/**
+ * Startet einen Server auf eigenem Port mit eigenem Spielstand-Pfad.
+ *
+ * Die Tests würfeln ihre Ports, und irgendwann treffen sich zwei. Vorher lief
+ * das in die Zeitschranke und meldete „Server startet nicht" – eine Meldung,
+ * die nach einem kaputten Server aussieht und in Wahrheit nur ein belegter Port
+ * war. Solche Fehlschläge verdecken echte. Jetzt wird der Grund erkannt und mit
+ * einem anderen Port weitergemacht.
+ */
+async function starteServer(port, stateFile, versuche = 5) {
+  for (let versuch = 0; versuch < versuche; versuch++) {
+    const dieserPort = port + versuch * 37;
+    const proc = spawn(process.execPath, [SERVER], {
+      env: { ...process.env, PORT: String(dieserPort), QUIZDUELL_STATE_FILE: stateFile },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let belegt = false;
+    let beendet = false;
+    proc.on('exit', () => { beendet = true; });
+    const lauscher = (d) => { if (/EADDRINUSE/.test(String(d))) belegt = true; };
+    proc.stderr.on('data', lauscher);
+    const base = `http://127.0.0.1:${dieserPort}`;
+    let oben = false;
+    for (let i = 0; i < 100 && !belegt && !beendet; i++) {
+      try {
+        const res = await fetch(`${base}/api/info`);
+        if (res.ok) { oben = true; break; }
+      } catch {
+        /* noch nicht oben */
+      }
+      await warte(50);
     }
-    await warte(50);
+    if (oben) {
+      proc.stderr.off('data', lauscher);
+      return { proc, base };
+    }
+    proc.kill('SIGKILL');
+    if (!belegt) throw new Error(`Server startet nicht (Port ${dieserPort})`);
   }
-  proc.kill('SIGKILL');
-  throw new Error('Server startet nicht');
+  throw new Error(`kein freier Port ab ${port} gefunden`);
 }
 
 /** Öffnet eine Host-Verbindung und liefert eine Funktion zum Absenden von Aktionen. */
@@ -814,4 +836,112 @@ test('der Host sieht, wie viele Handys noch auf ein Team warten', async (t) => {
 
   // Spieler bekommen die Zahl nicht – sie ist eine Host-Angabe.
   assert.equal((await zustand(base, false)).wartende, undefined);
+});
+
+test('gleichzeitige Zugriffe von Host und Handys bringen den Server nicht aus dem Tritt', async (t) => {
+  // Der Fuzzer in fuzz.test.js prüft die Regeln für sich. Hier kommt dazu, was
+  // am Spieleabend wirklich passiert: sieben Geräte drücken gleichzeitig, und
+  // zwar auch das Falsche zur falschen Zeit. Erlaubt ist alles, was mit einer
+  // lesbaren Meldung abprallt – nicht erlaubt ist ein Serverfehler, ein
+  // abgestürzter Prozess oder ein Zustand, der in sich nicht mehr stimmt.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-fuzz-'));
+  const port = 6400 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  const offen = [];
+  let gestorben = null;
+  proc.on('exit', (code) => { gestorben = code; });
+  t.after(async () => {
+    for (const r of offen) await r.cancel().catch(() => {});
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const strom = async (id, rolle) => {
+    const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
+    const r = res.body.getReader();
+    r.read();
+    offen.push(r);
+  };
+  await strom('fuzz-host', 'host');
+  const spieler = ['s1', 's2', 's3', 's4', 's5', 's6'];
+  for (const id of spieler) await strom(id, 'player');
+  await warte(300);
+
+  const schick = (clientId, body) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId, ...body }),
+  }).then(async (res) => ({ status: res.status, daten: await res.json().catch(() => null) }));
+
+  let x = 20240817; // feste Saat: ein Fehlschlag muss wiederholbar sein
+  const r = () => { x ^= x << 13; x >>>= 0; x ^= x >> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
+  const zufall = (liste) => liste[Math.floor(r() * liste.length)];
+
+  const host = await alsHost(base, 'fuzz-host');
+  await host({ type: 'addTeam', name: 'Rot' });
+  await host({ type: 'addTeam', name: 'Blau' });
+  await host({ type: 'addTeam', name: 'Grün' });
+
+  const bauZug = (teams) => {
+    const team = teams.length ? zufall(teams) : null;
+    const wer = zufall(['fuzz-host', ...spieler]);
+    const typ = zufall([
+      'addTeam', 'removeTeam', 'joinTeam', 'leaveTeam', 'adjustScore', 'setTurn',
+      'startGame', 'pick', 'pass', 'judge', 'buzz', 'buzzFor', 'resetBuzz',
+      'endQuestion', 'close', 'nextRound', 'undo', 'settings', 'backToLobby',
+    ]);
+    const gemein = { type: typ };
+    if (typ === 'addTeam') gemein.name = zufall(['Gelb', '', 'Lila']);
+    if (['removeTeam', 'setTurn', 'buzzFor', 'joinTeam'].includes(typ) && team) gemein.teamId = team.id;
+    if (typ === 'joinTeam') gemein.name = 'Gast';
+    if (typ === 'adjustScore') { gemein.teamId = team?.id; gemein.delta = zufall([-100, 100]); }
+    if (typ === 'startGame') gemein.file = 'kueche-und-keller.json';
+    if (typ === 'pick') { gemein.catIdx = Math.floor(r() * 7); gemein.rowIdx = Math.floor(r() * 5); }
+    if (typ === 'judge') gemein.correct = r() < 0.5;
+    if (typ === 'settings') gemein.settings = { wrongPenalty: zufall(['none', 'half', 'full']) };
+    return { wer, gemein };
+  };
+
+  for (let runde = 0; runde < 90; runde++) {
+    const teams = (await zustand(base)).teams;
+    // Fünf Geräte drücken im selben Moment.
+    const zuege = Array.from({ length: 5 }, () => bauZug(teams));
+    const antworten = await Promise.all(zuege.map(({ wer, gemein }) => schick(wer, gemein)));
+    antworten.forEach((a, i) => {
+      assert.ok(a.status < 500,
+        `Serverfehler ${a.status} bei ${zuege[i].gemein.type} (${zuege[i].wer})`);
+      assert.ok(a.daten && (a.daten.ok === true || typeof a.daten.error === 'string'),
+        `unbrauchbare Antwort auf ${zuege[i].gemein.type}: ${JSON.stringify(a.daten)}`);
+      if (a.daten.ok !== true) {
+        assert.ok(a.daten.error.length > 8, `zu knappe Meldung: „${a.daten.error}"`);
+      }
+    });
+    assert.equal(gestorben, null, `Server gestorben (Code ${gestorben}) in Runde ${runde}`);
+
+    const st = await zustand(base);
+    assert.ok(['lobby', 'board', 'question', 'roundEnd', 'gameOver'].includes(st.phase), st.phase);
+    assert.equal(st.phase === 'question', !!st.current, `Phase ${st.phase} passt nicht zu current`);
+    for (const team of st.teams) {
+      assert.ok(Number.isInteger(team.score), `Punktestand kaputt: ${team.score}`);
+      for (const [feld, wert] of Object.entries(team.bilanz || {})) {
+        assert.ok(Number.isFinite(wert) && wert >= 0, `Bilanz „${feld}" = ${wert}`);
+      }
+    }
+    if (st.teams.length) {
+      assert.ok(st.turnIndex >= 0 && st.turnIndex < st.teams.length,
+        `turnIndex ${st.turnIndex} bei ${st.teams.length} Teams`);
+    }
+    // Ein Gerät steht in höchstens einem Team – auch wenn zwei Beitritte
+    // gleichzeitig eintrudeln.
+    const gesehen = new Set();
+    for (const team of st.teams) {
+      for (const m of team.members) {
+        assert.ok(!gesehen.has(m.clientId), `Gerät ${m.clientId} steht in zwei Teams`);
+        gesehen.add(m.clientId);
+      }
+    }
+  }
+
+  // Zum Schluss muss der Server noch normal antworten.
+  assert.equal((await fetch(`${base}/api/info`)).ok, true, 'Server antwortet nicht mehr');
 });
