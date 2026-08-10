@@ -7,7 +7,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
-import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, DATA_DIR } from './questions.js';
+import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, DATA_DIR } from './questions.js';
 import { oeffne as oeffneImBrowser } from './browser.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -198,7 +198,7 @@ const HOST_ACTIONS = new Set([
   'addTeam', 'renameTeam', 'removeTeam', 'removeMember', 'adjustScore', 'setTurn',
   'startGame', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion',
   'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz', 'buzzFor',
-  'undo',
+  'undo', 'stechen',
 ]);
 
 /**
@@ -222,6 +222,7 @@ const LAGEGEBUNDEN = new Set(['judge', 'pass', 'openBuzz', 'reveal', 'endQuestio
 const RUECKNEHMBAR = new Set([
   'pick', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close',
   'nextRound', 'adjustScore', 'setTurn', 'resetBuzz', 'buzzFor', 'buzz',
+  'stechen',
 ]);
 
 let rueckStand = null; // { state, was }
@@ -242,6 +243,7 @@ function benenne(type, vorher) {
     case 'setTurn': return 'Zugwechsel';
     case 'buzz': case 'buzzFor': return 'Buzz';
     case 'resetBuzz': return 'Buzz zurücksetzen';
+    case 'stechen': return 'Stechen starten';
     default: return 'letzte Aktion';
   }
 }
@@ -388,6 +390,17 @@ async function handleAction(clientId, body) {
     case 'nextRound':
       G.nextRound(state);
       break;
+    case 'stechen': {
+      // Alles, was heute schon auf dem Brett stand, fällt raus – sonst kommt
+      // als Entscheidungsfrage ausgerechnet die, die vorhin schon jemand
+      // gehört hat.
+      const gespielt = [];
+      for (const runde of state.questionSet?.rounds || []) {
+        for (const cat of runde.categories) for (const q of cat.questions) gespielt.push(q.text);
+      }
+      G.startStechen(state, await stechenFrage([...gespielt, ...(state.stechenTexte || [])]));
+      break;
+    }
     case 'backToLobby':
       state = G.backToLobby(state);
       rueckStand = null;

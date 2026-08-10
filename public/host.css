@@ -896,6 +896,24 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   color: #b9d8f6;
   font-size: clamp(0.95rem, 1.5vw, 1.25rem);
 }
+
+/* Stechen: Die Entscheidungsfrage gehört zu keinem Feld und zu keinem
+   Punktwert – deshalb trägt sie Gold statt des üblichen Blau, damit im Raum
+   sofort klar ist, dass gerade etwas anderes läuft als die 47 Fragen davor. */
+.btn-stechen {
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  color: #3a2a00;
+  border-color: rgba(255, 236, 180, 0.8);
+}
+.q-head.stechen {
+  color: #3a2a00;
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  box-shadow: 0 0 0 1px rgba(255, 236, 180, 0.8), 0 8px 26px rgba(0, 0, 0, 0.7);
+}
+.q-panel.stechpanel {
+  border-color: rgba(255, 214, 102, 0.75);
+  box-shadow: 0 0 0 1px rgba(255, 214, 102, 0.35), 0 24px 60px rgba(0, 0, 0, 0.75);
+}
 @keyframes siegerIn { from { opacity: 0; transform: scale(0.86); } }
 
 /* Der Endstand baut sich von unten auf: Letzter zuerst, Sieger zuletzt.

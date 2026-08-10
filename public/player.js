@@ -327,7 +327,10 @@ function renderQuestion() {
     return;
   }
   box.hidden = false;
-  $('#p-q-head').textContent = `${q.category} · ${q.value} Punkte`;
+  // Die Stechfrage hat keinen Punktwert – „· 0 Punkte" wäre schlicht falsch.
+  $('#p-q-head').textContent = q.stechen
+    ? `Stechen · ${q.category}`
+    : `${q.category} · ${q.value} Punkte`;
   setFrageText($('#p-q-text'), q.text);
   const img = $('#p-q-image');
   if (q.image) {
@@ -432,7 +435,19 @@ function renderBuzzer(prev) {
     return;
   }
   if (state.phase === 'roundEnd') { setzeText(status, 'Runde vorbei – gleich geht’s weiter.'); lock('PAUSE'); return; }
-  if (state.phase === 'gameOver') { setzeText(status, 'Spiel beendet!'); lock('ENDE'); return; }
+  if (state.phase === 'gameOver') {
+    const best = Math.max(...state.teams.map((t) => t.score));
+    const spitze = state.teams.filter((t) => t.score === best);
+    setzeText(status, state.stechenSieger
+      ? (state.stechenSieger === you.teamId
+        ? 'Ihr habt das Stechen gewonnen!'
+        : `${state.teams.find((t) => t.id === state.stechenSieger)?.name ?? '?'} gewinnt das Stechen.`)
+      // Gleichstand oben: Gleich kommt die Entscheidungsfrage – das Handy sagt
+      // es, damit niemand den Buzzer weglegt.
+      : spitze.length > 1 ? 'Gleichstand oben – gleich das Stechen!' : 'Spiel beendet!');
+    lock('ENDE');
+    return;
+  }
 
   if (state.phase === 'board') {
     // Die stillste Stelle des Abends: Nach „Weiter" steht das Board wieder da,
@@ -459,7 +474,10 @@ function renderBuzzer(prev) {
 
   if (you.canBuzz) {
     buzzer.classList.add('armed');
-    setzeText(status, `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`);
+    // Im Stechen geht es nicht um Punkte, sondern um den ganzen Abend.
+    setzeText(status, q.stechen
+      ? 'Stechen! Wer zuerst drückt und richtig liegt, gewinnt.'
+      : `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`);
     status.classList.add('you');
     // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst
     // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.
@@ -523,6 +541,17 @@ function renderBuzzer(prev) {
     // hat mit eingestelltem Abzug aber genauso Punkte verloren wie ein Team,
     // das danebengebuzzert hat.
     const eigen = q.log.reduce((summe, e) => (e.teamId === you.teamId ? summe + e.delta : summe), 0);
+    // Im Stechen kostet ein Fehlversuch keine Punkte, sondern das Stechen –
+    // und wer gar nicht mitspielt, wartet nur zu, statt „seinen Versuch"
+    // gehabt zu haben.
+    if (q.stechen) {
+      const drin = q.log.some((e) => e.teamId === you.teamId);
+      setzeText(status, drin
+        ? 'Daneben – ihr seid raus aus dem Stechen.'
+        : 'Das Stechen läuft ohne euch – Daumen drücken.');
+      lock('GESPERRT');
+      return;
+    }
     setzeText(status, eigen < 0
       ? `Daneben – das kostet euch ${-eigen} Punkte. Die anderen sind noch dran.`
       : q.lockedOut.includes(you.teamId)
@@ -535,6 +564,16 @@ function renderBuzzer(prev) {
   // Die Lösung steht schon groß im Kasten – hier stattdessen das, was man sonst
   // nirgends sieht: was die Frage dem eigenen Team gebracht hat.
   const eigen = q.log.reduce((summe, e) => (e.teamId === you.teamId ? summe + e.delta : summe), 0);
+  if (q.stechen) {
+    setzeText(status, !state.stechenSieger
+      ? 'Das wusste keiner – gleich kommt die nächste Frage.'
+      : state.stechenSieger === you.teamId
+        ? 'Ihr habt das Stechen gewonnen!'
+        : `${state.teams.find((t) => t.id === state.stechenSieger)?.name ?? '?'} gewinnt das Stechen.`);
+    status.classList.toggle('you', state.stechenSieger === you.teamId);
+    lock('DURCH');
+    return;
+  }
   setzeText(status, !you.teamId ? 'Frage beendet.'
     : eigen > 0 ? `+${eigen} Punkte für euch!`
     : eigen < 0 ? `${eigen} Punkte für euch.`

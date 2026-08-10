@@ -805,3 +805,112 @@ test('die Feldwahl lässt sich mitten im Spiel umstellen', () => {
   G.pickCell(state, 0, 0, state.teams[state.turnIndex].id);
   assert.equal(state.phase, 'question', 'zurückgestellt geht es sofort wieder');
 });
+
+/* ----------------------------------------------------------------- Stechen */
+
+/** Spielt beide Runden leer, ohne dass jemand punktet – Endstand 0:0:0. */
+function bisGleichstand(state) {
+  for (let runde = 1; runde <= 2; runde++) {
+    for (const [ci, cat] of state.board.categories.entries()) {
+      for (const [ri] of cat.cells.entries()) {
+        G.pickCell(state, ci, ri);
+        G.endQuestion(state);
+        G.closeQuestion(state);
+      }
+    }
+    if (state.phase === 'roundEnd') G.nextRound(state);
+  }
+  return state;
+}
+
+const STECHFRAGE = { text: 'Wie viele Beine hat eine Spinne?', answer: '8', category: 'Tiere' };
+
+test('ein Stechen gibt es erst am Ende und nur bei Gleichstand', () => {
+  const state = setup();
+  assert.throws(() => G.startStechen(state, STECHFRAGE), /erst, wenn das Spiel durch ist/);
+  bisGleichstand(state);
+  assert.equal(state.phase, 'gameOver');
+  G.adjustScore(state, state.teams[0].id, 100);
+  assert.throws(() => G.startStechen(state, STECHFRAGE), /schon ein Sieger/);
+  G.adjustScore(state, state.teams[0].id, -100);
+  G.startStechen(state, STECHFRAGE);
+  assert.equal(state.phase, 'question');
+  assert.equal(state.current.stechen, true);
+});
+
+test('im Stechen darf jedes Team an der Spitze buzzern, sonst niemand', () => {
+  const state = setup();
+  bisGleichstand(state);
+  // Ein Team fällt zurück – es hat mit dem Stechen nichts zu tun.
+  G.adjustScore(state, state.teams[2].id, -100);
+  G.startStechen(state, STECHFRAGE);
+  assert.deepEqual(state.current.lockedOut, [state.teams[2].id]);
+  assert.equal(state.current.teamId, null, 'es gibt kein Zugteam');
+  assert.throws(() => G.buzzFor(state, state.teams[2].id), /schon versucht/);
+  G.buzzFor(state, state.teams[1].id);
+  assert.equal(state.current.buzzedTeamId, state.teams[1].id);
+});
+
+test('das Stechen ändert keine Punkte, sondern kürt einen Sieger', () => {
+  const state = setup();
+  bisGleichstand(state);
+  G.startStechen(state, STECHFRAGE);
+
+  // Erst daneben: kostet nichts, ist aber raus.
+  G.buzzFor(state, state.teams[0].id);
+  G.judge(state, false);
+  assert.equal(score(state, 0), 0, 'kein Abzug im Stechen');
+  assert.equal(state.teams[0].bilanz.falsch, 0, 'und kein Eintrag in der Bilanz');
+  assert.ok(state.current.lockedOut.includes(state.teams[0].id));
+  assert.equal(state.current.step, 'buzz', 'die Übrigen sind weiter dran');
+  assert.equal(state.stechenSieger, null);
+
+  // Dann richtig: entscheidet den Abend, ohne einen Punkt zu vergeben.
+  G.buzzFor(state, state.teams[1].id);
+  G.judge(state, true);
+  assert.equal(state.stechenSieger, state.teams[1].id);
+  assert.equal(score(state, 1), 0, 'auch der Sieg bringt keine Punkte');
+  assert.equal(state.current.step, 'result');
+  assert.equal(state.current.revealed, true, 'die Lösung steht danach da');
+
+  G.closeQuestion(state);
+  assert.equal(state.phase, 'gameOver', 'zurück in den Endstand');
+  assert.equal(G.ranking(state)[0].id, state.teams[1].id, 'und der Sieger steht oben');
+});
+
+test('weiß es keiner, geht es mit einer neuen Frage weiter', () => {
+  const state = setup();
+  bisGleichstand(state);
+  G.startStechen(state, STECHFRAGE);
+  // Alle drei liegen daneben – danach ist die Frage von selbst durch.
+  for (const team of state.teams) {
+    G.buzzFor(state, team.id);
+    G.judge(state, false);
+  }
+  assert.equal(state.current.step, 'result');
+  assert.equal(state.current.revealed, true);
+  G.closeQuestion(state);
+  assert.equal(state.phase, 'gameOver');
+  assert.equal(state.stechenSieger, null, 'entschieden ist noch nichts');
+
+  // Dieselbe Frage kommt nicht noch einmal: Der Server schließt sie über
+  // state.stechenTexte aus.
+  assert.deepEqual(state.stechenTexte, [STECHFRAGE.text]);
+  G.startStechen(state, { text: 'Und noch eine?', answer: 'Ja' });
+  assert.equal(state.stechenLauf, 2);
+  assert.notEqual(G.lageSignatur(state), 'fnull.null#buzz#', 'die Lage trägt den Zähler');
+});
+
+test('ein neues Spiel weiß nichts mehr vom Stechen', () => {
+  const state = setup();
+  bisGleichstand(state);
+  G.startStechen(state, STECHFRAGE);
+  G.buzzFor(state, state.teams[0].id);
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.ok(state.stechenSieger);
+  G.startGame(state, SET);
+  assert.equal(state.stechenSieger, null);
+  assert.equal(state.stechenLauf, 0);
+  assert.deepEqual(state.stechenTexte, []);
+});

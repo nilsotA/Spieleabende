@@ -258,6 +258,7 @@ function render(prev) {
     // in der Lobby nie. Beim zweiten Spiel eines Ein-Runden-Satzes blieb das
     // Konfetti deshalb aus.
     konfettiGefallen = false;
+    letzterStechSieger = null;
     standVorRunde = null;
     letzteRunde = null;
     fuehrend = null;
@@ -506,10 +507,16 @@ function renderBoard() {
   const offen = data.categories.reduce((n, c) => n + c.cells.filter((z) => !z.used).length, 0);
   board.classList.toggle('finale', offen === 1 && state.phase === 'board');
 
-  $('#round-label').textContent = `Runde ${state.round} / ${state.roundCount}`;
+  // Das Stechen gehört zu keiner Runde – „Runde 2 / 2 · 2× Punkte" stünde
+  // dort über einer Frage, für die es weder das eine noch das andere gibt.
+  const imStechen = !!state.current?.stechen;
+  $('#round-label').textContent = imStechen
+    ? 'Stechen'
+    : `Runde ${state.round} / ${state.roundCount}`;
   const mult = $('#round-mult');
-  mult.textContent = data.multiplier > 1 ? `${data.multiplier}× Punkte` : '';
-  mult.hidden = data.multiplier <= 1;
+  const zeigMult = data.multiplier > 1 && !imStechen;
+  mult.textContent = zeigMult ? `${data.multiplier}× Punkte` : '';
+  mult.hidden = !zeigMult;
   // Die Runde mit den doppelten Punkten sah bisher aus wie die erste – nur mit
   // anderen Zahlen. Ein Klassenwechsel an der Bühne färbt Kanten und Schein um,
   // ohne dass irgendwo Text kleiner oder kontrastärmer wird.
@@ -534,7 +541,11 @@ function renderQuestion(prev) {
     setBuzzIndicator('aus');
     return;
   }
-  const neu = !prev?.current || prev.current.catIdx !== q.catIdx || prev.current.rowIdx !== q.rowIdx;
+  // Stechfragen haben kein Feld: Ohne den Zähler sähe die zweite
+  // Entscheidungsfrage wie die erste aus und das Panel bliebe stehen.
+  const kennung = (z, lauf) => (z.stechen ? `s${lauf}` : `${z.catIdx}-${z.rowIdx}`);
+  const neu = !prev?.current
+    || kennung(prev.current, prev.stechenLauf) !== kennung(q, state.stechenLauf);
   box.hidden = false;
   // Das Feld ist gewählt – egal ob auf der Leinwand angeklickt oder auf dem
   // Handy angetippt. `prev` ist nur beim allerersten Zustand leer: Ein Reload
@@ -550,7 +561,12 @@ function renderQuestion(prev) {
     openFromTile(panel, q);
   }
 
-  $('#q-head').textContent = `${q.category} ${q.value}`;
+  // Beim Stechen steht kein Punktwert am Kopf – es gibt keinen.
+  $('#q-head').textContent = q.stechen
+    ? `Stechen · ${q.category}`
+    : `${q.category} ${q.value}`;
+  $('#q-head').classList.toggle('stechen', !!q.stechen);
+  panel.classList.toggle('stechpanel', !!q.stechen);
   setFrageText($('#q-text'), q.text);
 
   const img = $('#q-image');
@@ -587,7 +603,11 @@ function renderQuestion(prev) {
     status.append(el('div', { class: 'chip turn' }, `Am Zug: ${teamName(q.teamId)}`));
     setBuzzIndicator('idle');
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-    status.append(el('div', { class: 'chip buzzopen' }, `⚡ Buzzer frei · ${q.halfValue} Punkte`));
+    const dabei = state.teams.filter((t) => !q.lockedOut.includes(t.id));
+    status.append(el('div', { class: 'chip buzzopen' }, q.stechen
+      // Beim Stechen zählt nicht der Punktwert, sondern wer noch im Rennen ist.
+      ? `⚡ Wer zuerst drückt: ${aufzaehlung(dabei.map((t) => t.name))}`
+      : `⚡ Buzzer frei · ${q.halfValue} Punkte`));
     setBuzzIndicator('armed');
   } else if (q.buzzedTeamId) {
     // Wie knapp war es? Das Buzzer-Rennen endete bisher ohne Ergebnis.
@@ -777,7 +797,11 @@ function renderPlayers() {
     node.classList.toggle('buzzed', state.current?.buzzedTeamId === team.id && state.current?.step === 'buzz');
     // Wer führt, war an den Pulten nicht zu erkennen – alle Punktepillen sahen
     // gleich aus, ob 0 oder 3950. Bei Gleichstand leuchten eben mehrere.
-    node.classList.toggle('leader', state.teams.length > 1 && spanne > 0 && team.score === bestScore);
+    // Nach einem Stechen leuchtet nur noch der, der es geholt hat – die
+    // Punkte stehen ja gleich, entschieden ist es trotzdem.
+    node.classList.toggle('leader', state.stechenSieger
+      ? team.id === state.stechenSieger
+      : state.teams.length > 1 && spanne > 0 && team.score === bestScore);
 
     // Beim freien Buzzer sitzen mehrere Tische mit dem Finger über dem Handy.
     // Auf der Leinwand war davon nichts zu sehen – dabei ist das das Rennen.
@@ -946,13 +970,28 @@ function renderScoreboard() {
   $('#score-title').textContent = final ? 'Endstand' : `Runde ${state.round} beendet`;
   $('.scores-panel').classList.toggle('final', final);
   const list = $('#score-list');
-  const ranked = [...state.teams].sort((a, b) => b.score - a.score);
+  const stechSieger = state.stechenSieger || null;
+  // Beim ersten Endstand fiel das Konfetti auf ein Unentschieden. Jetzt hat der
+  // Abend wirklich einen Sieger – dafür darf die Fanfare noch einmal kommen.
+  if (stechSieger && stechSieger !== letzterStechSieger) {
+    letzterStechSieger = stechSieger;
+    konfettiGefallen = false;
+  }
+  const ranked = [...state.teams].sort((a, b) => b.score - a.score
+    // Wie beim Server: Wer das Stechen geholt hat, steht vor den Punktgleichen.
+    || (a.id === stechSieger ? -1 : 0) || (b.id === stechSieger ? 1 : 0));
 
-  // Sieg heißt mehr Punkte als alle anderen – bei Gleichstand gibt es keinen.
-  const geteilt = ranked.length > 1 && ranked[1].score === ranked[0].score;
+  // Sieg heißt mehr Punkte als alle anderen – bei Gleichstand gibt es keinen,
+  // solange ihn nicht ein Stechen entschieden hat.
+  const punktGleich = ranked.length > 1 && ranked[1].score === ranked[0].score;
+  const geteilt = punktGleich && !stechSieger;
   const sieger = $('#score-winner');
   sieger.hidden = false;
-  if (final) {
+  if (final && stechSieger) {
+    // Der Abend ist entschieden, obwohl die Zahlen gleich stehen – das muss die
+    // Zeile sagen, sonst liest sich die Tafel wie ein Widerspruch.
+    sieger.textContent = `Sieg im Stechen: ${state.teams.find((t) => t.id === stechSieger)?.name || '?'}`;
+  } else if (final) {
     // „Die Grübelmeister gewinnt!" – die meisten Teamnamen sind Plural, und ob
     // einer es ist, weiß man einem frei getippten Namen nicht an. Statt zu
     // raten eine Form, die für jeden Namen stimmt: „Sieg für …" braucht kein
@@ -1002,11 +1041,15 @@ function renderScoreboard() {
   // hatten es die ganze Zeit richtig, dort leuchteten beide.
   const raenge = ranked.map((t, i) => i);
   for (let i = 1; i < ranked.length; i++) {
-    raenge[i] = ranked[i].score === ranked[i - 1].score ? raenge[i - 1] : i;
+    // Nach einem Stechen teilt der Sieger den ersten Platz mit niemandem mehr –
+    // dafür war es ja da. Die Punktgleichen darunter rücken auf Platz 2.
+    const zusammen = ranked[i].score === ranked[i - 1].score
+      && !(stechSieger && raenge[i - 1] === 0);
+    raenge[i] = zusammen ? raenge[i - 1] : i;
   }
   const platz = (i) => raenge[i] + 1;
 
-  const key = ranked.map((t) => `${t.id}:${t.score}`).join('|') + `#${state.phase}`;
+  const key = ranked.map((t) => `${t.id}:${t.score}`).join('|') + `#${state.phase}#${stechSieger || ''}`;
   if (list.dataset.key !== key) {
     list.dataset.key = key;
     list.innerHTML = '';
@@ -1043,6 +1086,11 @@ function renderScoreboard() {
   zeigeRekorde(final, ranked);
   $('#btn-next-round').hidden = final;
   $('#btn-new-game').hidden = !final;
+  // Ein Abend, der mit „Unentschieden" endet, endet nicht wirklich. Der Knopf
+  // steht nur da, wenn er gebraucht wird: am Ende, bei Gleichstand an der
+  // Spitze, und solange das Stechen nicht schon entschieden ist.
+  const stechKnopf = $('#btn-stechen');
+  if (stechKnopf) stechKnopf.hidden = !(final && geteilt);
   if (final && !konfettiGefallen) {
     konfettiGefallen = true;
     // Der Endstand baut sich von unten auf – erst rollt die Trommel, und wenn
@@ -1167,6 +1215,7 @@ function zeigeRekorde(final, ranked) {
 
 let konfettiGefallen = false;
 let rundeAbgepfiffen = false;
+let letzterStechSieger = null;
 
 /** Einmalig beim Sieg – 60 Schnipsel, danach werden die Elemente entfernt. */
 function konfetti(farbe) {
@@ -1247,6 +1296,8 @@ function renderControls() {
     // ohne das im Schlüssel bliebe die Leiste stehen, wenn jemand mitten in der
     // Frage aufwacht oder wegfällt.
     state.teams.map((t) => `${t.id}:${t.name}:${t.members.some((m) => m.online !== false) ? 1 : 0}`).join('|'),
+    // Nach dem Stechen steht ein anderer Knopf da als davor.
+    state.stechenSieger,
   ].join('#');
   const neu = bar.dataset.key !== key;
   if (neu) {
@@ -1279,7 +1330,15 @@ function renderControls() {
   }
 
   if (state.phase === 'roundEnd' || state.phase === 'gameOver') {
-    setzeText(hint, state.phase === 'gameOver' ? 'Spiel beendet.' : 'Bereit für die nächste Runde?');
+    const spitze = state.teams.filter((t) => t.score === Math.max(...state.teams.map((x) => x.score)));
+    setzeText(hint, state.phase !== 'gameOver'
+      ? 'Bereit für die nächste Runde?'
+      : state.stechenSieger
+        ? 'Spiel beendet – im Stechen entschieden.'
+        : spitze.length > 1
+          // Der Knopf steht mitten auf der Leinwand; hier steht, wofür er gut ist.
+          ? 'Gleichstand – „Stechen" holt die Entscheidungsfrage.'
+          : 'Spiel beendet.');
     return;
   }
 
@@ -1299,7 +1358,7 @@ function renderControls() {
       button('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), '3'),
     );
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-    setzeText(hint, 'Buzzer ist frei.');
+    setzeText(hint, q.stechen ? 'Stechen läuft – wer zuerst drückt, antwortet.' : 'Buzzer ist frei.');
     // Vertreterknöpfe für alle, die keinen eigenen Buzzer in der Hand haben.
     // Wer ein Handy am Netz hat, drückt selbst – und mit acht Teams standen hier
     // sonst sieben Knöpfe voller Teamnamen, die die Leiste auf vier Reihen
@@ -1309,14 +1368,25 @@ function renderControls() {
       if (team.members.some((m) => m.online !== false)) continue;
       add(buzzKnopf(team));
     }
-    add(button('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion'), '4'));
+    add(button(q.stechen ? 'Keiner weiß es → nächste Frage' : 'Keiner weiß es → auflösen',
+      'btn-primary', () => act('endQuestion'), '4'));
   } else if (q.buzzedTeamId && q.step === 'buzz') {
-    setzeText(hint, `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
+    // Im Stechen gibt es keine Punkte zu gewinnen, sondern den Abend.
+    setzeText(hint, q.stechen
+      ? `${teamName(q.buzzedTeamId)} hat gebuzzert – richtig gewinnt, falsch ist raus.`
+      : `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
     add(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
       button('Buzz zurücknehmen', 'btn-ghost btn-sm', () => act('resetBuzz')),
     );
+  } else if (q.stechen) {
+    // Nach der Stechfrage geht es zurück in den Endstand – mit Sieger oder für
+    // die nächste Frage. Der Knopf sagt, was von beidem gleich passiert.
+    setzeText(hint, state.stechenSieger
+      ? `${teamName(state.stechenSieger)} gewinnt den Abend.`
+      : 'Das wusste keiner – zurück zum Endstand.');
+    add(button(state.stechenSieger ? 'Zum Endstand' : 'Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
   } else {
     setzeText(hint, 'Frage beendet.');
     add(button('Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
@@ -1359,6 +1429,7 @@ function kurzTeam(name) {
 }
 
 $('#btn-next-round').addEventListener('click', () => act('nextRound'));
+$('#btn-stechen').addEventListener('click', () => act('stechen'));
 $('#btn-new-game').addEventListener('click', () => act('backToLobby'));
 $('#btn-menu').addEventListener('click', openMenu);
 $('#btn-close-menu').addEventListener('click', closeMenu);
@@ -1477,7 +1548,9 @@ function fuelleSpickzettel() {
   const q = state.current;
   const zeilen = [];
 
-  if (q) {
+  if (q?.stechen) {
+    zeilen.push(['Stechen', 'richtig gewinnt den Abend, falsch ist raus – keine Punkte', true]);
+  } else if (q) {
     zeilen.push(['Diese Frage', `${q.category} ${q.value} · gebuzzert ${q.halfValue}`, true]);
   }
   zeilen.push(['Zugteam richtig', 'volle Punkte']);
@@ -1501,6 +1574,7 @@ function fuelleSpickzettel() {
   }
   zeilen.push(['Runde 2', state.round >= 2 ? 'läuft – alles zählt doppelt' : 'zählt doppelt',
     state.round >= 2]);
+  zeilen.push(['Gleichstand am Ende', 'ein Stechen entscheidet: Buzzer frei, richtig gewinnt']);
 
   const liste = $('#spick-regeln');
   const key = JSON.stringify(zeilen);

@@ -176,6 +176,47 @@ export function externalizeImages(set) {
   return { set, images };
 }
 
+/**
+ * Der Vorrat, aus dem das Stechen seine Entscheidungsfrage zieht: alle Fragen
+ * aller Sätze, abzüglich derer, die an diesem Abend schon dran waren.
+ *
+ * Bilderfragen bleiben draußen. Ihre Dateien liegen nur für den gespielten Satz
+ * bereit – eine Flagge aus einem anderen Satz käme als leerer Kasten auf die
+ * Leinwand, und das ausgerechnet in der Frage, die den Abend entscheidet.
+ */
+export function stechenVorrat(saetze, schonGestellt = []) {
+  const raus = new Set(schonGestellt.map((t) => String(t).trim().toLowerCase()));
+  const topf = [];
+  for (const set of saetze) {
+    for (const round of set.rounds || []) {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) {
+          if (q.image) continue;
+          if (!q.text || !q.answer) continue;
+          if (raus.has(q.text.trim().toLowerCase())) continue;
+          topf.push({ text: q.text, answer: q.answer, note: q.note || null, category: cat.name });
+        }
+      }
+    }
+  }
+  return topf;
+}
+
+/** Lädt alle Sätze und zieht eine Frage fürs Stechen. */
+export async function stechenFrage(schonGestellt = []) {
+  const saetze = [];
+  for (const eintrag of (await listSets()).filter((s) => !s.error)) {
+    try {
+      saetze.push(await loadSet(eintrag.file));
+    } catch {
+      /* Ein kaputter Satz darf das Stechen nicht verhindern. */
+    }
+  }
+  const topf = stechenVorrat(saetze, schonGestellt);
+  if (!topf.length) return null;
+  return topf[Math.floor(Math.random() * topf.length)];
+}
+
 export async function setExists(file) {
   try {
     await stat(path.join(DATA_DIR, path.basename(String(file || ''))));

@@ -174,6 +174,16 @@ hat. Wer falsch buzzert, ist für diese Frage raus; die Übrigen dürfen weiter.
 **Runde 2** hat neue Kategorien und **doppelte Punkte** (200/400/600/1000 statt
 100/200/300/500). Wer am Ende die meisten Punkte hat, gewinnt.
 
+**Stechen bei Gleichstand.** Stehen am Ende zwei oder mehr gleichauf an der Spitze,
+steht im Endstand ein Knopf „⚡ Stechen“. Er holt eine Entscheidungsfrage aus einem
+der anderen Fragensätze – eine, die an diesem Abend noch nicht dran war. Es gibt
+kein Zugteam: Der Buzzer ist sofort frei, aber nur für die Punktgleichen. Wer zuerst
+drückt und richtig liegt, gewinnt den Abend; wer danebenliegt, ist aus dem Stechen
+raus und die Übrigen dürfen weiter. Weiß es keiner, holt der Host die nächste Frage.
+
+Das Stechen vergibt **keine Punkte** – die Tafel bleibt, wie sie gespielt wurde. Es
+beantwortet nur die Frage, die sonst offenbliebe: wer gewonnen hat.
+
 ### Was der Screen nebenbei erzählt
 
 Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSet, QUESTIONS_PER_CATEGORY } from '../server/questions.js';
+import { normalizeSet, stechenVorrat, QUESTIONS_PER_CATEGORY } from '../server/questions.js';
 
 const frage = (i) => ({ text: `Frage ${i}`, answer: `Antwort ${i}` });
 const kategorie = (name, anzahl = QUESTIONS_PER_CATEGORY) => ({
@@ -475,4 +475,39 @@ test('der Zufallsmix verteilt sich über die Sätze', async () => {
   for (const datei of DATEIEN) {
     assert.ok(gesehen.get(datei) > 0, `${datei} kam in 40 Mixen kein einziges Mal vor`);
   }
+});
+
+test('der Vorrat fürs Stechen lässt Gespieltes und Bilder draußen', () => {
+  const saetze = [{
+    rounds: [{
+      categories: [{
+        name: 'Tiere',
+        questions: [
+          { text: 'Wie viele Beine hat eine Spinne?', answer: '8', note: 'Nicht 6.' },
+          { text: 'Schon gehabt', answer: 'ja' },
+          { text: 'Welche Flagge ist das?', answer: 'Katar', image: '/api/bild/b1' },
+          { text: 'Ohne Antwort', answer: '' },
+        ],
+      }],
+    }],
+  }];
+  const topf = stechenVorrat(saetze, ['  schon GEHABT ']);
+  assert.deepEqual(topf.map((q) => q.text), ['Wie viele Beine hat eine Spinne?'],
+    'Bildfragen, leere Antworten und schon Gestelltes fallen raus');
+  assert.equal(topf[0].category, 'Tiere', 'die Kategorie fährt mit – sie steht am Kopf der Frage');
+  assert.equal(topf[0].note, 'Nicht 6.');
+});
+
+test('ohne Ausschlüsse ist der Vorrat der ganze Satz', async () => {
+  const { default: fsp } = await import('node:fs/promises');
+  const { DATA_DIR } = await import('../server/questions.js');
+  const dateien = (await fsp.readdir(DATA_DIR)).filter((f) => f.endsWith('.json') && !f.startsWith('.'));
+  const saetze = [];
+  for (const f of dateien) {
+    saetze.push(normalizeSet(JSON.parse(await fsp.readFile(`${DATA_DIR}/${f}`, 'utf8')), f));
+  }
+  const topf = stechenVorrat(saetze, []);
+  // Genug Auswahl, damit ein Stechen auch nach mehreren Fragen nicht ausgeht.
+  assert.ok(topf.length > 400, `nur ${topf.length} Fragen im Topf`);
+  assert.ok(topf.every((q) => q.text && q.answer));
 });

@@ -56,6 +56,9 @@ function render() {
     // jemand mitten in der Frage aufwacht oder wegfällt.
     state.teams.map((t) => `${t.id}:${t.name}:${t.members.some((m) => m.online !== false) ? 1 : 0}`).join('|'),
     state.turnIndex,
+    // Im Endstand hängt die Leiste am Gleichstand und am Ausgang des Stechens.
+    state.stechenSieger,
+    state.teams.map((t) => t.score).join(','),
   ].join('#');
   const neueLeiste = bar.dataset.key !== barKey;
   if (neueLeiste) {
@@ -68,7 +71,9 @@ function render() {
 
   box.hidden = !q;
   if (q) {
-    $('#r-cat').textContent = `${q.category} · ${q.value} Punkte`;
+    $('#r-cat').textContent = q.stechen
+      ? `Stechen · ${q.category}`
+      : `${q.category} · ${q.value} Punkte`;
     setFrageText($('#r-text'), q.text);
     // Ohne Bild müsste der Host sich zur Leinwand umdrehen – genau das soll
     // die Fernbedienung ja ersparen.
@@ -124,10 +129,21 @@ function render() {
       setzeText(phase, `Runde ${state.round} beendet.`);
       setz(big('Nächste Runde', 'btn-primary', () => act('nextRound')));
       break;
-    case 'gameOver':
-      setzeText(phase, 'Spiel beendet.');
+    case 'gameOver': {
+      const best = Math.max(...state.teams.map((t) => t.score));
+      const spitze = state.teams.filter((t) => t.score === best);
+      const offen = spitze.length > 1 && !state.stechenSieger;
+      setzeText(phase, state.stechenSieger
+        ? `Spiel beendet – ${teamName(state.stechenSieger)} hat das Stechen geholt.`
+        : offen
+          ? `Gleichstand: ${spitze.map((t) => t.name).join(' und ')}. Ein Stechen entscheidet.`
+          : 'Spiel beendet.');
+      // Bei Gleichstand steht die Entscheidungsfrage oben – erst danach der
+      // Knopf, der den Abend wegräumt.
+      if (offen) setz(big('⚡ Stechen starten', 'btn-primary', () => act('stechen')));
       setz(big('Neues Spiel', 'btn-ghost', () => act('backToLobby')));
       break;
+    }
     case 'question':
       if (q.step === 'primary') {
         setzeText(phase, `${teamName(q.teamId)} antwortet.`);
@@ -137,11 +153,14 @@ function render() {
           big('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass')),
         );
       } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-        setzeText(phase, `Buzzer ist frei · ${q.halfValue} Punkte`);
+        setzeText(phase, q.stechen
+          ? 'Stechen – wer zuerst drückt, antwortet.'
+          : `Buzzer ist frei · ${q.halfValue} Punkte`);
         // „Keiner weiß es" zuerst: Das ist der Knopf, der die Frage beendet,
         // und bei acht Teams stand er vorher unter sieben Vertreterknöpfen –
         // also außerhalb des Bildschirms, obwohl der Tisch längst wartet.
-        setz(big('Keiner weiß es → auflösen', 'btn-primary', () => act('endQuestion')));
+        setz(big(q.stechen ? 'Keiner weiß es → nächste Frage' : 'Keiner weiß es → auflösen',
+          'btn-primary', () => act('endQuestion')));
         // Vertreten wird nur, wer keinen eigenen Buzzer in der Hand hat.
         for (const team of state.teams) {
           if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
@@ -149,12 +168,19 @@ function render() {
           setz(big(`Buzz: ${team.name}`, 'btn-ghost', () => act('buzzFor', { teamId: team.id })));
         }
       } else if (q.step === 'buzz' && q.buzzedTeamId) {
-        setzeText(phase, `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
+        setzeText(phase, q.stechen
+          ? `${teamName(q.buzzedTeamId)} hat gebuzzert – richtig gewinnt, falsch ist raus.`
+          : `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
         setz(
           big('Richtig ✓', 'btn-good', () => act('judge', { correct: true })),
           big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false })),
           big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz')),
         );
+      } else if (q.stechen) {
+        setzeText(phase, state.stechenSieger
+          ? `${teamName(state.stechenSieger)} gewinnt den Abend.`
+          : 'Das wusste keiner – zurück zum Endstand.');
+        setz(big(state.stechenSieger ? 'Zum Endstand' : 'Weiter', 'btn-primary', () => act('close')));
       } else {
         setzeText(phase, 'Frage beendet.');
         setz(big('Weiter', 'btn-primary', () => act('close')));

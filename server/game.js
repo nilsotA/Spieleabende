@@ -93,6 +93,11 @@ export function createState() {
     // Was man sich am nächsten Tag erzählt. Reine Buchhaltung fürs Ende – auf
     // Punkte und Ablauf hat davon nichts Einfluss.
     rekorde: leereRekorde(),
+    // Stechen (siehe startStechen): wie viele Entscheidungsfragen schon liefen,
+    // welche Texte dabei verbraucht sind und wer es am Ende geholt hat.
+    stechenLauf: 0,
+    stechenTexte: [],
+    stechenSieger: null,
   };
 }
 
@@ -271,6 +276,9 @@ export function startGame(state, questionSet) {
     team.bilanz = leereBilanz();
   }
   state.rekorde = leereRekorde();
+  state.stechenLauf = 0;
+  state.stechenTexte = [];
+  state.stechenSieger = null;
   return startRound(state, 1);
 }
 
@@ -497,6 +505,26 @@ export function judge(state, correct) {
   if (!q.onTheHook) throw new GameError('Es ist niemand am Zug – erst muss jemand buzzern.');
 
   const team = findTeam(state, q.onTheHook);
+
+  // Das Stechen läuft neben der Buchhaltung her: keine Punkte, keine Serie,
+  // keine Bilanz. Es geht nur noch um die Frage, wer den Abend gewinnt – die
+  // Zahlen auf der Tafel sind ja schon gespielt und sollen so stehen bleiben.
+  if (q.stechen) {
+    q.log.push({ teamId: team.id, result: correct ? 'correct' : 'wrong', delta: 0 });
+    q.lastDelta = { teamId: team.id, delta: 0 };
+    if (correct) {
+      state.stechenSieger = team.id;
+      q.revealed = true;
+      beende(q);
+      return state;
+    }
+    // Falsch heißt hier raus – und die Übrigen dürfen wieder drücken. Ist
+    // keiner mehr da, löst openBuzz die Frage auf und der Host stellt die
+    // nächste.
+    q.lockedOut.push(team.id);
+    return openBuzz(state);
+  }
+
   const isPrimary = q.step === 'primary';
   const full = q.value;
 
@@ -568,6 +596,18 @@ export function closeQuestion(state) {
   if (q.step !== 'result') {
     throw new GameError('Die Frage läuft noch – erst werten oder auflösen.');
   }
+
+  // Eine Stechfrage gehört zu keinem Brett: Danach geht es zurück in den
+  // Endstand – entweder mit Sieger oder für die nächste Entscheidungsfrage.
+  if (q.stechen) {
+    state.current = null;
+    state.phase = 'gameOver';
+    state.message = state.stechenSieger
+      ? `${findTeam(state, state.stechenSieger).name} entscheidet das Stechen!`
+      : 'Das wusste keiner – noch eine Frage?';
+    return state;
+  }
+
   const solvedBy = q.log.find((e) => e.result === 'correct');
 
   if (state.settings.turnMode === 'keepOnCorrect' && solvedBy) {
@@ -605,6 +645,64 @@ export function nextRound(state) {
   return startRound(state, state.round + 1);
 }
 
+/* ----------------------------------------------------------------- Stechen */
+
+/** Alle Teams, die den Höchststand teilen. */
+export function spitzenTeams(state) {
+  if (!state.teams.length) return [];
+  const best = Math.max(...state.teams.map((t) => t.score));
+  return state.teams.filter((t) => t.score === best);
+}
+
+/**
+ * Stechen: eine Entscheidungsfrage, wenn oben zwei gleichauf stehen.
+ *
+ * Ein Abend, der mit „Unentschieden" endet, endet nicht wirklich – es fehlt
+ * der Moment, in dem einer gewinnt. Die Regeln des Spiels bleiben davon
+ * unberührt: Das Stechen ändert keine Punkte und läuft erst, wenn das Brett
+ * leer ist und der Host es startet.
+ *
+ * Es läuft wie ein freigegebener Buzzer, nur ohne Zugteam: Wer zuerst drückt,
+ * antwortet. Richtig gewinnt den Abend, falsch scheidet aus dem Stechen aus –
+ * dann sind die übrigen dran. Weiß es keiner, gibt es die nächste Frage.
+ */
+export function startStechen(state, frage) {
+  if (state.phase !== 'gameOver') {
+    throw new GameError('Ein Stechen gibt es erst, wenn das Spiel durch ist.');
+  }
+  if (state.stechenSieger) throw new GameError('Das Stechen ist schon entschieden.');
+  const spitze = spitzenTeams(state);
+  if (spitze.length < 2) throw new GameError('Es steht schon ein Sieger fest.');
+  if (!frage || !frage.text) throw new GameError('Es ist keine Frage mehr übrig.');
+
+  state.stechenLauf = (state.stechenLauf || 0) + 1;
+  state.stechenTexte = [...(state.stechenTexte || []), frage.text];
+  state.current = {
+    stechen: true,
+    catIdx: null,
+    rowIdx: null,
+    category: frage.category || 'Stechen',
+    // Ohne Punktwert: Das Stechen entscheidet, wer gewinnt, nicht wie hoch.
+    value: 0,
+    text: frage.text,
+    image: null,
+    answer: frage.answer || '',
+    note: frage.note || null,
+    step: 'buzz',
+    // Kein Zugteam – deshalb darf hier jeder buzzern, der noch im Rennen ist.
+    teamId: null,
+    onTheHook: null,
+    buzzedTeamId: null,
+    lockedOut: state.teams.filter((t) => !spitze.includes(t)).map((t) => t.id),
+    revealed: false,
+    buzzOpenedAt: Date.now(),
+    log: [],
+  };
+  state.phase = 'question';
+  state.message = state.stechenLauf > 1 ? 'Noch eine Entscheidungsfrage!' : 'Stechen!';
+  return state;
+}
+
 export function setTurn(state, teamId) {
   const idx = state.teams.findIndex((t) => t.id === teamId);
   if (idx < 0) throw new GameError('Team nicht gefunden.');
@@ -633,7 +731,11 @@ export function backToLobby(state) {
 }
 
 export function ranking(state) {
-  return [...state.teams].sort((a, b) => b.score - a.score);
+  const sieger = state.stechenSieger;
+  return [...state.teams].sort((a, b) => b.score - a.score
+    // Wer das Stechen geholt hat, steht vor den Punktgleichen – sonst
+    // entschiede die Reihenfolge im Team-Array, wer oben auf der Tafel steht.
+    || (a.id === sieger ? -1 : 0) || (b.id === sieger ? 1 : 0));
 }
 
 /* ------------------------------------------------------------------- Hilfen */
@@ -670,7 +772,10 @@ export class GameError extends Error {}
 export function lageSignatur(state) {
   const q = state.current;
   if (!q) return `${state.phase}#${state.round}`;
-  return `f${q.catIdx}.${q.rowIdx}#${q.step}#${q.buzzedTeamId || ''}`;
+  // Beim Stechen gibt es kein Feld – dort trennt der Zähler die Fragen, sonst
+  // sähe die zweite Entscheidungsfrage aus wie die erste.
+  const feld = q.stechen ? `s${state.stechenLauf}` : `f${q.catIdx}.${q.rowIdx}`;
+  return `${feld}#${q.step}#${q.buzzedTeamId || ''}`;
 }
 
 export function viewFor(state, { isHost, clientId }) {
@@ -711,11 +816,14 @@ export function viewFor(state, { isHost, clientId }) {
     lage: lageSignatur(state),
     // Nur am Ende interessant, aber billig genug, um immer mitzufahren.
     rekorde: state.rekorde || null,
+    stechenLauf: state.stechenLauf || 0,
+    stechenSieger: state.stechenSieger || null,
   };
 
   if (state.current) {
     const q = state.current;
     view.current = {
+      stechen: !!q.stechen,
       catIdx: q.catIdx,
       rowIdx: q.rowIdx,
       category: q.category,
