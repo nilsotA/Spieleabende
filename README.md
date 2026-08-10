@@ -279,7 +279,9 @@ dem meisten Dazwischengerufe, „Kurios & Wahr“ der, bei dem gutes Raten reich
 mitraten kann jeder, der schon mal gekocht hat.
 
 Dazu gibt es in der Auswahl **🎲 Zufallsmix aus allen Sätzen** – zwölf Kategorien,
-bei jedem Start neu gewürfelt. So ist kein Abend wie der andere.
+bei jedem Start neu gewürfelt. So ist kein Abend wie der andere. Gezogen wird reihum
+über die Sätze: Je Runde kommt höchstens eine Kategorie aus derselben Quelle, damit
+sich der Mix auch nach Mischung anfühlt und nicht nach einem Satz mit Beilage.
 
 Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
 `Welcher Film?\n🦁 👑` sind die Symbole ja die eigentliche Frage.

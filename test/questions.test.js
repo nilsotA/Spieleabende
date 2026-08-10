@@ -367,3 +367,53 @@ test('ein Satz mit fehlender Bilddatei wird gemeldet statt still gespielt', asyn
     await unlink(datei).catch(() => {});
   }
 });
+
+test('der Zufallsmix verteilt sich über die Sätze', async () => {
+  // „Zufallsmix aus allen Sätzen" soll sich auch so anfühlen. Vorher wurden
+  // sechs Kategorien je Runde blind aus einem gemeinsamen Topf gezogen; bei acht
+  // Sätzen kamen dabei typisch drei bis vier aus derselben Quelle und in etwa
+  // jedem 150. Mix sechs von zwölf. Jetzt wird reihum über die Sätze gezogen.
+  const { mixSet } = await import('../server/questions.js');
+
+  // Fragetexte sind eindeutig, Kategorienamen nicht: „Was ist die Frage?" gibt
+  // es in fast jedem Satz.
+  const ausSatz = new Map();
+  for (const datei of DATEIEN) {
+    const set = JSON.parse(await readFile(new URL(datei, DATEN), 'utf8'));
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) ausSatz.set(q.text, datei);
+      }
+    }
+  }
+
+  const gesehen = new Map();
+  for (let i = 0; i < 40; i++) {
+    const mix = normalizeSet(await mixSet());
+    const proSatz = new Map();
+    for (const round of mix.rounds) {
+      const inDieserRunde = new Map();
+      for (const cat of round.categories) {
+        const satz = ausSatz.get(cat.questions[0].text);
+        assert.ok(satz, `Kategorie „${cat.name}" stammt aus keinem bekannten Satz`);
+        proSatz.set(satz, (proSatz.get(satz) || 0) + 1);
+        inDieserRunde.set(satz, (inDieserRunde.get(satz) || 0) + 1);
+        gesehen.set(satz, (gesehen.get(satz) || 0) + 1);
+      }
+      // Solange es mindestens sechs Sätze gibt, ist eine Runde sechsmal
+      // verschiedene Herkunft.
+      if (DATEIEN.length >= 6) {
+        const meiste = Math.max(...inDieserRunde.values());
+        assert.equal(meiste, 1,
+          `eine Runde zieht ${meiste} Kategorien aus demselben Satz`);
+      }
+    }
+    const proMix = Math.max(...proSatz.values());
+    assert.ok(proMix <= 2, `ein Mix zieht ${proMix} Kategorien aus demselben Satz`);
+  }
+
+  // Und über viele Mixe kommt jeder Satz auch wirklich vor.
+  for (const datei of DATEIEN) {
+    assert.ok(gesehen.get(datei) > 0, `${datei} kam in 40 Mixen kein einziges Mal vor`);
+  }
+});

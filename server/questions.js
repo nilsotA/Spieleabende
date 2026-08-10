@@ -203,12 +203,13 @@ export async function mixSet() {
       const topf = toepfe[Math.min(ri, toepfe.length - 1)];
       for (const cat of round.categories) {
         if (!topf.has(cat.name)) topf.set(cat.name, []);
-        topf.get(cat.name).push(cat);
+        // Woher die Kategorie stammt, wird mitgeführt: Der Mix zieht reihum
+        // über die Sätze, und dafür muss er sie auseinanderhalten können.
+        topf.get(cat.name).push({ cat, satz: eintrag.file });
       }
     });
   }
 
-  const zufaellig = (liste) => liste[Math.floor(Math.random() * liste.length)];
   const mischen = (liste) => {
     for (let i = liste.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -220,10 +221,40 @@ export async function mixSet() {
   const gezogen = [];
   const vergeben = new Set();
   for (const topf of toepfe) {
-    const kandidaten = mischen([...topf.entries()]
-      .filter(([name]) => !vergeben.has(name))
-      .map(([name, gleiche]) => ({ name, cat: zufaellig(gleiche) })));
-    const sechs = kandidaten.slice(0, 6);
+    // Reihum über die Sätze statt blind aus einem Topf.
+    //
+    // Vorher wurden sechs Kategorien aus allen zusammengeworfenen gezogen. Bei
+    // acht Sätzen kamen dabei typisch drei bis vier aus derselben Quelle, in
+    // etwa jedem 150. Mix aber sechs von zwölf – dann heißt das Brett zwar
+    // „Zufallsmix aus allen Sätzen", spielt sich aber wie ein Satz. Jetzt kommt
+    // je Runde höchstens eine Kategorie pro Satz, solange genug Sätze da sind;
+    // erst wenn die ausgehen, wird nachgelegt.
+    const nachSatz = new Map();
+    for (const [name, eintraege] of topf) {
+      if (vergeben.has(name)) continue;
+      for (const e of eintraege) {
+        if (!nachSatz.has(e.satz)) nachSatz.set(e.satz, []);
+        nachSatz.get(e.satz).push({ name, cat: e.cat });
+      }
+    }
+    const reihen = mischen([...nachSatz.values()].map((l) => mischen(l)));
+
+    const sechs = [];
+    const genommen = new Set();
+    // Mehrere Umläufe: Beim ersten bekommt jeder Satz eine Kategorie, beim
+    // zweiten die nächste – so verteilt es sich auch, wenn es weniger als sechs
+    // Sätze gibt.
+    while (sechs.length < 6 && reihen.some((l) => l.length)) {
+      for (const liste of reihen) {
+        if (sechs.length >= 6) break;
+        let k = liste.pop();
+        // Denselben Kategorienamen nicht zweimal – auch nicht aus zwei Sätzen.
+        while (k && (vergeben.has(k.name) || genommen.has(k.name))) k = liste.pop();
+        if (!k) continue;
+        genommen.add(k.name);
+        sechs.push(k);
+      }
+    }
     for (const k of sechs) vergeben.add(k.name);
     gezogen.push(sechs.map((k) => k.cat));
   }
