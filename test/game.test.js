@@ -70,7 +70,7 @@ test('nach falscher Antwort ist der Buzzer frei, richtig gibt die Hälfte', () =
   G.joinTeam(state, 'geraet-2', state.teams[1].id, 'Bea');
   G.pickCell(state, 0, 3); // 500
   G.judge(state, false);
-  assert.equal(score(state, 0), 0, 'Standard: kein Abzug für das Zugteam');
+  assert.equal(score(state, 0), -250, 'Standard: die Hälfte Abzug für das Zugteam');
   assert.equal(state.current.step, 'buzz');
 
   G.buzz(state, 'geraet-2');
@@ -148,6 +148,22 @@ test('Einstellung „wer richtig liegt, bleibt dran“', () => {
   G.endQuestion(state);
   G.closeQuestion(state);
   assert.equal(state.turnIndex, 1);
+});
+
+test('voreingestellt kostet ein Fehlgriff des Zugteams die Hälfte', () => {
+  // Ohne Abzug ist ein Feldaufruf risikofrei: Man nimmt das teuerste und rät.
+  // Die Voreinstellung ist deshalb die halbe Strafe – wer ändern will, kann.
+  const state = setup();
+  assert.equal(state.settings.wrongPenalty, 'half');
+
+  G.pickCell(state, 0, 3); // 500
+  G.judge(state, false);
+  assert.equal(score(state, 0), -250);
+
+  const zweiter = setup();
+  G.pickCell(zweiter, 0, 3);
+  G.passQuestion(zweiter);
+  assert.equal(score(zweiter, 0), -250, '„weiß nicht" kostet genauso viel');
 });
 
 test('optionaler Abzug für das Zugteam', () => {
@@ -735,6 +751,7 @@ test('die Einstellungen gelten ab sofort, auch mitten im Spiel', () => {
   const state = setup();
   const a = state.teams[0];
 
+  state.settings.wrongPenalty = 'none';
   G.pickCell(state, 0, 3); // 500, kein Abzug eingestellt
   G.judge(state, false);
   assert.equal(a.score, 0);

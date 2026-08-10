@@ -330,10 +330,11 @@ test('Zurücknehmen macht die letzte Wertung rückgängig', async (t) => {
   assert.equal(z.current.step, 'primary', 'die Frage steht wieder offen');
   assert.equal(z.rueckgaengig, null, 'nur eine Stufe');
 
-  // Und danach lässt sich normal weiterspielen: diesmal falsch.
+  // Und danach lässt sich normal weiterspielen: diesmal falsch – das kostet
+  // voreingestellt die Hälfte.
   await host({ type: 'judge', correct: false });
   z = await zustand(base);
-  assert.equal(z.teams[0].score, 0);
+  assert.equal(z.teams[0].score, -250);
   assert.equal(z.teams[0].bilanz.falsch, 1);
 });
 
@@ -999,13 +1000,15 @@ test('eine Wertung für die vorige Lage wird abgelehnt', async (t) => {
   assert.equal(spaet.ok, false, 'die überholte Wertung greift nicht durch');
   assert.match(spaet.error, /geändert/);
   st = await zustand(base);
-  assert.deepEqual(st.teams.map((t) => t.score), [0, 0], 'und hat keine Punkte verteilt');
+  // −250 steht schon da: „weiß nicht" kostet voreingestellt die Hälfte. Wichtig
+  // ist, dass sich durch den überholten Druck nichts weiter bewegt hat.
+  assert.deepEqual(st.teams.map((t) => t.score), [-250, 0], 'und hat keine Punkte verteilt');
 
   // Mit der aktuellen Lage geht es durch – und trifft das Buzzteam.
   const jetzt = await schick('lage-host', { type: 'judge', correct: true, lage: st.lage });
   assert.equal(jetzt.ok, true);
   st = await zustand(base);
-  assert.deepEqual(st.teams.map((t) => t.score), [0, 250], 'halbe Punkte fürs Buzzteam');
+  assert.deepEqual(st.teams.map((t) => t.score), [-250, 250], 'halbe Punkte fürs Buzzteam');
 
   // Ohne Angabe bleibt alles wie bisher – eine alte, im Browser hängende Seite
   // soll nicht plötzlich nichts mehr können.

@@ -77,8 +77,11 @@ export function createState() {
       // 'rotate'       = nach jeder Frage ist das nächste Team dran
       // 'keepOnCorrect'= wer richtig antwortet, bleibt dran
       turnMode: 'rotate',
-      // Abzug für das Zugteam bei falscher Antwort: 'none' | 'half' | 'full'
-      wrongPenalty: 'none',
+      // Abzug für das Zugteam, wenn es falsch liegt oder passt:
+      // 'none' | 'half' | 'full'. Voreingestellt die Hälfte – ohne Abzug ist
+      // ein Feld aufrufen risikofrei, und dann wird der Reihe nach das teuerste
+      // genommen und ins Blaue geraten.
+      wrongPenalty: 'half',
       // Buzzern erlauben, nachdem das Zugteam richtig geantwortet hat?
       buzzAfterCorrect: false,
       // Wer ruft das Feld auf?

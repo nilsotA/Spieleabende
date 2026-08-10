@@ -134,14 +134,14 @@ Das Board hat 6 Kategorien × 4 Felder. Wer am Zug ist, wählt ein Feld.
 | Situation | Punkte |
 |---|---|
 | Team am Zug antwortet richtig | **+ voller Wert** |
-| Team am Zug antwortet falsch **oder weiß es nicht** | 0 (einstellbar: Abzug) |
+| Team am Zug antwortet falsch **oder weiß es nicht** | **− halber Wert** (einstellbar) |
 | Danach: ein anderes Team buzzert und liegt richtig | **+ halber Wert** |
 | Danach: ein anderes Team buzzert und liegt falsch | **− halber Wert** |
 
 **„Weiß nicht" zählt wie eine falsche Antwort.** Wer die Frage zuerst bekommt und
 passt, steht genauso da, als hätte er etwas Falsches gesagt – gleicher Abzug, gleiche
-Serie gerissen. Sonst wäre „weiß nicht" der sichere Ausweg, sobald ihr einen Abzug
-eingestellt habt, und geraten hätte nur noch, wer nichts zu verlieren hat. Auf der
+Serie gerissen. Sonst wäre „weiß nicht" der sichere Ausweg, und geraten hätte nur noch,
+wer nichts zu verlieren hat. Auf der
 Leinwand steht trotzdem weiter „wusste es nicht" statt „falsch": Das ist am Tisch eine
 andere Geschichte, auch wenn sie gleich viel kostet.
 
@@ -176,8 +176,10 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 ### Einstellbar in der Lobby
 
 - **Wer ist als Nächstes dran?** Reihum (Standard) oder „wer richtig liegt, bleibt dran“.
-- **Abzug, wenn das Zugteam falsch liegt oder nicht weiß:** keiner (Standard), halbe
-  oder volle Punkte. Beides kostet gleich viel – siehe oben.
+- **Abzug, wenn das Zugteam falsch liegt oder nicht weiß:** halbe Punkte (Standard),
+  keiner oder volle Punkte. Falsch und „weiß nicht“ kosten gleich viel – siehe oben.
+  Ohne Abzug ist ein Feldaufruf risikofrei, dann wird gern das teuerste Feld genommen
+  und ins Blaue geraten.
 - **Buzzern nach richtiger Antwort:** normalerweise aus – die Frage ist dann durch.
 - **Wer ruft das Feld auf?** Standard: das Team am Zug tippt es auf seinem Handy an.
   Auf **„Nur der Host"** verschwindet das Raster von den Handys – dann rufen die Teams
