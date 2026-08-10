@@ -12,6 +12,11 @@
   /* Der Schriftzug ist hier Herkunftszeichen, nicht Bühne: eine Spur größer als
      die Überschrift, sonst hält er sich zurück. */
   .editor-logo { font-size: 1.5rem; flex: none; margin-right: .5rem; }
+  /* Auf einem hochkant gehaltenen Tablet blieben dem Namensfeld 110 Pixel –
+     der Platzhalter „Name des Fragensatzes" braucht 156. Statt ihn abzuschneiden
+     bricht die Zeile jetzt um: Feld und Auswahl behalten eine lesbare Breite,
+     die Knöpfe rutschen darunter. */
+  #set-name, #load-select { flex: 1 1 14rem; min-width: 0; }
   .bar { position: sticky; top: 0; z-index: 10; background: rgba(5,7,12,.94);
          backdrop-filter: blur(6px); padding: .8rem 0; margin-bottom: 1.2rem;
          border-bottom: 1px solid var(--line); }
@@ -100,8 +105,8 @@
       <a class="btn btn-ghost btn-sm" href="/host">← Host-Screen</a>
     </div>
     <div class="row" style="margin-top:.8rem">
-      <input id="set-name" class="grow" placeholder="Name des Fragensatzes" maxlength="80">
-      <select id="load-select" class="grow"></select>
+      <input id="set-name" class="grow" aria-label="Name des Fragensatzes" placeholder="Name des Fragensatzes" maxlength="80">
+      <select id="load-select" class="grow" aria-label="Vorhandenen Fragensatz laden"></select>
       <button id="btn-load" class="btn btn-ghost btn-sm" type="button">Laden</button>
       <label class="btn btn-ghost btn-sm datei-knopf" style="margin:0;cursor:pointer">
         Datei öffnen <input id="file-input" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei öffnen">

@@ -198,6 +198,15 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   display: flex;
   flex-direction: column;
   padding: clamp(0.5rem, 1.4vh, 1.2rem) clamp(0.8rem, 3vw, 3rem) 0;
+  /* Der Schein hinter der Kategorienzeile greift absichtlich 4 % über das Brett
+     hinaus. Auf einem 2560er-Fernseher sind das 102 Pixel je Seite – mehr als
+     das Polster der Bühne, und die Seite bekam eine waagerechte Bildlaufleiste.
+     Auf dem Schirm, den der ganze Raum ansieht, sieht das nach Versehen aus.
+     `clip` statt `hidden`: senkrecht darf weiter alles herausragen, sonst
+     schnitte es die Schatten der Pulte und das Frage-Overlay an. An dieser
+     Kante ist der Verlauf ohnehin längst durchsichtig – zu sehen ist nichts,
+     nur die Leiste ist weg. */
+  overflow-x: clip;
 }
 
 /* Goldener Lichtbalken über die volle Bühnenbreite: das eine Signal für
@@ -431,6 +440,21 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 @keyframes schildAn {
   from { opacity: 0; transform: translateY(-16px); }
 }
+/* Unter 1280px sind die sechs Schilder schmaler als die längsten deutschen
+   Kategorienamen. Gemessen brach „Tierische Superkräfte" zu „…rkräf|te" und
+   „Schätzfragen" zu „…tzfra|gen" – mitten im Wort, ohne Trennstrich, und das
+   liest sich wie ein Fehler statt wie ein Umbruch. Weniger Sperrung und ein
+   etwas kleinerer Fuß halten die Wörter zusammen; ab 1280px bleibt alles, wie
+   es war. Der Notausgang `overflow-wrap: anywhere` steht weiter da – für
+   selbstgebaute Kategorien, die noch länger sind. */
+@media (max-width: 1279px) {
+  .cat {
+    letter-spacing: 0.04em;
+    font-size: clamp(0.82rem, 1.35vw, 1.45rem);
+    padding-inline: 0.45rem;
+  }
+}
+
 .cat > span { position: relative; z-index: 1; }
 .cat::after {
   content: '';
@@ -1207,6 +1231,13 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   grid-template-areas: 'name' 'members' 'score';
   text-align: center;
   padding-inline: 0.5rem;
+  /* Gestapelt braucht ein Pult weniger Breite als nebeneinander. Ohne diese
+     Zeile galt weiter min-width: 128px, und auf einem 1024er-Schirm passten
+     acht Pulte nicht mehr in die Reihe: Das achte stand gemessen bei 994–1122,
+     also komplett außerhalb des Fensters. Erreichbar war es nur durch seitliches
+     Schieben der Leiste – auf der Leinwand, die der ganze Raum ansieht, ist ein
+     Punktestand hinter der Kante aber schlicht nicht da. */
+  min-width: 92px;
 }
 /* Zentriert wird der Text, nicht das Feld. Ein per `justify-items: center`
    ausgerichtetes Grid-Kind bemisst sich nach fit-content – und weil der Name
