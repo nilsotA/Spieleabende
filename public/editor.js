@@ -140,7 +140,11 @@ function render() {
             el('div', { class: 'val' }, String(BASE_VALUES[qi] * mult)),
             el('textarea', {
               placeholder: 'Frage',
-              oninput: (ev) => { q.text = ev.target.value; persistSoon(); },
+              oninput: (ev) => {
+                q.text = ev.target.value;
+                laengeMarkieren(ev.target);
+                persistSoon();
+              },
             }, q.text || ''),
             el('div', { class: 'antwort' },
               el('textarea', {
@@ -210,8 +214,8 @@ function render() {
   });
   updateFortschritt();
   zeigeZiel();
+  alleLaengenMarkieren();
 }
-
 /** Wohin „Auf dem Server speichern" schreibt – vorher wusste man das erst danach. */
 function zeigeZiel() {
   const ziel = $('#ziel-datei');
@@ -361,6 +365,29 @@ async function save(overwrite) {
  * 48 Fragen zu schreiben ist viel – sichtbar zu machen, wie weit man ist und
  * wo noch Lücken sind, nimmt der Sache das Zähe.
  */
+/**
+ * Sehr lange Fragen als solche kenntlich machen.
+ *
+ * Auf der Leinwand wird die Schrift so weit heruntergerechnet, bis alles
+ * draufpasst – bei einem ganzen Absatz landet sie dabei bei einem Bruchteil
+ * ihrer Größe und ist aus vier Metern nicht mehr zu lesen. Das merkt man beim
+ * Tippen nicht, sondern erst am Abend. Die Grenze ist gemessen: Bis etwa 180
+ * Zeichen bleibt die Frage auf einem 900px-Screen in voller Größe.
+ */
+const LEINWAND_GRENZE = 180;
+
+function laengeMarkieren(feld) {
+  const zulang = (feld.value || '').length > LEINWAND_GRENZE;
+  feld.classList.toggle('zulang', zulang);
+  feld.title = zulang
+    ? `${feld.value.length} Zeichen – das wird auf der Leinwand klein. Unter ${LEINWAND_GRENZE} bleibt es groß.`
+    : '';
+}
+
+function alleLaengenMarkieren() {
+  for (const feld of document.querySelectorAll('.qrow > textarea')) laengeMarkieren(feld);
+}
+
 function updateFortschritt() {
   const gesamt = set.rounds.reduce((n, r) => n + r.categories.length * 4, 0);
   const offen = fehlendeFelder();
@@ -371,6 +398,20 @@ function updateFortschritt() {
     ? `${fertig} von ${gesamt} Fragen fertig · nächste Lücke: ${offen[0].label}`
     : `Alle ${gesamt} Fragen ausgefüllt`;
   knopf.classList.toggle('fertig', offen.length === 0);
+
+  // Nebenbei: Wie viele Fragen sind zu lang für eine Leinwand? Das steht hier
+  // und nicht als Hindernis beim Speichern – geschrieben ist geschrieben, und
+  // manchmal muss eine Frage eben lang sein.
+  const lange = set.rounds.flatMap((r) => r.categories)
+    .flatMap((c) => c.questions)
+    .filter((q) => (q.text || '').length > LEINWAND_GRENZE).length;
+  const hinweis = $('#fortschritt-lang');
+  if (hinweis) {
+    hinweis.hidden = lange === 0;
+    hinweis.textContent = lange === 1
+      ? '1 Frage ist sehr lang – die wird auf der Leinwand klein.'
+      : `${lange} Fragen sind sehr lang – die werden auf der Leinwand klein.`;
+  }
 }
 
 $('#fortschritt').addEventListener('click', () => {
@@ -517,4 +558,5 @@ addEventListener('scroll', leisteAnpassen, { passive: true });
 loadSetList();
 render();
 updateFortschritt();
+alleLaengenMarkieren();
 leisteAnpassen();

@@ -348,6 +348,57 @@ function renderAnschluss() {
   setzeText(zeile, text);
 }
 
+/**
+ * Frage, Lösung und Zusatz auf die Bühne herunterrechnen.
+ *
+ * Die mitgelieferten Sätze sind kurz gehalten, aber der Editor lädt zum
+ * Selberschreiben ein – und dort tippt irgendwann jemand einen ganzen Absatz
+ * als Frage. Gemessen: 393 Zeichen ergaben auf einem 900px-Screen einen Kasten
+ * von 1036px, mit Lösung und Zusatz 1587px. Die Antwort stand damit weit unter
+ * der Bildkante.
+ *
+ * Scrollen ist auf einer Leinwand keine Antwort: Was nicht draufsteht, liest
+ * der Raum nicht, und niemand fasst den Beamer-Rechner mitten in der Frage an.
+ * Also wird die Schrift so weit verkleinert, bis alles zwischen Bühnenrand und
+ * Steuerleiste passt – in Schritten, nicht stufenlos, damit gleich lange Fragen
+ * gleich groß bleiben und die Anzeige nicht bei jedem Pixel zappelt.
+ *
+ * Untergrenze 0,5: Darunter wäre es aus vier Metern ohnehin nicht mehr zu
+ * lesen, und dann ist die Frage schlicht zu lang geschrieben.
+ */
+function passeFrageEin() {
+  // Nach dem Zeichnen messen: Das Overlay wird im selben Durchlauf erst
+  // sichtbar gemacht, und ein verstecktes Element hat keine Höhe. Der erste
+  // Anlauf maß deshalb bei jeder frisch geöffneten Frage ins Leere und
+  // verkleinerte gar nichts.
+  requestAnimationFrame(() => {
+    const overlay = document.querySelector('#question');
+    const panel = overlay?.querySelector('.q-panel');
+    if (!overlay || !panel || overlay.hidden) return;
+    const stufen = [1, 0.92, 0.84, 0.76, 0.68, 0.6, 0.52, 0.44];
+    for (const stufe of stufen) {
+      panel.style.setProperty('--frageskala', String(stufe));
+      // Höhe erst nach dem Setzen lesen – das erzwingt den Umbruch. Gemessen
+      // wird am Overlay: Es ist der Kasten, der sonst scrollen würde, und genau
+      // das soll auf einer Leinwand nicht passieren.
+      if (overlay.scrollHeight <= overlay.clientHeight + 1) break;
+    }
+    // Reicht auch die kleinste Stufe nicht, ist die Frage schlicht zu lang
+    // geschrieben – dann entscheidet, was man sieht. Sichtbar sein muss die
+    // Lösung: Die Frage hat der Host ohnehin vorgelesen.
+    if (overlay.scrollHeight > overlay.clientHeight + 1) {
+      const loesung = overlay.querySelector('#q-answer');
+      if (loesung && !loesung.hidden) {
+        loesung.scrollIntoView({ block: 'end', behavior: 'auto' });
+      } else {
+        overlay.scrollTop = 0;
+      }
+    }
+  });
+}
+
+addEventListener('resize', passeFrageEin);
+
 function renderBoard() {
   const board = $('#board');
   const data = state.board;
@@ -567,6 +618,10 @@ function renderQuestion(prev) {
   if (sameQuestion && buzzerJetztFrei && !buzzerVorherFrei) {
     setTimeout(() => sound('armed'), 180);
   }
+
+  // Zum Schluss auf die Bühne herunterrechnen – auch beim Auflösen, weil Lösung
+  // und Zusatz erst dann dazukommen und den Kasten weiter wachsen lassen.
+  passeFrageEin();
 }
 
 /**

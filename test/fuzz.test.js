@@ -171,3 +171,86 @@ test('zufällige Zugfolgen bringen die Regeln nicht durcheinander', () => {
     }
   }
 });
+
+test('die Punktestände sind genau die Summe der Wertungen', () => {
+  // Die stärkste Aussage über das Punktesystem: Am Ende darf kein Team einen
+  // Punkt mehr oder weniger haben, als in den Frageprotokollen steht. Damit
+  // fiele jede Doppelzählung auf – etwa wenn eine Wertung zweimal durchginge
+  // oder ein Abzug zusätzlich zum Buzzer-Malus gebucht würde.
+  //
+  // Gespielt wird zufällig, aber vollständig: jedes Feld, beide Runden, alle
+  // Regelkombinationen durch.
+  const kombis = [];
+  for (const wrongPenalty of ['none', 'half', 'full']) {
+    for (const turnMode of ['rotate', 'keepOnCorrect']) {
+      for (const buzzAfterCorrect of [false, true]) {
+        kombis.push({ wrongPenalty, turnMode, buzzAfterCorrect });
+      }
+    }
+  }
+
+  for (const [nr, settings] of kombis.entries()) {
+    let x = (nr + 1) * 2654435761;
+    const r = () => { x ^= x << 13; x >>>= 0; x ^= x >> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
+    const state = G.createState();
+    for (const name of ['Rot', 'Blau', 'Grün', 'Gelb']) G.addTeam(state, name);
+    Object.assign(state.settings, settings);
+    G.startGame(state, SATZ);
+
+    const gebucht = new Map(state.teams.map((t) => [t.id, 0]));
+    for (let runde = 1; runde <= 2; runde++) {
+      let schutz = 0;
+      while (state.phase === 'board' && schutz++ < 100) {
+        let feld = null;
+        state.board.categories.forEach((c, ci) => c.cells.forEach((z, ri) => {
+          if (!z.used && !feld) feld = { ci, ri };
+        }));
+        if (!feld) break;
+        G.pickCell(state, feld.ci, feld.ri);
+
+        let runden = 0;
+        while (state.phase === 'question' && runden++ < 20) {
+          const q = state.current;
+          if (q.step === 'primary') {
+            if (r() < 0.55) G.judge(state, r() < 0.5);
+            else G.passQuestion(state);
+          } else if (q.step === 'buzz' && !q.buzzedTeamId) {
+            const dran = state.teams.filter((t) => t.id !== q.teamId && !q.lockedOut.includes(t.id));
+            if (dran.length && r() < 0.7) {
+              G.buzzFor(state, dran[Math.floor(r() * dran.length)].id);
+            } else {
+              G.endQuestion(state);
+            }
+          } else if (q.step === 'buzz') {
+            G.judge(state, r() < 0.5);
+          } else {
+            break;
+          }
+        }
+        assert.equal(state.current?.step, 'result',
+          `Frage hängt in Schritt „${state.current?.step}" (Kombination ${nr})`);
+        // Vor dem Schließen mitschreiben – danach ist das Protokoll weg.
+        for (const e of state.current.log) {
+          gebucht.set(e.teamId, (gebucht.get(e.teamId) || 0) + e.delta);
+        }
+        G.closeQuestion(state);
+      }
+      if (runde === 1) {
+        assert.equal(state.phase, 'roundEnd', `Runde 1 endet nicht (Kombination ${nr})`);
+        G.nextRound(state);
+      }
+    }
+    assert.equal(state.phase, 'gameOver', `Spiel endet nicht (Kombination ${nr})`);
+    for (const t of state.teams) {
+      assert.equal(t.score, gebucht.get(t.id),
+        `${t.name} hat ${t.score}, gebucht wurden ${gebucht.get(t.id)} `
+        + `(Abzug ${settings.wrongPenalty}, ${settings.turnMode}, `
+        + `Buzz nach richtig: ${settings.buzzAfterCorrect})`);
+    }
+    // Und die Bilanz muss dieselbe Geschichte erzählen wie der Punktestand.
+    for (const t of state.teams) {
+      assert.equal(t.bilanz.geholt - t.bilanz.verloren, t.score,
+        `${t.name}: Bilanz ${t.bilanz.geholt}−${t.bilanz.verloren} passt nicht zu ${t.score}`);
+    }
+  }
+});

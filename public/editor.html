@@ -55,6 +55,10 @@
   .fortschritt.fertig .fortschritt-balken { background: rgba(37,201,125,.16); }
   .fortschritt span:last-child { position: relative; }
   .luecke { outline: 2px solid #f8d548 !important; outline-offset: 2px; }
+  .fortschritt-lang { margin: .45rem 0 0; font-size: .8rem; color: #f0c65a; }
+  /* Sehr lange Frage: nur ein warmer Rand, kein Fehler – manchmal muss eine
+     Frage eben lang sein. */
+  .qrow > textarea.zulang { border-color: rgba(240, 198, 90, .55); }
   /* Die Kopfleiste klebt oben und ist rund 10rem hoch – ohne dieses Polster
      springt „Zur nächsten Lücke" genau dahinter. */
   html { scroll-padding-top: 11rem; }
@@ -102,6 +106,10 @@
       <span id="fortschritt-balken" class="fortschritt-balken"></span>
       <span id="fortschritt-text"></span>
     </button>
+    <!-- Kein Hindernis beim Speichern, nur ein Hinweis: Auf der Leinwand wird
+         die Schrift heruntergerechnet, bis alles draufpasst, und bei einem
+         ganzen Absatz ist sie aus vier Metern nicht mehr zu lesen. -->
+    <p id="fortschritt-lang" class="fortschritt-lang" hidden></p>
   </div>
   <!-- Marke direkt unter der Leiste. Woran erkannt wird, ob man schon im
        Formular ist, darf sich nicht dadurch ändern, dass die Leiste zusammen-

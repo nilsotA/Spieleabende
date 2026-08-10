@@ -243,6 +243,12 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   sagt das die Fragensatz-Auswahl – sonst wäre die Frage im Spiel stumm verbrannt.
 - `note` ist optional und erscheint beim Auflösen als kleiner Zusatz – auf der
   Leinwand und auf den Handys. Genau darüber redet die Runde danach.
+- **Kurz halten.** Passt eine Frage nicht auf die Bühne, rechnet der Host-Screen
+  die Schrift herunter, bis sie passt – bei einem ganzen Absatz landet sie dabei
+  bei einem Bruchteil ihrer Größe und ist aus vier Metern nicht mehr zu lesen.
+  Bis etwa 180 Zeichen bleibt sie in voller Größe; darüber sagt es der Editor.
+  Reicht auch die kleinste Stufe nicht, rückt beim Auflösen wenigstens die
+  Lösung ins Bild – die Frage hat der Host ohnehin vorgelesen.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.
 
 ### Mitgeliefert
