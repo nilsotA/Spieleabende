@@ -2,7 +2,7 @@
 // erlaubt das Bewerten – damit die Lösung nie auf der Leinwand landet.
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
-  installAudioUnlock, keepScreenAwake, setFrageText, setzeText } from '/common.js';
+  installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand } from '/common.js';
 
 let state = null;
 
@@ -97,10 +97,19 @@ function render() {
     }
   }
 
+  phase.classList.remove('bereit');
   switch (state.phase) {
-    case 'lobby':
-      setzeText(phase, 'Lobby – Teams anlegen und starten geht am großen Screen.');
+    case 'lobby': {
+      // Der Host steht in der Lobby oft mit dem Handy am Tisch, während die
+      // Gäste beitreten – dann soll er hier dieselbe Auskunft bekommen wie auf
+      // der Leinwand, statt nur „geht am großen Screen".
+      const stand = anschlussStand(state);
+      setzeText(phase, stand.text
+        ? `${stand.text}\nAnlegen und starten geht am großen Screen.`
+        : 'Lobby – Teams anlegen und starten geht am großen Screen.');
+      phase.classList.toggle('bereit', stand.bereit);
       break;
+    }
     case 'board':
       setzeText(phase, `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – wählt ein Feld.`);
       setz(big('Zug überspringen', 'btn-ghost', () => {
@@ -162,8 +171,13 @@ function render() {
     state.teams.forEach((team, i) => {
       list.append(
         el('li', { class: i === state.turnIndex ? 'turn' : '' },
-          el('span', { class: 'dot', style: { background: team.color } }),
-          el('span', { class: 'grow' }, team.name),
+          // Punkt und Name in einer Hülle: Auf schmalen Handys rutschen die
+          // Knöpfe in eine zweite Zeile, und ohne die Hülle stünde der
+          // Farbpunkt allein in der ersten. Auf breiten Screens ist die Hülle
+          // per `display: contents` gar nicht da.
+          el('span', { class: 'r-kopf' },
+            el('span', { class: 'dot', style: { background: team.color } }),
+            el('span', { class: 'grow' }, team.name)),
           // Beschriftet wie im Host-Menü: „−" allein sagt nicht, um wie viel.
           el('button', {
             class: 'btn btn-sm btn-ghost',

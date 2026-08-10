@@ -1,6 +1,6 @@
 import {
   $, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
-  setFrageText, setzeText, istStumm, setzeStumm } from '/common.js';
+  setFrageText, setzeText, istStumm, setzeStumm, anschlussStand } from '/common.js';
 import { qrSvg } from '/qr.js';
 
 let state = null;
@@ -338,66 +338,14 @@ function renderLobby() {
   }
 }
 
-/**
- * Der Anschlussstand über dem Startknopf.
- *
- * Der Host sieht in der Teamliste zwar bei jedem Team, ob ein Handy dranhängt –
- * aber die Frage, die er beim Blick auf „Spiel starten" hat, ist eine andere:
- * Sind alle da? Bei acht Teams zählt man das nicht gern von oben nach unten
- * durch, während der Raum wartet.
- *
- * Zwei Dinge, die die Teamliste nicht zeigen kann:
- * - Geräte, die verbunden sind, aber noch in keinem Team stehen. Wer den
- *   QR-Code gerade gescannt hat und den Namen tippt, ist genau der Grund,
- *   noch zehn Sekunden zu warten. Diese Zahl kommt vom Server.
- * - Die Namen der Teams, bei denen noch etwas fehlt – damit der Host sie
- *   ansprechen kann, statt „irgendwer fehlt noch" in den Raum zu rufen.
- *
- * Kein Ton von Mangel: Ohne Handys zu spielen ist vorgesehen, der Satz sagt das
- * an der Stelle auch.
- */
+/** Zeichnet den Anschlussstand über dem Startknopf. Der Text kommt aus
+    common.js, weil die Fernbedienung ihn genauso braucht. */
 function renderAnschluss() {
   const zeile = $('#lobby-stand');
   if (!zeile) return;
-  const teams = state.teams;
-  const wartende = state.wartende || 0;
-  // Kopfzahl über alle Geräte: die in einem Team und die, die noch keins
-  // gewählt haben. Bei Zweierteams ist genau das die Frage – ein Team gilt
-  // schon mit einem Handy als verbunden, aber der zweite will auch buzzern.
-  const imTeam = teams.reduce((summe, t) => summe + t.members.filter((m) => m.online).length, 0);
-  const gesamt = imTeam + wartende;
-  const handys = (n) => (n === 1 ? '1 Handy' : `${n} Handys`);
-
-  if (!teams.length) {
-    zeile.classList.remove('bereit');
-    setzeText(zeile, gesamt ? `${handys(gesamt)} schon verbunden – leg jetzt die Teams an.` : '');
-    return;
-  }
-
-  const ohne = teams.filter((t) => !t.members.some((m) => m.online));
-  const alleDa = ohne.length === 0 && wartende === 0;
-  zeile.classList.toggle('bereit', alleDa);
-
-  if (alleDa) {
-    setzeText(zeile, `${handys(gesamt)} verbunden – alle ${teams.length} Teams sind dabei.`);
-    return;
-  }
-  if (!gesamt) {
-    setzeText(zeile, 'Noch kein Handy verbunden – ihr könnt auch ohne spielen, der Host drückt dann die Knöpfe.');
-    return;
-  }
-
-  // Bei vielen offenen Teams nicht die ganze Liste: Der Satz soll auf eine
-  // Zeile passen, sonst wächst die klebende Leiste in die Karten hinein.
-  const namen = ohne.map((t) => t.name);
-  const teile = [`${handys(gesamt)} verbunden`];
-  if (namen.length) {
-    teile.push(`ohne Handy: ${namen.length <= 3
-      ? namen.join(', ')
-      : `${namen.slice(0, 2).join(', ')} und ${namen.length - 2} weitere`}`);
-  }
-  if (wartende) teile.push(`${wartende} noch ohne Team`);
-  setzeText(zeile, `${teile.join(' · ')}`);
+  const { text, bereit } = anschlussStand(state);
+  zeile.classList.toggle('bereit', bereit);
+  setzeText(zeile, text);
 }
 
 function renderBoard() {

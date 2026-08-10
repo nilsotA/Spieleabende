@@ -34,7 +34,11 @@ body.remote #app {
   color: #9fd4ff;
   font-size: 0.95rem;
   min-height: 1.3rem;
+  /* In der Lobby stehen hier zwei Sätze untereinander: der Anschlussstand und
+     der Hinweis, wo angelegt und gestartet wird. */
+  white-space: pre-line;
 }
+.r-phase.bereit { color: #7ff0b8; }
 
 .r-card {
   border: 1px solid var(--line);
@@ -114,7 +118,31 @@ body.remote #app {
   border: 1px solid transparent;
 }
 .r-teams li.turn { border-color: #f8d548; background: rgba(248, 213, 72, 0.08); }
+/* Auf einem Handy passen Farbpunkt, Teamname, −100, Punktestand, +100 und
+   „dran" nicht in eine Zeile. Gemessen auf einem iPhone SE lag „+100" halb
+   außerhalb der Karte und „dran" ganz – und die Seite scrollt nicht seitlich,
+   der Knopf war also schlicht nicht erreichbar. Ausgerechnet auf dem Gerät, mit
+   dem der Host den ganzen Abend steuert.
+
+   Kürzere Beschriftungen wären der andere Weg, aber „−" allein sagt nicht, um
+   wie viel. Also bekommt der Name eine eigene Zeile und die Knöpfe darunter die
+   volle Breite – dann sind sie auch mit dem Daumen sicher zu treffen. */
+@media (max-width: 560px) {
+  .r-teams li { flex-wrap: wrap; row-gap: 0.35rem; }
+  .r-teams li .r-kopf {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-basis: 100%;
+    min-width: 0;
+  }
+  .r-teams li .btn { flex: 1; }
+  .r-teams .sc { min-width: 2.6rem; }
+}
 .r-teams .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+/* Auf breiten Screens ist die Hülle um Punkt und Name unsichtbar – die Zeile
+   bleibt genau die flache Reihe, die sie vorher war. */
+.r-teams .r-kopf { display: contents; }
 .r-teams .sc {
   font-family: var(--font-num);
   font-style: italic;

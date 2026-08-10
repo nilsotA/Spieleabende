@@ -53,6 +53,9 @@ Teamliste daneben nicht zeigen kann:
 Sind alle dabei, wird die Zeile grün. Ohne Handys zu spielen bleibt erlaubt: Dann
 steht dort nur, dass der Host die Knöpfe drückt, und der Start ist nicht gesperrt.
 
+Dieselbe Zeile steht auch oben auf der **Fernbedienung** – in der Lobby steht der
+Host meist mit dem Handy am Tisch und nicht am Laptop.
+
 ### Fernbedienung: `/remote`
 
 Der große Screen ist für alle sichtbar – die Lösung darf da nicht draufstehen. Öffne

@@ -486,3 +486,62 @@ export function setFrageText(node, text) {
     }
   });
 }
+
+/**
+ * Wie steht es um die Handys? – ein Satz für Leinwand und Fernbedienung.
+ *
+ * Die Teamliste zeigt zwar bei jedem Team, ob ein Handy dranhängt. Die Frage
+ * beim Blick auf „Spiel starten" ist aber eine andere: Sind alle da? Bei acht
+ * Teams zählt man das nicht gern von oben nach unten durch, während der Raum
+ * wartet.
+ *
+ * Drei Dinge stehen darin, die die Teamliste nicht zeigen kann:
+ * - Die Kopfzahl über alle Geräte. Ein Team gilt schon mit einem Handy als
+ *   dabei – ob in einem Zweierteam auch der Partner drauf ist, sieht man nur
+ *   an dieser Zahl.
+ * - Die Namen der Teams, bei denen etwas fehlt, damit der Host sie ansprechen
+ *   kann, statt „irgendwer fehlt noch" in den Raum zu rufen.
+ * - Geräte, die verbunden sind, aber noch in keinem Team stehen. Wer den
+ *   QR-Code gerade gescannt hat und den Namen tippt, kommt im Spielzustand gar
+ *   nicht vor – ist aber genau der Grund, noch zehn Sekunden zu warten. Die
+ *   Zahl kommt vom Server und steht nur in Host-Ansichten.
+ *
+ * Kein Ton von Mangel: Ohne Handys zu spielen ist vorgesehen, und der Satz
+ * sagt das an der Stelle auch.
+ *
+ * Liefert { text, bereit } – `bereit`, wenn nichts mehr aussteht.
+ */
+export function anschlussStand(state) {
+  const teams = state.teams || [];
+  const wartende = state.wartende || 0;
+  const imTeam = teams.reduce((summe, t) => summe + t.members.filter((m) => m.online).length, 0);
+  const gesamt = imTeam + wartende;
+  const handys = (n) => (n === 1 ? '1 Handy' : `${n} Handys`);
+
+  if (!teams.length) {
+    return { text: gesamt ? `${handys(gesamt)} schon verbunden – leg jetzt die Teams an.` : '', bereit: false };
+  }
+
+  const ohne = teams.filter((t) => !t.members.some((m) => m.online));
+  if (!ohne.length && !wartende) {
+    return { text: `${handys(gesamt)} verbunden – alle ${teams.length} Teams sind dabei.`, bereit: true };
+  }
+  if (!gesamt) {
+    return {
+      text: 'Noch kein Handy verbunden – ihr könnt auch ohne spielen, der Host drückt dann die Knöpfe.',
+      bereit: false,
+    };
+  }
+
+  // Bei vielen offenen Teams nicht die ganze Liste: Der Satz soll auf eine
+  // Zeile passen, sonst wächst die klebende Leiste in die Karten hinein.
+  const namen = ohne.map((t) => t.name);
+  const teile = [`${handys(gesamt)} verbunden`];
+  if (namen.length) {
+    teile.push(`ohne Handy: ${namen.length <= 3
+      ? namen.join(', ')
+      : `${namen.slice(0, 2).join(', ')} und ${namen.length - 2} weitere`}`);
+  }
+  if (wartende) teile.push(`${wartende} noch ohne Team`);
+  return { text: teile.join(' · '), bereit: false };
+}
