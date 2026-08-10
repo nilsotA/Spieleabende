@@ -551,7 +551,9 @@ function renderQuestion(prev) {
   // Handy angetippt. `prev` ist nur beim allerersten Zustand leer: Ein Reload
   // des Host-Screens mitten in einer Frage baut das Panel ebenfalls neu auf,
   // und dann wäre der Ton gelogen.
-  if (neu && prev) sound('pick');
+  // Beim Stechen wurde kein Feld gewählt; dort übernimmt gleich das
+  // aufsteigende Buzzer-Signal, und zwei Töne übereinander klängen nach Panne.
+  if (neu && prev && !q.stechen) sound('pick');
   if (neu) {
     peek = false; // die Lösung nicht von der Vorfrage her offen lassen
     // Das Wackeln von einer falschen Antwort blieb sonst als Klasse hängen –
@@ -598,6 +600,11 @@ function renderQuestion(prev) {
   // Bei freiem Buzzer ist niemand am Zug. Das Schild nannte dann weiter das
   // Zugteam – ausgerechnet das eine, das jetzt nicht mehr drücken darf.
   if (q.step === 'buzz' && !q.buzzedTeamId) $('#turn-pill').hidden = true;
+  // Ist die Frage durch, muss niemand mehr antworten. Das Schild fiel dann auf
+  // das Zugteam zurück – mit Stern, direkt neben der Zeile „Familie Ott: wusste
+  // es nicht", während ein anderer Tisch gerade 150 Punkte kassiert hatte. Wer
+  // die Frage geholt hat, steht ohnehin im Protokoll darunter.
+  if (q.step === 'result') $('#turn-pill').hidden = true;
 
   if (q.step === 'primary') {
     status.append(el('div', { class: 'chip turn' }, `Am Zug: ${teamName(q.teamId)}`));
@@ -644,7 +651,10 @@ function renderQuestion(prev) {
 
   // Tonsignale nur bei echten Übergängen derselben Frage.
   const prevQ = prev?.current;
-  const sameQuestion = prevQ && prev.round === state.round && prevQ.catIdx === q.catIdx && prevQ.rowIdx === q.rowIdx;
+  // Stechfragen haben kein Feld – dort trennt sie der Zähler voneinander.
+  const sameQuestion = prevQ && prev.round === state.round
+    && prevQ.catIdx === q.catIdx && prevQ.rowIdx === q.rowIdx
+    && !!prevQ.stechen === !!q.stechen && prev.stechenLauf === state.stechenLauf;
   if (sameQuestion && prevQ.log.length < q.log.length) {
     const letzte = q.log[q.log.length - 1];
     // Drei sehr verschiedene Ausgänge hatten denselben Ton. „Wusste es nicht"
@@ -671,7 +681,13 @@ function renderQuestion(prev) {
   // damit es nicht in den Wertungston hineinfällt.
   const buzzerJetztFrei = q.step === 'buzz' && !q.buzzedTeamId;
   const buzzerVorherFrei = sameQuestion && prevQ.step === 'buzz' && !prevQ.buzzedTeamId;
-  if (sameQuestion && buzzerJetztFrei && !buzzerVorherFrei) {
+  // Die Stechfrage ist der Sonderfall: Sie kommt neu auf den Schirm und der
+  // Buzzer ist im selben Moment frei. Ohne diesen Zweig hörte man dort nur das
+  // Blip einer gewählten Kachel – ausgerechnet beim Signal zum Losdrücken.
+  // `prev` fehlt nur beim allerersten Zustand – ein Reload mitten im Stechen
+  // soll das Signal nicht noch einmal geben.
+  const stechenGeradeAuf = !!prev && !sameQuestion && q.stechen && buzzerJetztFrei;
+  if ((sameQuestion && buzzerJetztFrei && !buzzerVorherFrei) || stechenGeradeAuf) {
     setTimeout(() => sound('armed'), 180);
   }
 
