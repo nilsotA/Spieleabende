@@ -209,6 +209,11 @@ const HOST_ACTIONS = new Set([
  * also nichts. Eine Stufe genügt: Wer zwei Züge zurück will, hat ein anderes
  * Problem, und mehr Stufen laden dazu ein, sich blind rückwärts zu klicken.
  */
+/* Züge, die sich auf genau eine Situation der laufenden Frage beziehen.
+   Punktekorrekturen und „dran" stehen bewusst nicht dabei: Die macht der Host
+   absichtlich und oft, während sich nebenher etwas bewegt. */
+const LAGEGEBUNDEN = new Set(['judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close', 'resetBuzz', 'buzzFor']);
+
 const RUECKNEHMBAR = new Set([
   'pick', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close',
   'nextRound', 'adjustScore', 'setTurn', 'resetBuzz', 'buzzFor', 'buzz',
@@ -255,6 +260,16 @@ async function handleAction(clientId, body) {
   // Sobald der Host etwas tut, ist der Stand nicht mehr „von letztem Mal",
   // sondern der laufende Abend.
   wiederhergestelltAm = null;
+
+  // Wertungen, die sich auf eine überholte Lage beziehen, prallen ab. Der
+  // Client schickt die Kennung mit, die er auf dem Schirm hatte; passt sie
+  // nicht mehr, war der Druck für die vorige Situation gedacht – typischerweise
+  // „Richtig" für das Zugteam, während schon jemand gebuzzert hat. Ohne die
+  // Angabe (ältere, im Browser hängengebliebene Seite) bleibt alles wie bisher.
+  if (LAGEGEBUNDEN.has(type) && typeof body.lage === 'string'
+      && body.lage !== G.lageSignatur(state)) {
+    throw new G.GameError('Da hat sich gerade etwas geändert – schau kurz auf den Screen.');
+  }
 
   if (RUECKNEHMBAR.has(type)) {
     // Erst sichern, dann handeln. Wirft die Aktion, bleibt der Schnappschuss

@@ -93,6 +93,13 @@ will, hat ein anderes Problem.
 Wer zwischendurch beigetreten ist, bleibt im Team – zurückgenommen wird der
 Spielzug, nicht der Raum.
 
+Gegen den anderen Verklicker – „Richtig" drücken, während in derselben Sekunde
+jemand buzzert – wirken zwei Sperren. Auf dem Gerät selbst ist jede Wertung
+400 ms lang gesperrt, damit ein zitternder Finger nicht zweimal zählt. Und jede
+Wertung nennt dem Server die Lage, für die sie gedacht war: Hat sich die
+inzwischen geändert, prallt sie ab, statt dem falschen Team Punkte zu geben.
+Das greift auch dann, wenn Leinwand und Fernbedienung kurz auseinanderlaufen.
+
 ### Wenn etwas abstürzt
 
 Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Board

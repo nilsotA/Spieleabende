@@ -109,7 +109,11 @@ export function connect({ role, onState, onEvent }) {
 
   source.addEventListener('state', (ev) => {
     setOnline(true);
-    onState(JSON.parse(ev.data));
+    const sicht = JSON.parse(ev.data);
+    // Zentral gemerkt, damit weder Host-Screen noch Fernbedienung etwas davon
+    // wissen müssen – siehe `lage` weiter oben.
+    lage = sicht.lage || null;
+    onState(sicht);
   });
   source.addEventListener('toast', (ev) => {
     const { level, text } = JSON.parse(ev.data);
@@ -158,13 +162,25 @@ export async function action(type, payload = {}, role = 'player') {
 const WERTUNGEN = new Set(['judge', 'pass', 'endQuestion', 'close']);
 let letzteWertung = -Infinity;
 
+/* Die Kennung der Lage, die zuletzt hereinkam. Sie fährt bei Wertungen mit
+   zurück, damit der Server einen Druck ablehnen kann, der für die vorige
+   Situation gedacht war – etwa „Richtig" fürs Zugteam, während schon jemand
+   gebuzzert hat. Die Entprellung oben fängt den Zitterfinger auf demselben
+   Gerät ab, aber nicht zwei Host-Geräte und nicht ein Nachtippen, wenn die
+   Anzeige bei zäher Verbindung hinterherhinkt. */
+let lage = null;
+const LAGEGEBUNDEN = new Set([
+  'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close', 'resetBuzz', 'buzzFor',
+]);
+
 export function hostAction(type, payload = {}) {
   if (WERTUNGEN.has(type)) {
     const jetzt = performance.now();
     if (jetzt - letzteWertung < 400) return Promise.resolve({ ok: false, entprellt: true });
     letzteWertung = jetzt;
   }
-  return action(type, payload, 'host');
+  const daten = LAGEGEBUNDEN.has(type) && lage ? { ...payload, lage } : payload;
+  return action(type, daten, 'host');
 }
 
 /* ---------------------------------------------------------------- Sounds */

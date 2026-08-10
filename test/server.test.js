@@ -945,3 +945,72 @@ test('gleichzeitige Zugriffe von Host und Handys bringen den Server nicht aus de
   // Zum Schluss muss der Server noch normal antworten.
   assert.equal((await fetch(`${base}/api/info`)).ok, true, 'Server antwortet nicht mehr');
 });
+
+test('eine Wertung für die vorige Lage wird abgelehnt', async (t) => {
+  // Der Host drückt „Richtig" fürs Zugteam – und in der Millisekunde davor hat
+  // jemand gebuzzert. Ohne Schutz schriebe der Druck dem Buzzer die vollen
+  // Punkte gut, die dem Zugteam gedacht waren. Die Entprellung im Browser deckt
+  // den Zitterfinger auf einem Gerät ab, aber nicht zwei Host-Geräte und nicht
+  // ein Nachtippen, wenn die Anzeige bei zäher Verbindung hinterherhinkt.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-lage-'));
+  const port = 6700 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  const offen = [];
+  t.after(async () => {
+    for (const r of offen) await r.cancel().catch(() => {});
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+  const strom = async (id, rolle) => {
+    const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
+    const r = res.body.getReader();
+    r.read();
+    offen.push(r);
+    await warte(150);
+  };
+  const schick = (clientId, body) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId, ...body }),
+  }).then((r) => r.json());
+
+  const host = await alsHost(base, 'lage-host');
+  await host({ type: 'addTeam', name: 'Zugteam' });
+  await host({ type: 'addTeam', name: 'Buzzteam' });
+  await strom('handy', 'player');
+  let st = await zustand(base);
+  await schick('handy', { type: 'joinTeam', teamId: st.teams[1].id, name: 'Mira' });
+  await host({ type: 'startGame', file: 'kueche-und-keller.json' });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 });
+
+  st = await zustand(base);
+  const alteLage = st.lage;
+  assert.equal(st.current.step, 'primary');
+  assert.ok(alteLage, 'die Ansicht bringt eine Lage mit');
+
+  // Jetzt überholt die Wirklichkeit: passen, dann buzzert das Handy.
+  await host({ type: 'pass' });
+  await schick('handy', { type: 'buzz' });
+  st = await zustand(base);
+  assert.equal(st.current.buzzedTeamId, st.teams[1].id, 'das Handy hat gebuzzert');
+
+  // Der verspätete Druck, der noch die alte Lage im Gepäck hat.
+  const spaet = await schick('lage-host', { type: 'judge', correct: true, lage: alteLage });
+  assert.equal(spaet.ok, false, 'die überholte Wertung greift nicht durch');
+  assert.match(spaet.error, /geändert/);
+  st = await zustand(base);
+  assert.deepEqual(st.teams.map((t) => t.score), [0, 0], 'und hat keine Punkte verteilt');
+
+  // Mit der aktuellen Lage geht es durch – und trifft das Buzzteam.
+  const jetzt = await schick('lage-host', { type: 'judge', correct: true, lage: st.lage });
+  assert.equal(jetzt.ok, true);
+  st = await zustand(base);
+  assert.deepEqual(st.teams.map((t) => t.score), [0, 250], 'halbe Punkte fürs Buzzteam');
+
+  // Ohne Angabe bleibt alles wie bisher – eine alte, im Browser hängende Seite
+  // soll nicht plötzlich nichts mehr können.
+  await host({ type: 'close' });
+  await host({ type: 'pick', catIdx: 1, rowIdx: 0 });
+  const ohne = await schick('lage-host', { type: 'judge', correct: true });
+  assert.equal(ohne.ok, true, 'ohne Lage-Angabe wird nicht blockiert');
+});

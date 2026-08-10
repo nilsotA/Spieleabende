@@ -611,6 +611,28 @@ export class GameError extends Error {}
  * Sicht für ein bestimmtes Gerät. Spieler dürfen die Antwort erst sehen,
  * wenn sie aufgedeckt ist – und nie den Rest des Boards ausspähen.
  */
+/**
+ * Kennung der Lage, auf die sich eine Wertung bezieht.
+ *
+ * Der Host drückt „Richtig", und in der Millisekunde davor hat jemand
+ * gebuzzert: Dann trifft der Druck nicht mehr die Situation, die auf dem Screen
+ * stand, sondern die nächste – und schreibt dem Buzzer die Punkte gut, die dem
+ * Zugteam gedacht waren. Die Entprellung im Browser deckt den Zitterfinger ab,
+ * aber nicht zwei Host-Geräte und nicht ein Nachtippen bei träger Verbindung.
+ *
+ * Deshalb fährt diese Kennung in jeder Ansicht mit, und Wertungen schicken sie
+ * zurück. Stimmt sie nicht mehr, war der Druck für eine andere Lage gedacht.
+ *
+ * Sie steht bewusst nur auf der laufenden Frage: Ein beitretendes Handy oder
+ * eine Punktekorrektur ändern sie nicht, sonst würde jede zweite Wertung
+ * grundlos abprallen.
+ */
+export function lageSignatur(state) {
+  const q = state.current;
+  if (!q) return `${state.phase}#${state.round}`;
+  return `f${q.catIdx}.${q.rowIdx}#${q.step}#${q.buzzedTeamId || ''}`;
+}
+
 export function viewFor(state, { isHost, clientId }) {
   const view = {
     phase: state.phase,
@@ -645,6 +667,8 @@ export function viewFor(state, { isHost, clientId }) {
     },
     current: null,
     you: null,
+    // Womit sich eine Wertung zurückmelden muss – siehe lageSignatur().
+    lage: lageSignatur(state),
     // Nur am Ende interessant, aber billig genug, um immer mitzufahren.
     rekorde: state.rekorde || null,
   };
