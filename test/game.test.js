@@ -499,6 +499,58 @@ test('Bilanz zählt verlorene Punkte positiv und trennt Verbuzzern', () => {
   assert.equal(b.bilanz.verloren, 250, 'die Hälfte von 500');
 });
 
+test('„weiß nicht" kostet dasselbe wie eine falsche Antwort', () => {
+  for (const [abzug, erwartet] of [['none', 0], ['half', -250], ['full', -500]]) {
+    // Zwei gleich aufgebaute Abende: einmal geraten und danebengelegen,
+    // einmal ehrlich gepasst. Am Ende muss dasselbe auf der Tafel stehen.
+    const geraten = setup();
+    const gepasst = setup();
+    for (const state of [geraten, gepasst]) {
+      state.settings.wrongPenalty = abzug;
+      G.pickCell(state, 0, 3); // 500 Punkte
+    }
+    G.judge(geraten, false);
+    G.passQuestion(gepasst);
+
+    assert.equal(geraten.teams[0].score, erwartet, `falsch bei „${abzug}"`);
+    assert.equal(gepasst.teams[0].score, erwartet, `weiß nicht bei „${abzug}"`);
+    assert.equal(gepasst.teams[0].bilanz.falsch, 1, 'zählt als falsche Antwort');
+    assert.equal(gepasst.teams[0].bilanz.gepasst, 1, 'und bleibt trotzdem ein „weiß nicht"');
+    assert.equal(gepasst.teams[0].bilanz.verloren, Math.abs(erwartet), 'verlorene Punkte positiv gezählt');
+    // Beide Male dürfen die Übrigen ran.
+    assert.equal(gepasst.current.step, 'buzz');
+    assert.equal(geraten.current.step, 'buzz');
+  }
+});
+
+test('„weiß nicht" reißt die Serie genauso wie eine falsche Antwort', () => {
+  const state = setup(['Team 1', 'Team 2']);
+  state.settings.turnMode = 'keepOnCorrect';
+
+  G.pickCell(state, 0, 0);
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(state.teams[0].serie, 1);
+
+  // Dasselbe Team ist wieder dran und weiß es nicht.
+  G.pickCell(state, 0, 1);
+  G.passQuestion(state);
+  assert.equal(state.teams[0].serie, 0, 'Serie ist gerissen');
+  assert.equal(state.teams[0].serieBest, 1, 'die beste Serie bleibt notiert');
+});
+
+test('„weiß nicht" mit Abzug landet im Protokoll und beim teuersten Reinfall', () => {
+  const state = setup();
+  state.settings.wrongPenalty = 'full';
+  G.pickCell(state, 0, 3); // 500 Punkte
+  G.passQuestion(state);
+
+  const eintrag = state.current.log.at(-1);
+  assert.equal(eintrag.result, 'pass', 'im Protokoll bleibt es ein „weiß nicht"');
+  assert.equal(eintrag.delta, -500, 'mit dem Abzug daneben');
+  assert.equal(state.rekorde.teuersterReinfall?.delta, -500);
+});
+
 test('ein neues Spiel setzt die Bilanz zurück', () => {
   const state = setup();
   G.pickCell(state, 0, 0);

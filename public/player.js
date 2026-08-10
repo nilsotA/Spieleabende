@@ -559,7 +559,9 @@ function renderBilanz(me) {
   // Ein Spielstand von vor dieser Buchhaltung bringt keine Bilanz mit.
   const b = me.bilanz || {};
   const zahl = (x) => Number(x) || 0;
-  const gestellt = zahl(b.richtig) + zahl(b.falsch) + zahl(b.gepasst);
+  // `gepasst` steckt seit der Regelklarstellung in `falsch` mit drin – „weiß
+  // nicht" zählt wie eine falsche Antwort. Hier also nicht doppelt zählen.
+  const gestellt = zahl(b.richtig) + zahl(b.falsch);
 
   const key = [state.phase, state.round, me.id, JSON.stringify(b)].join('#');
   if (box.dataset.key === key) return;
@@ -573,7 +575,9 @@ function renderBilanz(me) {
 
   const zeilen = [
     ['Richtig', zahl(b.richtig)],
-    ['Daneben', zahl(b.falsch)],
+    // Aufgeteilt statt übereinander: Beide zusammen ergeben die falschen
+    // Antworten, und „daneben" meint dann wirklich das Danebengeratene.
+    ['Daneben', Math.max(0, zahl(b.falsch) - zahl(b.gepasst))],
     ['Weiß nicht', zahl(b.gepasst)],
     // Nur zeigen, wenn es das überhaupt gab: Eine Reihe Nullen liest sich wie
     // ein Vorwurf, und beim Buzzern ist Nichtstun eine legitime Taktik.

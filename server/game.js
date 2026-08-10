@@ -339,13 +339,60 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
   return state;
 }
 
-/** Zugteam weiß es nicht → direkt für alle anderen freigeben (ohne Abzug). */
+/**
+ * Zugteam weiß es nicht → für alle anderen freigeben.
+ *
+ * Das zählt wie eine falsche Antwort: gleicher Abzug, gleiche Serie gerissen,
+ * gleicher Eintrag in der Bilanz. Sonst wäre „weiß nicht" der sichere Ausweg,
+ * sobald ein Abzug eingestellt ist – geraten hätte dann nur noch, wer nichts zu
+ * verlieren hat, und die Einstellung wäre wirkungslos.
+ *
+ * Im Protokoll bleibt der Unterschied trotzdem stehen: Auf der Leinwand ist
+ * „wusste es nicht" eine andere Geschichte als „falsch geraten", auch wenn
+ * beide gleich viel kosten. Und die ehrlichste Haut des Abends will man am Ende
+ * ja auszeichnen können.
+ */
 export function passQuestion(state) {
   const q = requireQuestion(state);
   if (q.step !== 'primary') throw new GameError('Das geht nur, solange das Zugteam dran ist.');
-  bilanzVon(findTeam(state, q.teamId)).gepasst += 1;
-  q.log.push({ teamId: q.teamId, result: 'pass', delta: 0 });
+  const team = findTeam(state, q.teamId);
+  bilanzVon(team).gepasst += 1;
+  verrechneFalsch(state, q, team, true, 'pass');
   return openBuzz(state);
+}
+
+/**
+ * Die Folgen einer nicht getroffenen Antwort – für „falsch" und „weiß nicht"
+ * derselbe Weg, damit die beiden nicht auseinanderlaufen können.
+ *
+ * `art` landet nur im Protokoll; an den Punkten ändert sie nichts.
+ */
+function verrechneFalsch(state, q, team, isPrimary, art) {
+  const full = q.value;
+  const half = halfPoints(full);
+  team.serie = 0;
+
+  const bilanz = bilanzVon(team);
+  let delta = 0;
+  if (isPrimary) {
+    if (state.settings.wrongPenalty === 'full') delta = -full;
+    else if (state.settings.wrongPenalty === 'half') delta = -half;
+  } else {
+    delta = -half;
+  }
+  team.score += delta;
+  bilanz.falsch += 1;
+  bilanz.verloren += -delta; // positiv gezählt, damit die Zahl für sich steht
+  if (!isPrimary) bilanz.daneben += 1;
+  q.log.push({ teamId: team.id, result: art, delta });
+  q.lastDelta = { teamId: team.id, delta };
+  // Der teuerste Reinfall des Abends – da lacht am Ende der ganze Tisch.
+  if (delta < 0 && delta < (state.rekorde.teuersterReinfall?.delta ?? 0)) {
+    state.rekorde.teuersterReinfall = {
+      teamId: team.id, delta, kategorie: q.category, wert: q.value,
+    };
+  }
+  if (!isPrimary) q.lockedOut.push(team.id);
 }
 
 export function openBuzz(state) {
@@ -449,7 +496,6 @@ export function judge(state, correct) {
   const team = findTeam(state, q.onTheHook);
   const isPrimary = q.step === 'primary';
   const full = q.value;
-  const half = halfPoints(full);
 
   // Serie richtiger Antworten – reine Anzeige, sie bringt keine Punkte und
   // ändert an den Regeln nichts. Sie zählt für das Team, das gerade antwortet:
@@ -460,7 +506,7 @@ export function judge(state, correct) {
   const bilanz = bilanzVon(team);
 
   if (correct) {
-    const delta = isPrimary ? full : half;
+    const delta = isPrimary ? full : halfPoints(full);
     team.score += delta;
     bilanz.richtig += 1;
     bilanz.geholt += delta;
@@ -481,27 +527,8 @@ export function judge(state, correct) {
     return state;
   }
 
-  // Falsch
-  let delta = 0;
-  if (isPrimary) {
-    if (state.settings.wrongPenalty === 'full') delta = -full;
-    else if (state.settings.wrongPenalty === 'half') delta = -half;
-  } else {
-    delta = -half;
-  }
-  team.score += delta;
-  bilanz.falsch += 1;
-  bilanz.verloren += -delta; // positiv gezählt, damit die Zahl für sich steht
-  if (!isPrimary) bilanz.daneben += 1;
-  q.log.push({ teamId: team.id, result: 'wrong', delta });
-  q.lastDelta = { teamId: team.id, delta };
-  // Der teuerste Reinfall des Abends – da lacht am Ende der ganze Tisch.
-  if (delta < 0 && delta < (state.rekorde.teuersterReinfall?.delta ?? 0)) {
-    state.rekorde.teuersterReinfall = {
-      teamId: team.id, delta, kategorie: q.category, wert: q.value,
-    };
-  }
-  if (!isPrimary) q.lockedOut.push(team.id);
+  // Falsch – denselben Weg wie „weiß nicht", damit beide nicht auseinanderlaufen.
+  verrechneFalsch(state, q, team, isPrimary, 'wrong');
   return openBuzz(state);
 }
 

@@ -591,8 +591,11 @@ function renderQuestion(prev) {
   }
 
   for (const entry of q.log) {
+    // „Weiß nicht" kostet dasselbe wie eine falsche Antwort. Der Abzug gehört
+    // deshalb auch dahinter – sonst sieht der Tisch die Punkte wandern und
+    // findet im Protokoll keinen Grund dafür.
     const label =
-      entry.result === 'pass' ? 'wusste es nicht'
+      entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${entry.delta}` : 'wusste es nicht')
         : entry.result === 'correct' ? `richtig +${entry.delta}`
           : entry.delta ? `falsch ${entry.delta}` : 'falsch';
     status.append(el('div', { class: `chip log ${entry.result}` }, `${teamName(entry.teamId)}: ${label}`));
@@ -617,9 +620,13 @@ function renderQuestion(prev) {
   if (sameQuestion && prevQ.log.length < q.log.length) {
     const letzte = q.log[q.log.length - 1];
     // Drei sehr verschiedene Ausgänge hatten denselben Ton. „Wusste es nicht"
-    // kostet standardmäßig nichts und darf nicht klingen wie ein Fehlgriff.
-    sound(letzte.result === 'correct' ? 'correct' : letzte.result === 'pass' ? 'passt' : 'wrong');
-    if (letzte.result === 'wrong') {
+    // klingt nach Achselzucken statt nach Fehlgriff – aber nur, solange es
+    // nichts kostet. Ist ein Abzug eingestellt, ist es ein Fehlgriff, und dann
+    // soll es auch so klingen.
+    const wehgetan = letzte.delta < 0;
+    sound(letzte.result === 'correct' ? 'correct'
+      : letzte.result === 'pass' && !wehgetan ? 'passt' : 'wrong');
+    if (wehgetan) {
       panel.classList.remove('wrong');
       void panel.offsetWidth;
       panel.classList.add('wrong');
@@ -1225,7 +1232,13 @@ function renderControls() {
   if (!q) { setzeText(hint, ''); return; }
 
   if (q.step === 'primary') {
-    setzeText(hint, `${teamName(q.teamId)} antwortet.`);
+    // Steht ein Abzug im Raum, gehört er in die Zeile: „Weiß nicht" kostet
+    // dasselbe wie eine falsche Antwort, und beim Drücken will man wissen,
+    // wie viel das gerade ist.
+    const abzug = { half: q.halfValue, full: q.value }[state.settings.wrongPenalty] || 0;
+    setzeText(hint, abzug
+      ? `${teamName(q.teamId)} antwortet. Falsch oder „weiß nicht" kostet ${abzug}.`
+      : `${teamName(q.teamId)} antwortet.`);
     add(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
       button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
@@ -1414,7 +1427,9 @@ function fuelleSpickzettel() {
     zeilen.push(['Diese Frage', `${q.category} ${q.value} · gebuzzert ${q.halfValue}`, true]);
   }
   zeilen.push(['Zugteam richtig', 'volle Punkte']);
-  zeilen.push(['Zugteam falsch', {
+  // „Weiß nicht" zählt wie eine falsche Antwort – deshalb eine Zeile für beides
+  // statt zwei, die man nebeneinanderhalten muss.
+  zeilen.push(['Zugteam falsch oder „weiß nicht"', {
     none: 'kein Abzug',
     half: 'halbe Punkte Abzug',
     full: 'volle Punkte Abzug',
@@ -1452,7 +1467,7 @@ function fuelleSpickzettel() {
   for (const [taste, was] of [
     ['1', 'Richtig'],
     ['2', 'Falsch'],
-    ['3', 'Zugteam weiß es nicht → Buzzer frei'],
+    ['3', 'Zugteam weiß es nicht → wie falsch, Buzzer frei'],
     ['4', 'Keiner weiß es → auflösen'],
     ['L', 'Lösung kurz aufdecken (alle sehen sie)'],
     ['Leer', 'Weiter / nächste Runde'],

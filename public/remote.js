@@ -90,7 +90,7 @@ function render() {
     log.innerHTML = '';
     for (const entry of q.log) {
       const label =
-        entry.result === 'pass' ? 'wusste es nicht'
+        entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${entry.delta}` : 'wusste es nicht')
           : entry.result === 'correct' ? `richtig +${entry.delta}`
             : entry.delta ? `falsch ${entry.delta}` : 'falsch';
       log.append(el('span', { class: `r-chip ${entry.result}` }, `${teamName(entry.teamId)}: ${label}`));

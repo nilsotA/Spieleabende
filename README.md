@@ -134,9 +134,16 @@ Das Board hat 6 Kategorien × 4 Felder. Wer am Zug ist, wählt ein Feld.
 | Situation | Punkte |
 |---|---|
 | Team am Zug antwortet richtig | **+ voller Wert** |
-| Team am Zug antwortet falsch oder weiß es nicht | 0 (einstellbar: Abzug) |
+| Team am Zug antwortet falsch **oder weiß es nicht** | 0 (einstellbar: Abzug) |
 | Danach: ein anderes Team buzzert und liegt richtig | **+ halber Wert** |
 | Danach: ein anderes Team buzzert und liegt falsch | **− halber Wert** |
+
+**„Weiß nicht" zählt wie eine falsche Antwort.** Wer die Frage zuerst bekommt und
+passt, steht genauso da, als hätte er etwas Falsches gesagt – gleicher Abzug, gleiche
+Serie gerissen. Sonst wäre „weiß nicht" der sichere Ausweg, sobald ihr einen Abzug
+eingestellt habt, und geraten hätte nur noch, wer nichts zu verlieren hat. Auf der
+Leinwand steht trotzdem weiter „wusste es nicht" statt „falsch": Das ist am Tisch eine
+andere Geschichte, auch wenn sie gleich viel kostet.
 
 **Wichtig:** Der Buzzer bleibt gesperrt, solange das Team am Zug nicht geantwortet hat.
 Erst danach wird er für alle anderen frei – der Server entscheidet, wer zuerst gedrückt
@@ -169,7 +176,8 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 ### Einstellbar in der Lobby
 
 - **Wer ist als Nächstes dran?** Reihum (Standard) oder „wer richtig liegt, bleibt dran“.
-- **Abzug bei falscher Antwort des Zugteams:** keiner (Standard), halbe oder volle Punkte.
+- **Abzug, wenn das Zugteam falsch liegt oder nicht weiß:** keiner (Standard), halbe
+  oder volle Punkte. Beides kostet gleich viel – siehe oben.
 - **Buzzern nach richtiger Antwort:** normalerweise aus – die Frage ist dann durch.
 - **Wer ruft das Feld auf?** Standard: das Team am Zug tippt es auf seinem Handy an.
   Auf **„Nur der Host"** verschwindet das Raster von den Handys – dann rufen die Teams
