@@ -308,18 +308,23 @@ function renderQuestion() {
 
 function renderPicker() {
   const box = $('#p-picker');
-  // Steht die Feldwahl auf „nur Host", gibt es hier nichts anzutippen – ein
-  // Raster, das bei jedem Tipp mit einer Absage antwortet, wäre schlimmer als
-  // keins.
-  const canPick = state.phase === 'board' && state.you.isMyTurn && state.board
-    && state.settings.feldwahl !== 'host';
-  box.hidden = !canPick;
-  if (!canPick) return;
+  // Zwei Betriebsarten. Normal tippt das Zugteam sein Feld hier an. Steht die
+  // Feldwahl auf „nur Host", bleibt dieselbe Übersicht stehen – aber ohne
+  // Knöpfe: Die Leute müssen ihr Feld ja ansagen, und dafür wollen sie sehen,
+  // was noch offen ist. Ein Raster, das bei jedem Tipp mit einer Absage
+  // antwortet, wäre schlimmer als keins; eine leere Handyfläche, während man
+  // gerade dran ist, aber auch.
+  const nurAnsehen = state.settings.feldwahl === 'host';
+  const zeigen = state.phase === 'board' && state.you.isMyTurn && state.board;
+  box.hidden = !zeigen;
+  box.classList.toggle('nur-ansehen', nurAnsehen);
+  if (!zeigen) return;
 
-  // Fragensatz mit in den Schlüssel: sonst zeigt ein neues Spiel mit gleicher
-  // Feldbelegung noch die Kategorien des alten.
+  // Fragensatz und Betriebsart mit in den Schlüssel: sonst zeigt ein neues
+  // Spiel mit gleicher Feldbelegung noch die Kategorien des alten – und ein
+  // Umschalten mitten im Spiel bliebe unbemerkt.
   const key = [
-    state.setName, state.round,
+    state.setName, state.round, nurAnsehen ? 'ansehen' : 'waehlen',
     state.board.categories.map((c) => `${c.name}:${c.cells.map((x) => (x.used ? 1 : 0)).join('')}`).join('|'),
   ].join('#');
   if (box.dataset.key === key) return;
@@ -330,8 +335,11 @@ function renderPicker() {
       el('div', { class: 'pick-cat' },
         el('h3', {}, cat.name),
         el('div', { class: 'pick-values' },
-          cat.cells.map((cell, rowIdx) =>
-            el('button', {
+          cat.cells.map((cell, rowIdx) => (nurAnsehen
+            // Kein Knopf, sondern Text: Nichts an dieser Fläche soll aussehen,
+            // als ließe sie sich drücken.
+            ? el('span', { class: cell.used ? 'used' : '' }, String(cell.value))
+            : el('button', {
               type: 'button',
               class: cell.used ? 'used' : '',
               onclick: (ev) => {
@@ -340,8 +348,7 @@ function renderPicker() {
                 sound('pick');
                 action('pick', { catIdx, rowIdx, quiet: true });
               },
-            }, String(cell.value)),
-          ),
+            }, String(cell.value)))),
         ),
       ),
     );

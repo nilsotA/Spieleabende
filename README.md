@@ -175,7 +175,8 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   Auf **„Nur der Host"** verschwindet das Raster von den Handys – dann rufen die Teams
   ihr Feld zu und du klickst es an. Das lohnt sich, wenn ihr sowieso alle auf die
   Leinwand schaut, oder wenn zu oft versehentlich das teuerste Feld angetippt wird.
-  Das Handy sagt dem Zugteam trotzdem, dass es dran ist.
+  Das Zugteam sieht die Kategorien und die offenen Werte weiterhin auf seinem Handy –
+  nur eben zum Ansehen, damit es ansagen kann, was es will.
 
 ### Tastenkürzel auf dem Host-Screen
 

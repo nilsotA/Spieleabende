@@ -190,6 +190,25 @@ body {
 }
 .picker .pick-values button:disabled { background: #12161e; color: #2b3342; border-color: transparent; }
 
+/* Nur zum Ansehen: Ruft der Host die Felder auf, bleibt die Übersicht stehen,
+   damit das Zugteam ansagen kann, was es will – aber flach und ohne Rand, damit
+   niemand versucht, darauf zu tippen. */
+.picker.nur-ansehen .pick-values span {
+  flex: 1;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #cfe0f5;
+  font-family: var(--font-num);
+  font-style: italic;
+  text-align: center;
+  padding: 0.55rem 0;
+}
+.picker.nur-ansehen .pick-values span.used {
+  color: #2b3342;
+  text-decoration: line-through;
+  background: rgba(255, 255, 255, 0.02);
+}
+
 /* -------------------------------------------------------------- Buzzer
 
    Der Buzzer ist ein echter Druckknopf mit Sockel: beim Drücken fährt er
