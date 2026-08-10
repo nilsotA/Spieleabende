@@ -10,9 +10,30 @@ Keine Datenbank, keine Abhängigkeiten, kein Build. Node installieren, starten, 
 
 ## Losspielen
 
+**Der kürzeste Weg: doppelklicken.**
+
+| System | Datei |
+|---|---|
+| macOS | `Start-Quizduell.command` |
+| Windows | `Start-Quizduell.bat` |
+| Linux | `start-quizduell.sh` |
+
+Das Fenster bleibt offen, solange gespielt wird, und der Host-Screen geht von
+selbst im Browser auf. Fehlt Node.js noch, sagt das Fenster, wo es herkommt.
+Tut der Doppelklick auf macOS oder Linux nichts, fehlt einmalig das Ausführrecht:
+
 ```bash
-node server/index.js       # oder: npm start
+chmod +x "Start-Quizduell.command"    # bzw. start-quizduell.sh
 ```
+
+Im Terminal geht es genauso:
+
+```bash
+npm start                  # oder: node server/index.js
+```
+
+Ist der übliche Port 3000 schon belegt, nimmt der Server von selbst den nächsten
+freien und sagt es dazu – ein zweiter Doppelklick läuft also nicht ins Leere.
 
 Der Server nennt beim Start alle Adressen:
 
@@ -29,7 +50,8 @@ Fragen-Editor:            http://localhost:3000/editor
    wählen beide dasselbe Team.
 3. Fragensatz auswählen, Regeln einstellen, **Spiel starten**.
 
-Anderer Port: `PORT=8080 node server/index.js`
+Anderer Port: `PORT=8080 node server/index.js` – eine eigene Angabe gilt dann
+genau so und wird nicht verschoben.
 
 ### Wann kann ich starten?
 
@@ -344,7 +366,9 @@ aus, hat aber fünf Zacken statt neun.
   einer anderen verrät – so etwas verschenkt sonst ausgerechnet die teuerste Frage.
 
 ```
+Start-Quizduell.command/.bat, start-quizduell.sh   zum Doppelklicken
 server/   game.js (Spielregeln) · questions.js (Fragensätze) · index.js (HTTP/SSE)
+          browser.js (öffnet den Host-Screen beim Doppelklick-Start)
 public/   host.* (Board) · player.* (Handy) · remote.* (Fernbedienung)
           editor.* (Fragen) · index.html/start.css · common.js · qr.js · style.css
 data/     Fragensätze als JSON, Bilder unter data/bilder/

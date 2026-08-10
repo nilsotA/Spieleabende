@@ -1,0 +1,9 @@
+# Windows-Batchdateien brauchen CRLF: Eine .bat mit reinen Zeilenumbrüchen läuft
+# zwar meistens, stolpert aber über Sprungmarken und wird von manchen Editoren
+# gar nicht mehr als Batchdatei erkannt. Git soll sie deshalb in Ruhe lassen.
+*.bat text eol=crlf
+
+# Die Startskripte für macOS und Linux umgekehrt: Ein CRLF am Zeilenende macht
+# aus der Shebang-Zeile „#!/bin/bash\r", und das Startet nichts mehr.
+*.command text eol=lf
+*.sh text eol=lf

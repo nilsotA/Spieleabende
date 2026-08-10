@@ -8,10 +8,15 @@ import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
 import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, DATA_DIR } from './questions.js';
+import { oeffne as oeffneImBrowser } from './browser.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
-const PORT = Number(process.env.PORT) || 3000;
+// Ein selbst gesetzter Port gilt genau so. Ohne Angabe darf der Server sich
+// den nächsten freien suchen: Wer das Startskript zweimal doppelklickt, soll
+// nicht vor „Port belegt" und einer Kommandozeile stehen.
+const PORT_GESETZT = !!process.env.PORT;
+let PORT = Number(process.env.PORT) || 3000;
 const MAX_BODY_BYTES = 32 * 1024 * 1024;
 const MIX = '__mix'; // Kennung für das gewürfelte Board
 
@@ -655,14 +660,31 @@ function localUrls() {
 server.keepAliveTimeout = 120000;
 server.headersTimeout = 125000;
 
+/**
+ * Ist der Port belegt, den nächsten nehmen – bis zu zehnmal.
+ *
+ * „Port 3000 ist schon belegt" und darunter eine Zeile, die man abtippen soll,
+ * ist genau die Stelle, an der ein Spieleabend hängen bleibt: Wer das
+ * Startskript doppelklickt, hat kein Terminal offen und will auch keins.
+ * Ein selbst gesetzter Port bleibt unangetastet – wer PORT=8080 schreibt, meint
+ * 8080, und Testläufe verlassen sich darauf.
+ */
+const PORT_VERSUCHE = 10;
+let portVersuche = 0;
+
 server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`\n  Port ${PORT} ist schon belegt.`);
-    console.error('  Läuft der Server vielleicht bereits in einem anderen Fenster?');
-    console.error(`  Sonst mit einem anderen Port starten:  PORT=${PORT + 1} npm start\n`);
-    process.exit(1);
+  if (err.code !== 'EADDRINUSE') throw err;
+
+  if (!PORT_GESETZT && portVersuche < PORT_VERSUCHE) {
+    portVersuche += 1;
+    PORT += 1;
+    server.listen(PORT);
+    return;
   }
-  throw err;
+  console.error(`\n  Port ${PORT} ist schon belegt.`);
+  console.error('  Läuft der Server vielleicht bereits in einem anderen Fenster?');
+  console.error(`  Sonst mit einem anderen Port starten:  PORT=${PORT + 1} npm start\n`);
+  process.exit(1);
 });
 
 const wiederhergestellt = await restore();
@@ -682,4 +704,10 @@ server.listen(PORT, () => {
     console.log(`  Handys der Mitspieler:    ${u}`);
   }
   console.log(`  Fragen-Editor:            http://localhost:${PORT}/editor\n`);
+  if (!PORT_GESETZT && portVersuche > 0) {
+    console.log(`  (Port ${PORT - portVersuche} war belegt – daher ${PORT}.)\n`);
+  }
+  if (process.env.QUIZDUELL_BROWSER === '1') {
+    oeffneImBrowser(`http://localhost:${PORT}/host`);
+  }
 });

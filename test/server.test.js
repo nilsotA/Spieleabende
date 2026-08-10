@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { createServer } from 'node:net';
 import { rm, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -1016,4 +1017,91 @@ test('eine Wertung für die vorige Lage wird abgelehnt', async (t) => {
   await host({ type: 'pick', catIdx: 1, rowIdx: 0 });
   const ohne = await schick('lage-host', { type: 'judge', correct: true });
   assert.equal(ohne.ok, true, 'ohne Lage-Angabe wird nicht blockiert');
+});
+
+/* ------------------------------------------------------- Losspielen */
+
+test('ein belegter Port hält den Start nicht auf', async (t) => {
+  // Wer das Startskript doppelklickt, hat kein Terminal offen. „Port 3000 ist
+  // belegt, nimm einen anderen" wäre dort eine Sackgasse – also sucht der
+  // Server sich selbst den nächsten freien.
+  //
+  // Geprüft wird mit dem echten Standardport: Ein zweiter Startport nur für
+  // Tests wäre Prüfgerüst im Produkt. Hat schon etwas anderes den Port, ist
+  // die Ausgangslage nicht herstellbar – dann wird der Test übersprungen statt
+  // aus einem fremden Grund rot.
+  const blocker = createServer(() => {});
+  const belegt = await new Promise((r) => {
+    blocker.once('error', () => r(false));
+    blocker.listen(3000, () => r(true));
+  });
+  if (!belegt) {
+    t.skip('Port 3000 ist von etwas anderem belegt');
+    return;
+  }
+  t.after(() => blocker.close());
+
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-port-'));
+  const proc = spawn(process.execPath, [SERVER], {
+    // Kein PORT in der Umgebung – sonst gilt die Angabe, und das mit Recht.
+    env: { ...process.env, PORT: '', QUIZDUELL_STATE_FILE: path.join(dir, 'stand.json') },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  let ausgabe = '';
+  proc.stdout.on('data', (d) => { ausgabe += d; });
+  proc.stderr.on('data', (d) => { ausgabe += d; });
+  for (let i = 0; i < 120 && !/läuft!/.test(ausgabe); i++) await warte(50);
+
+  assert.match(ausgabe, /läuft!/, 'der Server ist gar nicht hochgekommen');
+  assert.match(ausgabe, /war belegt/, 'er hätte sagen müssen, warum es ein anderer Port ist');
+  const treffer = ausgabe.match(/localhost:(\d+)\/host/);
+  assert.ok(treffer, 'keine Adresse in der Ausgabe');
+  const genutzt = Number(treffer[1]);
+  assert.notEqual(genutzt, 3000, 'er sitzt auf dem belegten Port');
+
+  // Und er ist wirklich ansprechbar, nicht nur laut.
+  const res = await fetch(`http://localhost:${genutzt}/api/info`);
+  assert.equal(res.ok, true);
+});
+
+test('ein selbst gesetzter Port wird nicht heimlich verschoben', async (t) => {
+  // Wer PORT=8080 schreibt, meint 8080 – ein stilles Ausweichen würde
+  // Anleitungen, Lesezeichen und Testläufe unter der Hand falsch machen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-port2-'));
+  const belegt = 7600 + Math.floor(Math.random() * 200);
+  t.after(async () => { await rm(dir, { recursive: true, force: true }); });
+
+  const blocker = createServer(() => {});
+  await new Promise((r) => blocker.listen(belegt, r));
+  t.after(() => blocker.close());
+
+  const proc = spawn(process.execPath, [SERVER], {
+    env: { ...process.env, PORT: String(belegt), QUIZDUELL_STATE_FILE: path.join(dir, 'stand.json') },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let ausgabe = '';
+  proc.stdout.on('data', (d) => { ausgabe += d; });
+  proc.stderr.on('data', (d) => { ausgabe += d; });
+  const code = await new Promise((r) => proc.on('exit', r));
+
+  assert.equal(code, 1, 'er hätte mit einer Meldung aufhören müssen');
+  assert.match(ausgabe, /schon belegt/);
+  assert.doesNotMatch(ausgabe, /läuft!/, 'und nicht auf einem anderen Port weiterlaufen');
+});
+
+test('der Browser wird je System richtig aufgerufen', async () => {
+  // Der leere String bei Windows ist die Stelle, an der so etwas gern kaputt
+  // geht: `start` deutet sein erstes Argument in Anführungszeichen als
+  // Fenstertitel, und ohne Platzhalter ginge nichts auf.
+  const { browserBefehl } = await import('../server/browser.js');
+  assert.deepEqual(browserBefehl('darwin'), { befehl: 'open', args: [] });
+  assert.deepEqual(browserBefehl('win32'), { befehl: 'cmd', args: ['/c', 'start', ''] });
+  assert.deepEqual(browserBefehl('linux'), { befehl: 'xdg-open', args: [] });
+  assert.deepEqual(browserBefehl('freebsd'), { befehl: 'xdg-open', args: [] },
+    'unbekannte Systeme bekommen den verbreitetsten Weg');
 });
