@@ -1,4 +1,5 @@
 import { $, el, toast } from '/common.js';
+import { verraeteneLoesungen } from '/fragenpruefung.js';
 
 const BASE_VALUES = [100, 200, 300, 500];
 const STORAGE_KEY = 'quizduell.editor';
@@ -143,13 +144,14 @@ function render() {
               oninput: (ev) => {
                 q.text = ev.target.value;
                 laengeMarkieren(ev.target);
+                verraeterMarkieren();
                 persistSoon();
               },
             }, q.text || ''),
             el('div', { class: 'antwort' },
               el('textarea', {
                 placeholder: 'Antwort',
-                oninput: (ev) => { q.answer = ev.target.value; persistSoon(); },
+                oninput: (ev) => { q.answer = ev.target.value; verraeterMarkieren(); persistSoon(); },
               }, q.answer || ''),
               // Der Zusatz erscheint beim Auflösen klein unter der Lösung –
               // gut für „Nicht Sydney!" oder eine Quellenangabe.
@@ -386,6 +388,65 @@ function laengeMarkieren(feld) {
 
 function alleLaengenMarkieren() {
   for (const feld of document.querySelectorAll('.qrow > textarea')) laengeMarkieren(feld);
+  verraeterMarkieren();
+}
+
+/**
+ * Steht eine Lösung schon in einer anderen Frage derselben Kategorie?
+ *
+ * Das ist der Fehler, der einen Spielabend wirklich kostet: Die Kategorie
+ * steht offen auf der Leinwand, und wer lesen kann, holt sich die teuerste
+ * Frage geschenkt. Beim Tippen fällt es kaum auf – zwischen den beiden Zeilen
+ * liegen ja zwei andere.
+ *
+ * Geprüft wird mit derselben Regel, die auch über den fertigen Satz läuft.
+ * Gewarnt wird, nicht verboten: Manchmal ist die Wiederholung Absicht, und ein
+ * Editor, der das Speichern verweigert, wäre schlimmer als das Problem.
+ */
+function verraeterMarkieren() {
+  const zeilen = [...document.querySelectorAll('.qrow')];
+  for (const z of zeilen) {
+    z.classList.remove('verraet');
+    const feld = z.querySelector('.antwort > textarea');
+    if (feld) feld.title = '';
+  }
+
+  let index = 0;
+  let gefunden = 0;
+  let ersteZeile = null;
+  for (const runde of set.rounds) {
+    for (const cat of runde.categories) {
+      const treffer = verraeteneLoesungen(cat.questions);
+      for (const { i, j } of treffer) {
+        const zeile = zeilen[index + i];
+        if (!zeile || zeile.classList.contains('verraet')) continue;
+        zeile.classList.add('verraet');
+        const feld = zeile.querySelector('.antwort > textarea');
+        if (feld) {
+          const andere = (cat.questions[j].text || '').slice(0, 60);
+          feld.title = 'Diese Lösung steht schon in einer anderen Frage dieser Kategorie '
+            + `– auf der Leinwand ist sie damit verschenkt:\n„${andere}…"`;
+        }
+        gefunden += 1;
+        if (!ersteZeile) ersteZeile = zeile;
+      }
+      index += cat.questions.length;
+    }
+  }
+
+  const hinweis = $('#fortschritt-verraet');
+  if (hinweis) {
+    hinweis.hidden = gefunden === 0;
+    hinweis.textContent = gefunden === 1
+      ? '1 Lösung steht schon in einer anderen Frage derselben Kategorie.'
+      : `${gefunden} Lösungen stehen schon in anderen Fragen derselben Kategorie.`;
+    hinweis.onclick = ersteZeile
+      ? () => ersteZeile.scrollIntoView({
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'center',
+      })
+      : null;
+  }
 }
 
 function updateFortschritt() {

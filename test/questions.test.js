@@ -290,60 +290,58 @@ test('zwei Mixe unterscheiden sich', async () => {
  * die 500er fragte nach dessen Gebirge – damit war die teuerste Frage geschenkt.
  */
 test('keine Frage verrät die Lösung einer anderen derselben Kategorie', async () => {
-  const stoppwoerter = new Set([
-    'der', 'die', 'das', 'des', 'dem', 'den', 'ein', 'eine', 'einer', 'eines',
-    'und', 'oder', 'aus', 'von', 'für', 'mit', 'auf', 'ist', 'sind', 'was',
-    'wer', 'wie', 'wo', 'welche', 'welcher', 'welches', 'welchem', 'welchen',
-    'in', 'im', 'am', 'an', 'zu', 'zum', 'zur', 'es', 'man', 'sich', 'nicht',
-    'heißt', 'nennt', 'gibt', 'hat', 'haben', 'seit', 'auch', 'noch', 'aber',
-  ]);
-  // Antwortformate, die in ihrer Kategorie naturgemäß mehrfach vorkommen.
-  const formatantworten = /^(wahr|falsch|ja|nein)\b/i;
-
-  const zerlege = (text, mindestens) =>
-    text.toLowerCase()
-      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-      .split(/\s+/)
-      .filter((w) => w.length >= mindestens && !stoppwoerter.has(w));
-  const kernwoerter = (text) => zerlege(text, 4);
-  // Kurze Lösungen brauchen eine kürzere Latte. „SMS“ hat drei Buchstaben und
-  // fiel damit ganz aus der Prüfung – ausgerechnet in einer Kategorie, in der
-  // eine zweite Frage „Wofür steht die Abkürzung SMS?“ hieß. Abkürzungen und
-  // Zahlen sind die Lösungen, die sich am leichtesten verraten.
-  const loesungswoerter = (text) => {
-    const lang = zerlege(text, 4);
-    return lang.length ? lang : zerlege(text, 2);
-  };
-
+  // Die Regel selbst steht in public/fragenpruefung.js – derselbe Code, den der
+  // Editor beim Tippen anwendet. Zwei Fassungen derselben Regel würden über
+  // kurz oder lang auseinanderlaufen, und dann warnt der Editor vor etwas
+  // anderem, als der Testlauf verlangt.
+  const { verraeteneLoesungen } = await import('../public/fragenpruefung.js');
   const verraeter = [];
   for (const datei of DATEIEN) {
     const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
     set.rounds.forEach((round, ri) => {
       for (const cat of round.categories) {
-        cat.questions.forEach((q, i) => {
-          if (formatantworten.test(q.answer.trim())) return;
-          const loesung = loesungswoerter(q.answer);
-          if (!loesung.length) return;
-          cat.questions.forEach((andere, j) => {
-            if (i === j) return;
-            // Auch hier die kurze Latte: Sonst steht „SMS“ zwar in der Lösung,
-            // aber nicht im Vergleichstext, und das Paar bleibt unsichtbar.
-            const anderswo = zerlege(`${andere.text} ${andere.answer}`, 2);
-            // Erst wenn die Lösung vollständig anderswo steht, ist sie verraten.
-            // Ganze Wörter, damit „Spiel“ nicht in „Spieleabend“ anschlägt.
-            const vollstaendig = loesung.every((w) => anderswo.includes(w));
-            if (vollstaendig) {
-              verraeter.push(
-                `${datei} R${ri + 1} „${cat.name}“: Lösung von Frage ${i + 1} („${q.answer}“) `
-                + `steht schon in Frage ${j + 1} („${andere.text}“)`,
-              );
-            }
-          });
-        });
+        for (const { i, j, answer } of verraeteneLoesungen(cat.questions)) {
+          verraeter.push(
+            `${datei} R${ri + 1} „${cat.name}“: Lösung von Frage ${i + 1} („${answer}“) `
+            + `steht schon in Frage ${j + 1} („${cat.questions[j].text}“)`,
+          );
+        }
       }
     });
   }
   assert.deepEqual(verraeter, []);
+});
+
+test('die geteilte Prüfung erkennt einen verratenen Fall und lässt heile Sätze in Ruhe', async () => {
+  const { verraeteneLoesungen } = await import('../public/fragenpruefung.js');
+
+  // Der Klassiker: Die Lösung der einen Frage steht im Text der anderen.
+  const verraten = verraeteneLoesungen([
+    { text: 'Wie heißt die Hauptstadt von Frankreich?', answer: 'Paris' },
+    { text: 'In welcher Stadt steht der Eiffelturm – in Paris oder in Lyon?', answer: 'In der ersten' },
+  ]);
+  assert.equal(verraten.length, 1);
+  assert.equal(verraten[0].i, 0);
+  assert.equal(verraten[0].j, 1);
+
+  // „Wahr" und „falsch" stehen in ihrer Kategorie zwangsläufig mehrfach.
+  assert.deepEqual(verraeteneLoesungen([
+    { text: 'Bananen wachsen an Bäumen.', answer: 'Falsch' },
+    { text: 'Ein Chamäleon tarnt sich mit Farbe.', answer: 'Falsch' },
+  ]), []);
+
+  // Halb getippte Zeilen sind keine Warnung wert.
+  assert.deepEqual(verraeteneLoesungen([
+    { text: '', answer: '' },
+    { text: 'Wie heißt die Hauptstadt von Frankreich?', answer: 'Paris' },
+  ]), []);
+
+  // Kurze Lösungen fallen nicht durchs Raster.
+  const kurz = verraeteneLoesungen([
+    { text: 'Wie schickte man früher kurze Nachrichten?', answer: 'SMS' },
+    { text: 'Wofür steht die Abkürzung SMS?', answer: 'Short Message Service' },
+  ]);
+  assert.equal(kurz.length, 1, 'die Abkürzung steht in der Nachbarfrage');
 });
 
 test('Bildkennungen hängen am Inhalt, nicht an der Reihenfolge', async () => {

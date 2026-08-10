@@ -64,6 +64,12 @@
   .fortschritt span:last-child { position: relative; }
   .luecke { outline: 2px solid #f8d548 !important; outline-offset: 2px; }
   .fortschritt-lang { margin: .45rem 0 0; font-size: .8rem; color: #f0c65a; }
+  .fortschritt-verraet { display: block; margin: .45rem 0 0; padding: 0; border: 0; background: none;
+                         font: inherit; font-size: .8rem; color: #ffbecb; text-align: left;
+                         cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  /* Die betroffene Zeile bekommt eine Kante, damit man sie im langen Formular
+     wiederfindet – kein roter Kasten, es ist ein Hinweis und kein Fehler. */
+  .qrow.verraet { box-shadow: inset 3px 0 0 rgba(242,109,132,.85); }
   /* Sehr lange Frage: nur ein warmer Rand, kein Fehler – manchmal muss eine
      Frage eben lang sein. */
   .qrow > textarea.zulang { border-color: rgba(240, 198, 90, .55); }
@@ -123,6 +129,9 @@
          die Schrift heruntergerechnet, bis alles draufpasst, und bei einem
          ganzen Absatz ist sie aus vier Metern nicht mehr zu lesen. -->
     <p id="fortschritt-lang" class="fortschritt-lang" hidden></p>
+    <!-- Der teuerste Fehler beim Fragenschreiben: Die Lösung steht in der
+         Nachbarfrage derselben Kategorie und ist auf der Leinwand verschenkt. -->
+    <button id="fortschritt-verraet" class="fortschritt-verraet" type="button" hidden></button>
   </div>
   <!-- Marke direkt unter der Leiste. Woran erkannt wird, ob man schon im
        Formular ist, darf sich nicht dadurch ändern, dass die Leiste zusammen-
