@@ -401,6 +401,25 @@ function passeFrageEin() {
 
 addEventListener('resize', passeFrageEin);
 
+/**
+ * Deutsche Aufzählung: „A", „A und B", „A, B und C".
+ *
+ * Bei einem Dreier-Gleichstand stand auf der Leinwand „A und B und C" – auf dem
+ * einen Bildschirm des Abends, auf den am Ende alle schauen.
+ *
+ * Gedeckelt, weil ein Gleichstand über alle acht Teams möglich ist: Hat in einer
+ * Runde niemand gepunktet, stehen alle bei null. Acht Namen in der Schlagzeile
+ * wären keine Ansage mehr, sondern eine Liste.
+ */
+function aufzaehlung(namen, hoechstens = 3) {
+  if (namen.length <= 1) return namen[0] || '';
+  if (namen.length === 2) return `${namen[0]} und ${namen[1]}`;
+  if (namen.length <= hoechstens) {
+    return `${namen.slice(0, -1).join(', ')} und ${namen[namen.length - 1]}`;
+  }
+  return `${namen.slice(0, hoechstens - 1).join(', ')} und ${namen.length - (hoechstens - 1)} weitere`;
+}
+
 function renderBoard() {
   const board = $('#board');
   const data = state.board;
@@ -909,7 +928,7 @@ function renderScoreboard() {
   sieger.hidden = !final;
   if (final) {
     sieger.textContent = geteilt
-      ? `Unentschieden – ${ranked.filter((t) => t.score === ranked[0].score).map((t) => t.name).join(' und ')}`
+      ? `Unentschieden – ${aufzaehlung(ranked.filter((t) => t.score === ranked[0].score).map((t) => t.name))}`
       : `${ranked[0].name} gewinnt!`;
     sieger.classList.toggle('geteilt', geteilt);
   }
