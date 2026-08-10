@@ -468,6 +468,7 @@ function renderBoard() {
       // danach klappen die Panels auf. Vorhang auf statt „alles ist plötzlich da".
       board.append(el('div', { class: 'cat', style: { gridColumn: catIdx + 1, gridRow: 1, '--c': catIdx } },
         el('span', {}, cat.name)));
+      katSchriftSpaeter = true;
       cat.cells.forEach((cell, rowIdx) => {
         board.append(
           el('button', {
@@ -483,6 +484,12 @@ function renderBoard() {
         );
       });
     });
+  }
+
+  if (katSchriftSpaeter) {
+    katSchriftSpaeter = false;
+    // Erst nach dem Layout messen: Vorher steht die Spaltenbreite nicht fest.
+    requestAnimationFrame(katSchriftAnpassen);
   }
 
   data.categories.forEach((cat, catIdx) => {
@@ -945,7 +952,54 @@ function pruefeEnge(box) {
 addEventListener('resize', () => {
   const box = $('#players');
   if (box) pruefeEnge(box);
+  katSchriftAnpassen();
 });
+
+/**
+ * Lange Kategorienamen so weit herunterrechnen, dass kein Wort zerschnitten wird.
+ *
+ * Auf dem Schild stand „NACHBARLÄNDE / R" und „FORTGESCHRITT / ENE": Passt ein
+ * einzelnes Wort nicht in die Spalte, bricht der Browser es irgendwo – der
+ * saubere Trennstrich käme aus `hyphens: auto`, und dafür braucht er ein
+ * Silbenwörterbuch für Deutsch, das längst nicht überall installiert ist.
+ *
+ * Statt darauf zu hoffen, misst der Screen das längste Wort und nimmt die
+ * Schrift so weit zurück, bis es in eine Zeile passt. Nur so weit wie nötig,
+ * und nie unter 12 px – darunter ist auf der Leinwand ohnehin nichts mehr zu
+ * lesen, dann bleibt der Umbruch als kleineres Übel.
+ */
+let katSchriftSpaeter = false;
+function katSchriftAnpassen() {
+  for (const node of document.querySelectorAll('#board .cat')) {
+    const ziel = node.querySelector('span') || node;
+    ziel.style.fontSize = '';
+    const wort = ziel.textContent.trim().split(/\s+/)
+      .reduce((a, b) => (b.length > a.length ? b : a), '');
+    if (wort.length < 8) continue;
+    const stil = getComputedStyle(node);
+    const platz = node.clientWidth
+      - parseFloat(stil.paddingLeft) - parseFloat(stil.paddingRight);
+    if (!(platz > 0)) continue;
+    const probe = document.createElement('span');
+    probe.textContent = wort;
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;left:0;top:0';
+    ziel.appendChild(probe);
+    // Buchstabenabstand und Schriftgröße wachsen beide mit em, die Breite
+    // skaliert also fast linear – aber eben nur fast: Schriftrasterung rundet,
+    // und „FORTGESCHRITTENE" landete nach einem Schritt auf 192 px bei 189 px
+    // Platz. Deshalb nachfassen, bis es passt. Zwei Pixel Luft, damit nicht
+    // genau auf der Kante gelandet wird.
+    for (let versuch = 0; versuch < 4; versuch++) {
+      const breit = probe.getBoundingClientRect().width;
+      if (breit <= platz) break;
+      const jetzt = parseFloat(getComputedStyle(ziel).fontSize);
+      const neu = Math.max(12, Math.floor(jetzt * ((platz - 2) / breit) * 100) / 100);
+      if (neu >= jetzt) break; // unter 12 px wird nicht weiter geschrumpft
+      ziel.style.fontSize = `${neu}px`;
+    }
+    probe.remove();
+  }
+}
 
 /**
  * Die Punktzahl steigt groß auf – aber über dem Pult des Teams, das sie bekommt,

@@ -1092,6 +1092,13 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   padding: 0.9rem clamp(0.8rem, 3vw, 3rem) 0.5rem;
   position: relative;
   z-index: 2;
+  /* Der Scheinwerferkegel unten ist 2,4-mal so breit wie das Pult, auf dem er
+     liegt. Bei zwei Teams ist ein Pult halb so breit wie die Leinwand – der
+     Kegel ragte damit weit über den rechten Rand hinaus und zog die ganze
+     Seite in eine Querscrollleiste (gemessen: 1867 px Inhalt auf 1440 px
+     Bühne). `clip` statt `hidden`, weil der Kegel nach oben aus der Leiste
+     herausstehen muss; auf der Y-Achse bleibt deshalb alles sichtbar. */
+  overflow-x: clip;
 }
 @media (max-width: 1150px) {
   .players { overflow-x: auto; }

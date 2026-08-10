@@ -301,7 +301,7 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 
 ### Mitgeliefert
 
-Zwölf fertige Sätze mit je 48 Fragen – zusammen 576, keine doppelt:
+Vierzehn fertige Sätze mit je 48 Fragen – zusammen 672, keine doppelt:
 
 | Satz | Kategorien |
 |---|---|
@@ -317,6 +317,8 @@ Zwölf fertige Sätze mit je 48 Fragen – zusammen 576, keine doppelt:
 | **Zahlen & Formen** | Berühmte Zahlen, Geometrie, Kopfrechnen, Wahrscheinlichkeit, Mathe-Köpfe |
 | **Anpfiff** | Regelkunde, Olympia, Wintersport, Leichtathletik, Vereine, Sport & Körper |
 | **Schule & Uni** | Schulfächer, Latein, Notenkunde, Pausenhof, Uni-Latein, Prüfungszeit |
+| **Der Klassiker** | Hauptstädte, Zahlen, der Mensch, „Wer war das?“, Abkürzungen, Tiere & Pflanzen |
+| **Weltgeschichte** | Ritter & Römer, Kriege & Krisen, Herrscher, Entdecker, Weltreiche, Kalter Krieg |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit

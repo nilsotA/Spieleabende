@@ -1,0 +1,295 @@
+{
+  "name": "Der Klassiker",
+  "description": "Der Satz für „das weiß man doch\": Hauptstädte, Jahreszahlen, der eigene Körper und die Wörter, die alle benutzen und niemand ausschreibt. Runde 2 zieht dieselben Fächer eine Nummer schärfer an.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Wie heißt die Hauptstadt?",
+          "questions": [
+            {
+              "text": "Wie heißt die Hauptstadt von Irland?",
+              "answer": "Dublin"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt der Slowakei?",
+              "answer": "Bratislava",
+              "note": "Sie liegt an der Donau, keine 60 Kilometer von Wien entfernt."
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Bulgarien?",
+              "answer": "Sofia"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Brasilien?",
+              "answer": "Brasília",
+              "note": "Erst ab 1956 auf dem leeren Hochland gebaut – damit das Land nicht nur an der Küste lebt."
+            }
+          ]
+        },
+        {
+          "name": "Zahlen, die jeder kennt",
+          "questions": [
+            {
+              "text": "Wie viele Ringe hat das olympische Symbol?",
+              "answer": "Fünf",
+              "note": "Einer für jeden bewohnten Erdteil."
+            },
+            {
+              "text": "Aus wie vielen Ringen besteht das Logo von Audi?",
+              "answer": "Vier",
+              "note": "Für die vier Firmen, die sich 1932 zur Auto Union zusammenschlossen."
+            },
+            {
+              "text": "Wie lang ist eine Meile in Metern?",
+              "answer": "Rund 1609 Meter",
+              "note": "Genau 1609,344 – das ist die englische Landmeile."
+            },
+            {
+              "text": "Wie viele chemische Elemente stehen heute im Periodensystem?",
+              "answer": "118",
+              "note": "Das schwerste heißt Oganesson und hält sich nur Sekundenbruchteile."
+            }
+          ]
+        },
+        {
+          "name": "Der Mensch",
+          "questions": [
+            {
+              "text": "Welches Organ filtert das Blut?",
+              "answer": "Die Nieren"
+            },
+            {
+              "text": "Welches Vitamin bildet die Haut im Sonnenlicht selbst?",
+              "answer": "Vitamin D"
+            },
+            {
+              "text": "Wie viel Blut hat ein erwachsener Mensch ungefähr im Körper?",
+              "answer": "Etwa fünf Liter",
+              "note": "Rund acht Prozent des Körpergewichts."
+            },
+            {
+              "text": "Welcher Muskel bringt, auf seine Fläche gerechnet, die größte Kraft auf?",
+              "answer": "Der Kaumuskel",
+              "note": "Der größte Muskel ist ein anderer – der große Gesäßmuskel."
+            }
+          ]
+        },
+        {
+          "name": "Wer war das?",
+          "questions": [
+            {
+              "text": "Wer war der erste Präsident der Vereinigten Staaten?",
+              "answer": "George Washington"
+            },
+            {
+              "text": "Wer rückte in seinem Hauptwerk die Sonne statt der Erde in den Mittelpunkt?",
+              "answer": "Nikolaus Kopernikus",
+              "note": "Galileo Galilei verteidigte die Idee später – und bekam dafür Ärger mit der Kirche."
+            },
+            {
+              "text": "Wer schrieb den Roman „Die unendliche Geschichte\"?",
+              "answer": "Michael Ende"
+            },
+            {
+              "text": "Wer schrieb die Novelle „Der Schimmelreiter\"?",
+              "answer": "Theodor Storm"
+            }
+          ]
+        },
+        {
+          "name": "Abgekürzt",
+          "questions": [
+            {
+              "text": "Wofür stehen die drei W am Anfang einer Internetadresse?",
+              "answer": "World Wide Web"
+            },
+            {
+              "text": "Wofür steht die Abkürzung RTL?",
+              "answer": "Radio Télévision Luxembourg",
+              "note": "Der Sender startete tatsächlich in Luxemburg."
+            },
+            {
+              "text": "Wofür steht das LCD in „LCD-Bildschirm\"?",
+              "answer": "Liquid Crystal Display",
+              "note": "Auf Deutsch: Flüssigkristallanzeige."
+            },
+            {
+              "text": "Wofür stand in der DDR die Abkürzung Stasi?",
+              "answer": "Ministerium für Staatssicherheit"
+            }
+          ]
+        },
+        {
+          "name": "Tiere & Pflanzen",
+          "questions": [
+            {
+              "text": "Wie viele Beine hat eine Spinne?",
+              "answer": "Acht"
+            },
+            {
+              "text": "Welches Tier ist im Sturzflug das schnellste der Welt?",
+              "answer": "Der Wanderfalke",
+              "note": "Über 320 km/h – im Horizontalflug ist er deutlich langsamer."
+            },
+            {
+              "text": "Was sind die Früchte einer Rose?",
+              "answer": "Hagebutten",
+              "note": "Sie enthalten mehr Vitamin C als Zitronen."
+            },
+            {
+              "text": "Welches Insekt stemmt, auf sein Gewicht gerechnet, die größte Last?",
+              "answer": "Der Mistkäfer",
+              "note": "Ein Stierkäfer-Männchen zieht das 1141-Fache seines Gewichts – als könnte ein Mensch sechs Doppeldeckerbusse schleppen."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Erde & Weltall",
+          "questions": [
+            {
+              "text": "Wie nennt man die gasförmige Hülle, die einen Himmelskörper umgibt?",
+              "answer": "Die Atmosphäre"
+            },
+            {
+              "text": "Welcher Planet unseres Sonnensystems ist der heißeste?",
+              "answer": "Die Venus",
+              "note": "Näher an der Sonne liegt Merkur – die dichte Wolkendecke der Venus hält die Hitze fest."
+            },
+            {
+              "text": "Wie alt ist die Erde nach heutigem Stand ungefähr?",
+              "answer": "Rund 4,5 Milliarden Jahre"
+            },
+            {
+              "text": "Aus welchem Element besteht die Sonne überwiegend?",
+              "answer": "Aus Wasserstoff",
+              "note": "Rund 92 Prozent aller Atome; nach Masse gerechnet etwa drei Viertel."
+            }
+          ]
+        },
+        {
+          "name": "Jahreszahlen",
+          "questions": [
+            {
+              "text": "In welchem Jahr endete der Zweite Weltkrieg?",
+              "answer": "1945"
+            },
+            {
+              "text": "An welchem Tag fiel die Berliner Mauer?",
+              "answer": "Am 9. November 1989"
+            },
+            {
+              "text": "Seit wann bezahlt man in Deutschland mit Euro-Scheinen und -Münzen?",
+              "answer": "Seit 2002",
+              "note": "Als Buchgeld gab es den Euro schon drei Jahre länger."
+            },
+            {
+              "text": "In welchem Jahr wurde der Eiffelturm fertiggestellt?",
+              "answer": "1889",
+              "note": "Zur Weltausstellung, hundert Jahre nach der Französischen Revolution."
+            }
+          ]
+        },
+        {
+          "name": "Staat & Gesellschaft",
+          "questions": [
+            {
+              "text": "Wie beginnt Artikel 1 des Grundgesetzes?",
+              "answer": "„Die Würde des Menschen ist unantastbar.\""
+            },
+            {
+              "text": "Welche drei Gewalten teilen sich in Deutschland die Staatsmacht?",
+              "answer": "Legislative, Exekutive und Judikative",
+              "note": "Gesetzgebung, Verwaltung und Rechtsprechung."
+            },
+            {
+              "text": "Welches Amt steht in Deutschland protokollarisch an erster Stelle?",
+              "answer": "Das des Bundespräsidenten"
+            },
+            {
+              "text": "Welche Mehrheit braucht eine Änderung des Grundgesetzes?",
+              "answer": "Eine Zweidrittelmehrheit",
+              "note": "Und zwar in Bundestag und Bundesrat."
+            }
+          ]
+        },
+        {
+          "name": "Rekorde der Landkarte",
+          "questions": [
+            {
+              "text": "Welcher Kontinent hat die meisten Länder?",
+              "answer": "Afrika",
+              "note": "54 anerkannte Staaten."
+            },
+            {
+              "text": "Durch wie viele europäische Hauptstädte fließt die Donau?",
+              "answer": "Durch vier",
+              "note": "Wien, Bratislava, Budapest und Belgrad."
+            },
+            {
+              "text": "Welches ist die größte spanischsprachige Stadt der Welt?",
+              "answer": "Mexiko-Stadt"
+            },
+            {
+              "text": "Welches Land zählt die meisten Inseln?",
+              "answer": "Schweden",
+              "note": "Rund 270.000 – die allermeisten davon unbewohnt."
+            }
+          ]
+        },
+        {
+          "name": "Wörter & Sätze",
+          "questions": [
+            {
+              "text": "Wie nennt man die Gesamtheit aller Pflanzen eines Gebiets?",
+              "answer": "Die Flora",
+              "note": "Das Gegenstück für die Tiere heißt Fauna."
+            },
+            {
+              "text": "Aus welchem Stück stammt „Sein oder Nichtsein, das ist hier die Frage\"?",
+              "answer": "Aus „Hamlet\"",
+              "note": "Von William Shakespeare."
+            },
+            {
+              "text": "Was ist ein Oxymoron?",
+              "answer": "Eine Formulierung, die sich selbst widerspricht",
+              "note": "„Alter Knabe\", „bittersüß\", „Eile mit Weile\"."
+            },
+            {
+              "text": "Von wem stammt der Satz „Religion ist das Opium des Volkes\"?",
+              "answer": "Von Karl Marx"
+            }
+          ]
+        },
+        {
+          "name": "Rechnen & Messen",
+          "questions": [
+            {
+              "text": "Was ist eine Primzahl?",
+              "answer": "Eine Zahl, die nur durch 1 und sich selbst teilbar ist",
+              "note": "Die 1 selbst gehört nicht dazu – die kleinste ist die 2."
+            },
+            {
+              "text": "Wie lautet der Satz des Pythagoras?",
+              "answer": "a² + b² = c²",
+              "note": "Gilt nur im rechtwinkligen Dreieck, c ist die Seite gegenüber dem rechten Winkel."
+            },
+            {
+              "text": "Welchen pH-Wert hat reines Wasser?",
+              "answer": "7",
+              "note": "Genau in der Mitte zwischen sauer und basisch."
+            },
+            {
+              "text": "In welcher Einheit misst man den elektrischen Widerstand?",
+              "answer": "In Ohm"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

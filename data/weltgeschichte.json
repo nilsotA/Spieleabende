@@ -1,0 +1,298 @@
+{
+  "name": "Weltgeschichte",
+  "description": "Von Hannibals Elefanten bis zum Fall der Mauer in Moskau: der Satz für alles, was passiert ist, bevor wir dabei waren. Runde 1 fragt nach dem, was hängengeblieben ist, Runde 2 nach Jahreszahlen, Reichen und dem Kalten Krieg.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Von Rittern und Römern",
+          "questions": [
+            {
+              "text": "Wer musste im Mittelalter Frondienste leisten?",
+              "answer": "Die Bauern",
+              "note": "Unbezahlte Arbeit für den Grundherrn – Felder, Wege, Burgmauern."
+            },
+            {
+              "text": "Welchen Honigwein tranken die Wikinger gern?",
+              "answer": "Met"
+            },
+            {
+              "text": "Mit welchen Tieren überquerte Hannibal die Alpen?",
+              "answer": "Mit Elefanten",
+              "note": "37 sollen es gewesen sein – in Italien ankam fast keiner."
+            },
+            {
+              "text": "Wie viele Jahre dauerte der Hundertjährige Krieg?",
+              "answer": "116 Jahre",
+              "note": "Von 1337 bis 1453, mit langen Pausen dazwischen."
+            }
+          ]
+        },
+        {
+          "name": "Kriege & Krisen",
+          "questions": [
+            {
+              "text": "In welchen Jahren fand der Erste Weltkrieg statt?",
+              "answer": "Von 1914 bis 1918"
+            },
+            {
+              "text": "Wie viele Tage dauerte die Kubakrise?",
+              "answer": "13 Tage",
+              "note": "Im Oktober 1962 – näher war die Welt einem Atomkrieg nie."
+            },
+            {
+              "text": "In welchem Land begann die Februarrevolution von 1917?",
+              "answer": "In Russland",
+              "note": "Sie stürzte den Zaren; im Oktober folgte die zweite Revolution."
+            },
+            {
+              "text": "Welches Ereignis gilt als Auslöser des Dreißigjährigen Krieges?",
+              "answer": "Der Prager Fenstersturz",
+              "note": "1618 warfen protestantische Adlige zwei kaiserliche Statthalter aus dem Fenster der Burg. Alle drei überlebten."
+            }
+          ]
+        },
+        {
+          "name": "Herrscher & Häupter",
+          "questions": [
+            {
+              "text": "Wer war der letzte Zar von Russland?",
+              "answer": "Nikolaus II."
+            },
+            {
+              "text": "Wer war der Vater von Königin Elisabeth II.?",
+              "answer": "Georg VI.",
+              "note": "Er wurde König, weil sein Bruder Eduard VIII. abdankte."
+            },
+            {
+              "text": "Welcher französische König regierte 72 Jahre – länger als jeder andere Monarch Europas?",
+              "answer": "Ludwig XIV.",
+              "note": "Der Sonnenkönig, 1643 bis 1715."
+            },
+            {
+              "text": "Wer war der letzte Kaiser von China?",
+              "answer": "Puyi",
+              "note": "Mit zwei Jahren auf den Thron gesetzt, mit sechs abgedankt – später Gärtner in Peking."
+            }
+          ]
+        },
+        {
+          "name": "Entdecker & Eroberer",
+          "questions": [
+            {
+              "text": "Wer erreichte als Erster den Südpol?",
+              "answer": "Roald Amundsen",
+              "note": "Der Norweger war fünf Wochen vor Robert Falcon Scott da."
+            },
+            {
+              "text": "Welche Krankheit fürchteten Seefahrer auf langen Reisen am meisten?",
+              "answer": "Skorbut",
+              "note": "Vitamin-C-Mangel. Zitrusfrüchte an Bord machten dem ein Ende."
+            },
+            {
+              "text": "Von welchem Kontinent aus breitete sich der Homo sapiens über die Welt aus?",
+              "answer": "Von Afrika"
+            },
+            {
+              "text": "Wessen Expedition umrundete als erste die Erde?",
+              "answer": "Die von Ferdinand Magellan",
+              "note": "Magellan selbst starb unterwegs – heimgebracht hat das letzte Schiff Juan Sebastián Elcano."
+            }
+          ]
+        },
+        {
+          "name": "Das 20. Jahrhundert",
+          "questions": [
+            {
+              "text": "In welcher Stadt wurde John F. Kennedy erschossen?",
+              "answer": "In Dallas"
+            },
+            {
+              "text": "In welchem Jahr wurden die Vereinten Nationen gegründet?",
+              "answer": "1945"
+            },
+            {
+              "text": "Wie viele bemannte Mondlandungen gab es insgesamt?",
+              "answer": "Sechs",
+              "note": "Apollo 11 bis 17 – nur Apollo 13 musste nach einer Explosion umkehren."
+            },
+            {
+              "text": "Welcher Gangsterboss beherrschte in den 1920er-Jahren die Unterwelt von Chicago?",
+              "answer": "Al Capone",
+              "note": "Verurteilt wurde er am Ende wegen Steuerhinterziehung."
+            }
+          ]
+        },
+        {
+          "name": "Berühmte Sätze",
+          "questions": [
+            {
+              "text": "Wer sagte bei der ersten Mondlandung „Ein kleiner Schritt für einen Menschen …\"?",
+              "answer": "Neil Armstrong"
+            },
+            {
+              "text": "Wer soll gesagt haben „Ich weiß, dass ich nichts weiß\"?",
+              "answer": "Sokrates",
+              "note": "Überliefert hat es Platon – wörtlich so gesagt hat Sokrates es wohl nie."
+            },
+            {
+              "text": "Welcher Feldherr soll beim Überschreiten des Rubikon „Der Würfel ist gefallen\" gerufen haben?",
+              "answer": "Julius Cäsar",
+              "note": "Damit begann der Bürgerkrieg gegen Pompeius."
+            },
+            {
+              "text": "Wer soll gesagt haben „Wenn sie kein Brot haben, sollen sie doch Kuchen essen\"?",
+              "answer": "Marie-Antoinette",
+              "note": "Belegt ist es nicht – der Satz stand schon vor ihrer Zeit bei Rousseau."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Weltgeschichte in Jahren",
+          "questions": [
+            {
+              "text": "In welchem Jahr fiel Konstantinopel an die Osmanen?",
+              "answer": "1453",
+              "note": "Für viele das Ende des Mittelalters."
+            },
+            {
+              "text": "In welchem Jahr unterzeichneten die USA ihre Unabhängigkeitserklärung?",
+              "answer": "1776",
+              "note": "Am 4. Juli – daher der Feiertag."
+            },
+            {
+              "text": "In welchem Jahr stürmte die Menge die Bastille?",
+              "answer": "1789",
+              "note": "Am 14. Juli, dem heutigen französischen Nationalfeiertag."
+            },
+            {
+              "text": "In welchem Jahr löste sich die Sowjetunion auf?",
+              "answer": "1991"
+            }
+          ]
+        },
+        {
+          "name": "Revolutionen & Umbrüche",
+          "questions": [
+            {
+              "text": "In welchem Land begann die Industrielle Revolution?",
+              "answer": "In Großbritannien"
+            },
+            {
+              "text": "Wer schrieb den Hauptteil der amerikanischen Unabhängigkeitserklärung?",
+              "answer": "Thomas Jefferson"
+            },
+            {
+              "text": "Wer führte Indien mit gewaltlosem Widerstand in die Unabhängigkeit?",
+              "answer": "Mahatma Gandhi",
+              "note": "1947 wurde Indien unabhängig, ein Jahr später wurde Gandhi ermordet."
+            },
+            {
+              "text": "Wer führte den Sklavenaufstand an, aus dem der Staat Haiti hervorging?",
+              "answer": "Toussaint Louverture",
+              "note": "Die Unabhängigkeit 1804 erlebte er nicht mehr – vollendet hat sie Jean-Jacques Dessalines."
+            }
+          ]
+        },
+        {
+          "name": "Weltreiche",
+          "questions": [
+            {
+              "text": "Welches Volk baute Machu Picchu?",
+              "answer": "Die Inka"
+            },
+            {
+              "text": "Welches Reich beherrschte Mexiko, bevor die Spanier kamen?",
+              "answer": "Das Aztekenreich",
+              "note": "Die Hauptstadt Tenochtitlán lag dort, wo heute Mexiko-Stadt steht."
+            },
+            {
+              "text": "Wer begründete im 13. Jahrhundert das größte zusammenhängende Reich der Geschichte?",
+              "answer": "Dschingis Khan"
+            },
+            {
+              "text": "In welchem Jahr endete das Weströmische Reich nach gängiger Zählung?",
+              "answer": "476",
+              "note": "Da wurde der letzte weströmische Kaiser abgesetzt. Das Oströmische Reich hielt noch tausend Jahre."
+            }
+          ]
+        },
+        {
+          "name": "Sie schrieben Geschichte",
+          "questions": [
+            {
+              "text": "Wer hielt 1963 die Rede „I have a dream\"?",
+              "answer": "Martin Luther King"
+            },
+            {
+              "text": "Wer war der erste Mensch im Weltall?",
+              "answer": "Juri Gagarin",
+              "note": "1961, eine Erdumrundung in 108 Minuten."
+            },
+            {
+              "text": "Wer war die erste Frau im Weltall?",
+              "answer": "Walentina Tereschkowa",
+              "note": "1963 – die nächste Frau flog erst 19 Jahre später."
+            },
+            {
+              "text": "Wer wurde 1994 zum ersten schwarzen Präsidenten Südafrikas gewählt?",
+              "answer": "Nelson Mandela",
+              "note": "Zuvor saß er 27 Jahre im Gefängnis."
+            }
+          ]
+        },
+        {
+          "name": "Karten & Grenzen",
+          "questions": [
+            {
+              "text": "Wie hieß die Handelsroute, die China mit dem Mittelmeer verband?",
+              "answer": "Die Seidenstraße"
+            },
+            {
+              "text": "Welches Land verkaufte 1867 Alaska an die USA?",
+              "answer": "Russland",
+              "note": "Für 7,2 Millionen Dollar – damals galt das als Fehlkauf der Amerikaner."
+            },
+            {
+              "text": "Welchen Wall ließ Kaiser Hadrian quer durch Britannien bauen?",
+              "answer": "Den Hadrianswall",
+              "note": "Rund 117 Kilometer, heute Weltkulturerbe."
+            },
+            {
+              "text": "Welche zwei Länder teilten 1494 im Vertrag von Tordesillas die Neue Welt unter sich auf?",
+              "answer": "Spanien und Portugal",
+              "note": "Deshalb spricht Brasilien heute Portugiesisch."
+            }
+          ]
+        },
+        {
+          "name": "Der Kalte Krieg",
+          "questions": [
+            {
+              "text": "Welche zwei Supermächte standen sich im Kalten Krieg gegenüber?",
+              "answer": "Die USA und die Sowjetunion"
+            },
+            {
+              "text": "Wie hieß das Militärbündnis des Ostblocks?",
+              "answer": "Der Warschauer Pakt"
+            },
+            {
+              "text": "Womit versorgten die Westalliierten das abgeriegelte West-Berlin 1948/49?",
+              "answer": "Mit einer Luftbrücke",
+              "note": "Die „Rosinenbomber\" landeten fast im Minutentakt."
+            },
+            {
+              "text": "Wie hieß Michail Gorbatschows Programm für den Umbau von Staat und Wirtschaft?",
+              "answer": "Perestroika",
+              "note": "„Umbau\" – zusammen mit Glasnost, der Offenheit."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
