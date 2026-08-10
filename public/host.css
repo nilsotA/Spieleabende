@@ -152,6 +152,13 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, 0.82) 34%, var(--ink-900) 58%);
 }
 .btn-big { font-size: 1.15rem; padding: 0.9rem 2.4rem; border-radius: 12px; }
+/* Die Startleiste klebt unten und liegt über dem Inhalt. Ab dem siebten Team
+   reichte die Teamkarte darunter, und vom gerade eingetippten Team blieb nur
+   ein verblasster Rest – ausgerechnet in dem Moment, in dem der Host wissen
+   will, ob es geklappt hat. Der Rand sagt dem Browser, wie viel Luft ein
+   Eintrag unter sich braucht, damit `scrollIntoView` ihn wirklich freischiebt
+   statt ihn für sichtbar zu halten. */
+.lobby-teams li { scroll-margin-bottom: 7rem; }
 
 /* ------------------------------------------------------------------ Bühne */
 

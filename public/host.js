@@ -11,6 +11,10 @@ let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
 let standVorRunde = null; // Platzierung am Ende der vorletzten Runde, für den Endstand
 let letzteRunde = null;   // zuletzt gesehene Rundennummer, für die Rundenansage
 let fuehrend = null;      // wer zuletzt allein vorne lag, für den Führungswechsel
+// Beim Absenden des Teamformulars gesetzt, beim nächsten Aufbau der Liste
+// verbraucht: So scrollt nur der Host, der gerade getippt hat, und nicht jeder
+// Host-Screen bei jedem Broadcast.
+let gradAngelegt = false;
 
 const act = hostAction;
 
@@ -74,6 +78,7 @@ function stageFlash(color) {
 $('#team-form').addEventListener('submit', (ev) => {
   ev.preventDefault();
   const input = $('#team-name');
+  gradAngelegt = true;
   act('addTeam', { name: input.value });
   input.value = '';
   input.focus();
@@ -305,6 +310,31 @@ function renderLobby() {
   $('#set-penalty').value = state.settings.wrongPenalty;
   $('#set-buzzcorrect').value = String(state.settings.buzzAfterCorrect);
   $('#btn-start').disabled = state.teams.length < 2;
+  // Das frisch angelegte Team ins Bild holen. Ab dem siebten Team reicht die
+  // Karte bis unter die klebende „Spiel starten"-Leiste, und der Host sah vom
+  // Team, das er gerade eingetippt hatte, nur noch einen verblassten Rest –
+  // also genau in dem Moment nicht, in dem er wissen will, ob es geklappt hat.
+  //
+  // Gerechnet wird die Verdeckung selbst, statt `scrollIntoView` zu bitten:
+  // Mit `block: 'nearest'` bricht der Browser ab, sobald das Element formal im
+  // Sichtfeld liegt – und das tut es ja, es ist nur überdeckt. Der Rand aus
+  // `scroll-margin-bottom` ändert daran nichts, weil es gar nicht erst zum
+  // Ausrichten kommt.
+  if (gradAngelegt) {
+    gradAngelegt = false;
+    const neu = list.lastElementChild;
+    const leiste = $('.lobby-start');
+    const box = $('#view-lobby');
+    if (neu && leiste && box) {
+      const drunter = neu.getBoundingClientRect().bottom - leiste.getBoundingClientRect().top;
+      if (drunter > 0) {
+        box.scrollBy({
+          top: drunter + 8,
+          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        });
+      }
+    }
+  }
 }
 
 function renderBoard() {
