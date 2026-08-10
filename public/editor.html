@@ -12,6 +12,18 @@
   .bar { position: sticky; top: 0; z-index: 10; background: rgba(5,7,12,.94);
          backdrop-filter: blur(6px); padding: .8rem 0; margin-bottom: 1.2rem;
          border-bottom: 1px solid var(--line); }
+  /* Zusammengerückt, sobald man im Formular ist.
+
+     48 Fragen sind ein langes Formular – 7000 Pixel. Die Leiste klebt oben,
+     damit Speichern und Fortschritt immer zur Hand sind, kostete dabei aber
+     202px: auf einem 720er-Laptop 28 Prozent des Bildes, dauerhaft. Überschrift,
+     Untertitel und der Hinweis auf den Dateinamen sagen einem beim Tippen der
+     34. Frage nichts mehr – die blenden sich aus, das Namensfeld, die Knöpfe
+     und der Fortschritt bleiben. */
+  .bar.eng > .row:first-child { display: none; }
+  .bar.eng #ziel-datei { display: none; }
+  .bar.eng > .row { margin-top: 0 !important; }
+  .bar.eng .fortschritt { margin-top: .5rem; }
   .round { margin-bottom: 2rem; }
   .round > h2 { display: flex; align-items: center; gap: .6rem; }
   .round-mult { font-size: .72rem; color: var(--red-1); }
@@ -91,6 +103,13 @@
       <span id="fortschritt-text"></span>
     </button>
   </div>
+  <!-- Marke direkt unter der Leiste. Woran erkannt wird, ob man schon im
+       Formular ist, darf sich nicht dadurch ändern, dass die Leiste zusammen-
+       rückt: Schrumpft sie, wird die Seite um denselben Betrag kürzer, und der
+       Browser zieht den Scrollwert nach, um den Inhalt an Ort und Stelle zu
+       halten. Gegen `scrollY` gemessen klappte die Leiste deshalb endlos auf
+       und zu. Diese Marke bleibt bei genau dem Nachziehen stehen. -->
+  <div id="bar-marke" aria-hidden="true"></div>
 
   <!-- Bleibt stehen, solange der Zwischenspeicher voll ist. Ein Toast wäre nach
        drei Sekunden weg, und danach sähe der Editor wieder gesund aus. -->

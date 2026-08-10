@@ -494,6 +494,27 @@ function slug(str) {
     .replace(/^-|-$/g, '') || 'fragensatz';
 }
 
+/**
+ * Die Kopfleiste rückt zusammen, sobald man im Formular arbeitet.
+ *
+ * Gemessen wird an der Marke direkt unter der Leiste, nicht an `scrollY`.
+ * Grund steht in editor.html: Das Zusammenrücken verkürzt die Seite, der
+ * Browser zieht den Scrollwert nach – und gegen `scrollY` geprüft klappte die
+ * Leiste dadurch endlos auf und zu. Die Marke bewegt sich bei diesem Nachziehen
+ * nicht, weil genau das der Zweck des Nachziehens ist.
+ */
+function leisteAnpassen() {
+  const bar = document.querySelector('.bar');
+  const marke = document.querySelector('#bar-marke');
+  if (!bar || !marke) return;
+  const oben = marke.getBoundingClientRect().top;
+  const eng = bar.classList.contains('eng');
+  if (!eng && oben < 60) bar.classList.add('eng');
+  else if (eng && oben > 90) bar.classList.remove('eng');
+}
+addEventListener('scroll', leisteAnpassen, { passive: true });
+
 loadSetList();
 render();
 updateFortschritt();
+leisteAnpassen();
