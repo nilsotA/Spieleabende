@@ -740,7 +740,12 @@ function summenzeile(geholt, verloren) {
 function renderScores() {
   const box = $('#p-scores');
   const activeId = state.teams[state.turnIndex]?.id;
-  const key = state.teams.map((t) => `${t.id}:${t.wappen}:${t.name}:${t.score}`).join('|') + `#${activeId}`;
+  // Die eigene Teamkennung gehört mit hinein: Sie entscheidet, welcher Chip
+  // als „meiner" leuchtet. Nach „Team wechseln" ändert sich sonst nichts am
+  // Schlüssel – kein Name, kein Wappen, kein Punktestand –, die Reihe wird
+  // nicht neu gebaut, und die Markierung klebt am alten Team.
+  const key = state.teams.map((t) => `${t.id}:${t.wappen}:${t.name}:${t.score}`).join('|')
+    + `#${activeId}#${state.you?.teamId}`;
   if (box.dataset.key === key) return;
   box.dataset.key = key;
   box.innerHTML = '';

@@ -285,11 +285,19 @@ async function handleAction(clientId, body) {
     throw new G.GameError('Da hat sich gerade etwas geändert – schau kurz auf den Screen.');
   }
 
-  if (RUECKNEHMBAR.has(type)) {
-    // Erst sichern, dann handeln. Wirft die Aktion, bleibt der Schnappschuss
-    // stehen und zeigt weiterhin auf den letzten Zug, der wirklich durchging.
-    rueckStand = { state: structuredClone(state), was: benenne(type, state) };
-  }
+  // Erst sichern, dann handeln – aber übernommen wird der Schnappschuss erst,
+  // wenn der Zug auch durchgegangen ist.
+  //
+  // Vorher stand er sofort in `rueckStand`, und ein abgelehnter Zug hat damit
+  // den Rückweg überschrieben: Host wertet „Richtig" für Rot (100 Punkte,
+  // Knopf sagt „Wertung für Rot"), tippt gleich darauf auf ein Feld, das
+  // gerade nicht wählbar ist – der Knopf sagt danach „Feldwahl", und
+  // Zurücknehmen ließ die 100 Punkte stehen. Gemessen und nachgestellt. Der
+  // Kommentar an dieser Stelle beschrieb schon immer das gewünschte Verhalten;
+  // der Code tat es nur nicht.
+  const schnappschuss = RUECKNEHMBAR.has(type)
+    ? { state: structuredClone(state), was: benenne(type, state) }
+    : null;
 
   switch (type) {
     case 'undo': {
@@ -301,6 +309,15 @@ async function handleAction(clientId, body) {
       for (const team of alt.teams) {
         const jetzt = state.teams.find((t) => t.id === team.id);
         if (jetzt) team.members = jetzt.members;
+      }
+      // Und Teams, die es im Schnappschuss noch gar nicht gab, bleiben auch.
+      // Sonst warf ein „Zurücknehmen" genau das Team hinaus, das sich ein
+      // Handy zwei Sekunden vorher selbst angelegt hat – samt Gerät: Der Host
+      // tippt in der Lobby auf „dran", jemand legt sein Team an, der Host
+      // nimmt den Zugwechsel zurück, und das Team ist weg. Nachgestellt.
+      const bekannt = new Set(alt.teams.map((t) => t.id));
+      for (const team of state.teams) {
+        if (!bekannt.has(team.id)) alt.teams.push(team);
       }
       state = alt;
       rueckStand = null;
@@ -440,6 +457,10 @@ async function handleAction(clientId, body) {
     default:
       throw new G.GameError(`Unbekannte Aktion: ${type}`);
   }
+  // Bis hierher kommt nur, was nicht geworfen hat. `undo` und `backToLobby`
+  // räumen den Rückweg selbst ab und stehen nicht in RUECKNEHMBAR – ihr
+  // Schnappschuss ist null und überschreibt deshalb nichts.
+  if (schnappschuss) rueckStand = schnappschuss;
   broadcast();
 }
 

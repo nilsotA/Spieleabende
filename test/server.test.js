@@ -355,6 +355,70 @@ test('eine fehlende Datei verrät den Pfad des Servers nicht', async (t) => {
   assert.doesNotMatch(error, /ENOENT|\//, `kein Pfad in der Meldung: ${error}`);
 });
 
+test('ein abgelehnter Zug überschreibt den Rückweg nicht', async (t) => {
+  // Der Rückweg ist das Sicherheitsnetz des Hosts – und genau dann gespannt,
+  // wenn er sich vertippt hat. Vorher setzte jeder rücknehmbare Zug den
+  // Schnappschuss, bevor er lief: Ein abgelehnter Griff daneben ersetzte damit
+  // den Rückweg, und die falsche Wertung davor war nicht mehr zurückzuholen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-rueck-'));
+  const port = 5300 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'rueck-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 });
+  await host({ type: 'judge', correct: true });
+  assert.equal((await zustand(base)).teams[0].score, 500);
+  assert.match((await zustand(base)).rueckgaengig, /Wertung/);
+
+  // Ein Feld wählen, während die Frage noch offen ist: prallt ab.
+  const daneben = await host({ type: 'pick', catIdx: 1, rowIdx: 0 });
+  assert.equal(daneben.ok, false);
+  assert.match((await zustand(base)).rueckgaengig, /Wertung/, 'der Rückweg zeigt weiter auf die Wertung');
+
+  await host({ type: 'undo' });
+  const nachher = await zustand(base);
+  assert.equal(nachher.teams[0].score, 0, 'die Wertung ist wirklich zurückgenommen');
+  assert.equal(nachher.rueckgaengig, null);
+});
+
+test('Zurücknehmen wirft ein frisch angelegtes Team nicht hinaus', async (t) => {
+  // „Eigenes Team" darf jedes Handy jederzeit in der Lobby. Der Host darf dort
+  // ebenso „dran" setzen, und das ist rücknehmbar. Vorher verschwand das neue
+  // Team beim Zurücknehmen mitsamt seinem Gerät, weil der alte Zustand die
+  // Teamliste komplett ersetzte.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-neuteam-'));
+  const port = 5500 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'neuteam-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  const teams = (await zustand(base)).teams;
+  await host({ type: 'setTurn', teamId: teams[1].id });
+
+  await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'handy-nils', role: 'player', type: 'eigenesTeam', name: 'Nils' }),
+  });
+  assert.equal((await zustand(base)).teams.length, 3);
+
+  await host({ type: 'undo' });
+  const nachher = await zustand(base);
+  assert.deepEqual(nachher.teams.map((x) => x.name), ['Rot', 'Blau', 'Nils'], 'das neue Team bleibt');
+  assert.equal(nachher.teams[2].members.length, 1, 'und sein Handy sitzt noch drin');
+  assert.equal(nachher.turnIndex, 0, 'der Zugwechsel selbst ist zurückgenommen');
+});
+
 test('Spieler bekommen die Lösung nicht mitgeschickt', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
   const port = 4300 + Math.floor(Math.random() * 200);

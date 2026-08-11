@@ -121,8 +121,9 @@
               "answer": "Was ist ein Sieb?"
             },
             {
-              "text": "Dieses weiße Pulver aus Mais bindet Soßen, ohne sie trüb werden zu lassen.",
-              "answer": "Was ist Speisestärke?"
+              "text": "Dieses weiße Pulver aus Mais bindet Soßen und macht Pudding fest.",
+              "answer": "Was ist Speisestärke?",
+              "note": "Klar und glänzend bindet dagegen Kartoffelstärke – Maisstärke trübt ein."
             },
             {
               "text": "Dieses Verfahren macht Milch länger haltbar und ist nach einem französischen Chemiker benannt.",

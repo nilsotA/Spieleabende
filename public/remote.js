@@ -196,7 +196,12 @@ function render() {
   renderRueckgaengig();
 
   const list = $('#r-teams');
-  const key = state.teams.map((t) => `${t.id}:${t.score}`).join('|') + `#${state.turnIndex}`;
+  // Name und Wappen stehen in der Zeile, also gehören sie in den Schlüssel.
+  // In der Lobby stehen alle Punktestände auf 0: Sucht sich dort ein Handy
+  // sein Wappen aus oder benennt der Host ein Team um, änderte sich am
+  // Schlüssel nichts, und die Liste auf der Fernbedienung fror ein.
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.score}`).join('|')
+    + `#${state.turnIndex}`;
   if (list.dataset.key !== key) {
     list.dataset.key = key;
     list.innerHTML = '';

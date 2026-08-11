@@ -204,8 +204,9 @@
           "name": "Feste & Bräuche",
           "questions": [
             {
-              "text": "An welchem Tag stellen Kinder in Deutschland ihre Stiefel vor die Tür?",
-              "answer": "Am 6. Dezember"
+              "text": "An welchem Tag finden Kinder in Deutschland etwas in ihren geputzten Stiefeln?",
+              "answer": "Am 6. Dezember",
+              "note": "Hingestellt werden sie am Abend davor, dem Nikolausabend."
             },
             {
               "text": "Wie viele Türchen hat ein klassischer Adventskalender?",

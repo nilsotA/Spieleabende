@@ -265,6 +265,11 @@ function render(prev) {
     standVorRunde = null;
     letzteRunde = null;
     fuehrend = null;
+    // Auch der Board-Schlüssel gehört zurückgesetzt. Er überlebte den Weg
+    // durch die Lobby, und beim zweiten Spiel mit demselben Satz war der
+    // Schlüssel deshalb noch derselbe: Das Board galt als „nicht frisch
+    // gebaut", und die Rundenansage samt Ton blieb aus.
+    $('#board').dataset.key = '';
     return renderLobby();
   }
 
@@ -1343,12 +1348,12 @@ function zeigeRekorde(final, ranked) {
   };
   const zeilen = [];
 
-  /** „A und B" – ab drei wird gezählt, sonst sprengt eine Zeile das Panel. */
-  const nenne = (teams) => {
-    const n = teams.map((t) => `${t.wappen} ${t.name}`);
-    if (n.length <= 2) return n.join(' und ');
-    return `${n[0]}, ${n[1]} und ${n.length - 2} weitere`;
-  };
+  // Dieselbe Aufzählung wie überall sonst. Hier stand eine zweite, eigene
+  // Fassung, und die zählte schon ab drei Namen: Bei genau drei Teams – der
+  // häufigsten Runde überhaupt – hieß die Auszeichnung „🦊 A, 🐻 B und 1
+  // weitere". Das ist grammatisch falsch und länger, als die drei einfach zu
+  // nennen. `aufzaehlung` fängt genau diesen Fall ab und zählt erst ab vier.
+  const nenne = (teams) => aufzaehlung(teams.map((t) => `${t.wappen} ${t.name}`));
 
 
   if (r.schnellsterBuzz) {
@@ -1642,7 +1647,11 @@ function buzzKnopf(team, aufschrift) {
     'aria-label': `Buzz für ${team.name}`,
     onclick: () => act('buzzFor', { teamId: team.id }),
   },
-    el('span', { class: 'dot', style: { background: team.color } }),
+    // `color` mit setzen: Der Schein um den Punkt kommt aus currentColor
+    // (host.css .buzz-fuer .dot). Ohne das erbte er die Textfarbe des Knopfes
+    // und leuchtete weißlich – bei acht Knöpfen nebeneinander war die
+    // Teamfarbe damit genau am auffälligsten Teil nicht abzulesen.
+    el('span', { class: 'dot', style: { background: team.color, color: team.color } }),
     aufschrift,
   );
   return node;
