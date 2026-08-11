@@ -3,7 +3,7 @@
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
   installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand,
-  punkte } from '/common.js';
+  aufzaehlung, punkte } from '/common.js';
 
 let state = null;
 
@@ -139,7 +139,7 @@ function render() {
       setzeText(phase, state.stechenSieger
         ? `Spiel beendet – ${teamName(state.stechenSieger)} hat das Stechen geholt.`
         : offen
-          ? `Gleichstand: ${spitze.map((t) => t.name).join(' und ')}. Ein Stechen entscheidet.`
+          ? `Gleichstand: ${aufzaehlung(spitze.map((t) => `${t.wappen} ${t.name}`))}. Ein Stechen entscheidet.`
           : 'Spiel beendet.');
       // Bei Gleichstand steht die Entscheidungsfrage oben – erst danach der
       // Knopf, der den Abend wegräumt.

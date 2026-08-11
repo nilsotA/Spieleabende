@@ -82,6 +82,28 @@ export function setzeText(node, text) {
   node.textContent = text;
 }
 
+/**
+ * Deutsche Aufzählung: „A", „A und B", „A, B und C".
+ *
+ * Bei einem Dreier-Gleichstand stand auf der Leinwand „A und B und C" – auf dem
+ * einen Bildschirm des Abends, auf den am Ende alle schauen. Auf der
+ * Fernbedienung stand derselbe Satz noch, nachdem die Leinwand längst richtig
+ * aufzählte: zwei Fassungen derselben Regel, von denen eine nachgezogen wurde.
+ * Deshalb steht sie jetzt hier, wo beide sie holen.
+ *
+ * Gedeckelt, weil ein Gleichstand über alle acht Teams möglich ist: Hat in einer
+ * Runde niemand gepunktet, stehen alle bei null. Acht Namen in der Schlagzeile
+ * wären keine Ansage mehr, sondern eine Liste.
+ */
+export function aufzaehlung(namen, hoechstens = 3) {
+  if (namen.length <= 1) return namen[0] || '';
+  if (namen.length === 2) return `${namen[0]} und ${namen[1]}`;
+  if (namen.length <= hoechstens) {
+    return `${namen.slice(0, -1).join(', ')} und ${namen[namen.length - 1]}`;
+  }
+  return `${namen.slice(0, hoechstens - 1).join(', ')} und ${namen.length - (hoechstens - 1)} weitere`;
+}
+
 export function toast(text, level = 'info') {
   const box = $('#toasts');
   if (!box) return;

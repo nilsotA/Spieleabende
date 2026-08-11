@@ -1,6 +1,6 @@
 import {
   $, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
-  setFrageText, setzeText, istStumm, setzeStumm, anschlussStand,
+  setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
   punkte, delta as vorzeichen } from '/common.js';
 import { qrSvg } from '/qr.js';
 
@@ -488,25 +488,6 @@ addEventListener('resize', passeFrageEin);
 // misst dann einen Kasten ohne Bild und ist fertig, bevor das Bild überhaupt
 // da ist. Sobald es steht, wird noch einmal gerechnet.
 $('#q-image')?.addEventListener('load', passeFrageEin);
-
-/**
- * Deutsche Aufzählung: „A", „A und B", „A, B und C".
- *
- * Bei einem Dreier-Gleichstand stand auf der Leinwand „A und B und C" – auf dem
- * einen Bildschirm des Abends, auf den am Ende alle schauen.
- *
- * Gedeckelt, weil ein Gleichstand über alle acht Teams möglich ist: Hat in einer
- * Runde niemand gepunktet, stehen alle bei null. Acht Namen in der Schlagzeile
- * wären keine Ansage mehr, sondern eine Liste.
- */
-function aufzaehlung(namen, hoechstens = 3) {
-  if (namen.length <= 1) return namen[0] || '';
-  if (namen.length === 2) return `${namen[0]} und ${namen[1]}`;
-  if (namen.length <= hoechstens) {
-    return `${namen.slice(0, -1).join(', ')} und ${namen[namen.length - 1]}`;
-  }
-  return `${namen.slice(0, hoechstens - 1).join(', ')} und ${namen.length - (hoechstens - 1)} weitere`;
-}
 
 function renderBoard() {
   const board = $('#board');
