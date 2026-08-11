@@ -1109,3 +1109,49 @@ test('der Browser wird je System richtig aufgerufen', async () => {
   assert.deepEqual(browserBefehl('freebsd'), { befehl: 'xdg-open', args: [] },
     'unbekannte Systeme bekommen den verbreitetsten Weg');
 });
+
+test('ein Handy legt sein eigenes Team an – aber nur in der Lobby', async (t) => {
+  // Der Weg, der einen Spieleabend eröffnet: Alle scannen den QR-Code, tippen
+  // ihren Namen und legen los. Ohne das muss der Host erst vier Namen abtippen,
+  // bevor überhaupt jemand beitreten kann.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-eigen-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 3700 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const spieler = async (id, name) => {
+    const r = await fetch(`${base}/api/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: id, role: 'player', type: 'eigenesTeam', name }),
+    });
+    return r.json();
+  };
+
+  assert.deepEqual((await spieler('h1', 'Nils')), { ok: true });
+  await spieler('h2', 'Annemarie');
+  const lobby = await zustand(base);
+  assert.deepEqual(lobby.teams.map((t) => t.name), ['Nils', 'Annemarie'],
+    'die Teams heißen wie die Leute, die sie angelegt haben');
+  assert.deepEqual(lobby.teams.map((t) => t.members.map((m) => m.name)), [['Nils'], ['Annemarie']],
+    'und jeder sitzt gleich in seinem');
+
+  // Ohne Namen legt der Server trotzdem eins an – mit dem üblichen Ersatznamen.
+  // Der Client bremst vorher, aber der Server darf daran nicht zerbrechen.
+  await spieler('h3', '   ');
+  const mitLeer = await zustand(base);
+  assert.equal(mitLeer.teams.length, 3);
+  assert.match(mitLeer.teams[2].name, /^Team \d+$/);
+
+  // Läuft das Spiel, ist Schluss: Teams gibt es nur in der Lobby.
+  const host = await alsHost(base, 'eigen-host');
+  await host({ type: 'startGame', set: SATZ });
+  const abgelehnt = await spieler('h4', 'Zuspät');
+  assert.equal(abgelehnt.ok, false);
+  assert.match(abgelehnt.error, /Lobby/);
+  assert.equal((await zustand(base)).teams.length, 3, 'und es bleibt bei drei Teams');
+});

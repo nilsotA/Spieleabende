@@ -296,7 +296,8 @@ function renderLobby() {
   const list = $('#lobby-teams');
   list.innerHTML = '';
   if (!state.teams.length) {
-    list.append(el('li', { class: 'muted' }, 'Noch keine Teams. Lege oben mindestens zwei an.'));
+    list.append(el('li', { class: 'muted' },
+      'Noch keine Teams. Sie erscheinen hier, sobald die Handys eins anlegen – oder du legst sie oben selbst an.'));
   }
   for (const team of state.teams) {
     list.append(

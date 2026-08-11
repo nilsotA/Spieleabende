@@ -302,6 +302,18 @@ async function handleAction(clientId, body) {
     case 'joinTeam':
       G.joinTeam(state, clientId, body.teamId, body.name);
       break;
+    // Ein Handy legt sein eigenes Team an und tritt ihm bei. Bewusst nicht
+    // host-only: Genau das ist der Punkt – niemand muss auf den Host warten,
+    // der sonst vier Namen abtippt, bevor überhaupt jemand beitreten kann.
+    // Die Grenzen dafür stehen ohnehin schon in addTeam: nur in der Lobby,
+    // höchstens acht Teams. Entfernen kann sie weiterhin nur der Host.
+    case 'eigenesTeam': {
+      const wunsch = String(body.name || '').trim();
+      G.addTeam(state, wunsch);
+      const neu = state.teams[state.teams.length - 1];
+      G.joinTeam(state, clientId, neu.id, wunsch);
+      break;
+    }
     case 'leaveTeam':
       G.leaveTeams(state, clientId);
       break;

@@ -44,11 +44,17 @@ Fernbedienung für dich:   http://192.168.x.x:3000/remote
 Fragen-Editor:            http://localhost:3000/editor
 ```
 
-1. **Host-Screen** öffnen und Teams anlegen – für Einzelspieler einfach ein Team pro Person.
-2. Alle anderen scannen den **QR-Code**, der in der Lobby steht (oder tippen die
-   WLAN-Adresse ein), geben ihren Namen ein und wählen ihr Team. Für Zweierteams
-   wählen beide dasselbe Team.
+1. **Host-Screen** öffnen – mehr braucht es zum Anfangen nicht.
+2. Alle scannen den **QR-Code**, der in der Lobby steht (oder tippen die
+   WLAN-Adresse ein), geben ihren Namen ein und tippen auf **„Eigenes Team"**.
+   Das Team heißt dann wie sie und erscheint sofort auf der Leinwand. Für
+   Zweierteams tippt der Zweite stattdessen auf das Team des Ersten.
 3. Fragensatz auswählen, Regeln einstellen, **Spiel starten**.
+
+Teams anlegen, umbenennen und entfernen kann der Host weiterhin selbst – nur
+muss er nicht mehr vier Namen abtippen, bevor überhaupt jemand beitreten kann.
+Selbst anlegen geht ausschließlich in der Lobby; läuft das Spiel, steigt man in
+ein vorhandenes Team ein.
 
 Anderer Port: `PORT=8080 node server/index.js` – eine eigene Angabe gilt dann
 genau so und wird nicht verschoben.

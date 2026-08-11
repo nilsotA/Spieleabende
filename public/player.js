@@ -50,6 +50,25 @@ $('#join-form').addEventListener('submit', async (ev) => {
 
 $('#btn-leave').addEventListener('click', () => action('leaveTeam'));
 
+/**
+ * „Eigenes Team": Legt ein Team unter dem eigenen Namen an und tritt ihm bei.
+ *
+ * Ein Schritt statt zwei – der Name steht ja schon im Feld darüber. Wer zu
+ * zweit spielt, tippt danach einfach auf das Team des anderen.
+ */
+async function eigenesTeam() {
+  unlockAudio();
+  keepScreenAwake();
+  const name = $('#my-name').value.trim();
+  if (!name) {
+    $('#my-name').focus();
+    return toast('Bitte trag deinen Namen ein.', 'error');
+  }
+  document.activeElement?.blur?.();
+  const res = await action('eigenesTeam', { name });
+  if (res.ok) localStorage.setItem('quizduell.name', name);
+}
+
 /* Stumm gilt pro Gerät: Wer neben dem Beamer sitzt, braucht seinen Buzzerton
    nicht doppelt – und das Handy vibriert ja ohnehin. */
 const tonKnopf = $('#btn-ton');
@@ -287,11 +306,11 @@ function renderJoin() {
   // Nur neu bauen, wenn sich wirklich etwas geändert hat – sonst geht ein
   // Antippen verloren, weil zwischendurch ein State-Update eintrudelt.
   const key = state.teams.map((t) => `${t.id}:${t.name}:${t.members.map((m) => m.name).join(',')}`).join('|')
-    + `#${selectedTeam}`;
+    + `#${selectedTeam}#${state.phase}`;
   if (box.dataset.key !== key) {
     box.dataset.key = key;
     box.innerHTML = '';
-    if (!state.teams.length) {
+    if (!state.teams.length && state.phase !== 'lobby') {
       box.append(el('p', { class: 'muted small' }, 'Der Host hat noch keine Teams angelegt. Gleich geht’s los …'));
     }
     if (selectedTeam && !state.teams.some((t) => t.id === selectedTeam)) selectedTeam = null;
@@ -307,6 +326,28 @@ function renderJoin() {
             el('div', {}, team.name),
             el('div', { class: 'sub' },
               team.members.length ? team.members.map((m) => m.name).join(', ') : 'noch frei'),
+          ),
+        ),
+      );
+    }
+    // Ein eigenes Team anlegen, ohne auf den Host zu warten.
+    //
+    // Vorher musste er jedes Team vorher eintippen, und wer vor ihm den
+    // QR-Code scannte, stand vor einer leeren Liste. Auf der Leinwand hießen
+    // die Teams dann „Team 1" und „Team 2", weil das schneller ging als vier
+    // Namen abzutippen. Jetzt tippt jeder seinen eigenen – der Host kann
+    // weiterhin welche anlegen, umbenennen und entfernen.
+    if (state.phase === 'lobby' && state.teams.length < 8) {
+      box.append(
+        el('button', {
+          type: 'button',
+          class: 'team-choice neu',
+          onclick: eigenesTeam,
+        },
+          el('span', { class: 'dot plus' }, '+'),
+          el('span', {},
+            el('div', {}, 'Eigenes Team'),
+            el('div', { class: 'sub' }, 'heißt wie du – für Zweierteams tippt der Zweite oben darauf'),
           ),
         ),
       );
