@@ -1055,9 +1055,13 @@ test('ein belegter Port hält den Start nicht auf', async (t) => {
   let ausgabe = '';
   proc.stdout.on('data', (d) => { ausgabe += d; });
   proc.stderr.on('data', (d) => { ausgabe += d; });
-  for (let i = 0; i < 120 && !/läuft!/.test(ausgabe); i++) await warte(50);
+  // Großzügig warten: Hier startet ein echter Node-Prozess, der beim ersten
+  // Versuch auf einen belegten Port läuft und es dann noch einmal probiert.
+  // Auf einer beschäftigten Maschine dauert das länger als die sechs Sekunden,
+  // die hier standen – dann wurde der Test rot, ohne dass etwas kaputt war.
+  for (let i = 0; i < 400 && !/läuft!/.test(ausgabe); i++) await warte(50);
 
-  assert.match(ausgabe, /läuft!/, 'der Server ist gar nicht hochgekommen');
+  assert.match(ausgabe, /läuft!/, `der Server ist gar nicht hochgekommen. Ausgabe:\n${ausgabe}`);
   assert.match(ausgabe, /war belegt/, 'er hätte sagen müssen, warum es ein anderer Port ist');
   const treffer = ausgabe.match(/localhost:(\d+)\/host/);
   assert.ok(treffer, 'keine Adresse in der Ausgabe');

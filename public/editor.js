@@ -144,6 +144,7 @@ function render() {
               oninput: (ev) => {
                 q.text = ev.target.value;
                 laengeMarkieren(ev.target);
+                hoeheAnpassen(ev.target);
                 verraeterMarkieren();
                 persistSoon();
               },
@@ -151,7 +152,12 @@ function render() {
             el('div', { class: 'antwort' },
               el('textarea', {
                 placeholder: 'Antwort',
-                oninput: (ev) => { q.answer = ev.target.value; verraeterMarkieren(); persistSoon(); },
+                oninput: (ev) => {
+                  q.answer = ev.target.value;
+                  hoeheAnpassen(ev.target);
+                  verraeterMarkieren();
+                  persistSoon();
+                },
               }, q.answer || ''),
               // Der Zusatz erscheint beim Auflösen klein unter der Lösung –
               // gut für „Nicht Sydney!" oder eine Quellenangabe.
@@ -226,10 +232,11 @@ function render() {
   updateFortschritt();
   zeigeZiel();
   alleLaengenMarkieren();
-  // Nach dem Neuaufbau stehen die Zusätze wieder auf einer Zeile – die Höhe
-  // muss zum Inhalt passen, sonst sieht man von einem geladenen Satz nur die
-  // erste Zeile jedes Zusatzes.
-  for (const feld of box.querySelectorAll('textarea.notiz')) hoeheAnpassen(feld);
+  // Nach dem Neuaufbau stehen alle Felder auf ihrer Grundhöhe – die muss zum
+  // Inhalt passen, sonst sieht man von einem geladenen Satz nur den Anfang.
+  // Alle auf einmal, nicht einzeln beim Bauen: So liest der Browser die Höhen
+  // in einem Durchgang, statt für jedes Feld neu zu rechnen.
+  for (const feld of box.querySelectorAll('.qrow textarea')) hoeheAnpassen(feld);
 }
 
 /**

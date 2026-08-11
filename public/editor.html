@@ -47,7 +47,9 @@
   /* Zwei Zeilen statt einer: Die mitgelieferten Fragen sind im Schnitt deutlich
      länger als die ~60 Zeichen, die in eine Zeile passen – man tippte bisher
      blind in einen Schlitz. */
-  .qrow textarea { min-height: 4rem; resize: vertical; line-height: 1.35; }
+  /* overflow: hidden, weil hoeheAnpassen die Höhe setzt – eine Bildlaufleiste
+     im Feld wäre dann nur noch ein Flackern beim Tippen. */
+  .qrow textarea { min-height: 4rem; resize: vertical; line-height: 1.35; overflow: hidden; }
   .fortschritt { display: block; width: 100%; margin-top: .7rem; padding: .4rem .7rem; text-align: left;
                  background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 10px;
                  color: var(--muted); font: inherit; font-size: .82rem; cursor: pointer; position: relative;
