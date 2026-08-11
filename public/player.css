@@ -510,6 +510,18 @@ html, body { touch-action: manipulation; }
   flex: 0 0 auto;
   overflow: visible;
 }
+/* Und was zwischen Kopfzeile und ruhendem Knopf übrig bleibt, verteilt sich
+   auf beide Seiten. Auf einem Handy sind das ein paar Dutzend Pixel und man
+   merkt es kaum. Auf einem iPad hochkant lagen dort gemessene 700 leere Pixel:
+   Frage und Lösung klebten oben, der geschrumpfte Knopf unten, dazwischen ein
+   Loch, das nach „da fehlt noch was" aussah.
+
+   Über auto-Ränder statt justify-content: center – wird der Inhalt einmal
+   höher als der Kasten, fallen sie auf null zurück und der Anfang bleibt
+   erreichbar. Zentriert per justify-content wäre er in manchen Browsern nicht
+   mehr scrollbar. */
+.knopf-ruht .pscroll > .p-status { margin-top: auto; }
+.knopf-ruht .pscroll > .p-scores { margin-bottom: auto; }
 
 /* Wer den Buzz verloren hat, sah bisher genau dasselbe wie jemand, dessen
    Buzzer noch gesperrt ist: einen grauen Teller. Der Knopf trägt jetzt die
@@ -687,3 +699,22 @@ html, body { touch-action: manipulation; }
   color: #b9d8f6;
 }
 .p-bilanz-leer { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+/* ------------------------------------------------- Tablet als Buzzer
+
+   Ein iPad in der Hand eines Teams ist kein großes Handy: Auf 820 x 1180
+   Pixeln stand die Frage in derselben 1,2-rem-Schrift wie auf einem 390er
+   Display und wirkte verloren. Alles hier wird nur größer, nie kleiner, und
+   die Schwelle liegt so, dass kein Handy sie erreicht – auch keins quer.  */
+@media (min-width: 700px) and (min-height: 700px) {
+  .p-team { font-size: 1.3rem; }
+  .phead > div:first-child .muted { font-size: 1rem; }
+  .p-score { font-size: 1.9rem; }
+  .p-status { font-size: 1.15rem; }
+  .p-q-head { font-size: 0.95rem; }
+  .p-q-text { font-size: 1.75rem; }
+  .p-q-answer { font-size: 1.4rem; padding: 0.55rem 1.6rem; }
+  .p-q-note { font-size: 1.05rem; }
+  .p-scores .chip { font-size: 0.95rem; padding: 0.35rem 0.9rem; }
+  .p-question { padding: 1.2rem 1.4rem; }
+}
