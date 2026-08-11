@@ -232,3 +232,25 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   border-color: #4f9bec;
   box-shadow: 0 0 0 3px rgba(79, 155, 236, 0.2);
 }
+
+/* ------------------------------------------------------- Fingerbedienung */
+
+/* Auf einem Touchgerät ist der Zeiger kein Pfeil, sondern eine Kuppe von rund
+   einem Zentimeter. 44 Pixel sind das Maß, unter dem daneben gegriffen wird –
+   gemessen fehlten sie am Namensfeld der Anmeldung (38 px) und an sämtlichen
+   Knöpfen des Editors (26 bis 28 px).
+   Host-Screen und Fernbedienung bringen eigene, engere Regeln mit; die stehen
+   in ihren Stylesheets und bleiben davon unberührt. */
+@media (pointer: coarse) {
+  .btn,
+  .datei-knopf,
+  select,
+  input:not([type='file']),
+  textarea {
+    min-height: 44px;
+  }
+  /* Quadratische Symbolknöpfe („✕") brauchen auch die Breite: 32 Pixel neben
+     einem Textfeld sind ein Zielfehler mit Folgen – dahinter steckt das
+     Löschen einer ganzen Kategorie. */
+  .btn-sm { min-width: 44px; }
+}

@@ -195,6 +195,22 @@ body {
 }
 .picker .pick-values button:disabled { background: #12161e; color: #2b3342; border-color: transparent; }
 
+/* Die Felder sind 40 Pixel hoch – knapp unter dem, was ein Daumen sicher
+   trifft. Sie größer zu machen war der falsche Weg: Von sechs Kategorien
+   passten dann nur noch vier auf ein iPhone SE, und was man nicht sieht,
+   wählt man auch nicht. Stattdessen wächst allein die Trefferfläche in den
+   Innenabstand der Reihe hinein – 46 Pixel hoch, ohne dass sich am Bild
+   etwas ändert. Der Abstand zum Nachbarn (6,4 px) bleibt größer als die
+   Erweiterung, die Flächen überlappen also nicht. */
+@media (pointer: coarse) {
+  .picker .pick-values button { position: relative; }
+  .picker .pick-values button::after {
+    content: '';
+    position: absolute;
+    inset: -3px -2px;
+  }
+}
+
 /* Nur zum Ansehen: Ruft der Host die Felder auf, bleibt die Übersicht stehen,
    damit das Zugteam ansagen kann, was es will – aber flach und ohne Rand, damit
    niemand versucht, darauf zu tippen. */
