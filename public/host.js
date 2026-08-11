@@ -1050,7 +1050,16 @@ function katSchriftAnpassen() {
   for (const node of document.querySelectorAll('#board .cat')) {
     const ziel = node.querySelector('span') || node;
     ziel.style.fontSize = '';
-    const wort = ziel.textContent.trim().split(/\s+/)
+    // Weiche Trennzeichen eines früheren Durchgangs zuerst wieder heraus: Beim
+    // Ziehen des Fensters läuft das hier erneut, und sonst sammelten sich die
+    // Trennstellen von jeder Zwischenbreite an.
+    if (ziel.textContent.includes('\u00AD')) {
+      ziel.textContent = ziel.textContent.replace(/\u00AD/g, '');
+    }
+    // Den Text jetzt festhalten: Gleich hängt die Messsonde als Kind in
+    // diesem Element, und `textContent` liefert dann beides hintereinander.
+    const roh = ziel.textContent;
+    const wort = roh.trim().split(/\s+/)
       .reduce((a, b) => (b.length > a.length ? b : a), '');
     if (wort.length < 8) continue;
     const stil = getComputedStyle(node);
@@ -1074,8 +1083,64 @@ function katSchriftAnpassen() {
       if (neu >= jetzt) break; // unter 12 px wird nicht weiter geschrumpft
       ziel.style.fontSize = `${neu}px`;
     }
+    // Reicht auch die kleinste Stufe nicht, bricht der Browser das Wort
+    // irgendwo – ohne Trennstrich, weil dafür ein Silbenwörterbuch für Deutsch
+    // nötig wäre, das längst nicht überall installiert ist. Auf einem Board mit
+    // acht Kategorien stand auf einem 1024er-Schirm gemessen „NACHBARLÄ /
+    // NDER", „FORTGESCHR / ITTENE" und „TIERISCHE SUPERKRÄFT / E".
+    //
+    // Ein weiches Trennzeichen an der Stelle, an der ohnehin umbrochen wird,
+    // macht daraus „NACHBARLÄ- / NDER": Die Trennung sitzt nicht auf der Silbe,
+    // aber der Strich sagt „das Wort geht weiter", und genau das fehlte. Der
+    // Browser bevorzugt diese Stelle gegenüber einem beliebigen Schnitt.
+    // Dieselben zwei Pixel Luft wie oben: „SUPERKRÄFTE" maß auf einem
+    // 1024er-Schirm 96 Pixel bei 97 Pixeln Platz, galt damit als passend – und
+    // brach in der Zeile trotzdem um, weil das Kästchen den letzten Punkt
+    // anders rundet als die Messung.
+    if (probe.getBoundingClientRect().width > platz - 2) {
+      ziel.textContent = mitTrennstrichen(roh, probe, platz);
+    }
     probe.remove();
   }
+}
+
+/**
+ * Weiche Trennzeichen dort einsetzen, wo der Text sonst hart abgeschnitten
+ * würde – gemessen, nicht geraten: Für jedes zu lange Wort wird der längste
+ * Anfang gesucht, der noch in die Spalte passt.
+ *
+ * `probe` ist ein bereits eingehängtes, unsichtbares Element in derselben
+ * Schrift; darüber wird gemessen, ohne dass jemand etwas blinken sieht.
+ */
+function mitTrennstrichen(text, probe, platz) {
+  const SHY = '\u00AD';
+  return text.split(/(\s+)/).map((teil) => {
+    if (/^\s*$/.test(teil)) return teil;
+    probe.textContent = teil;
+    if (probe.getBoundingClientRect().width <= platz - 2) return teil;
+    let rest = teil;
+    let raus = '';
+    // Höchstens vier Trennungen: Ein Wort, das danach immer noch nicht passt,
+    // ist für diese Spalte ohnehin verloren, und die Schleife soll enden.
+    for (let runde = 0; runde < 4 && rest.length > 3; runde++) {
+      let passt = 1;
+      for (let i = 2; i < rest.length; i++) {
+        probe.textContent = `${rest.slice(0, i)}-`;
+        if (probe.getBoundingClientRect().width > platz - 2) break;
+        passt = i;
+      }
+      // Mindestens zwei Buchstaben müssen mit hinüber. Sonst stünde bei
+      // „Wie wahrscheinlich?" ein Trennstrich vor dem einzelnen Fragezeichen –
+      // gemessen wurde genau diese Stelle vorgeschlagen.
+      if (passt < 2 || passt >= rest.length) break;
+      if (!/[\p{L}\p{N}].*[\p{L}\p{N}]/u.test(rest.slice(passt))) break;
+      raus += rest.slice(0, passt) + SHY;
+      rest = rest.slice(passt);
+      probe.textContent = rest;
+      if (probe.getBoundingClientRect().width <= platz - 2) break;
+    }
+    return raus + rest;
+  }).join('');
 }
 
 /**
