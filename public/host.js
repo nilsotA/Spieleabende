@@ -398,10 +398,25 @@ function passeFrageEin() {
     //
     // Die Breite gehört deshalb in dieselbe Rechnung wie die Höhe. Sie hilft
     // hier auch wirklich: Das Wort schrumpft mit der Schrift, der Kasten nicht.
+    //
+    // Gemessen wird durchweg in Layoutmaßen (offsetHeight, offsetLeft,
+    // scrollWidth) – nie über getBoundingClientRect. Das Panel fährt beim
+    // Öffnen aus der Kachel heran, und während dieser Animation zeigt
+    // getBoundingClientRect eine Lage, die es hinterher gar nicht mehr gibt.
+    // Gemessen wurde damit ein Kasten, der weit unter die Bühne ragte: Eine
+    // Bildfrage landete auf Stufe 0,52 statt 0,84 – das Bild war dauerhaft ein
+    // Drittel zu klein, obwohl der Platz da war. Layoutmaße kennen keine
+    // Transformationen.
+    const ovStil = getComputedStyle(overlay);
+    const platzHoch = overlay.clientHeight
+      - parseFloat(ovStil.paddingTop || 0) - parseFloat(ovStil.paddingBottom || 0);
+    // Das Kopfschild sitzt halb über der oberen Panelkante und zählt in
+    // offsetHeight nicht mit – sein Überstand gehört trotzdem in die Rechnung.
+    const kopf = panel.querySelector('.q-head');
+    const kopfUeber = kopf ? kopf.offsetHeight / 2 : 0;
+    const hochPasst = () => panel.offsetHeight + kopfUeber <= platzHoch + 1;
     const querPasst = () => {
-      const stil = getComputedStyle(panel);
-      const kasten = panel.getBoundingClientRect();
-      const rechts = kasten.right - parseFloat(stil.paddingRight || 0);
+      const rechts = panel.clientWidth - parseFloat(getComputedStyle(panel).paddingRight || 0);
       for (const sel of ['#q-text', '#q-answer', '#q-note']) {
         const n = overlay.querySelector(sel);
         if (!n || n.hidden) continue;
@@ -409,18 +424,33 @@ function passeFrageEin() {
         // Textblock ist auf 26 Zeichen begrenzt und steht mittig, das zu lange
         // Wort läuft aus ihm nach rechts heraus. Maßgeblich ist also, wo es
         // tatsächlich endet – linke Kante des Blocks plus seine Inhaltsbreite.
-        if (n.getBoundingClientRect().left + n.scrollWidth > rechts + 1) return false;
+        if (n.offsetLeft + n.scrollWidth > rechts + 1) return false;
       }
       return true;
     };
+    // Bei einer Bildfrage ist das Bild die Frage. Es bekommt deshalb keinen
+    // festen Anteil der Bildschirmhöhe, sondern alles, was nach Kopfschild,
+    // Fragetext und Protokollzeile übrig bleibt. Gerechnet wird zweistufig:
+    // erst der Kasten ohne Bild, dann der Rest ans Bild.
+    const bild = overlay.querySelector('#q-image');
+    const hatBild = !!bild && !bild.hidden;
+    const bildAus = () => panel.style.setProperty('--bildhoehe', '0px');
+    const restHoehe = () => platzHoch - kopfUeber - panel.offsetHeight;
+
     const stufen = [1, 0.92, 0.84, 0.76, 0.68, 0.6, 0.52, 0.44];
+    const letzte = stufen[stufen.length - 1];
     const lauf = () => {
       for (const stufe of stufen) {
         panel.style.setProperty('--frageskala', String(stufe));
-        // Höhe erst nach dem Setzen lesen – das erzwingt den Umbruch. Gemessen
-        // wird am Overlay: Es ist der Kasten, der sonst scrollen würde, und genau
-        // das soll auf einer Leinwand nicht passieren.
-        if (overlay.scrollHeight <= overlay.clientHeight + 1 && querPasst()) return true;
+        if (hatBild) bildAus();
+        // Höhe erst nach dem Setzen lesen – das erzwingt den Umbruch. Verglichen
+        // wird mit dem freien Platz der Bühne: Was darüber hinausgeht, müsste
+        // gescrollt werden, und das gibt es auf einer Leinwand nicht.
+        if (!hochPasst() || !querPasst()) continue;
+        // Bleibt für das Bild weniger als vier Zehntel der Bühne, ist die Frage
+        // eine Stufe zu groß geschrieben: Ein Bild, das kleiner ist als die
+        // Schrift darüber, kann der Raum nicht mehr erkennen.
+        if (!hatBild || stufe === letzte || restHoehe() >= platzHoch * 0.4) return true;
       }
       return false;
     };
@@ -434,10 +464,14 @@ function passeFrageEin() {
       panel.classList.add('bricht');
       lauf();
     }
+    // Und jetzt der Rest ans Bild – auch dann, wenn oben keine Stufe gepasst
+    // hat. Sonst bliebe die Höhe auf null stehen und das Bild verschwände.
+    if (hatBild) panel.style.setProperty('--bildhoehe', `${Math.max(0, Math.floor(restHoehe()))}px`);
+    else panel.style.removeProperty('--bildhoehe');
     // Reicht auch die kleinste Stufe nicht, ist die Frage schlicht zu lang
     // geschrieben – dann entscheidet, was man sieht. Sichtbar sein muss die
     // Lösung: Die Frage hat der Host ohnehin vorgelesen.
-    if (overlay.scrollHeight > overlay.clientHeight + 1) {
+    if (!hochPasst()) {
       const loesung = overlay.querySelector('#q-answer');
       if (loesung && !loesung.hidden) {
         loesung.scrollIntoView({ block: 'end', behavior: 'auto' });
@@ -449,6 +483,11 @@ function passeFrageEin() {
 }
 
 addEventListener('resize', passeFrageEin);
+
+// Ein Bild, das noch nicht geladen ist, hat keine Höhe – die Rechnung oben
+// misst dann einen Kasten ohne Bild und ist fertig, bevor das Bild überhaupt
+// da ist. Sobald es steht, wird noch einmal gerechnet.
+$('#q-image')?.addEventListener('load', passeFrageEin);
 
 /**
  * Deutsche Aufzählung: „A", „A und B", „A, B und C".

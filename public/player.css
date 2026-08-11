@@ -474,6 +474,11 @@ html, body { touch-action: manipulation; }
   max-height: none;
   width: 100%;
   object-fit: contain;
+  /* Der Kasten ist breiter als ein hochkant aufgenommenes Bild, und der helle
+     Rahmen lief deshalb weit außen um ein Bild herum, das mittendrin schwebte
+     – das sah nach Fehler aus. Mit dunklem Grund liest sich derselbe Rahmen
+     als Passepartout, so wie auf der Leinwand auch. */
+  background: rgba(4, 8, 16, 0.45);
 }
 
 /* Ist die Frage durch, hat der Knopf nichts mehr zu tun. Statt als grauer Teller

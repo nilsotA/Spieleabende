@@ -799,7 +799,14 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
      Raum mit; die Höhe bleibt der Zügel, damit der Kasten nicht aus dem Bild
      läuft, und bei 900 ist Schluss – darüber würden die Vorlagen weich. */
   max-width: min(100%, 46vw, 900px);
-  max-height: 38vh;
+  /* Die Höhe war mit festen 38vh der heimliche Deckel: Ein hochkant
+     aufgenommenes Bild – also alles, was jemand mit dem Handy fotografiert –
+     blieb auf einem 1280x720-Beamer bei 205 Pixel Breite stehen, obwohl der
+     Kasten noch Luft hatte. Bei einer Bildfrage ist aber das Bild die Frage.
+     Deshalb setzt passeFrageEin() die Höhe jetzt auf genau das, was nach
+     Kopfschild, Fragetext und Protokollzeile übrig bleibt. Der Wert hier gilt
+     nur, solange die Rechnung noch nicht gelaufen ist. */
+  max-height: var(--bildhoehe, 38vh);
   border: 0;
   border-radius: 8px;
   background: #0a1322;
