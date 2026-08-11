@@ -142,7 +142,13 @@ async function pruefeBilder(set, quelle) {
 export async function loadSet(file) {
   const safe = path.basename(String(file || ''));
   if (!safe.endsWith('.json')) throw new Error('Ungültige Datei.');
-  const raw = JSON.parse(await readFile(path.join(DATA_DIR, safe), 'utf8'));
+  // Fehlt die Datei, kam bisher die Meldung des Betriebssystems durch – auf
+  // Englisch und samt vollständigem Pfad („ENOENT … open '/home/…/data/x.json'").
+  // Das half niemandem und verriet die Ordnerstruktur an jedes Gerät im WLAN.
+  const roh = await readFile(path.join(DATA_DIR, safe), 'utf8').catch(() => {
+    throw new Error(`Den Fragensatz „${safe}“ gibt es nicht (mehr).`);
+  });
+  const raw = JSON.parse(roh);
   const set = normalizeSet(raw, safe.replace(/\.json$/, ''));
   await pruefeBilder(set, safe);
   return set;

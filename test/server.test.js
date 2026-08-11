@@ -279,6 +279,82 @@ test('zu großer Upload wird als lesbare JSON-Meldung abgelehnt', async (t) => {
   assert.match(daten.error, /Zu groß/);
 });
 
+test('krumme Anfragen bekommen eine Antwort statt eines Absturzes', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-krumm-'));
+  const port = 4700 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const sende = (rumpf) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: rumpf,
+  });
+
+  // `null`, ein Array und eine nackte Zeichenkette sind gültiges JSON, aber
+  // kein Aufruf. Bei `null` lief der Server vorher in eine Ausnahme und
+  // antwortete mit 500 und dem englischen Wortlaut der JS-Fehlermeldung.
+  for (const rumpf of ['null', '[1,2,3]', '"hallo"', '']) {
+    const res = await sende(rumpf);
+    assert.equal(res.status, 200, `${rumpf || '(leer)'} sollte sauber beantwortet werden`);
+    const daten = await res.json();
+    assert.equal(daten.ok, false);
+    assert.match(daten.error, /Unbekannte Aktion/);
+  }
+
+  const kaputt = await sende('{nicht json');
+  assert.equal(kaputt.status, 400);
+  assert.match((await kaputt.json()).error, /JSON/);
+
+  // Und danach nimmt er ganz normal wieder Züge an.
+  const host = await alsHost(base, 'krumm-host');
+  assert.deepEqual(await host({ type: 'addTeam', name: 'Rot' }), { ok: true });
+});
+
+test('ein Fragensatz darf den Spielstand nicht überschreiben', async (t) => {
+  // Die Sicherung des laufenden Abends liegt als .spielstand.json im selben
+  // Ordner wie die Fragensätze. Ein Satz mit diesem Dateinamen hätte sie
+  // ersetzt – gemessen ging das durch.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-name-'));
+  const port = 4900 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const speichere = (file) => fetch(`${base}/api/sets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ file, set: SATZ, overwrite: true }),
+  }).then((r) => r.json());
+
+  for (const file of ['.spielstand.json', '.htaccess.json', '.json']) {
+    const antwort = await speichere(file);
+    assert.equal(antwort.ok, false, `${file} sollte abgelehnt werden`);
+    assert.match(antwort.error, /Punkt/);
+  }
+});
+
+test('eine fehlende Datei verrät den Pfad des Servers nicht', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-pfad-'));
+  const port = 5100 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const res = await fetch(`${base}/api/set?file=gibtsnicht.json`);
+  assert.equal(res.status, 400);
+  const { error } = await res.json();
+  assert.match(error, /gibt es nicht/);
+  assert.doesNotMatch(error, /ENOENT|\//, `kein Pfad in der Meldung: ${error}`);
+});
+
 test('Spieler bekommen die Lösung nicht mitgeschickt', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
   const port = 4300 + Math.floor(Math.random() * 200);

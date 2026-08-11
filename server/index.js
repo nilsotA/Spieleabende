@@ -577,6 +577,11 @@ async function apiHandler(req, res, url, pathname) {
     try {
       const set = normalizeSet(body.set, 'Eigener Satz');
       const name = path.basename(String(body.file || 'eigener-satz.json'));
+      // Kein Punkt am Anfang: Im selben Ordner liegt die laufende Sicherung
+      // (.spielstand.json). Ein Fragensatz, der so heißt, hätte den Spielstand
+      // des Abends überschrieben – gemessen ging das durch. basename() hält
+      // Verzeichnisse schon draußen, aber einen Punkt nicht auf.
+      if (name.startsWith('.')) throw new Error('Der Dateiname darf nicht mit einem Punkt beginnen.');
       const file = name.endsWith('.json') ? name : `${name}.json`;
       const overwrite = await setExists(file);
       if (overwrite && !body.overwrite) {
@@ -672,7 +677,14 @@ function readJson(req) {
     req.on('end', () => {
       try {
         const text = Buffer.concat(chunks).toString('utf8');
-        resolve(text ? JSON.parse(text) : {});
+        const roh = text ? JSON.parse(text) : {};
+        // `null`, `[1,2,3]` und `"hallo"` sind gültiges JSON, aber kein
+        // Aufruf. Ohne diese Zeile lief `body.clientId` auf `null` in eine
+        // Ausnahme, und der Server antwortete mit 500 und dem englischen
+        // Wortlaut der JS-Fehlermeldung – als einzige Stelle, die keine
+        // ordentliche Antwort gab. Jetzt landen sie beim üblichen
+        // „Unbekannte Aktion".
+        resolve(roh && typeof roh === 'object' && !Array.isArray(roh) ? roh : {});
       } catch {
         reject(new Error('Ungültiges JSON'));
       }
