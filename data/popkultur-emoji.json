@@ -34,8 +34,9 @@
               "answer": "Star Wars"
             },
             {
-              "text": "Wer stellt sich mit „Mein Name ist Bond. James Bond“ vor?",
-              "answer": "James Bond"
+              "text": "In welcher Filmreihe wird der Martini „geschüttelt, nicht gerührt“ bestellt?",
+              "answer": "James Bond",
+              "note": "Der Satz stammt aus den Filmen – in Ian Flemings Büchern steht er so nicht."
             },
             {
               "text": "In welchem Film heißt es „Das Leben ist wie eine Schachtel Pralinen“?",

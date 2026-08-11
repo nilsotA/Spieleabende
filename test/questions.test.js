@@ -312,6 +312,45 @@ test('keine Frage verrät die Lösung einer anderen derselben Kategorie', async 
   assert.deepEqual(verraeter, []);
 });
 
+test('keine Frage verrät ihre eigene Lösung', async () => {
+  // Der Klassiker unter den geschenkten Punkten: „Wer stellt sich mit ‚Mein
+  // Name ist Bond. James Bond‘ vor?" – die Lösung steht im Zitat. Auf 200
+  // Punkte kann daran niemand scheitern.
+  //
+  // Entweder-oder-Fragen („Was war zuerst: A oder B?") und Wahr-oder-falsch
+  // nennen die Lösung notwendigerweise im Text. Das ist ihre Form und kein
+  // Fehler, deshalb bleiben sie draußen.
+  const einfach = (s) => s.toLowerCase()
+    .replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const geschenkt = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    set.rounds.forEach((round, ri) => {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) {
+          if (/ oder /i.test(q.text)) continue;
+          // Nur die erste Lesart prüfen: „Paris/Frankreich" meint eine Lösung
+          // mit zwei zulässigen Antworten. Am Komma wird bewusst nicht
+          // getrennt – in „Wer im Glashaus sitzt, soll nicht mit Steinen
+          // werfen" ist es Satzzeichen, und der halbe Satz steht natürlich in
+          // der verdrehten Fassung, nach der die Frage sucht.
+          const loesung = einfach(q.answer.split(/\/| bzw\.? | oder /i)[0]);
+          if (loesung.length < 4) continue;
+          if (new RegExp(`\\b${loesung.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(einfach(q.text))) {
+            geschenkt.push(`${datei} R${ri + 1} „${cat.name}“: „${q.text}" enthält die Lösung „${q.answer}"`);
+          }
+        }
+      }
+    });
+  }
+  assert.deepEqual(geschenkt, []);
+});
+
 test('die geteilte Prüfung erkennt einen verratenen Fall und lässt heile Sätze in Ruhe', async () => {
   const { verraeteneLoesungen } = await import('../public/fragenpruefung.js');
 
