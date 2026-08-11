@@ -1633,11 +1633,13 @@ body.host.flat .tile {
    einzige Moment, in dem alle gleichzeitig auf die Leinwand starren müssen.
    Die Ruhezone liegt im SVG (quiet: 4), nicht im Padding: Scanner brauchen sie
    im Bild, und ein weißer Rahmen drumherum ist etwas anderes. */
-/* Auch die Höhe zählt mit: In einem 680 Pixel hohen Fenster nahm der Code
-   allein ein Drittel der Karte, und der Rest rutschte unter den Startbalken.
-   Ein Handy stellt auch auf 165 Pixel scharf. */
+/* Die Höhe zählt mit, damit der Code in einem flachen Fenster nicht die halbe
+   Karte frisst – aber nach unten ist bei 190 Pixeln Schluss. Ein QR-Code wird
+   nicht aus 30 Zentimetern gescannt, sondern quer über den Tisch, oft von der
+   Kamera eines alten Handys. Er war zwischenzeitlich auf 150 gedeckelt; das
+   war an der falschen Stelle gespart. */
 .join-qr {
-  width: clamp(150px, min(15vw, 24vh), 290px);
+  width: clamp(190px, min(17vw, 30vh), 320px);
   max-width: 100%;
   border-radius: 10px;
   background: #fff;

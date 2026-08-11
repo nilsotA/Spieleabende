@@ -237,6 +237,9 @@ function zeigeQr(basis, liste) {
   } catch {
     $('#join-qr').hidden = true;
   }
+  // Damit man vergleichen kann, was das Handy nach dem Scannen anzeigt.
+  const zielZeile = $('#qr-ziel');
+  if (zielZeile) zielZeile.textContent = ziel;
   for (const node of liste.children) node.classList.toggle('aktiv', node.textContent === basis);
 }
 
