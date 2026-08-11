@@ -155,13 +155,22 @@ function render() {
               }, q.answer || ''),
               // Der Zusatz erscheint beim Auflösen klein unter der Lösung –
               // gut für „Nicht Sydney!" oder eine Quellenangabe.
-              el('input', {
+              //
+              // Als einzeiliges Feld war er nach rund 60 Zeichen zu Ende zu
+              // sehen: „Magellan selbst starb unterwegs – heimgebracht hat das
+              // letzte S…". Wer nachlesen will, was er geschrieben hat, musste
+              // im Feld scrollen. Jetzt umbricht er und wächst mit.
+              el('textarea', {
                 class: 'notiz',
                 placeholder: 'Zusatz beim Auflösen (optional)',
                 maxlength: 200,
-                value: q.note || '',
-                oninput: (ev) => { q.note = ev.target.value.trim() || null; persistSoon(); },
-              }),
+                rows: 1,
+                oninput: (ev) => {
+                  q.note = ev.target.value.trim() || null;
+                  hoeheAnpassen(ev.target);
+                  persistSoon();
+                },
+              }, q.note || ''),
             ),
             el('div', { class: 'img-btn' },
               q.image ? el('img', { src: q.image, alt: '' }) : null,
@@ -217,6 +226,21 @@ function render() {
   updateFortschritt();
   zeigeZiel();
   alleLaengenMarkieren();
+  // Nach dem Neuaufbau stehen die Zusätze wieder auf einer Zeile – die Höhe
+  // muss zum Inhalt passen, sonst sieht man von einem geladenen Satz nur die
+  // erste Zeile jedes Zusatzes.
+  for (const feld of box.querySelectorAll('textarea.notiz')) hoeheAnpassen(feld);
+}
+
+/**
+ * Ein Textfeld auf die Höhe seines Inhalts bringen.
+ *
+ * Erst auf `auto` zurücksetzen, sonst wächst es nur und schrumpft nie wieder:
+ * `scrollHeight` kann die eingestellte Höhe nicht unterschreiten.
+ */
+function hoeheAnpassen(feld) {
+  feld.style.height = 'auto';
+  feld.style.height = `${feld.scrollHeight}px`;
 }
 /** Wohin „Auf dem Server speichern" schreibt – vorher wusste man das erst danach. */
 function zeigeZiel() {
