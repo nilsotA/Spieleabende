@@ -46,7 +46,7 @@ Fragen-Editor:            http://localhost:3000/editor
 
 1. **Host-Screen** öffnen – mehr braucht es zum Anfangen nicht.
 2. Alle scannen den **QR-Code**, der in der Lobby steht (oder tippen die
-   WLAN-Adresse ein), geben ihren Namen ein und tippen auf **„Eigenes Team"**.
+   WLAN-Adresse ein), geben ihren Namen ein und tippen auf **„Eigenes Team“**.
    Das Team heißt dann wie sie und erscheint sofort auf der Leinwand. Für
    Zweierteams tippt der Zweite stattdessen auf das Team des Ersten.
 3. Wer mag, sucht sich auf dem Handy noch ein **Wappen** aus – Fuchs, Bär,
@@ -117,16 +117,16 @@ Der Host-Screen muss kein Beamer sein – ein MacBook oder ein iPad tut es genau
 
 ### Verklickt?
 
-„Richtig" statt „Falsch" passiert an jedem Spieleabend genau einmal. Ein Knopf
+„Richtig“ statt „Falsch“ passiert an jedem Spieleabend genau einmal. Ein Knopf
 in der Steuerleiste – und auf der Fernbedienung – nimmt den letzten Zug wieder
 zurück, samt Punkten, Serie und Bilanz. Er sagt dabei, was er zurücknimmt
-(„Wertung für Die Grübelmeister"). Eine Stufe genügt: Wer zwei Züge zurück
+(„Wertung für Die Grübelmeister“). Eine Stufe genügt: Wer zwei Züge zurück
 will, hat ein anderes Problem.
 
 Wer zwischendurch beigetreten ist, bleibt im Team – zurückgenommen wird der
 Spielzug, nicht der Raum.
 
-Gegen den anderen Verklicker – „Richtig" drücken, während in derselben Sekunde
+Gegen den anderen Verklicker – „Richtig“ drücken, während in derselben Sekunde
 jemand buzzert – wirken zwei Sperren. Auf dem Gerät selbst ist jede Wertung
 400 ms lang gesperrt, damit ein zitternder Finger nicht zweimal zählt. Und jede
 Wertung nennt dem Server die Lage, für die sie gedacht war: Hat sich die
@@ -138,7 +138,7 @@ Das greift auch dann, wenn Leinwand und Fernbedienung kurz auseinanderlaufen.
 Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Board
 und sogar eine offen stehende Frage werden laufend gesichert und beim Start wieder
 hergestellt. Der Host-Screen sagt dann oben, von wann der Stand ist, und bietet
-„Neues Spiel" gleich daneben an – der Hinweis verschwindet beim ersten Zug. Ein versehentlich geschlossenes Terminal oder ein abgestürzter Rechner
+„Neues Spiel“ gleich daneben an – der Hinweis verschwindet beim ersten Zug. Ein versehentlich geschlossenes Terminal oder ein abgestürzter Rechner
 kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand,
 und „Spiel beenden“ im Host-Menü verwirft ihn sofort.
 
@@ -173,9 +173,9 @@ Das Board hat 6 Kategorien × 4 Felder. Wer am Zug ist, wählt ein Feld.
 
 **„Weiß nicht" zählt wie eine falsche Antwort.** Wer die Frage zuerst bekommt und
 passt, steht genauso da, als hätte er etwas Falsches gesagt – gleicher Abzug, gleiche
-Serie gerissen. Sonst wäre „weiß nicht" der sichere Ausweg, und geraten hätte nur noch,
+Serie gerissen. Sonst wäre „weiß nicht“ der sichere Ausweg, und geraten hätte nur noch,
 wer nichts zu verlieren hat. Auf der
-Leinwand steht trotzdem weiter „wusste es nicht" statt „falsch": Das ist am Tisch eine
+Leinwand steht trotzdem weiter „wusste es nicht“ statt „falsch“: Das ist am Tisch eine
 andere Geschichte, auch wenn sie gleich viel kostet.
 
 **Wichtig:** Der Buzzer bleibt gesperrt, solange das Team am Zug nicht geantwortet hat.
@@ -225,7 +225,7 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   und ins Blaue geraten.
 - **Buzzern nach richtiger Antwort:** normalerweise aus – die Frage ist dann durch.
 - **Wer ruft das Feld auf?** Standard: das Team am Zug tippt es auf seinem Handy an.
-  Auf **„Nur der Host"** verschwindet das Raster von den Handys – dann rufen die Teams
+  Auf **„Nur der Host“** verschwindet das Raster von den Handys – dann rufen die Teams
   ihr Feld zu und du klickst es an. Das lohnt sich, wenn ihr sowieso alle auf die
   Leinwand schaut, oder wenn zu oft versehentlich das teuerste Feld angetippt wird.
   Das Zugteam sieht die Kategorien und die offenen Werte weiterhin auf seinem Handy –

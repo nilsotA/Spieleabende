@@ -122,10 +122,10 @@ function render() {
             ? el('button', {
               class: 'btn btn-sm btn-ghost',
               title: 'Diese Kategorie entfernen',
-              'aria-label': `Kategorie „${cat.name}" entfernen`,
+              'aria-label': `Kategorie „${cat.name}“ entfernen`,
               onclick: () => {
                 const wieviele = cat.questions.filter((q) => q.text.trim()).length;
-                if (!wirklichLoeschen(`die Kategorie „${cat.name}"`, wieviele)) return;
+                if (!wirklichLoeschen(`die Kategorie „${cat.name}“`, wieviele)) return;
                 round.categories.splice(ci, 1);
                 persist();
                 render();
@@ -384,7 +384,7 @@ async function save(overwrite) {
     } else if (data.exists) {
       // Wer hier abbricht, hat auf „Speichern“ gedrückt und sieht sonst gar
       // nichts passieren – und weiß nicht, ob der Klick angekommen ist.
-      if (confirm(`„${data.file}" gibt es schon. Überschreiben?`)) save(true);
+      if (confirm(`„${data.file}“ gibt es schon. Überschreiben?`)) save(true);
       else toast('Nicht gespeichert – der Satz behält seinen bisherigen Stand auf der Platte.');
     } else {
       toast(data.error || 'Speichern fehlgeschlagen.', 'error');
@@ -456,7 +456,7 @@ function verraeterMarkieren() {
         if (feld) {
           const andere = (cat.questions[j].text || '').slice(0, 60);
           feld.title = 'Diese Lösung steht schon in einer anderen Frage dieser Kategorie '
-            + `– auf der Leinwand ist sie damit verschenkt:\n„${andere}…"`;
+            + `– auf der Leinwand ist sie damit verschenkt:\n„${andere}…“`;
         }
         gefunden += 1;
         if (!ersteZeile) ersteZeile = zeile;
@@ -606,7 +606,7 @@ function normalizeLoaded(raw) {
         note: q.note || null,
       }));
       if (questions.length > 4) {
-        toast(`Kategorie „${cat.name || '?'}" hatte ${questions.length} Fragen – nur die ersten 4 werden übernommen.`, 'error');
+        toast(`Kategorie „${cat.name || '?'}“ hatte ${questions.length} Fragen – nur die ersten 4 werden übernommen.`, 'error');
       }
       while (questions.length < 4) questions.push({ text: '', answer: '', image: null, note: null });
       return { name: cat.name || '', questions: questions.slice(0, 4) };

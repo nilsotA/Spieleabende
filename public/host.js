@@ -313,7 +313,7 @@ function renderLobby() {
         ),
         el('button', {
           class: 'btn btn-sm btn-ghost',
-          'aria-label': `Team „${team.name}" entfernen`,
+          'aria-label': `Team „${team.name}“ entfernen`,
           title: 'Team entfernen',
           onclick: () => act('removeTeam', { teamId: team.id }),
         }, '✕'),
@@ -1288,12 +1288,18 @@ function zeigeRekorde(final, ranked) {
     box.hidden = true;
     return;
   }
-  const name = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+  // Mit Wappen wie in der Rangliste direkt darüber – die beiden Listen stehen
+  // untereinander im selben Kasten, und dieselben Teams sollen darin gleich
+  // aussehen.
+  const name = (id) => {
+    const t = state.teams.find((x) => x.id === id);
+    return t ? `${t.wappen} ${t.name}` : '?';
+  };
   const zeilen = [];
 
   /** „A und B" – ab drei wird gezählt, sonst sprengt eine Zeile das Panel. */
   const nenne = (teams) => {
-    const n = teams.map((t) => t.name);
+    const n = teams.map((t) => `${t.wappen} ${t.name}`);
     if (n.length <= 2) return n.join(' und ');
     return `${n[0]}, ${n[1]} und ${n.length - 2} weitere`;
   };
@@ -1301,7 +1307,11 @@ function zeigeRekorde(final, ranked) {
 
   if (r.schnellsterBuzz) {
     const s = (r.schnellsterBuzz.ms / 1000).toFixed(2).replace('.', ',');
-    zeilen.push(['⚡ Schnellster Buzz', `${r.schnellsterBuzz.name} – ${s} s`]);
+    // Im Rekord steht der Name, wie er zum Zeitpunkt des Buzzes hieß. Das
+    // Wappen kommt aus dem Team, falls es das noch gibt.
+    const wer = state.teams.find((t) => t.id === r.schnellsterBuzz.teamId);
+    zeilen.push(['⚡ Schnellster Buzz',
+      `${wer ? `${wer.wappen} ${wer.name}` : r.schnellsterBuzz.name} – ${s} s`]);
   }
   // Die längste Serie über alle Teams; bei Gleichstand nennt sie alle.
   const best = Math.max(0, ...ranked.map((t) => t.serieBest || 0));
@@ -1355,7 +1365,7 @@ function zeigeRekorde(final, ranked) {
   // Ab zwei Mal, damit ein einzelnes „weiß nicht" niemanden zum Titelträger macht.
   const ehrlich = spitze(ranked, (t) => zahl(bilanz(t).gepasst), 2);
   if (ehrlich) {
-    zeilen.push(['🤷 Ehrlichste Haut', `${nenne(ehrlich.wer)} – ${ehrlich.best}× „weiß nicht"`]);
+    zeilen.push(['🤷 Ehrlichste Haut', `${nenne(ehrlich.wer)} – ${ehrlich.best}× „weiß nicht“`]);
   }
 
   // Bei vielen Teams frisst die Rangliste den Platz. Vier Auszeichnungen sind
@@ -1508,7 +1518,7 @@ function renderControls() {
         ? 'Spiel beendet – im Stechen entschieden.'
         : spitze.length > 1
           // Der Knopf steht mitten auf der Leinwand; hier steht, wofür er gut ist.
-          ? 'Gleichstand – „Stechen" holt die Entscheidungsfrage.'
+          ? 'Gleichstand – „Stechen“ holt die Entscheidungsfrage.'
           : 'Spiel beendet.');
     return;
   }
@@ -1521,7 +1531,7 @@ function renderControls() {
     // wie viel das gerade ist.
     const abzug = { half: q.halfValue, full: q.value }[state.settings.wrongPenalty] || 0;
     setzeText(hint, abzug
-      ? `${teamName(q.teamId)} antwortet. Falsch oder „weiß nicht" kostet ${abzug}.`
+      ? `${teamName(q.teamId)} antwortet. Falsch oder „weiß nicht“ kostet ${abzug}.`
       : `${teamName(q.teamId)} antwortet.`);
     add(
       button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
@@ -1746,7 +1756,7 @@ function fuelleSpickzettel() {
   zeilen.push(['Zugteam richtig', 'volle Punkte']);
   // „Weiß nicht" zählt wie eine falsche Antwort – deshalb eine Zeile für beides
   // statt zwei, die man nebeneinanderhalten muss.
-  zeilen.push(['Zugteam falsch oder „weiß nicht"', {
+  zeilen.push(['Zugteam falsch oder „weiß nicht“', {
     none: 'kein Abzug',
     half: 'halbe Punkte Abzug',
     full: 'volle Punkte Abzug',
