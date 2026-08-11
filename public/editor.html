@@ -89,6 +89,10 @@
   .qrow .notiz { font-size: .82rem; padding: .35rem .5rem; opacity: .82;
                  min-height: 2rem; line-height: 1.4; resize: vertical; overflow: hidden; }
   .qrow .notiz:focus { opacity: 1; }
+  /* Am Finger reichen zwei Zeilen Höhe nicht: 32 Pixel sind unter der Marke,
+     ab der ein Ziel zuverlässig getroffen wird. Die allgemeine Regel aus
+     style.css greift hier nicht – die Zeile oben ist spezifischer. */
+  @media (pointer: coarse) { .qrow .notiz { min-height: 44px; } }
   .qrow .img-btn { display: flex; flex-direction: column; gap: .3rem; }
   .qrow img { max-width: 90px; max-height: 60px; border-radius: 6px; border: 2px solid #fff; background: #fff; }
   @media (max-width: 760px) { .qrow { grid-template-columns: 1fr; } .qrow .val { padding-top: 0; } }

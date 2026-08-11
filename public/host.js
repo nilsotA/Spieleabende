@@ -1410,7 +1410,12 @@ function renderControls() {
   const hint = $('#control-hint');
   const bar = $('#control-buttons');
   const q = state.current;
-  const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+  // Mit Wappen wie überall sonst – die Leiste ist die Zeile, auf die der Host
+  // schaut, während der Raum auf die Pulte schaut.
+  const teamName = (id) => {
+    const t = state.teams.find((x) => x.id === id);
+    return t ? `${t.wappen} ${t.name}` : '?';
+  };
 
   // Die Leiste war der einzige Renderer ohne Schlüssel und baute sich bei jedem
   // Broadcast neu auf – auch wenn nur ein Handy beigetreten ist. Fällt so ein
