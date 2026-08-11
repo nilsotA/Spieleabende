@@ -825,9 +825,18 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   color: #3a2a00;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
+/* Im Moment des Buzzers sagen drei Dinge dasselbe: der Ring um den Kasten, das
+   Pult unten und das Schild oben rechts – alle in der Farbe des Teams, das
+   gedrückt hat. Nur diese Ansage stand in Markenrot daneben und behauptete
+   damit eine vierte Farbe. Jetzt trägt auch sie die Teamfarbe – als Ring und
+   Schein, nicht als Füllung: Auf einem hellen Grün oder Gelb wäre weiße
+   Schrift nicht mehr zu lesen. */
 .q-status .chip.buzzed {
-  background: linear-gradient(180deg, var(--neon-1), var(--neon-3));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 30px rgba(255, 45, 85, 0.6);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+  box-shadow:
+    inset 0 0 0 2px var(--team, var(--neon-1)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 34px color-mix(in srgb, var(--team, var(--neon-1)) 55%, transparent);
 }
 /* Zwei Stufen: „Buzzer frei" und „X hat gebuzzert" sind Ansagen an den Raum,
    die Protokollzeilen daneben nur Gedächtnisstütze. Gleich groß wären beide
