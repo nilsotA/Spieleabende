@@ -1870,6 +1870,14 @@ function zeitwort(ms) {
   const dann = new Date(ms);
   const jetzt = new Date();
   const uhr = dann.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  // Der häufigste Fall ist nicht der nächste Samstag, sondern der Absturz
+  // mitten im Abend: Server weg, Server wieder da, und der Host hat die ganze
+  // Zeit davorgesessen. „Spielstand von heute, 21:14 Uhr wiederhergestellt"
+  // klingt dann nach einem alten Stand von irgendwann – gemeint ist „von vor
+  // zehn Sekunden". Unter fünf Minuten sagt der Balken das auch so.
+  const minuten = Math.round((jetzt - dann) / 60000);
+  if (minuten < 1) return 'von gerade eben';
+  if (minuten < 5) return `von vor ${minuten === 1 ? 'einer Minute' : `${minuten} Minuten`}`;
   const tage = Math.round((new Date(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate())
     - new Date(dann.getFullYear(), dann.getMonth(), dann.getDate())) / 86400000);
   if (tage === 0) return `von heute, ${uhr} Uhr`;
