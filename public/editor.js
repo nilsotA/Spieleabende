@@ -116,7 +116,16 @@ function render() {
             value: cat.name,
             maxlength: 40,
             placeholder: 'Kategoriename',
-            oninput: (ev) => { cat.name = ev.target.value; persistSoon(); },
+            'aria-label': `Name der ${ci + 1}. Kategorie in Runde ${ri + 1}`,
+            oninput: (ev) => {
+              cat.name = ev.target.value;
+              // Die Felder darunter tragen den Kategorienamen in ihrem
+              // Vorlesetext. Neu gezeichnet wird beim Tippen bewusst nichts –
+              // also hier nachziehen, sonst nennt die Vorlesehilfe den ganzen
+              // Abend „Kategorie 3", während oben „Erdkunde" steht.
+              benenneFelder(card, cat, ri, ci, mult);
+              persistSoon();
+            },
           }),
           round.categories.length > 2
             ? el('button', {
@@ -136,11 +145,21 @@ function render() {
       );
 
       cat.questions.forEach((q, qi) => {
+        // Woher ein Feld kommt, steht nur links daneben (der Punktwert) und
+        // ganz oben in der Karte (der Kategoriename). Vorgelesen bekam man
+        // 144-mal „Frage", „Antwort", „Zusatz" – ohne zu wissen, in welcher
+        // Kategorie und bei welchem Wert man gerade ist. Der Zusatz nennt
+        // beides; sichtbar ändert sich nichts.
+        // Die Runde gehört dazu: Runde 2 verdoppelt, und ohne sie hieße die
+        // zweite Zeile von Runde 1 genauso wie die erste von Runde 2 – beide
+        // stehen bei 200 Punkten.
+        const wo = `Runde ${ri + 1}, ${cat.name || `Kategorie ${ci + 1}`}, ${BASE_VALUES[qi] * mult} Punkte`;
         card.append(
           el('div', { class: 'qrow' },
             el('div', { class: 'val' }, String(BASE_VALUES[qi] * mult)),
             el('textarea', {
               placeholder: 'Frage',
+              'aria-label': `Frage – ${wo}`,
               oninput: (ev) => {
                 q.text = ev.target.value;
                 laengeMarkieren(ev.target);
@@ -152,6 +171,7 @@ function render() {
             el('div', { class: 'antwort' },
               el('textarea', {
                 placeholder: 'Antwort',
+                'aria-label': `Antwort – ${wo}`,
                 oninput: (ev) => {
                   q.answer = ev.target.value;
                   hoeheAnpassen(ev.target);
@@ -169,6 +189,7 @@ function render() {
               el('textarea', {
                 class: 'notiz',
                 placeholder: 'Zusatz beim Auflösen (optional)',
+                'aria-label': `Zusatz beim Auflösen – ${wo}`,
                 maxlength: 200,
                 rows: 1,
                 oninput: (ev) => {
@@ -237,6 +258,22 @@ function render() {
   // Alle auf einmal, nicht einzeln beim Bauen: So liest der Browser die Höhen
   // in einem Durchgang, statt für jedes Feld neu zu rechnen.
   for (const feld of box.querySelectorAll('.qrow textarea')) hoeheAnpassen(feld);
+}
+
+/**
+ * Vorlesetexte der Felder einer Kategorie neu setzen.
+ *
+ * Steht getrennt, weil beim Umbenennen einer Kategorie nichts neu gezeichnet
+ * wird – der Cursor im Namensfeld soll ja stehen bleiben.
+ */
+function benenneFelder(card, cat, ri, ci, mult) {
+  card.querySelectorAll('.qrow').forEach((zeile, qi) => {
+    const wo = `Runde ${ri + 1}, ${cat.name || `Kategorie ${ci + 1}`}, ${BASE_VALUES[qi] * mult} Punkte`;
+    const felder = zeile.querySelectorAll('textarea');
+    if (felder[0]) felder[0].setAttribute('aria-label', `Frage – ${wo}`);
+    if (felder[1]) felder[1].setAttribute('aria-label', `Antwort – ${wo}`);
+    if (felder[2]) felder[2].setAttribute('aria-label', `Zusatz beim Auflösen – ${wo}`);
+  });
 }
 
 /**

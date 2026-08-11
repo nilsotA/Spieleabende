@@ -167,7 +167,10 @@
   </div>
 </main>
 
-<div id="toasts"></div>
+<!-- Die Meldungen dieser Seite (Fehler, Bestätigungen) waren nur zu sehen,
+     nie zu hören: „Bitte trag deinen Namen ein." blieb einer Vorlesehilfe
+     verborgen. `polite`, damit es nicht mitten in einen Satz platzt. -->
+<div id="toasts" role="status" aria-live="polite"></div>
 <script type="module" src="/editor.js"></script>
 </body>
 </html>
