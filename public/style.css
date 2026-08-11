@@ -254,3 +254,20 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
      Löschen einer ganzen Kategorie. */
   .btn-sm { min-width: 44px; }
 }
+
+/* --------------------------------------------------------- Weniger Bewegung */
+
+/* Wer im Betriebssystem „Bewegung reduzieren" gesetzt hat, meint es auch für
+   ein Quizspiel: Kacheln, die aufklappen, ein Buzzer, der pulsiert, Konfetti,
+   das fällt. Die Regel stand bisher nur im Stylesheet des Host-Screens – die
+   Startseite, die Handys und der Editor animierten weiter.
+   Ausgeschaltet wird nichts, nur beschleunigt: Ein Übergang mit 0,01 ms ist
+   für JavaScript weiterhin ein Übergang, und `transitionend` feuert. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
