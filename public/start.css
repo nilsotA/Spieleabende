@@ -220,5 +220,7 @@ main {
 footer {
   text-align: center;
   font-size: 0.8rem;
-  color: #5d6a80;
+  /* #5d6a80 kam gegen den Grund auf 3,7:1 – unter dem, was man ohne
+     Anstrengung liest. */
+  color: #8494ad;
 }

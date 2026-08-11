@@ -375,7 +375,9 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 .buzz-circle span { font-size: 1.5rem; line-height: 1; filter: grayscale(1); opacity: 0.5; }
-.buzz-circle small { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.14em; }
+/* 0.62rem waren 9,9 px – die kleinste Schrift der ganzen Bühne, und die steht
+   auf einer Leinwand. */
+.buzz-circle small { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; }
 
 .buzz-indicator.armed .buzz-circle {
   background: radial-gradient(circle at 50% 32%, #ffe9a0, var(--gold) 45%, #d09a05 100%);
@@ -1394,10 +1396,12 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   flex: 0 0 auto;
   max-width: 100%;
 }
+/* Die Tastenkürzel liest der Host aus einem halben Meter – aber 10,6 px bei
+   60 % Deckkraft waren auch dafür knapp. */
 .control-buttons kbd {
   font: inherit;
-  font-size: 0.7em;
-  opacity: 0.6;
+  font-size: 0.78em;
+  opacity: 0.72;
   border: 1px solid currentColor;
   border-radius: 4px;
   padding: 0 0.25em;
