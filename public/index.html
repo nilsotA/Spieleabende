@@ -34,17 +34,17 @@
     <a class="tile" href="/host">
       <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M9 20.5h6M12 17.5v3"/></svg>
       <strong>Host-Screen</strong>
-      <small>Das Spielbrett für Beamer, TV oder Bildschirmteilen. Hier werden Teams angelegt und das Spiel gestartet.</small>
+      <small>Das Spielbrett für Beamer oder TV. Hier legst du Teams an und startest das Spiel.</small>
     </a>
     <a class="tile" href="/remote">
       <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><circle cx="12" cy="15" r="2.6"/><path d="M9 7h6"/></svg>
       <strong>Fernbedienung</strong>
-      <small>Für den Host aufs eigene Handy: zeigt die Lösung und die Bewertungsknöpfe – die Leinwand bleibt sauber.</small>
+      <small>Aufs eigene Handy: Lösung und Wertungsknöpfe – die Leinwand bleibt sauber.</small>
     </a>
     <a class="tile" href="/editor">
       <svg class="tile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L20 8a2.6 2.6 0 0 0-3.7-3.7L4 16.5z"/><path d="M14.5 6.2 17.8 9.5"/></svg>
       <strong>Fragen-Editor</strong>
-      <small>Eigene Kategorien und Fragen bauen, als Datei sichern und beim nächsten Mal wieder laden.</small>
+      <small>Eigene Kategorien und Fragen bauen, sichern und beim nächsten Mal wieder laden.</small>
     </a>
   </section>
 
@@ -55,8 +55,14 @@
         <span class="step-no">1</span>
         <div>
           <b>Wer dran ist, wählt ein Feld</b> und beantwortet die Frage.
-          <span class="chip good">richtig · volle Punkte</span>
-          <span class="chip bad">falsch oder „weiß nicht“ · halbe Punkte Abzug</span>
+          <!-- Die Marken stehen als eigene Zeile unter dem Satz. Inline hingen
+               sie an dessen Länge: Bei Schritt 1 rutschten beide in eine neue
+               Zeile, bei Schritt 3 klebte die erste hinter dem Punkt und nur die
+               zweite fiel herunter – zwei Schritte, zwei Anordnungen. -->
+          <div class="chip-reihe">
+            <span class="chip good">richtig · volle Punkte</span>
+            <span class="chip bad">falsch oder „weiß nicht“ · halbe Punkte Abzug</span>
+          </div>
         </div>
       </li>
       <li>
@@ -70,8 +76,10 @@
         <span class="step-no">3</span>
         <div>
           <b>Wer sich reinbuzzert, riskiert etwas.</b>
-          <span class="chip good">richtig · halbe Punkte</span>
-          <span class="chip bad">falsch · halbe Punkte Abzug</span>
+          <div class="chip-reihe">
+            <span class="chip good">richtig · halbe Punkte</span>
+            <span class="chip bad">falsch · halbe Punkte Abzug</span>
+          </div>
         </div>
       </li>
     </ol>
