@@ -1278,6 +1278,14 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
      die Leiste darf dafür lieber seitlich scrollen. */
   min-width: 4.5rem;
 }
+/* Das Wappen am Pult. Bewusst nicht größer als der Name: `.pname` schneidet
+   oben und unten ab (overflow: hidden), und ein hochgezogenes Emoji hätte
+   dabei seine Ohren verloren. Die Sperrung des Namens gilt für Buchstaben,
+   nicht für ein Bildzeichen – sonst klebt der Abstand doppelt. */
+.player .pwappen {
+  letter-spacing: normal;
+  margin-right: 0.3em;
+}
 .player .pmembers {
   grid-area: members;
   align-self: start;

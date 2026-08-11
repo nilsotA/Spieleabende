@@ -176,8 +176,9 @@ function render(prev) {
   }
 
   const me = state.teams.find((t) => t.id === state.you.teamId);
-  $('#p-team').textContent = me?.name || '—';
+  $('#p-team').textContent = me ? `${me.wappen} ${me.name}` : '—';
   $('#p-name').textContent = (me?.members || []).map((m) => m.name).join(', ');
+  renderWappen(me);
 
   // Der eigene Punktestand sprang lautlos von 0 auf 250 – der Moment, um den
   // das ganze Spiel geht, kam am Handy gar nicht an. Ausgelöst wird nur bei
@@ -301,11 +302,55 @@ function punktesprung(delta, von, bis) {
   vibrate(delta > 0 ? [30, 40, 30] : 120);
 }
 
+/**
+ * Wappen des eigenen Teams aussuchen.
+ *
+ * Nur in der Lobby: Danach ist das Wappen das, woran man sein Team auf der
+ * Leinwand wiedererkennt. Belegte Wappen stehen als `belegt` da – sichtbar,
+ * aber nicht wählbar. Sie ganz auszublenden würde die Reihe bei jedem
+ * Beitritt umsortieren, und man tippt daneben.
+ */
+function renderWappen(me) {
+  const box = $('#p-wappen');
+  box.hidden = !me || state.phase !== 'lobby';
+  if (box.hidden) return;
+  const auswahl = state.wappenAuswahl || [];
+  // Die eigene Kennung gehört mit hinein: Nach „Team wechseln" ist die Reihe
+  // dieselbe, aber ein anderes Wappen ist meins – und die Farbe eine andere.
+  const key = `${me.id}#${me.wappen}#${state.teams.map((t) => t.wappen).join('')}#${auswahl.join('')}`;
+  if (box.dataset.key === key) return;
+  box.dataset.key = key;
+  box.innerHTML = '';
+  box.append(el('div', { class: 'muted small' }, 'Euer Wappen – so steht ihr auf der Leinwand'));
+  const reihe = el('div', { class: 'wappen-reihe' });
+  for (const w of auswahl) {
+    const meins = w === me.wappen;
+    const fremd = !meins && state.teams.find((t) => t.wappen === w);
+    reihe.append(el('button', {
+      type: 'button',
+      class: `wappen-knopf ${meins ? 'meins' : ''} ${fremd ? 'belegt' : ''}`,
+      disabled: !!fremd,
+      // Der Rahmen trägt die Farbe des Teams, dem es gehört – auch der eigene.
+      // „Vergeben" allein lässt einen suchen, wer es denn hat; die Farbe steht
+      // auf der Leinwand an derselben Stelle wie das Wappen.
+      style: { '--team': (fremd || (meins ? me : null))?.color || '' },
+      'aria-pressed': meins ? 'true' : 'false',
+      'aria-label': fremd ? `${w} – gehört schon ${fremd.name}` : `Wappen ${w} wählen`,
+      onclick: () => {
+        if (meins) return;
+        vibrate(20); // dasselbe kurze Nicken wie beim Feldwählen
+        action('wappen', { wappen: w });
+      },
+    }, w));
+  }
+  box.append(reihe);
+}
+
 function renderJoin() {
   const box = $('#team-choices');
   // Nur neu bauen, wenn sich wirklich etwas geändert hat – sonst geht ein
   // Antippen verloren, weil zwischendurch ein State-Update eintrudelt.
-  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.members.map((m) => m.name).join(',')}`).join('|')
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.members.map((m) => m.name).join(',')}`).join('|')
     + `#${selectedTeam}#${state.phase}`;
   if (box.dataset.key !== key) {
     box.dataset.key = key;
@@ -321,7 +366,7 @@ function renderJoin() {
           class: `team-choice ${selectedTeam === team.id ? 'selected' : ''}`,
           onclick: () => { selectedTeam = team.id; renderJoin(); },
         },
-          el('span', { class: 'dot', style: { background: team.color } }),
+          el('span', { class: 'tw', style: { '--team': team.color } }, team.wappen),
           el('span', {},
             el('div', {}, team.name),
             el('div', { class: 'sub' },
@@ -695,7 +740,7 @@ function summenzeile(geholt, verloren) {
 function renderScores() {
   const box = $('#p-scores');
   const activeId = state.teams[state.turnIndex]?.id;
-  const key = state.teams.map((t) => `${t.id}:${t.score}`).join('|') + `#${activeId}`;
+  const key = state.teams.map((t) => `${t.id}:${t.wappen}:${t.name}:${t.score}`).join('|') + `#${activeId}`;
   if (box.dataset.key === key) return;
   box.dataset.key = key;
   box.innerHTML = '';
@@ -705,6 +750,6 @@ function renderScores() {
       team.id === state.you.teamId ? 'me' : '',
       team.id === activeId ? 'turn' : '',
     ].join(' ');
-    box.append(el('span', { class: cls }, `${team.name}: ${punkte(team.score)}`));
+    box.append(el('span', { class: cls }, `${team.wappen} ${team.name}: ${punkte(team.score)}`));
   }
 }

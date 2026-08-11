@@ -6,6 +6,17 @@ export const TEAM_COLORS = [
   '#9b59d0', '#22b3b3', '#e2703a', '#d94fa0',
 ];
 
+/**
+ * Wappen der Teams. Auf der Leinwand unterscheidet die Farbe die Teams – aber
+ * am Tisch sagt niemand „die Blauen", sondern „wir sind der Fuchs". Das Wappen
+ * steht überall neben dem Namen und ist auch von hinten im Raum noch zu
+ * erkennen, wo drei Blautöne längst gleich aussehen.
+ *
+ * Mehr Wappen als Teams (12 zu 8): So bleibt beim Aussuchen immer eine echte
+ * Auswahl übrig, statt dass die letzten Teams nehmen müssen, was übrig ist.
+ */
+export const TEAM_WAPPEN = ['🦊', '🐻', '🐼', '🦁', '🐸', '🦉', '🐙', '🦄', '🐝', '🐳', '🦖', '🐧'];
+
 /** Punktwerte je Zeile in Runde 1. Runde 2 verdoppelt (siehe roundMultiplier). */
 export const BASE_VALUES = [100, 200, 300, 500];
 
@@ -119,6 +130,9 @@ export function addTeam(state, name) {
     // und ein neues anlegt, bekam sonst zweimal dieselbe Farbe an der Leiste.
     color: TEAM_COLORS.find((f) => !state.teams.some((t) => t.color === f))
       || TEAM_COLORS[state.teams.length % TEAM_COLORS.length],
+    // Gleiche Regel wie bei der Farbe: das erste noch freie Wappen.
+    wappen: TEAM_WAPPEN.find((w) => !state.teams.some((t) => t.wappen === w))
+      || TEAM_WAPPEN[state.teams.length % TEAM_WAPPEN.length],
     score: 0,
     // Von Anfang an vollständig. Serie und Bestserie entstanden früher erst bei
     // der ersten Wertung; bis dahin stand dort `undefined`. Gelesen wurde das
@@ -135,6 +149,28 @@ export function addTeam(state, name) {
 export function renameTeam(state, teamId, name) {
   const team = findTeam(state, teamId);
   team.name = String(name || '').trim().slice(0, 24) || team.name;
+  return state;
+}
+
+/**
+ * Wappen wechseln. Nur in der Lobby – wenn das Spiel läuft, ist das Wappen
+ * das, woran man ein Team auf der Leinwand wiedererkennt; mitten in einer
+ * Runde umzustecken würde genau diese Wiedererkennung zerstören.
+ *
+ * Zwei Teams mit demselben Wappen wären ein Rückschritt gegenüber der Farbe,
+ * deshalb bleibt ein vergebenes Wappen vergeben. Das Handy zeigt belegte
+ * Wappen gar nicht erst als wählbar an – die Prüfung hier fängt nur den Fall
+ * ab, dass zwei Geräte im selben Moment dasselbe antippen.
+ */
+export function setTeamWappen(state, teamId, wappen) {
+  if (state.phase !== 'lobby') throw new GameError('Das Wappen lässt sich nur in der Lobby ändern.');
+  const team = findTeam(state, teamId);
+  if (!TEAM_WAPPEN.includes(wappen)) throw new GameError('Dieses Wappen gibt es nicht.');
+  if (team.wappen === wappen) return state;
+  if (state.teams.some((t) => t.wappen === wappen)) {
+    throw new GameError('Das Wappen hat sich gerade ein anderes Team geschnappt.');
+  }
+  team.wappen = wappen;
   return state;
 }
 
@@ -787,10 +823,17 @@ export function viewFor(state, { isHost, clientId }) {
     turnIndex: state.turnIndex,
     message: state.message,
     settings: state.settings,
-    teams: state.teams.map((t) => ({
+    // Die Auswahl kommt vom Server mit, damit die Liste nur an einer Stelle
+    // steht. Sonst hätte das Handy eine eigene Kopie, die beim nächsten
+    // zusätzlichen Wappen still auseinanderläuft.
+    wappenAuswahl: TEAM_WAPPEN,
+    teams: state.teams.map((t, i) => ({
       id: t.id,
       name: t.name,
       color: t.color,
+      // Spielstände aus der Zeit vor den Wappen haben keins gespeichert. Statt
+      // im Handy überall auf `undefined` zu prüfen, bekommen sie hier eins.
+      wappen: t.wappen || TEAM_WAPPEN[i % TEAM_WAPPEN.length],
       score: t.score,
       serie: t.serie || 0,
       serieBest: t.serieBest || 0,

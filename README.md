@@ -49,7 +49,12 @@ Fragen-Editor:            http://localhost:3000/editor
    WLAN-Adresse ein), geben ihren Namen ein und tippen auf **„Eigenes Team"**.
    Das Team heißt dann wie sie und erscheint sofort auf der Leinwand. Für
    Zweierteams tippt der Zweite stattdessen auf das Team des Ersten.
-3. Fragensatz auswählen, Regeln einstellen, **Spiel starten**.
+3. Wer mag, sucht sich auf dem Handy noch ein **Wappen** aus – Fuchs, Bär,
+   Panda … Es steht den Abend über neben dem Teamnamen: an der Punkteleiste,
+   im Fragenkasten und in der Rangliste. Ein vergebenes Wappen zeigt der
+   Rahmen in der Farbe des Teams, dem es gehört. Zu ändern ist es nur in der
+   Lobby – danach ist es das Zeichen, an dem man sein Team wiedererkennt.
+4. Fragensatz auswählen, Regeln einstellen, **Spiel starten**.
 
 Teams anlegen, umbenennen und entfernen kann der Host weiterhin selbst – nur
 muss er nicht mehr vier Namen abtippen, bevor überhaupt jemand beitreten kann.

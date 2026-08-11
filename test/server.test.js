@@ -1155,3 +1155,45 @@ test('ein Handy legt sein eigenes Team an – aber nur in der Lobby', async (t) 
   assert.match(abgelehnt.error, /Lobby/);
   assert.equal((await zustand(base)).teams.length, 3, 'und es bleibt bei drei Teams');
 });
+
+test('jedes Handy sucht sich das Wappen seines Teams selbst aus', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-wappen-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 3900 + Math.floor(Math.random() * 90);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const tippe = async (id, body) => {
+    const r = await fetch(`${base}/api/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: id, role: 'player', ...body }),
+    });
+    return r.json();
+  };
+
+  await tippe('w1', { type: 'eigenesTeam', name: 'Nils' });
+  await tippe('w2', { type: 'eigenesTeam', name: 'Annemarie' });
+  const vorher = await zustand(base);
+  const fremd = vorher.teams[1].wappen;
+  const frei = vorher.wappenAuswahl.find((w) => !vorher.teams.some((t) => t.wappen === w));
+
+  // Ohne teamId gilt es fürs eigene Team – niemand muss eine ID kennen.
+  assert.deepEqual(await tippe('w1', { type: 'wappen', wappen: frei }), { ok: true });
+  assert.equal((await zustand(base)).teams[0].wappen, frei);
+
+  // Das Wappen der anderen bleibt deren Wappen.
+  const belegt = await tippe('w1', { type: 'wappen', wappen: fremd });
+  assert.equal(belegt.ok, false);
+  assert.match(belegt.error, /anderes Team/);
+
+  // Ein Handy ohne Team hat auch keins zu vergeben – und darf kein fremdes
+  // umstecken, indem es einfach eine teamId mitschickt.
+  const ohne = await tippe('w9', { type: 'wappen', wappen: fremd, teamId: vorher.teams[0].id });
+  assert.equal(ohne.ok, false);
+  assert.match(ohne.error, /Team/);
+  assert.equal((await zustand(base)).teams[1].wappen, fremd);
+});

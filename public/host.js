@@ -305,7 +305,7 @@ function renderLobby() {
         // color mitsetzen: Der Schein um den Punkt kommt aus currentColor.
         el('span', { class: 'dot', style: { background: team.color, color: team.color } }),
         el('span', { class: 'grow' },
-          el('div', { class: 'tname' }, team.name),
+          el('div', { class: 'tname' }, `${team.wappen} ${team.name}`),
           el('div', { class: 'tmembers' },
             team.members.length
               ? team.members.map((m) => (m.online ? m.name : `${m.name} (offline)`)).join(', ')
@@ -534,7 +534,7 @@ function renderBoard() {
   $('.stage').classList.toggle('doppelt', data.multiplier > 1);
 
   const active = state.teams[state.turnIndex];
-  $('#turn-name').textContent = active ? active.name : '—';
+  $('#turn-name').textContent = active ? `${active.wappen} ${active.name}` : '—';
   $('#turn-pill').hidden = !(state.phase === 'board' || state.phase === 'question');
   if (active) $('#turn-pill').style.setProperty('--team', active.color);
 }
@@ -593,7 +593,13 @@ function renderQuestion(prev) {
 
   const status = $('#q-status');
   status.innerHTML = '';
-  const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+  // Mit Wappen: Im Protokoll stehen nach einer Buzzer-Runde bis zu acht Zeilen
+  // untereinander, und die unterscheiden sich sonst nur durch den Namen ganz
+  // vorne. Das Zeichen findet das Auge schneller als das gelesene Wort.
+  const teamName = (id) => {
+    const t = state.teams.find((x) => x.id === id);
+    return t ? `${t.wappen} ${t.name}` : '?';
+  };
 
   panel.classList.toggle('buzzopen', q.step === 'buzz' && !q.buzzedTeamId);
   // Hat jemand gedrückt, wechselt der Ring von Gold auf die Teamfarbe – die
@@ -605,7 +611,7 @@ function renderQuestion(prev) {
   // Zugteams, während ein ganz anderer Tisch reden musste.
   const dran = q.onTheHook ? state.teams.find((t) => t.id === q.onTheHook) : null;
   if (dran) {
-    $('#turn-name').textContent = dran.name;
+    $('#turn-name').textContent = `${dran.wappen} ${dran.name}`;
     $('#turn-pill').style.setProperty('--team', dran.color);
   }
   // Bei freiem Buzzer ist niemand am Zug. Das Schild nannte dann weiter das
@@ -774,14 +780,19 @@ function setBuzzIndicator(mode) {
 
 function renderPlayers() {
   const box = $('#players');
-  const key = state.teams.map((t) => t.id).join('|');
+  // Name und Wappen gehören mit in den Schlüssel: Beides lässt sich in der
+  // Lobby noch ändern, und die Pulte werden nicht neu gebaut, solange dieselben
+  // Teams dastehen. Vorher zeigte die Leiste nach einem „Zurück zur Lobby" mit
+  // Umbenennen noch den alten Namen.
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}`).join('|');
   if (box.dataset.key !== key) {
     box.dataset.key = key;
     box.innerHTML = '';
     for (const team of state.teams) {
       box.append(
         el('div', { class: 'player', 'data-team': team.id, style: { '--team': team.color } },
-          el('div', { class: 'pname' }, team.name),
+          el('div', { class: 'pname' },
+            el('span', { class: 'pwappen' }, team.wappen), team.name),
           el('div', { class: 'pmembers' }, ''),
           el('div', { class: 'pscore' }, '0'),
           el('div', { class: 'pserie', hidden: true }, ''),
@@ -946,7 +957,13 @@ function pruefeEnge(box) {
   // Annahme – standen an allen drei Pulten „DIE …" und sonst nichts.
   // Großbuchstabe in Halbfett plus Sperrung misst 0,67 em, eine tabellarische
   // Ziffer der Pille 0,62 em, und der größte Punktestand („-1000") sind fünf.
-  const noetig = 14 * 0.67 * nameGrad + 11 /* Spalte */ + 27 /* Pillenpolster */
+  // Das Wappen steht davor und nimmt sich rund 1,3 em (Glyphe plus Abstand) –
+  // dafür reichen zwölf Zeichen statt vierzehn. Das ist eine bewusste
+  // Verrechnung: Ein Bildzeichen sagt aus zehn Metern mehr über „wer ist das"
+  // als die dreizehnte und vierzehnte Silbe eines Namens, der ohnehin gekürzt
+  // dasteht. So bleibt die Schwelle zum gestapelten Pult genau da, wo sie war –
+  // vier Teams auf einem 1366er-Beamer stehen weiter nebeneinander.
+  const noetig = (12 * 0.67 + 1.3) * nameGrad + 11 /* Spalte */ + 27 /* Pillenpolster */
     + 32 /* Pultpolster */ + 5 * 0.62 * zahlGrad;
   box.classList.toggle('eng', proPult < noetig);
 }
@@ -1139,7 +1156,7 @@ function renderScoreboard() {
       list.append(
         el('li', { class: raenge[i] === 0 ? 'first' : '', style: { '--i': stufe, '--team': team.color } },
           el('span', { class: 'rank' }, `${platz(i)}`),
-          el('span', { class: 'sname' }, team.name),
+          el('span', { class: 'sname' }, `${team.wappen} ${team.name}`),
           // Nur wer sich bewegt hat, bekommt einen Pfeil. Vier Punkte für „nichts
           // passiert" wären bloß Rauschen in der wichtigsten Tabelle des Abends.
           sprung !== 0
@@ -1578,7 +1595,7 @@ function fillMenu() {
   // Solange das Menü offen ist, läuft das bei jedem Broadcast – auch wenn nur
   // ein Handy aus dem Standby kommt. Ohne Schlüssel würden dabei die Knöpfe
   // unter dem Finger des Hosts ausgetauscht, während er Punkte korrigiert.
-  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.score}:${t.members.filter((m) => !m.online).length}`).join('|')
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.score}:${t.members.filter((m) => !m.online).length}`).join('|')
     + `#${state.turnIndex}`;
   if (list.dataset.key === key) return;
   list.dataset.key = key;
@@ -1589,7 +1606,7 @@ function fillMenu() {
       el('li', {},
         el('span', { class: 'dot', style: { background: team.color } }),
         el('span', { class: 'tname' },
-          team.name,
+          `${team.wappen} ${team.name}`,
           offline.length
             ? el('span', { class: 'muted small' }, ` · ${offline.length} offline`)
             : null),

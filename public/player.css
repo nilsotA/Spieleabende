@@ -62,6 +62,22 @@ body {
   width: 100%;
 }
 .team-choice .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+
+/* Wappen in der Teamliste. Der farbige Ring bleibt: Die Farbe ist das, was
+   auf der Leinwand an der Punkteleiste klebt, das Wappen das, was man von
+   hinten im Raum erkennt. Beides zusammen zeigt die Zuordnung. */
+.team-choice .tw {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  line-height: 1;
+  background: color-mix(in srgb, var(--team, #4f9bec) 24%, transparent);
+  box-shadow: inset 0 0 0 2px var(--team, #4f9bec);
+}
 .team-choice .sub { font-size: 0.75rem; font-weight: 400; color: var(--muted); }
 .team-choice.selected { border-color: #4f9bec; box-shadow: 0 0 0 3px rgba(79, 155, 236, 0.2); }
 
@@ -138,6 +154,47 @@ body {
   min-height: 1.4rem;
 }
 .p-status.you { color: #f8d548; }
+
+/* Wappenwahl in der Lobby. Die Knöpfe sind bewusst groß: Sie stehen in der
+   Zeit, in der ohnehin gewartet wird, und werden mit dem Daumen bedient. */
+.p-wappen {
+  display: grid;
+  gap: 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.7rem 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+.wappen-reihe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(46px, 1fr));
+  gap: 0.4rem;
+}
+.wappen-knopf {
+  min-height: 46px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.wappen-knopf:active { transform: scale(0.94); }
+.wappen-knopf.meins {
+  border-color: var(--team, #4f9bec);
+  background: color-mix(in srgb, var(--team, #4f9bec) 22%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--team, #4f9bec) 25%, transparent);
+}
+/* Belegt heißt nicht blass: Das Wappen bleibt voll lesbar, nur der Rahmen
+   sagt „gehört schon jemandem". Ein ausgegrautes Emoji wäre auf einem Handy
+   in der Sonne schlicht nicht mehr zu erkennen. */
+.wappen-knopf.belegt {
+  cursor: default;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--team, #7a8aa0) 70%, transparent);
+  background: transparent;
+}
 
 /* Der Kasten gibt nicht nach.
 

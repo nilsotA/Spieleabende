@@ -108,6 +108,13 @@ async function restore() {
     // ab dem letzten Zug weiter und nicht erst ab dem Neustart. Ohne das würde
     // ein Neustart jeden Gast von vor Stunden wieder frisch wirken lassen.
     for (const team of wieder.teams || []) {
+      // Stände von vor den Wappen haben keins. Die Anzeige käme damit klar
+      // (viewFor füllt auf), die Vergabe nicht: Ein leeres Feld kollidiert mit
+      // nichts, und zwei Teams könnten sich dasselbe Wappen aussuchen.
+      if (!team.wappen) {
+        team.wappen = G.TEAM_WAPPEN.find((w) => !(wieder.teams || []).some((t) => t.wappen === w))
+          || G.TEAM_WAPPEN[0];
+      }
       for (const member of team.members || []) {
         member.online = false;
         member.wegSeit = member.wegSeit || roh.gespeichert || Date.now();
@@ -312,6 +319,17 @@ async function handleAction(clientId, body) {
       G.addTeam(state, wunsch);
       const neu = state.teams[state.teams.length - 1];
       G.joinTeam(state, clientId, neu.id, wunsch);
+      break;
+    }
+    // Wappen wechseln. Ohne `teamId` gilt es fürs eigene Team – so darf jedes
+    // Handy sein Wappen aussuchen, aber keins das der anderen umstecken. Der
+    // Host darf über die Fernbedienung jedes ändern, so wie er auch jeden
+    // Namen ändern darf.
+    case 'wappen': {
+      const eigenes = G.teamOfClient(state, clientId);
+      const ziel = isHost && body.teamId ? body.teamId : eigenes?.id;
+      if (!ziel) throw new G.GameError('Such dir erst ein Team aus.');
+      G.setTeamWappen(state, ziel, String(body.wappen || ''));
       break;
     }
     case 'leaveTeam':

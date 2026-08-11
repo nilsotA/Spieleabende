@@ -37,7 +37,10 @@ $('#r-undo').addEventListener('click', () => {
 function render() {
   if (!state) return;
   const q = state.current;
-  const teamName = (id) => state.teams.find((t) => t.id === id)?.name || '?';
+  const teamName = (id) => {
+    const t = state.teams.find((x) => x.id === id);
+    return t ? `${t.wappen} ${t.name}` : '?';
+  };
 
   const phase = $('#r-phase');
   const box = $('#r-question');
@@ -54,7 +57,7 @@ function render() {
     // Ob ein Team ein Handy am Netz hat, entscheidet über seinen
     // Vertreterknopf – ohne das im Schlüssel bliebe die Leiste stehen, wenn
     // jemand mitten in der Frage aufwacht oder wegfällt.
-    state.teams.map((t) => `${t.id}:${t.name}:${t.members.some((m) => m.online !== false) ? 1 : 0}`).join('|'),
+    state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.members.some((m) => m.online !== false) ? 1 : 0}`).join('|'),
     state.turnIndex,
     // Im Endstand hängt die Leiste am Gleichstand und am Ausgang des Stechens.
     state.stechenSieger,
@@ -165,7 +168,7 @@ function render() {
         for (const team of state.teams) {
           if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
           if (team.members.some((m) => m.online !== false)) continue;
-          setz(big(`Buzz: ${team.name}`, 'btn-ghost', () => act('buzzFor', { teamId: team.id })));
+          setz(big(`Buzz: ${team.wappen} ${team.name}`, 'btn-ghost', () => act('buzzFor', { teamId: team.id })));
         }
       } else if (q.step === 'buzz' && q.buzzedTeamId) {
         setzeText(phase, q.stechen
@@ -206,7 +209,7 @@ function render() {
           // per `display: contents` gar nicht da.
           el('span', { class: 'r-kopf' },
             el('span', { class: 'dot', style: { background: team.color } }),
-            el('span', { class: 'grow' }, team.name)),
+            el('span', { class: 'grow' }, `${team.wappen} ${team.name}`)),
           // Beschriftet wie im Host-Menü: „−" allein sagt nicht, um wie viel.
           el('button', {
             class: 'btn btn-sm btn-ghost',

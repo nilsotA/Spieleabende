@@ -230,6 +230,51 @@ test('ein Gerät gehört immer nur zu einem Team', () => {
   assert.equal(state.teams[1].members.length, 1);
 });
 
+test('jedes Team bekommt ein eigenes Wappen', () => {
+  const state = G.createState();
+  for (let i = 0; i < 8; i++) G.addTeam(state, `T${i}`);
+  const wappen = state.teams.map((t) => t.wappen);
+  assert.equal(new Set(wappen).size, 8, 'acht Teams, acht verschiedene Wappen');
+  for (const w of wappen) assert.ok(G.TEAM_WAPPEN.includes(w));
+
+  // Wie bei der Farbe: Nach einem Löschen wird das freigewordene Wappen wieder
+  // vergeben, statt dass das nächste Team eins doppelt bekommt.
+  const weg = state.teams[2].wappen;
+  G.removeTeam(state, state.teams[2].id);
+  G.addTeam(state, 'Neu');
+  assert.equal(state.teams[7].wappen, weg);
+});
+
+test('Wappen tauschen – nur in der Lobby und nur, wenn es frei ist', () => {
+  const state = G.createState();
+  G.addTeam(state, 'A');
+  G.addTeam(state, 'B');
+  const frei = G.TEAM_WAPPEN.find((w) => !state.teams.some((t) => t.wappen === w));
+
+  G.setTeamWappen(state, state.teams[0].id, frei);
+  assert.equal(state.teams[0].wappen, frei);
+
+  // Das eigene nochmal antippen ist kein Fehler, sondern ein Nichts.
+  G.setTeamWappen(state, state.teams[0].id, frei);
+  assert.equal(state.teams[0].wappen, frei);
+
+  assert.throws(() => G.setTeamWappen(state, state.teams[1].id, frei), /anderes Team/);
+  assert.throws(() => G.setTeamWappen(state, state.teams[1].id, '🍕'), /gibt es nicht/);
+
+  G.startGame(state, SET);
+  const nochFrei = G.TEAM_WAPPEN.find((w) => !state.teams.some((t) => t.wappen === w));
+  assert.throws(() => G.setTeamWappen(state, state.teams[0].id, nochFrei), /Lobby/);
+});
+
+test('alte Spielstände ohne Wappen bekommen in der Sicht eins', () => {
+  const state = setup(['A', 'B']);
+  for (const team of state.teams) delete team.wappen;
+  const sicht = G.viewFor(state, { isHost: true, clientId: 'h' });
+  const wappen = sicht.teams.map((t) => t.wappen);
+  assert.equal(new Set(wappen).size, 2);
+  for (const w of wappen) assert.ok(G.TEAM_WAPPEN.includes(w));
+});
+
 test('Spiel braucht mindestens zwei Teams', () => {
   const state = G.createState();
   G.addTeam(state, 'Allein');
