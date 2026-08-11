@@ -312,6 +312,44 @@ test('keine Frage verrät die Lösung einer anderen derselben Kategorie', async 
   assert.deepEqual(verraeter, []);
 });
 
+test('Anführungszeichen werden deutsch geschlossen', async () => {
+  // Auf der Leinwand steht der Fragetext in 50 Pixeln – ein gerades
+  // Anführungszeichen hinter einem „ fällt dort auf. Zwölf der vierzehn Sätze
+  // machten es richtig, zwei nicht: In „Der Klassiker" und „Weltgeschichte"
+  // war jedes der 16 Zitate mit einem geraden Zeichen geschlossen.
+  const offen = [];
+  for (const datei of DATEIEN) {
+    const roh = JSON.parse(await readFile(new URL(datei, DATEN), 'utf8'));
+    const felder = [['Beschreibung', roh.description || '']];
+    for (const [ri, round] of (roh.rounds || []).entries()) {
+      for (const cat of round.categories || []) {
+        felder.push([`R${ri + 1} Kategorie`, cat.name || '']);
+        for (const q of cat.questions || []) {
+          felder.push([`R${ri + 1} „${cat.name}“ Frage`, q.text || '']);
+          felder.push([`R${ri + 1} „${cat.name}“ Lösung`, q.answer || '']);
+          if (q.note) felder.push([`R${ri + 1} „${cat.name}“ Zusatz`, q.note]);
+        }
+      }
+    }
+    for (const [wo, text] of felder) {
+      // Jedes „ braucht ein “ dahinter, bevor das nächste „ kommt.
+      let auf = false;
+      for (const zeichen of text) {
+        if (zeichen === '„') auf = true;
+        else if (zeichen === '“') auf = false;
+        else if (zeichen === '"' && auf) {
+          offen.push(`${datei} ${wo}: ${text.slice(0, 70)}`);
+          break;
+        }
+      }
+      if (auf && !offen.some((e) => e.endsWith(text.slice(0, 70)))) {
+        offen.push(`${datei} ${wo}: „ ohne “ – ${text.slice(0, 70)}`);
+      }
+    }
+  }
+  assert.deepEqual(offen, []);
+});
+
 test('keine Frage verrät ihre eigene Lösung', async () => {
   // Der Klassiker unter den geschenkten Punkten: „Wer stellt sich mit ‚Mein
   // Name ist Bond. James Bond‘ vor?" – die Lösung steht im Zitat. Auf 200

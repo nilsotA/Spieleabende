@@ -1,6 +1,6 @@
 {
   "name": "Der Klassiker",
-  "description": "Der Satz für „das weiß man doch\": Hauptstädte, Jahreszahlen, der eigene Körper und die Wörter, die alle benutzen und niemand ausschreibt. Runde 2 zieht dieselben Fächer eine Nummer schärfer an.",
+  "description": "Der Satz für „das weiß man doch“: Hauptstädte, Jahreszahlen, der eigene Körper und die Wörter, die alle benutzen und niemand ausschreibt. Runde 2 zieht dieselben Fächer eine Nummer schärfer an.",
   "rounds": [
     {
       "categories": [
@@ -88,11 +88,11 @@
               "note": "Galileo Galilei verteidigte die Idee später – und bekam dafür Ärger mit der Kirche."
             },
             {
-              "text": "Wer schrieb den Roman „Die unendliche Geschichte\"?",
+              "text": "Wer schrieb den Roman „Die unendliche Geschichte“?",
               "answer": "Michael Ende"
             },
             {
-              "text": "Wer schrieb die Novelle „Der Schimmelreiter\"?",
+              "text": "Wer schrieb die Novelle „Der Schimmelreiter“?",
               "answer": "Theodor Storm"
             }
           ]
@@ -110,7 +110,7 @@
               "note": "Der Sender startete tatsächlich in Luxemburg."
             },
             {
-              "text": "Wofür steht das LCD in „LCD-Bildschirm\"?",
+              "text": "Wofür steht das LCD in „LCD-Bildschirm“?",
               "answer": "Liquid Crystal Display",
               "note": "Auf Deutsch: Flüssigkristallanzeige."
             },
@@ -199,7 +199,7 @@
           "questions": [
             {
               "text": "Wie beginnt Artikel 1 des Grundgesetzes?",
-              "answer": "„Die Würde des Menschen ist unantastbar.\""
+              "answer": "„Die Würde des Menschen ist unantastbar.“"
             },
             {
               "text": "Welche drei Gewalten teilen sich in Deutschland die Staatsmacht?",
@@ -250,17 +250,17 @@
               "note": "Das Gegenstück für die Tiere heißt Fauna."
             },
             {
-              "text": "Aus welchem Stück stammt „Sein oder Nichtsein, das ist hier die Frage\"?",
-              "answer": "Aus „Hamlet\"",
+              "text": "Aus welchem Stück stammt „Sein oder Nichtsein, das ist hier die Frage“?",
+              "answer": "Aus „Hamlet“",
               "note": "Von William Shakespeare."
             },
             {
               "text": "Was ist ein Oxymoron?",
               "answer": "Eine Formulierung, die sich selbst widerspricht",
-              "note": "„Alter Knabe\", „bittersüß\", „Eile mit Weile\"."
+              "note": "„Alter Knabe“, „bittersüß“, „Eile mit Weile“."
             },
             {
-              "text": "Von wem stammt der Satz „Religion ist das Opium des Volkes\"?",
+              "text": "Von wem stammt der Satz „Religion ist das Opium des Volkes“?",
               "answer": "Von Karl Marx"
             }
           ]

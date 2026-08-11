@@ -1,6 +1,6 @@
 {
   "name": "Weltgeschichte",
-  "description": "Von Hannibals Elefanten bis zum Fall der Mauer in Moskau: der Satz für alles, was passiert ist, bevor wir dabei waren. Runde 1 fragt nach dem, was hängengeblieben ist, Runde 2 nach Jahreszahlen, Reichen und dem Kalten Krieg.",
+  "description": "Von Hannibals Elefanten bis zum Fall der Berliner Mauer: der Satz für alles, was passiert ist, bevor wir dabei waren. Runde 1 fragt nach dem, was hängengeblieben ist, Runde 2 nach Jahreszahlen, Reichen und dem Kalten Krieg.",
   "rounds": [
     {
       "categories": [
@@ -127,21 +127,21 @@
           "name": "Berühmte Sätze",
           "questions": [
             {
-              "text": "Wer sagte bei der ersten Mondlandung „Ein kleiner Schritt für einen Menschen …\"?",
+              "text": "Wer sagte bei der ersten Mondlandung „Ein kleiner Schritt für einen Menschen …“?",
               "answer": "Neil Armstrong"
             },
             {
-              "text": "Wer soll gesagt haben „Ich weiß, dass ich nichts weiß\"?",
+              "text": "Wer soll gesagt haben „Ich weiß, dass ich nichts weiß“?",
               "answer": "Sokrates",
               "note": "Überliefert hat es Platon – wörtlich so gesagt hat Sokrates es wohl nie."
             },
             {
-              "text": "Welcher Feldherr soll beim Überschreiten des Rubikon „Der Würfel ist gefallen\" gerufen haben?",
+              "text": "Welcher Feldherr soll beim Überschreiten des Rubikon „Der Würfel ist gefallen“ gerufen haben?",
               "answer": "Julius Cäsar",
               "note": "Damit begann der Bürgerkrieg gegen Pompeius."
             },
             {
-              "text": "Wer soll gesagt haben „Wenn sie kein Brot haben, sollen sie doch Kuchen essen\"?",
+              "text": "Wer soll gesagt haben „Wenn sie kein Brot haben, sollen sie doch Kuchen essen“?",
               "answer": "Marie-Antoinette",
               "note": "Belegt ist es nicht – der Satz stand schon vor ihrer Zeit bei Rousseau."
             }
@@ -225,7 +225,7 @@
           "name": "Sie schrieben Geschichte",
           "questions": [
             {
-              "text": "Wer hielt 1963 die Rede „I have a dream\"?",
+              "text": "Wer hielt 1963 die Rede „I have a dream“?",
               "answer": "Martin Luther King"
             },
             {
@@ -283,12 +283,12 @@
             {
               "text": "Womit versorgten die Westalliierten das abgeriegelte West-Berlin 1948/49?",
               "answer": "Mit einer Luftbrücke",
-              "note": "Die „Rosinenbomber\" landeten fast im Minutentakt."
+              "note": "Die „Rosinenbomber“ landeten fast im Minutentakt."
             },
             {
               "text": "Wie hieß Michail Gorbatschows Programm für den Umbau von Staat und Wirtschaft?",
               "answer": "Perestroika",
-              "note": "„Umbau\" – zusammen mit Glasnost, der Offenheit."
+              "note": "„Umbau“ – zusammen mit Glasnost, der Offenheit."
             }
           ]
         }
