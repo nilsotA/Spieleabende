@@ -390,13 +390,49 @@ function passeFrageEin() {
     const overlay = document.querySelector('#question');
     const panel = overlay?.querySelector('.q-panel');
     if (!overlay || !panel || overlay.hidden) return;
+    // Ein Wort, das in keine Zeile passt, bricht der Browser nicht – es steht
+    // einfach über den Rand hinaus. Gemessen auf einem 1024er-Beamer:
+    // „Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz" ragte
+    // 930 Pixel aus einem 886 Pixel breiten Kasten, quer über die halbe
+    // Leinwand. Deutsch macht solche Wörter, und der Editor lädt dazu ein.
+    //
+    // Die Breite gehört deshalb in dieselbe Rechnung wie die Höhe. Sie hilft
+    // hier auch wirklich: Das Wort schrumpft mit der Schrift, der Kasten nicht.
+    const querPasst = () => {
+      const stil = getComputedStyle(panel);
+      const kasten = panel.getBoundingClientRect();
+      const rechts = kasten.right - parseFloat(stil.paddingRight || 0);
+      for (const sel of ['#q-text', '#q-answer', '#q-note']) {
+        const n = overlay.querySelector(sel);
+        if (!n || n.hidden) continue;
+        // Nicht die Breite des Kastens mit der des Panels vergleichen: Der
+        // Textblock ist auf 26 Zeichen begrenzt und steht mittig, das zu lange
+        // Wort läuft aus ihm nach rechts heraus. Maßgeblich ist also, wo es
+        // tatsächlich endet – linke Kante des Blocks plus seine Inhaltsbreite.
+        if (n.getBoundingClientRect().left + n.scrollWidth > rechts + 1) return false;
+      }
+      return true;
+    };
     const stufen = [1, 0.92, 0.84, 0.76, 0.68, 0.6, 0.52, 0.44];
-    for (const stufe of stufen) {
-      panel.style.setProperty('--frageskala', String(stufe));
-      // Höhe erst nach dem Setzen lesen – das erzwingt den Umbruch. Gemessen
-      // wird am Overlay: Es ist der Kasten, der sonst scrollen würde, und genau
-      // das soll auf einer Leinwand nicht passieren.
-      if (overlay.scrollHeight <= overlay.clientHeight + 1) break;
+    const lauf = () => {
+      for (const stufe of stufen) {
+        panel.style.setProperty('--frageskala', String(stufe));
+        // Höhe erst nach dem Setzen lesen – das erzwingt den Umbruch. Gemessen
+        // wird am Overlay: Es ist der Kasten, der sonst scrollen würde, und genau
+        // das soll auf einer Leinwand nicht passieren.
+        if (overlay.scrollHeight <= overlay.clientHeight + 1 && querPasst()) return true;
+      }
+      return false;
+    };
+    // Erst ganz ohne Umbruch im Wort versuchen – das ist die schönere Lösung
+    // und reicht für alles, was ein Mensch freiwillig tippt. Nur wenn selbst
+    // die kleinste Stufe zu breit bleibt, wird gebrochen; und dann von vorn,
+    // damit die Schrift nicht winzig bleibt, obwohl mit Umbruch längst wieder
+    // die volle Größe passt.
+    panel.classList.remove('bricht');
+    if (!lauf()) {
+      panel.classList.add('bricht');
+      lauf();
     }
     // Reicht auch die kleinste Stufe nicht, ist die Frage schlicht zu lang
     // geschrieben – dann entscheidet, was man sieht. Sichtbar sein muss die

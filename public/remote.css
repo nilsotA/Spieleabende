@@ -59,7 +59,10 @@ body.remote #app {
   text-transform: uppercase;
   color: #9fd4ff;
 }
-.r-text { margin-top: 0.4rem; font-weight: 700; font-size: 1.05rem; line-height: 1.35; }
+/* Wie am Handy: Ein Wort, das in keine Zeile passt, würde sonst seitlich aus
+   der Karte laufen – und die Fernbedienung ist das Gerät, von dem der Host
+   vorliest. */
+.r-text { margin-top: 0.4rem; font-weight: 700; font-size: 1.05rem; line-height: 1.35; overflow-wrap: anywhere; }
 
 .r-answer-box {
   margin-top: 0.9rem;
@@ -75,7 +78,7 @@ body.remote #app {
   text-transform: uppercase;
   color: #7fe0a8;
 }
-.r-answer { font-size: 1.25rem; font-weight: 800; line-height: 1.3; margin-top: 0.15rem; }
+.r-answer { font-size: 1.25rem; font-weight: 800; line-height: 1.3; margin-top: 0.15rem; overflow-wrap: anywhere; }
 
 .r-log { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.7rem; }
 .r-chip {
@@ -196,6 +199,7 @@ body.remote #app {
 /* Der Zusatz zur Lösung – hier liest ihn nur der Host, deshalb steht er von
    Anfang an da und nicht erst nach dem Auflösen wie auf der Leinwand. */
 .r-note {
+  overflow-wrap: anywhere;
   margin-top: 0.5rem;
   font-size: 0.92rem;
   line-height: 1.4;

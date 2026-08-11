@@ -220,15 +220,21 @@ body {
   text-align: center;
 }
 .p-q-head { color: #9fd4ff; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.p-q-text { margin-top: 0.5rem; font-weight: 800; font-size: 1.2rem; line-height: 1.35; text-transform: uppercase; }
+/* Ein überlanges Wort („Rindfleischetikettierungsüberwachungs…") passt auf
+   390 Pixel in keine Zeile. Der Browser lässt es dann stehen und schiebt es aus
+   dem Kasten heraus – auf dem Handy heißt das abgeschnitten. Also brechen. */
+.p-q-text { margin-top: 0.5rem; font-weight: 800; font-size: 1.2rem; line-height: 1.35; text-transform: uppercase; overflow-wrap: anywhere; }
 .p-q-image { margin-top: 0.7rem; max-width: 100%; max-height: 30dvh; border-radius: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.16); }
 .p-q-note {
+  overflow-wrap: anywhere;
   margin: 0.7rem 0 0;
   font-size: 0.88rem;
   line-height: 1.4;
   color: #b9d8f6;
 }
 .p-q-answer {
+  overflow-wrap: anywhere;
+  max-width: 100%;
   margin-top: 0.8rem;
   display: inline-block;
   background: linear-gradient(180deg, #37c176, #21894f);

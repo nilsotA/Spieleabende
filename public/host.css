@@ -775,6 +775,20 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
 }
 
+/* Notbremse für ein Wort, das auch auf der kleinsten Stufe breiter bleibt als
+   der Kasten (siehe passeFrageEin). Der Umbruch mitten im Wort ist hässlich –
+   ein Text, der halb neben dem Kasten steht, ist unbrauchbar. Deshalb erst
+   verkleinern, und nur wenn das nicht reicht, brechen. */
+.q-panel.bricht .q-text,
+.q-panel.bricht .q-answer,
+.q-panel.bricht .q-note {
+  overflow-wrap: anywhere;
+  /* Wenn ein Silbenwörterbuch für Deutsch da ist, setzt der Browser einen
+     sauberen Trennstrich statt hart mitten im Wort umzubrechen. Ist keins da,
+     greift `anywhere` – deshalb steht beides hier. */
+  hyphens: auto;
+}
+
 .q-image {
   display: block;
   margin: clamp(0.8rem, 2vh, 1.4rem) auto 0;
