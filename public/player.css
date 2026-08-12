@@ -49,7 +49,9 @@ body {
    ab sieben auch „Dein Name" und die Oberkante des Namensfelds – der Gast konnte
    seinen Namen nicht mehr eintippen. `safe center` fällt beim Überlaufen von
    selbst auf den Anfang zurück, und mit eigenem Bildlauf bleibt der Rest
-   erreichbar. Bei wenigen Teams steht die Karte weiter genau in der Mitte. */
+   erreichbar. Bei wenigen Teams steht die Karte weiter genau in der Mitte.
+   Ein Browser, der das Schlüsselwort nicht kennt, verwirft die ganze Zeile und
+   richtet am Anfang aus – also genau so, wie es im Engfall sein soll. */
 #view-join {
   align-items: center;
   justify-content: safe center;

@@ -1199,10 +1199,20 @@ test('ein belegter Port hält den Start nicht auf', async (t) => {
   // Versuch auf einen belegten Port läuft und es dann noch einmal probiert.
   // Auf einer beschäftigten Maschine dauert das länger als die sechs Sekunden,
   // die hier standen – dann wurde der Test rot, ohne dass etwas kaputt war.
-  for (let i = 0; i < 400 && !/läuft!/.test(ausgabe); i++) await warte(50);
+  //
+  // Gewartet wird auf die LETZTE Zeile, nicht auf die erste. „läuft!" ist die
+  // Überschrift, der Hinweis auf den ausgewichenen Port kommt fünf Ausgaben
+  // später – und stdout kommt häppchenweise an. Wer bei „läuft!" aufhört zu
+  // warten, prüft mit etwa jedem siebten Lauf einen Text, der nur aus der
+  // Überschrift besteht: gemessen 25 Läufe, einer rot, und im Fehlerbericht
+  // stand als tatsächliche Ausgabe genau die eine Zeile. Das war kein Fehler
+  // im Server, sondern ein Test, der zu früh hinsah.
+  const fertig = () => /war belegt/.test(ausgabe) || proc.exitCode !== null;
+  for (let i = 0; i < 400 && !fertig(); i++) await warte(50);
 
   assert.match(ausgabe, /läuft!/, `der Server ist gar nicht hochgekommen. Ausgabe:\n${ausgabe}`);
-  assert.match(ausgabe, /war belegt/, 'er hätte sagen müssen, warum es ein anderer Port ist');
+  assert.match(ausgabe, /war belegt/,
+    `er hätte sagen müssen, warum es ein anderer Port ist. Ausgabe:\n${ausgabe}`);
   const treffer = ausgabe.match(/localhost:(\d+)\/host/);
   assert.ok(treffer, 'keine Adresse in der Ausgabe');
   const genutzt = Number(treffer[1]);

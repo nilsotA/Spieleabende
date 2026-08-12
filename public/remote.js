@@ -6,6 +6,12 @@ import {
   aufzaehlung, punkte } from '/common.js';
 
 let state = null;
+// Welche Frage zuletzt auf dem Schirm stand – siehe render(). Steht hier oben
+// bei den übrigen Modulwerten, nicht erst vor render(): connect() weiter unten
+// ruft render() zwar erst beim ersten Zustand vom Server auf, aber eine
+// Deklaration, die nur deshalb rechtzeitig fertig ist, ist eine Falle für den
+// Nächsten, der eine Zeile verschiebt.
+let letzteFrage = null;
 
 installAudioUnlock();
 keepScreenAwake();
@@ -33,9 +39,6 @@ $('#r-undo').addEventListener('click', () => {
   if (performance.now() - rueckSeitWann < 400) return;
   act('undo');
 });
-
-// Welche Frage zuletzt auf dem Schirm stand – siehe render().
-let letzteFrage = null;
 
 function render() {
   if (!state) return;
