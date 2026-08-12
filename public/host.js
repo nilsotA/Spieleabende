@@ -884,7 +884,13 @@ function renderPlayers() {
   for (const team of state.teams) {
     const node = box.querySelector(`[data-team="${team.id}"]`);
     if (!node) continue;
-    node.querySelector('.pmembers').textContent = team.members
+    // Wer allein spielt, nennt sein Team gern nach sich selbst. Am Pult stand
+    // dann „OLEK" und darunter noch einmal „Olek" – eine Zeile, die nichts
+    // sagt. Ausnahme: das abgemeldete Handy. Das ⚪ ist die einzige Stelle, an
+    // der der Spielleiter sieht, dass dieser Tisch gerade keinen Buzzer hat.
+    const einerAllein = team.members.length === 1 && team.members[0].online
+      && team.members[0].name.trim().toLowerCase() === team.name.trim().toLowerCase();
+    node.querySelector('.pmembers').textContent = einerAllein ? '' : team.members
       .map((m) => (m.online ? m.name : `${m.name} ⚪`))
       .join(', ');
     const scoreNode = node.querySelector('.pscore');
@@ -953,7 +959,11 @@ function renderPlayers() {
   // Am Pult selbst könnte er nicht hängen: Dessen clip-path (das Trapez)
   // schneidet auch die eigenen Pseudo-Elemente ab.
   // Am Ende gehört der Scheinwerfer dem Sieger – vorher dem, der reden muss.
+  // Reihenfolge ist Pflicht: pruefeEnge entscheidet über die Aufstellung,
+  // pultSchriftAnpassen setzt darin den Grad, und pultNamenAnpassen kürzt erst,
+  // wenn der endgültige Grad steht.
   pruefeEnge(box);
+  pultSchriftAnpassen(box);
   pultNamenAnpassen(box);
 
   const imLicht = box.querySelector('.player.buzzed')
@@ -1058,11 +1068,14 @@ function pruefeEnge(box) {
   // clamp() als Text zurück – parseFloat macht daraus NaN, und jeder Vergleich
   // damit ist falsch. Dann lieber am Pult selbst messen: Der Wert stimmt im
   // nebeneinanderstehenden Zustand, und aus dem heraus wird ja entschieden.
+  // Gelesen wird der Boden, nicht der gewachsene Grad: pultSchriftAnpassen
+  // vergrößert die Schrift erst, nachdem hier entschieden wurde, und würde die
+  // Leiste sonst mit ihrem eigenen Ergebnis wieder ins Gestapelte kippen.
   const wurzel = getComputedStyle(document.documentElement);
   const proPultZahl = parseFloat(getComputedStyle(box.querySelector('.pscore')).fontSize);
   const proPultName = parseFloat(getComputedStyle(box.querySelector('.pname')).fontSize);
-  const zahlGrad = parseFloat(wurzel.getPropertyValue('--pult-zahl')) || proPultZahl;
-  const nameGrad = parseFloat(wurzel.getPropertyValue('--pult-name')) || proPultName;
+  const zahlGrad = parseFloat(wurzel.getPropertyValue('--pult-zahl-boden')) || proPultZahl;
+  const nameGrad = parseFloat(wurzel.getPropertyValue('--pult-name-boden')) || proPultName;
   if (!zahlGrad || !nameGrad) return;
 
   // Vierzehn Zeichen des Teamnamens sollen stehen bleiben. Die Zahl ist nicht
@@ -1081,6 +1094,171 @@ function pruefeEnge(box) {
   const noetig = (12 * 0.67 + 1.3) * nameGrad + 11 /* Spalte */ + 27 /* Pillenpolster */
     + 32 /* Pultpolster */ + 5 * 0.62 * zahlGrad;
   box.classList.toggle('eng', proPult < noetig);
+
+  // Die schräge Schulter des Trapezes zieht mit der Pultbreite mit, die
+  // Polsterung tat es nicht – Begründung und Messwerte stehen in host.css bei
+  // `.player`. Gestapelte Pulte sind schmal, dort schneidet nichts: gemessen
+  // blieb der Inhalt in jeder Lage von 152 bis 410 Pixeln Pultbreite innerhalb
+  // der Fläche. Deshalb greift die Rechnung nur nebeneinander, und auch dort
+  // erst ab rund 510 Pixeln Pultbreite – enge Vier-Team-Leisten verlieren
+  // keinen Pixel Namensbreite.
+  if (box.classList.contains('eng')) box.style.removeProperty('--pult-polster');
+  else box.style.setProperty('--pult-polster', `${Math.max(16, Math.ceil(proPult * 0.0276) + 2)}px`);
+}
+
+/**
+ * Wie groß darf die Schrift am Pult sein?
+ *
+ * Die clamp()-Grade hängen allein an der Fensterbreite und wissen nichts davon,
+ * wie viele Pulte nebeneinanderstehen. Zwei Teams auf einem 1920er Schirm
+ * bekommen damit denselben Namen in 16,8 Pixeln wie acht Teams – obwohl das
+ * Pult 907 statt 220 Pixel breit ist. Auf dem Bild vom Spielabend stand „OLEK"
+ * als Flüstern neben einer dreimal so großen 2350, mit 600 Pixeln Leere
+ * dazwischen. Die Datei sagt an anderer Stelle selbst, woran das zu messen ist:
+ * „Die Leinwand steht vier Meter weg – kleiner heißt hier unlesbar."
+ *
+ * Gerechnet wird deshalb hier statt in CSS: Nur host.js kennt die Zahl der
+ * Pulte, und nur gemessen lässt sich sagen, was ein Pult wirklich trägt. Vier
+ * Grenzen, die kleinste gewinnt, und der Boden aus host.css bleibt der Boden –
+ * kleiner als bisher wird nie etwas.
+ *
+ *  1. Breite, an den echten Namen gemessen. Nicht an einer Zeichenzahl: Ein
+ *     Ansatz von zwölf Zeichen wächst genau bis zwölf Zeichen und schneidet
+ *     dem dreizehnten den Kopf ab – aus einem abgeschnittenen Namen wurden so
+ *     gemessen drei. Gewachsen wird nur in Platz, der wirklich frei ist,
+ *     deshalb kann kein Name durch das Wachsen verlorengehen.
+ *  2. Höhe. Die Leiste nimmt sich ihre Höhe vom Brett, also hängt die Grenze an
+ *     der Fensterhöhe: höchstens 14 Prozent. Das ist billiger, als es klingt –
+ *     der Schriftgrad der Kacheln hängt an der Fensterbreite, nicht an der
+ *     Bretthöhe. Die Kachel verliert Weißraum, keine Lesbarkeit.
+ *  3. Lesbarkeit. Über 1,9rem Name bringt Wachsen nichts mehr: Auf einer zwei
+ *     Meter breiten Leinwand sind das rund 21 mm Versalhöhe, und die übliche
+ *     Schwelle für vier Meter Abstand liegt bei 20.
+ *  4. Der Boden. Unter die bisherigen Grade geht es nie.
+ *
+ * Das Verhältnis Zahl zu Name rückt dabei von 2,76 auf 2,3 zusammen. Die Zahl
+ * bleibt das Größte auf der Leiste – sie ist das, worauf der Raum schaut –,
+ * aber der Name hört auf, ihr Anhängsel zu sein.
+ */
+const PULT_R = 2.3;              // Punktzahl geteilt durch Teamname
+const PULT_MITGLIED = 0.75;      // Mitgliederzeile, Anteil am Teamnamen
+const PULT_NAME_MAX = 1.9;       // rem – ab hier bringt Wachsen nichts mehr
+const PULT_LEISTE_MAX = 0.14;    // Anteil der Fensterhöhe, den die Leiste nehmen darf
+
+function pultSchriftAnpassen(box) {
+  const pulte = [...box.querySelectorAll('.player')];
+  if (!pulte.length) return;
+  for (const p of ['--pult-zahl', '--pult-name', '--pult-mitglied']) box.style.removeProperty(p);
+
+  const stil = getComputedStyle(box);
+  const wurzel = getComputedStyle(document.documentElement);
+  const bodenZahl = parseFloat(stil.getPropertyValue('--pult-zahl-boden'));
+  const bodenName = parseFloat(wurzel.getPropertyValue('--pult-name-boden'));
+  const bodenMit = parseFloat(wurzel.getPropertyValue('--pult-mitglied-boden'));
+  // Ohne @property (Safari vor 16.4) kommt das unausgerechnete clamp() als Text
+  // zurück und parseFloat macht daraus NaN. Dann bleibt es beim CSS-Wert, statt
+  // mit NaN zu rechnen – denselben Weg geht pruefeEnge schon.
+  if (!bodenZahl || !bodenName || !bodenMit) return;
+
+  const eng = box.classList.contains('eng');
+  const spalte = eng ? 0 : parseFloat(getComputedStyle(pulte[0]).columnGap) || 0;
+
+  // Gemessen wird am vollen Namen: Ein bereits gekürzter Name bräuchte weniger
+  // Platz, das Wachstum fiele größer aus, und beim nächsten Durchlauf stünde er
+  // wieder gekürzt da – die Leiste würde sich hochschaukeln.
+  for (const pult of pulte) {
+    const nm = pult.querySelector('.pname');
+    const letzter = nm.lastChild;
+    if (nm.dataset.voll && letzter && letzter.nodeType === 3) letzter.textContent = nm.dataset.voll;
+  }
+
+  // Name und Mitgliederzeile stehen in einer gedehnten Spalte – `scrollWidth`
+  // liefert dort die Breite des Kastens, nicht die des Textes, und für „OLEK"
+  // kämen 711 statt 80 Pixel heraus. Deshalb wird für die Messung kurz auf
+  // `max-content` gestellt: `offsetWidth` ist ein Layoutmaß und damit
+  // unempfindlich gegen die Transformationen, die auf den Pulten liegen.
+  // Erst alle umstellen, dann alle lesen, dann alle zurück – so kostet es ein
+  // erzwungenes Layout statt eines pro Pult.
+  const felder = pulte.map((pult) => ({
+    nm: pult.querySelector('.pname'),
+    mi: pult.querySelector('.pmembers'),
+    sc: pult.querySelector('.pscore'),
+  }));
+  for (const f of felder) { f.nm.style.width = 'max-content'; f.mi.style.width = 'max-content'; }
+  const roh = felder.map((f) => ({ name: f.nm.offsetWidth, mitglied: f.mi.offsetWidth }));
+  for (const f of felder) { f.nm.style.removeProperty('width'); f.mi.style.removeProperty('width'); }
+
+  const bedarf = pulte.map((pult, i) => {
+    const pStil = getComputedStyle(pult);
+    const scStil = getComputedStyle(felder[i].sc);
+    // Das Polster der Pille steht in rem und wächst nicht mit dem Grad mit.
+    const pillePolster = parseFloat(scStil.paddingLeft) + parseFloat(scStil.paddingRight);
+    // Gerechnet wird mit dem größten Punktestand, der kommen kann („−1000"),
+    // nicht mit dem aktuellen – genau wie in pruefeEnge und aus demselben
+    // Grund: Sonst schrumpfte die Schrift im Laufe des Abends jedes Mal, wenn
+    // eine Pille eine Stelle dazubekommt, und die ganze Leiste zappelte.
+    // Gemessen wanderte die Leistenhöhe so binnen einer Runde von 124 über 118
+    // auf 108 Pixel. Die Ziffern stehen tabellarisch, also ist die Breite einer
+    // Ziffer die Breite jeder anderen.
+    const stellen = Math.max(1, felder[i].sc.textContent.trim().length);
+    const jeZiffer = Math.max(0, felder[i].sc.offsetWidth - pillePolster) / stellen;
+    return {
+      platz: pult.clientWidth - parseFloat(pStil.paddingLeft) - parseFloat(pStil.paddingRight) - spalte,
+      name: roh[i].name,
+      mitglied: roh[i].mitglied,
+      ziffern: jeZiffer * 5,
+      pillePolster,
+    };
+  });
+
+  // 1. Breite. Nebeneinander teilen sich Name und Pille die Zeile, gestapelt
+  //    steht jedes für sich auf voller Breite.
+  const ausBreite = Math.min(...bedarf.map((b) => {
+    if (eng) {
+      const ausName = (b.platz * PULT_R * bodenName) / Math.max(1, b.name);
+      const ausPille = ((b.platz - b.pillePolster) * bodenZahl) / Math.max(1, b.ziffern);
+      return Math.min(ausName, ausPille);
+    }
+    const jeZahl = b.name / (PULT_R * bodenName) + b.ziffern / bodenZahl;
+    return (b.platz - b.pillePolster) / Math.max(0.001, jeZahl);
+  }));
+
+  // 2. Höhe. Zwei Proben statt einer Rechnung aus Zeilenhöhen und Polstern: Die
+  //    Leistenhöhe hängt linear am Schriftgrad, zwei Punkte legen die Gerade
+  //    fest, und das stimmt auch noch, wenn später jemand ein Polster ändert.
+  const setzen = (zahl, name, mitglied) => {
+    box.style.setProperty('--pult-zahl', `${zahl}px`);
+    box.style.setProperty('--pult-name', `${name}px`);
+    box.style.setProperty('--pult-mitglied', `${mitglied}px`);
+  };
+  const hoeheBei = (zahl) => {
+    setzen(zahl, zahl / PULT_R, (zahl / PULT_R) * PULT_MITGLIED);
+    return box.offsetHeight;
+  };
+  const h1 = hoeheBei(bodenZahl);
+  const h2 = hoeheBei(bodenZahl * 2);
+  const steigung = (h2 - h1) / bodenZahl;
+  const ausHoehe = steigung > 0
+    ? (innerHeight * PULT_LEISTE_MAX - (h1 - steigung * bodenZahl)) / steigung
+    : Infinity;
+
+  // 3. Lesbarkeitsdeckel.
+  const rem = parseFloat(wurzel.fontSize) || 16;
+  const zahl = Math.max(bodenZahl, Math.min(ausBreite, ausHoehe, PULT_NAME_MAX * rem * PULT_R));
+
+  // Der Name darf nur so weit mit, wie nach der Pille wirklich Platz bleibt –
+  // sonst holte das engere Verhältnis 2,3 zurück, was Grenze 1 gerade verhindert.
+  const nameAusBreite = Math.min(...bedarf.map((b) => {
+    const pille = eng ? 0 : b.ziffern * (zahl / bodenZahl) + b.pillePolster;
+    return ((b.platz - pille) * bodenName) / Math.max(1, b.name);
+  }));
+  const name = Math.max(bodenName, Math.min(zahl / PULT_R, nameAusBreite));
+  const mitgliedAusBreite = Math.min(...bedarf.map((b) => {
+    const pille = eng ? 0 : b.ziffern * (zahl / bodenZahl) + b.pillePolster;
+    return ((b.platz - pille) * bodenMit) / Math.max(1, b.mitglied);
+  }));
+  const mitglied = Math.max(bodenMit, Math.min(name * PULT_MITGLIED, mitgliedAusBreite));
+  setzen(zahl, name, mitglied);
 }
 
 // Beim Ziehen des Fensters ändert sich die Breite, ohne dass ein neuer
@@ -1089,6 +1267,7 @@ addEventListener('resize', () => {
   const box = $('#players');
   if (box) {
     pruefeEnge(box);
+    pultSchriftAnpassen(box);
     pultNamenAnpassen(box);
   }
   katSchriftAnpassen();

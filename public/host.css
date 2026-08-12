@@ -325,7 +325,18 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 
 /* Aus vier Metern war das hier mit 12px eine graue Schliere. Die Rundenanzeige
    wächst mit dem Screen mit – wie alles andere, was man aus dem Sessel lesen
-   können muss. */
+   können muss. – Nur mitgewachsen ist sie nicht weit genug: Der Deckel 1.15rem
+   ist ab 1937px Fensterbreite erreicht, und ab da stand „RUNDE 2 / 2" auf
+   jedem Schirm in denselben 18,4 Pixeln. Auf 3440x1440 gemessen waren das
+   14 Pixel Versalhöhe neben einer Kachelziffer von 36 – die kleinste Schrift
+   auf der ganzen Wand. Betroffen ist damit ausgerechnet die Plakette darunter:
+   „doppelte Punkte" ist die einzige Regel, die Runde 2 von Runde 1 trennt, und
+   sie stand als 12-Pixel-Briefmarke da. Die Grenze hängt jetzt an beiden
+   Kanten des Fensters statt nur an der Breite – auf einem 768er Laptop bringt
+   die Breite allein zu wenig –, und der Deckel liegt hoch genug, dass ihn kein
+   üblicher Schirm erreicht. Kleiner wird die Anzeige dabei auf keiner
+   gemessenen Größe: 1366x768 von 13,0 auf 17,8 Pixel, 1920x1080 von 18,2 auf
+   25,0, 3440x1440 von 18,4 auf 36,8. */
 .round-badge {
   justify-self: start;
   display: flex;
@@ -335,14 +346,14 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: clamp(0.8rem, 0.95vw, 1.15rem);
+  font-size: clamp(1.1rem, 1.6vh + 0.4vw, 2.4rem);
   color: #9db4d6;
 }
 .round-badge.leer { visibility: hidden; }
 /* „Doppelte Punkte“ ist die wichtigste Ansage der zweiten Runde – als Schild,
    nicht als Fußnote. Gold, weil im ganzen Spiel nur Gewinn gold ist. */
 .round-badge small {
-  font-size: clamp(0.72rem, 0.85vw, 1rem);
+  font-size: clamp(1rem, 1.4vh + 0.4vw, 2.1rem);
   letter-spacing: 0.14em;
   color: #3a2a00;
   background: linear-gradient(180deg, var(--gold-hell), var(--gold));
@@ -408,15 +419,27 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: clamp(0.85rem, 1.3vw, 1.1rem);
-  color: #fff;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--team) 85%, white 15%), var(--team));
+  /* Weiß auf der Teamfarbe war die schlechteste Schrift auf der ganzen Bühne:
+     aus den Farbwerten gerechnet 1,98:1 auf Gelb, 2,25 auf Türkis, 2,34 auf
+     Grün – im besten Fall 3,46. Dabei ist diese Pille die einzige Stelle, an
+     der der Raum den Namen des Teams am Zug lesen kann.
+     Dunkel auf hell ist hier in jeder der acht Teamfarben besser als hell auf
+     dunkel, und die Leiste macht es bei der Führungspille längst so (#3a2a00
+     auf Gold). Damit auch das dunkelste Violett über 4,5:1 kommt, hellt der
+     Verlauf etwas mehr auf: 78 statt 85 Prozent oben, 92 statt 100 unten.
+     Schlechtester Wert danach 5,01:1 – gerechnet über alle acht Farben und
+     beide Enden des Verlaufs. Kontrastärmer wird dabei nichts. */
+  color: #0b0d12;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--team) 78%, white 22%),
+    color-mix(in srgb, var(--team) 92%, white 8%));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
     0 0 0 2px rgba(255, 255, 255, 0.12),
     0 0 34px color-mix(in srgb, var(--team) 55%, transparent);
   animation: turnIn 0.3s ease;
 }
-.turn-pill::before { content: '★'; color: rgba(255, 255, 255, 0.85); }
+.turn-pill::before { content: '★'; color: rgba(0, 0, 0, 0.55); }
 @keyframes turnIn { from { opacity: 0; transform: translateY(-6px); } }
 
 /* ------------------------------------------------------------- Studiowand */
@@ -477,8 +500,15 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
     0 8px 18px -6px rgba(0, 0, 0, 0.75);
   font-weight: 900;
-  /* 23px auf 1920px – gedeckelt bei 1.05rem waren es 17px. */
-  font-size: clamp(1rem, 1.2vw, 1.45rem);
+  /* 23px auf 1920px – gedeckelt bei 1.05rem waren es 17px. Der Deckel wanderte
+     danach noch einmal nach oben: 1.45rem war ab 1933px Fensterbreite erreicht,
+     und ab da wuchs zwar das Schild weiter (auf 3440px gemessen 546px breit),
+     die Beschriftung aber nicht mehr – 23,2px, während die Kachelziffer
+     darunter mit 48px gut das Doppelte misst. Der Kategoriename ist das
+     Einzige auf dem Brett, was pro Spalte etwas Eigenes sagt; die Ziffer steht
+     in jeder Reihe sechsmal gleich. Der neue Deckel greift erst jenseits von
+     3466px und lässt alles unter 1933px unverändert. */
+  font-size: clamp(1rem, 1.2vw, 2.6rem);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1.14;
@@ -1193,7 +1223,16 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
   background: linear-gradient(180deg, rgba(32, 48, 76, 0.85), rgba(8, 13, 22, 0.95));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  padding: 0.55rem 1rem 0.6rem;
+  /* Die Schräge ist ein Anteil der Pultbreite, die Polsterung war eine feste
+     Länge – bei wenigen Teams läuft das auseinander. Zwei Teams auf 1920 px
+     ergeben 907 px Pultbreite und damit 27 px Einzug oben gegen 16 px Polster:
+     gemessen schnitt die Schulter 5 px in den Namen und 9 px in die
+     Punktepille, auf 3440 px waren es 22 und 29. Auf dem Bild vom Spielabend
+     war der Fuchs am Pult diagonal angeschnitten, vom Mitgliedsnamen fehlte
+     das halbe O, und der goldenen Führungspille war die rechte runde Kappe
+     glatt abgesägt. host.js misst die Pultbreite ohnehin und setzt die
+     Polsterung darauf; ohne JavaScript bleibt es beim bisherigen Wert. */
+  padding: 0.55rem var(--pult-polster, 1rem) 0.6rem;
   /* Name links, Punktestand groß rechts: aus drei Metern Entfernung ist die
      Zahl das Einzige, worauf wirklich alle schauen. */
   display: grid;
@@ -1281,6 +1320,26 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   animation: serieAn 0.4s var(--ease-snap) both;
 }
 @keyframes serieAn { from { opacity: 0; transform: translate(-50%, -8px) scale(0.8); } }
+/* Im gestapelten Pult steht der Name oben – genau dort, wo die Plakette liegt.
+   Gemessen bei sechs und acht Teams auf 1920px: Plakette y2–21, Name y9–32, und
+   waagerecht deckte die 128px breite Plakette den zentrierten Namen vollständig
+   ab. Aus den Bildschirmpixeln blieben von 13px Versalhöhe 5 stehen; vom Wappen
+   war der Kopf weg. Es traf immer das Pult, auf das der ganze Raum schaut: Die
+   Plakette gibt es nur bei drei Richtigen in Folge, und dieses Team ist meist
+   auch am Zug. Gestapelt bekommt sie deshalb eine eigene Zeile über dem Namen –
+   nicht mehr Fläche, nur ihre eigene. Dass das Pult in dem Moment um die Höhe
+   der Plakette wächst, ist der Preis; er ist kleiner als ein halber Name.
+   Verschieben statt umlegen ging nicht: Nach oben schneidet der clip-path des
+   Trapezes auch die eigenen Kinder weg. */
+.players.eng .pserie {
+  position: static;
+  grid-area: serie;
+  justify-self: center;
+  transform: none;
+  margin-bottom: 0.1rem;
+  animation-name: serieAnEng;
+}
+@keyframes serieAnEng { from { opacity: 0; transform: translateY(-8px) scale(0.8); } }
 
 .player .pname {
   grid-area: name;
@@ -1310,7 +1369,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .player .pmembers {
   grid-area: members;
   align-self: start;
-  font-size: clamp(0.68rem, 0.75vw, 0.85rem);
+  font-size: var(--pult-mitglied);
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -1333,9 +1392,45 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   inherits: true;
   initial-value: 16px;
 }
+@property --pult-mitglied {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 13px;
+}
+/* Die Basisgrade sind der Boden, unter den nichts fällt: host.js rechnet von
+   hier aus nur nach oben, und ohne JavaScript oder ohne `@property` steht genau
+   der bisherige Zustand da. Warum es einen Boden braucht, siehe
+   pultSchriftAnpassen() in host.js. */
+@property --pult-zahl-boden {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 32px;
+}
+@property --pult-name-boden {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 16px;
+}
+@property --pult-mitglied-boden {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 13px;
+}
 :root {
-  --pult-zahl: clamp(1.5rem, 2.5vw, 2.9rem);
-  --pult-name: clamp(0.8rem, 1vw, 1.05rem);
+  --pult-zahl-boden: clamp(1.5rem, 2.5vw, 2.9rem);
+  --pult-name-boden: clamp(0.8rem, 1vw, 1.05rem);
+  --pult-mitglied-boden: clamp(0.68rem, 0.75vw, 0.85rem);
+  --pult-zahl: var(--pult-zahl-boden);
+  --pult-name: var(--pult-name-boden);
+  --pult-mitglied: var(--pult-mitglied-boden);
+}
+/* Das gestapelte Pult hat für die Zahl einen eigenen Boden – und muss ihn hier
+   auflösen, nicht an der Wurzel: Sonst käme der größere Grad des nebeneinander
+   stehenden Pults herunter, und pruefeEnge entschiede über die Umschaltung mit
+   einer Zahl, die im gestapelten Zustand gar nicht gilt. */
+.players.eng {
+  --pult-zahl-boden: clamp(1.5rem, 2.2vw, 2.4rem);
+  --pult-zahl: var(--pult-zahl-boden);
 }
 
 /* Namensschild aus Chrom mit rotem Punktestand – wie am echten Pult. */
@@ -1365,7 +1460,9 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
    weg – kleiner heißt hier unlesbar, nicht kompakter. */
 .players.eng .player {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: 'name' 'members' 'score';
+  /* Die Zeile „serie" oben ist leer, solange keine Serie läuft, und fällt dann
+     auf null zusammen – siehe die Begründung bei .players.eng .pserie. */
+  grid-template-areas: 'serie' 'name' 'members' 'score';
   text-align: center;
   padding-inline: 0.5rem;
   /* Gestapelt braucht ein Pult weniger Breite als nebeneinander. Ohne diese
@@ -1386,7 +1483,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
    in der Spalte, und die Auslassungspunkte greifen wie vorgesehen. */
 .players.eng .player .pname { align-self: center; min-width: 0; letter-spacing: 0.02em; }
 .players.eng .player .pmembers { align-self: center; }
-.players.eng .player .pscore { justify-self: center; font-size: clamp(1.5rem, 2.2vw, 2.4rem); }
+.players.eng .player .pscore { justify-self: center; font-size: var(--pult-zahl); }
 /* Wer führt, trägt Gold. Vorher waren 0 und 3950 dieselbe rote Pille – man
    musste die Zahlen lesen und vergleichen, statt es zu sehen. */
 .player.leader .pscore {
