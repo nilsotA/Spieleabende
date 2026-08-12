@@ -1586,8 +1586,18 @@ body.host.flat .tile {
   .settings select,
   #team-name,
   #set-select,
-  .datei-knopf {
+  .datei-knopf,
+  /* Die beiden Aufklapper in der Lobby sind Bedienelemente wie jeder Knopf –
+     und standen als einzige nicht in dieser Liste. Auf einem iPad als
+     Host-Screen waren sie gemessene 25 Pixel hoch, während während des Spiels
+     alles andere längst Fingergröße hatte. */
+  .lobby-tipps > summary {
     min-height: 44px;
+  }
+  /* Der Text soll dabei mittig stehen bleiben, nicht oben kleben. */
+  .lobby-tipps > summary {
+    display: flex;
+    align-items: center;
   }
   /* Quadratische Symbolknöpfe brauchen auch die Breite: „×“, „↻“, „⋯“, „👁“. */
   .btn-sm,
