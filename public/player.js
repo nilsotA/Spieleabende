@@ -500,7 +500,17 @@ function renderBuzzer(prev) {
   const status = $('#p-status');
   const label = $('#buzzer-label');
 
-  buzzer.classList.remove('armed', 'won', 'locked', 'fremd', 'probe');
+  // `tooearly` gehört mit in die Aufräumzeile. Fehlte sie, blieb die Klasse für
+  // den Rest des Abends am Knopf kleben – und weil `.buzzer.tooearly` im
+  // Stylesheet nach `.buzzer.armed` steht und dieselbe Spezifität hat, gewann
+  // ihr `shake` über den Puls. Gemessen: Wer einmal zu früh gedrückt hatte,
+  // bekam bei jeder weiteren Freigabe `animation-name: shake` und gar keine
+  // laufende Animation mehr, während alle anderen `armedPulse` pulsten. Es traf
+  // ausgerechnet den Eifrigen: Der Puls ist das einzige fortlaufende Signal
+  // „du darfst jetzt drücken" – Ton, Blitz und Vibration gibt es nur im Moment
+  // des Umschaltens. Das Wackeln selbst leidet nicht darunter, es wird in
+  // pressBuzzer() ohnehin per remove/reflow/add neu gestartet.
+  buzzer.classList.remove('armed', 'won', 'locked', 'fremd', 'probe', 'tooearly');
   label.textContent = 'BUZZ';
   status.classList.remove('you');
 

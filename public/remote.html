@@ -41,9 +41,15 @@
     <div id="r-log" class="r-log"></div>
   </section>
 
-  <button id="r-undo" class="btn r-undo" type="button" hidden>↩ Zurücknehmen</button>
-
-  <div id="r-buttons" class="r-buttons"></div>
+  <!-- Zurücknehmen und die Wertungsknöpfe kleben gemeinsam unten. Getrennt
+       geklebt lag „Zurücknehmen" im Fluss und die Wertungsleiste darüber: Der
+       Knopf war durch den durchsichtigen Rand des Verlaufs noch zu sehen, sein
+       Tipp landete aber auf „Richtig" – gemessen wurden dabei 100 Punkte
+       vergeben. Zwei Bahnen bleiben es trotzdem. -->
+  <div class="r-foot">
+    <button id="r-undo" class="btn r-undo" type="button" hidden>↩ Zurücknehmen</button>
+    <div id="r-buttons" class="r-buttons"></div>
+  </div>
 
   <section class="r-card r-scores">
     <h2>Punkte</h2>

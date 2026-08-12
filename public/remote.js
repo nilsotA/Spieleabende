@@ -34,6 +34,9 @@ $('#r-undo').addEventListener('click', () => {
   act('undo');
 });
 
+// Welche Frage zuletzt auf dem Schirm stand – siehe render().
+let letzteFrage = null;
+
 function render() {
   if (!state) return;
   const q = state.current;
@@ -71,6 +74,23 @@ function render() {
   const setz = (...knoepfe) => { if (neueLeiste) bar.append(...knoepfe); };
 
   renderFeldwahl();
+
+  // Eine neue Frage holt den Blick zurück nach oben.
+  //
+  // Der Host steht oft weiter unten in der Seite – bei den Punkteknöpfen oder
+  // in der Feldübersicht. Ruft in dem Moment ein Handy sein Feld auf, baut die
+  // Fernbedienung Frage, Lösung und Wertungsknöpfe zwar auf, aber der Blick
+  // bleibt stehen: Gemessen lag der Fragenkasten dann 300 bis 600 Pixel über
+  // dem Bildrand, und der Host sucht die Lösung, die er gerade vorlesen soll.
+  // Nur beim Wechsel der Frage, nicht bei jedem Zustand – sonst risse es dem
+  // Host die Seite unter dem Daumen weg, während er die Punkte korrigiert.
+  // Ohne `behavior: 'smooth'`: keine Bewegung, nichts, was jemand mit
+  // „Bewegung reduzieren" abbestellt hätte.
+  const frageKey = q ? `${q.catIdx}:${q.rowIdx}:${q.stechen ? 's' : ''}` : null;
+  if (frageKey && frageKey !== letzteFrage && box.getBoundingClientRect().top < 0) {
+    scrollTo({ top: 0 });
+  }
+  letzteFrage = frageKey;
 
   box.hidden = !q;
   if (q) {

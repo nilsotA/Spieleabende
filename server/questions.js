@@ -276,13 +276,22 @@ export async function mixSet() {
     // „Zufallsmix aus allen Sätzen", spielt sich aber wie ein Satz. Jetzt kommt
     // je Runde höchstens eine Kategorie pro Satz, solange genug Sätze da sind;
     // erst wenn die ausgehen, wird nachgelegt.
+    // Jeder Kategoriename tritt genau einmal an, egal in wie vielen Sätzen es
+    // ihn gibt. Vorher zog jedes Vorkommen mit: „Was ist die Frage?" steht in
+    // acht der vierzehn Sätze und hatte damit achtmal so viele Lose wie eine
+    // Kategorie, die es nur einmal gibt. Über 4000 gewürfelte Bretter gemessen
+    // stand sie auf 45,4 Prozent aller Boards, die seltenste Kategorie auf
+    // 6,4 – Faktor 7,1. Für ein Brett, dessen ganzer Zweck „kein Abend ist wie
+    // der andere" ist, ist das zu schief. Mit einem Los je Name sind es 14,8
+    // gegen 6,2 Prozent, Faktor 2,4; der Rest ist die unterschiedliche Größe
+    // der Runden-Töpfe. Aus welchem Satz die Fragen kommen, wird ausgelost –
+    // die Kategorie heißt gleich, die vier Fragen dahinter sind es nicht.
     const nachSatz = new Map();
     for (const [name, eintraege] of topf) {
       if (vergeben.has(name)) continue;
-      for (const e of eintraege) {
-        if (!nachSatz.has(e.satz)) nachSatz.set(e.satz, []);
-        nachSatz.get(e.satz).push({ name, cat: e.cat });
-      }
+      const e = eintraege[Math.floor(Math.random() * eintraege.length)];
+      if (!nachSatz.has(e.satz)) nachSatz.set(e.satz, []);
+      nachSatz.get(e.satz).push({ name, cat: e.cat });
     }
     const reihen = mischen([...nachSatz.values()].map((l) => mischen(l)));
 

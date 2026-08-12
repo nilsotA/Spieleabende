@@ -95,17 +95,29 @@ body.remote #app {
 /* Die Wertungsknöpfe kleben am unteren Rand. Vorher standen sie einfach im
    Fluss – bei einer Bildfrage schob der Fragenkasten sie auf einem 667er Handy
    unter die Falz, und der Host musste erst scrollen, um „Richtig" zu treffen.
-   Genau das soll die Fernbedienung ja ersparen. */
-.r-buttons {
-  display: grid;
-  gap: 0.5rem;
+   Genau das soll die Fernbedienung ja ersparen.
+
+   Geklebt wird der ganze Fuß, nicht nur die Wertungsreihe. Vorher klebte allein
+   `.r-buttons`, während „Zurücknehmen" darüber im Fluss stand: Sobald die Seite
+   länger wurde als der Schirm, schob sich die Leiste über den Knopf. Durch den
+   durchsichtigen oberen Rand ihres Verlaufs blieb er sichtbar – gemessen 33 von
+   47 Pixeln –, aber der Tipp landete auf „Richtig", weil die Leiste mit
+   z-index 5 darüberliegt. Nachgestellt auf 360x740 vergab ein Tipp auf die
+   sichtbare Mitte des Korrekturknopfes 100 Punkte. Zwei Bahnen bleiben es
+   trotzdem: Der Korrekturknopf steht weiter über den Wertungsknöpfen, nur eben
+   in derselben klebenden Ebene statt darunter. */
+.r-foot {
   position: sticky;
   bottom: 0;
   z-index: 5;
-  padding: 0.6rem 0 0.5rem;
   /* Nach oben ausblenden, damit der Fragentext nicht an einer harten Kante
      abgeschnitten wirkt, wenn er darunter durchscrollt. */
   background: linear-gradient(180deg, rgba(5, 7, 12, 0) 0%, rgba(5, 7, 12, 0.92) 26%, var(--bg, #05070c) 60%);
+}
+.r-buttons {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem 0 0.5rem;
 }
 .r-buttons:empty { display: none; }
 .r-big { padding: 1rem; font-size: 1.05rem; border-radius: 14px; }
@@ -258,7 +270,9 @@ body.remote #app {
 }
 
 /* Zurücknehmen: über der Knopfleiste, nicht darin. Nach einer Wertung ist der
-   Daumen unten unterwegs – ein Korrekturknopf gehört nicht in dieselbe Bahn. */
+   Daumen unten unterwegs – ein Korrekturknopf gehört nicht in dieselbe Bahn.
+   Er sitzt im gemeinsamen klebenden Fuß (siehe .r-foot), damit ihn die
+   Wertungsknöpfe nicht überdecken können. */
 .r-undo {
   width: 100%;
   margin-top: 0.6rem;

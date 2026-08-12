@@ -42,7 +42,20 @@ body {
 
 /* ------------------------------------------------------------ Anmeldung */
 
-#view-join { align-items: center; justify-content: center; text-align: center; }
+/* Mittig – aber nur, solange es passt. `justify-content: center` schiebt bei
+   Überlänge nach beiden Seiten gleich viel heraus, und was oben herausrutscht,
+   liegt vor dem Scrollanfang und ist mit keiner Geste mehr erreichbar. Gemessen
+   auf einem 390x844-Handy: ab fünf Teams stand der Schriftzug über der Kante,
+   ab sieben auch „Dein Name" und die Oberkante des Namensfelds – der Gast konnte
+   seinen Namen nicht mehr eintippen. `safe center` fällt beim Überlaufen von
+   selbst auf den Anfang zurück, und mit eigenem Bildlauf bleibt der Rest
+   erreichbar. Bei wenigen Teams steht die Karte weiter genau in der Mitte. */
+#view-join {
+  align-items: center;
+  justify-content: safe center;
+  text-align: center;
+  overflow-y: auto;
+}
 .join-card { width: min(420px, 100%); display: grid; gap: 1rem; text-align: left; }
 .btn-block { width: 100%; padding: 0.9rem; font-size: 1.05rem; }
 
@@ -484,6 +497,22 @@ html, body { touch-action: manipulation; }
      als Passepartout, so wie auf der Leinwand auch. */
   background: rgba(4, 8, 16, 0.45);
 }
+/* Kurze Schirme: Das Bild muss ganz zu sehen sein, sonst ist die Frage wertlos.
+   Auf einem 320x568-Handy brauchte der Fragenkasten 194 Pixel und bekam 132 –
+   die unteren 31 der 80 Bildpixel lagen hinter `overflow: hidden`, ohne
+   Bildlaufleiste und ohne Maske. Gemessen an einer Flagge: Die untere Hälfte
+   des Andreaskreuzes fehlte, während der Raum am Beamer die ganze Flagge sah.
+   Zwei Stellschrauben, beide nur hier unten: Die 5rem-Untergrenze des Bildes
+   war die Ursache des Überlaufs – ohne sie schrumpft das Bild, bleibt aber
+   ganz. Und der Buzzer gibt Höhe ab; der sichtbare Kreis wird dabei kleiner,
+   die Trefferfläche ist ohnehin die ganze Zone (siehe oben). Ein
+   abgeschnittenes Bild kostet die Antwort, ein kleinerer Kreis nichts. */
+@media (max-height: 660px) {
+  .hat-bild .p-q-image { min-height: 3rem; }
+}
+@media (max-height: 600px) {
+  .hat-bild .buzz-zone { height: 24dvh; }
+}
 
 /* Ist die Frage durch, hat der Knopf nichts mehr zu tun. Statt als grauer Teller
    das halbe Handy zu belegen, schrumpft er auf Anzeigegröße – der Platz gehört
@@ -532,11 +561,18 @@ html, body { touch-action: manipulation; }
    Farbe des Teams, das schneller war – aus dem Augenwinkel erkennt man den
    Unterschied, ohne die kleine Beschriftung zu lesen. */
 .buzzer.fremd {
+  /* Weiß auf der Teamfarbe war hier dieselbe Falle wie an der Zug-Pille auf der
+     Leinwand: aus echten Bildschirmpixeln gerechnet 1,54:1 auf Gelb, 1,68 auf
+     Türkis, im besten Fall 2,25. Wer den Buzz verloren hat, soll aber genau
+     lesen können, wer schneller war. Dunkel auf hell ist in jeder der acht
+     Teamfarben besser; damit auch das dunkelste Violett über 4,5:1 kommt, hellt
+     der Innenring des Verlaufs von 100 auf 90 Prozent Teamfarbe auf.
+     Schlechtester Wert danach 5,01:1. Kontrastärmer wird nichts. */
   background: radial-gradient(circle at 50% 32%,
     color-mix(in srgb, var(--fremd, #55617a) 55%, #ffffff) 0%,
-    var(--fremd, #55617a) 45%,
+    color-mix(in srgb, var(--fremd, #55617a) 90%, #ffffff) 45%,
     color-mix(in srgb, var(--fremd, #55617a) 55%, #05070c) 100%);
-  color: #fff;
+  color: #0b1220;
   box-shadow:
     0 0 0 7px #131a26,
     0 0 0 9px color-mix(in srgb, var(--fremd, #55617a) 60%, transparent),

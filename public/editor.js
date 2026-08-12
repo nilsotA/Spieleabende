@@ -684,6 +684,28 @@ function leisteAnpassen() {
 }
 addEventListener('scroll', leisteAnpassen, { passive: true });
 
+/**
+ * Wird das Fenster schmaler, passen weniger Wörter in eine Zeile – die Felder
+ * behielten aber ihre alte Höhe.
+ *
+ * Die Höhe wird beim Aufbauen und bei jeder Eingabe gesetzt, nur nicht, wenn
+ * sich die Breite ändert. Gemessen auf einem hochkant gedrehten iPad: Eine
+ * Frage, die quer in zwei Zeilen passte, brauchte hochkant acht – sichtbar
+ * blieben zwei, der Rest lag unter `overflow: hidden`, ohne Bildlaufleiste.
+ * Dasselbe passiert am Laptop beim Verkleinern des Fensters.
+ *
+ * Entprellt, weil beim Ziehen am Fensterrand Dutzende Ereignisse kommen und
+ * jedes einzelne alle Felder neu vermessen würde.
+ */
+let hoehenLauf = 0;
+addEventListener('resize', () => {
+  clearTimeout(hoehenLauf);
+  hoehenLauf = setTimeout(() => {
+    for (const feld of document.querySelectorAll('.qrow textarea')) hoeheAnpassen(feld);
+    leisteAnpassen();
+  }, 120);
+}, { passive: true });
+
 loadSetList();
 render();
 updateFortschritt();
