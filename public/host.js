@@ -852,7 +852,7 @@ function renderPlayers() {
     for (const team of state.teams) {
       box.append(
         el('div', { class: 'player', 'data-team': team.id, style: { '--team': team.color } },
-          el('div', { class: 'pname' },
+          el('div', { class: 'pname', 'data-voll': team.name },
             el('span', { class: 'pwappen' }, team.wappen), team.name),
           el('div', { class: 'pmembers' }, ''),
           el('div', { class: 'pscore' }, '0'),
@@ -954,6 +954,7 @@ function renderPlayers() {
   // schneidet auch die eigenen Pseudo-Elemente ab.
   // Am Ende gehört der Scheinwerfer dem Sieger – vorher dem, der reden muss.
   pruefeEnge(box);
+  pultNamenAnpassen(box);
 
   const imLicht = box.querySelector('.player.buzzed')
     || box.querySelector('.player.active')
@@ -963,6 +964,59 @@ function renderPlayers() {
     box.style.setProperty('--spot-x', `${imLicht.offsetLeft + imLicht.offsetWidth / 2}px`);
     box.style.setProperty('--spot-w', `${imLicht.offsetWidth}px`);
   }
+}
+
+/**
+ * Lange Teamnamen am Pult: erst kürzen, dann erst die Auslassung.
+ *
+ * Aus einem echten Abend: „Die Namen waren etwas abgeschnitten und nicht ganz
+ * auf der Fläche, das sah unsauber aus.“ Nachgestellt bei sechs Teams auf
+ * 1366 Pixeln – so breit ist ein 1920er Windows-Bildschirm bei 125 Prozent
+ * Skalierung: Da stand „TEAM DONNERBAL…“ und „DIE UNBESTECHLIC…“, und der Rest
+ * lief bis an die schräge Schulter des Trapezes.
+ *
+ * Zwei Stufen, beide erst nach der Messung und jede nur, wenn die vorige nicht
+ * reicht:
+ *   1. „Die“, „Der“, „Das“, „Team“ am Anfang weg – die tragen nichts zur
+ *      Unterscheidung bei, und der Rest passt meistens ganz.
+ *   2. Nur noch das erste Wort. Genau so beschriftet die Leiste schon die
+ *      Vertreterknöpfe, und wer im Team sitzt, steht ohnehin eine Zeile
+ *      darunter. Ein ganzes Wort liest sich aus vier Metern deutlich besser
+ *      als dasselbe Wort mit abgesägtem Ende.
+ * Bleibt es dann immer noch zu lang – ein einzelnes langes Wort auf einem
+ * schmalen Pult –, greifen wie bisher die Auslassungspunkte.
+ *
+ * Kollisionen bleiben ausgeschlossen: Eine Kurzform wird nur genommen, wenn
+ * kein anderes Pult sie ebenfalls anzeigen könnte. Sonst stünde bei „Die
+ * Nachzügler“ und „Team Nachzügler“ zweimal dasselbe.
+ */
+function pultNamenAnpassen(box) {
+  const pulte = [...box.querySelectorAll('.player .pname')];
+  if (!pulte.length) return;
+  const voll = pulte.map((n) => n.dataset.voll || n.textContent.trim());
+  const stufen = voll.map((name) => {
+    const ohneFueller = String(name).replace(/^(die|der|das|team)\s+/i, '').trim() || String(name);
+    const erstesWort = ohneFueller.split(/\s+/)[0] || ohneFueller;
+    return [...new Set([String(name), ohneFueller, erstesWort])];
+  });
+  // Was könnte sonst noch irgendwo stehen? Alles aus den Ketten der anderen.
+  const belegt = stufen.map((_, i) => new Set(
+    stufen.filter((__, j) => j !== i).flat().map((s) => s.toLowerCase()),
+  ));
+
+  pulte.forEach((node, i) => {
+    const schreib = (text) => {
+      // Nur den Textknoten hinter dem Wappen austauschen, das Wappen bleibt.
+      const letzter = node.lastChild;
+      if (letzter && letzter.nodeType === 3) letzter.textContent = text;
+      else node.append(document.createTextNode(text));
+    };
+    for (const kandidat of stufen[i]) {
+      if (kandidat !== stufen[i][0] && belegt[i].has(kandidat.toLowerCase())) break;
+      schreib(kandidat);
+      if (node.scrollWidth <= node.clientWidth + 1) return;
+    }
+  });
 }
 
 /**
@@ -1033,7 +1087,10 @@ function pruefeEnge(box) {
 // Spielstand kommt – sonst bliebe die Leiste bis zum nächsten Zug falsch.
 addEventListener('resize', () => {
   const box = $('#players');
-  if (box) pruefeEnge(box);
+  if (box) {
+    pruefeEnge(box);
+    pultNamenAnpassen(box);
+  }
   katSchriftAnpassen();
 });
 
