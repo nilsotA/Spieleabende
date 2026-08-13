@@ -120,11 +120,36 @@ Der Host-Screen muss kein Beamer sein – ein MacBook oder ein iPad tut es genau
 „Richtig“ statt „Falsch“ passiert an jedem Spieleabend genau einmal. Ein Knopf
 in der Steuerleiste – und auf der Fernbedienung – nimmt den letzten Zug wieder
 zurück, samt Punkten, Serie und Bilanz. Er sagt dabei, was er zurücknimmt
-(„Wertung für Die Grübelmeister“). Eine Stufe genügt: Wer zwei Züge zurück
-will, hat ein anderes Problem.
+(„Wertung für Die Grübelmeister“), und wie viele Schritte noch gehen.
+
+Der Weg zurück reicht über 25 Züge. Ein Fehler fällt selten sofort auf – „Moment,
+das war doch gar nicht falsch“ kommt eine Frage später, und dann hilft es nichts,
+wenn nur der letzte Zug gemerkt ist. Punkte von Hand zu schieben wäre kein Ersatz:
+Bilanz und Rekorde hängen an den Wertungen, nicht am Punktestand.
 
 Wer zwischendurch beigetreten ist, bleibt im Team – zurückgenommen wird der
 Spielzug, nicht der Raum.
+
+### Die Frage taugt nichts
+
+Doppeldeutig gestellt, die Lösung war vorhin schon gefallen, im Satz steht ein
+Fehler – das merkt man erst beim Vorlesen. **„Frage verwerfen“** auf der
+Fernbedienung (am Fragenkasten) oder im Host-Menü streicht sie: Das Feld ist
+wieder offen, und alles, was an dieser Frage hing, ist zurückgerechnet – Punkte,
+Bilanz, Serie, wer als Nächstes dran ist. Dasselbe Team wählt noch einmal.
+
+Gestrichen wird nicht durch Zurückrechnen, sondern indem der Server bis zu dem
+Zustand zurückgeht, in dem das Feld noch offen war. Deshalb stimmt danach alles,
+und deshalb lässt sich auch das Streichen selbst wieder zurücknehmen.
+
+### Pause
+
+Zwei Stunden Spiel heißen mindestens einmal Küche. **⏸ Pause** – auf der
+Fernbedienung ganz oben, im Host-Menü – legt den Abend still: Auf der Leinwand
+steht das Pausenbild mit dem Punktestand, die Handys sagen „Pause“, und niemand
+kann versehentlich ein Feld aufrufen oder buzzern. Die offene Frage bleibt
+stehen und läuft danach weiter; auch die Uhr am Buzzer hält an. Der Host darf in
+der Pause weiter alles – dafür ist sie oft da.
 
 Gegen den anderen Verklicker – „Richtig“ drücken, während in derselben Sekunde
 jemand buzzert – wirken zwei Sperren. Auf dem Gerät selbst ist jede Wertung
@@ -215,6 +240,11 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   seinem Team, wie der Punktestand zustande kam: richtig, daneben, „weiß nicht“, dazu
   Geklautes und Verbuzzertes. Das steht bewusst auf dem Handy und nicht auf der
   Leinwand, wo alle auf den Sieger schauen.
+- **Zum Mitnehmen:** Am Endstand legt **📋 Zusammenfassung** den ganzen Abend als Text
+  in die Zwischenablage – Fragensatz und Datum, die Rangliste mit Wappen, die
+  Auszeichnungen und die Bilanz jedes Teams. Für den Gruppenchat am nächsten Tag,
+  statt eines Fotos vom Fernseher. Klappt die Zwischenablage nicht, steht der Text
+  in einem Feld und ist schon markiert.
 
 ### Einstellbar in der Lobby
 
@@ -224,6 +254,12 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   Ohne Abzug ist ein Feldaufruf risikofrei, dann wird gern das teuerste Feld genommen
   und ins Blaue geraten.
 - **Buzzern nach richtiger Antwort:** normalerweise aus – die Frage ist dann durch.
+- **Uhr beim freien Buzzer:** normalerweise aus. Eingeschaltet (10 bis 30 Sekunden)
+  zieht sich der goldene Lichtbalken über der Bühne zusammen, und auf Handy und
+  Fernbedienung läuft die Sekundenzahl mit. Sie **wertet nichts**: Läuft die Zeit ab,
+  wird der Balken rot, mehr nicht – wer eine Sekunde später drückt, hat trotzdem
+  gedrückt, und darüber entscheidest du. Sie ist gegen das Schweigen da, wenn niemand
+  sich traut.
 - **Wer ruft das Feld auf?** Standard: das Team am Zug tippt es auf seinem Handy an.
   Auf **„Nur der Host“** verschwindet das Raster von den Handys – dann rufen die Teams
   ihr Feld zu und du klickst es an. Das lohnt sich, wenn ihr sowieso alle auf die
@@ -267,6 +303,13 @@ Der **Fragen-Editor** unter `/editor` baut Fragensätze im Browser: Kategorien b
 Fragen und Antworten eintippen, optional ein Bild pro Frage (wird verkleinert und direkt
 in die Datei eingebettet). Speichern geht auf den Server (landet in `data/`) oder als
 Download – zwischendurch merkt sich der Browser den Stand automatisch.
+
+**Nicht alles selbst tippen:** Jede Kategorie hat den Knopf **⇱ Holen**. Der zeigt alle
+Kategorien aus allen vorhandenen Sätzen – bei den mitgelieferten sind das 168 – mit Suche
+über Kategorie- und Satznamen. Ein Tipp holt eine davon samt ihren vier Fragen, Antworten,
+Bildern und Zusätzen an diesen Platz; danach lässt sie sich normal weiterbearbeiten. Der
+Ursprungssatz bleibt unberührt. Das ist der Zufallsmix von Hand: sechs Kategorien selbst
+aussuchen, statt sie zu erwürfeln.
 
 Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 
@@ -350,7 +393,11 @@ die Wahrscheinlichkeiten schafft aber auch der Rest des Tisches.
 Dazu gibt es in der Auswahl **🎲 Zufallsmix aus allen Sätzen** – zwölf Kategorien,
 bei jedem Start neu gewürfelt. So ist kein Abend wie der andere. Gezogen wird reihum
 über die Sätze: Je Runde kommt höchstens eine Kategorie aus derselben Quelle, damit
-sich der Mix auch nach Mischung anfühlt und nicht nach einem Satz mit Beilage.
+sich der Mix auch nach Mischung anfühlt und nicht nach einem Satz mit Beilage. Und
+jeder Kategoriename tritt genau einmal an, egal in wie vielen Sätzen es ihn gibt –
+sonst hätte „Was ist die Frage?“, das in acht der vierzehn Sätze steht, achtmal so
+viele Lose wie eine einmalige Kategorie. Gemessen über 4000 gewürfelte Bretter stand
+sie damit auf 45 Prozent aller Boards; jetzt sind es 13.
 
 Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
 `Welcher Film?\n🦁 👑` sind die Symbole ja die eigentliche Frage.
