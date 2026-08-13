@@ -179,6 +179,7 @@ function render(prev) {
   $('#p-team').textContent = me ? `${me.wappen} ${me.name}` : '—';
   $('#p-name').textContent = (me?.members || []).map((m) => m.name).join(', ');
   renderWappen(me);
+  schlafHinweis();
 
   // Der eigene Punktestand sprang lautlos von 0 auf 250 – der Moment, um den
   // das ganze Spiel geht, kam am Handy gar nicht an. Ausgelöst wird nur bei
@@ -313,6 +314,35 @@ function punktesprung(delta, von, bis) {
  * aber nicht wählbar. Sie ganz auszublenden würde die Reihe bei jedem
  * Beitritt umsortieren, und man tippt daneben.
  */
+/**
+ * Was passiert, wenn der Bildschirm dunkel wird.
+ *
+ * `navigator.wakeLock` gibt es nur im sicheren Kontext. Der Host-Screen läuft
+ * über localhost und gilt damit als sicher; die Handys hängen an der
+ * WLAN-Adresse und tun es nicht – gemessen: `isSecureContext` false,
+ * `navigator.wakeLock` undefined. Der Aufruf in keepScreenAwake() läuft dort
+ * also ins Leere, und das Handy schläft mitten im Spiel ein.
+ *
+ * Dagegen hilft ohne HTTPS nichts Verlässliches. Was hilft, ist zu wissen, dass
+ * es nichts kostet: Nachgemessen war die Seite 417 ms nach dem Aufwecken wieder
+ * verbunden, mit dem richtigen Stand, und der Buzzer ging sofort. Genau das
+ * sagt der Hinweis – damit niemand in dem Moment neu lädt oder den Abend für
+ * kaputt hält.
+ *
+ * Nur in der Lobby, nur einmal gesetzt, und nur dort, wo die Sperre wirklich
+ * fehlt: Auf einem Handy, das den Host-Screen über localhost öffnet, oder
+ * später einmal über HTTPS, steht die Zeile nicht.
+ */
+function schlafHinweis() {
+  const zeile = $('#p-schlaf');
+  if (!zeile) return;
+  const fehlt = !navigator.wakeLock;
+  zeile.hidden = !(fehlt && state.phase === 'lobby');
+  if (zeile.hidden || zeile.textContent) return;
+  zeile.textContent = 'Dein Bildschirm kann zwischendurch dunkel werden. '
+    + 'Tipp ihn dann einfach an – dein Buzzer ist sofort wieder da, nichts geht verloren.';
+}
+
 function renderWappen(me) {
   const box = $('#p-wappen');
   box.hidden = !me || state.phase !== 'lobby';

@@ -760,3 +760,16 @@ html, body { touch-action: manipulation; }
   .p-scores .chip { font-size: 0.95rem; padding: 0.35rem 0.9rem; }
   .p-question { padding: 1.2rem 1.4rem; }
 }
+
+/* Der Hinweis auf den einschlafenden Bildschirm. Kein Warnton – es ist keine
+   Störung, sondern eine Auskunft, und sie steht nur in der Lobby. */
+.p-schlaf {
+  margin: 0.2rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(120, 160, 220, 0.1);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
