@@ -200,9 +200,43 @@ const connections = new Map(); // connId -> { res, clientId, isHost }
  */
 const geheimnisse = new Map(); // clientId -> Geheimnis
 
+// So viele Kennungen merkt sich ein Abend. Acht Teams mit je vier Geräten sind
+// 32, dazu Leinwand und Fernbedienung – 200 ist weit jenseits jedes
+// Spieleabends und deckelt trotzdem, was sonst unbegrenzt wüchse: Jeder neue
+// Ereignisstrom legt einen Eintrag an, und über den Tunnel kann den jeder
+// öffnen, der den Spielschlüssel hat.
+const GEHEIMNISSE_MAX = 200;
+
 function geheimnisFuer(clientId) {
-  if (!geheimnisse.has(clientId)) geheimnisse.set(clientId, randomUUID());
+  if (!geheimnisse.has(clientId)) {
+    if (geheimnisse.size >= GEHEIMNISSE_MAX) vergissAlteGeheimnisse();
+    geheimnisse.set(clientId, randomUUID());
+  }
   return geheimnisse.get(clientId);
+}
+
+/**
+ * Platz schaffen – zuerst bei denen, die niemandem mehr gehören.
+ *
+ * Wer gerade verbunden ist oder in einem Team steht, behält sein Geheimnis;
+ * alles andere fliegt in der Reihenfolge seines Eintreffens. Und selbst wenn
+ * doch einmal ein Eintrag zu viel weggeht, sperrt das niemanden aus: Eine
+ * Kennung ohne hinterlegtes Geheimnis kommt durch (siehe darfHandeln).
+ */
+function vergissAlteGeheimnisse() {
+  const gebraucht = new Set([
+    ...[...connections.values()].map((c) => c.clientId),
+    ...state.teams.flatMap((t) => t.members.map((m) => m.clientId)),
+  ]);
+  for (const id of geheimnisse.keys()) {
+    if (geheimnisse.size <= GEHEIMNISSE_MAX / 2) break;
+    if (!gebraucht.has(id)) geheimnisse.delete(id);
+  }
+  // Selbst wenn alle gebraucht werden: Der Deckel gilt trotzdem.
+  for (const id of geheimnisse.keys()) {
+    if (geheimnisse.size < GEHEIMNISSE_MAX) break;
+    geheimnisse.delete(id);
+  }
 }
 
 function darfHandeln(clientId, mitgebracht) {

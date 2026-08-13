@@ -2316,3 +2316,59 @@ test('eine Kennung, die der Server nicht kennt, wird nicht ausgesperrt', async (
   }).then((r) => r.json());
   assert.equal(ohneStrom.ok, true, ohneStrom.error || '');
 });
+
+test('die Geheimnisse der Geräte wachsen nicht ins Unendliche', async (t) => {
+  // Jeder neue Ereignisstrom legt eine Kennung an – über den Tunnel kann den
+  // jeder öffnen, der den Spielschlüssel hat. Der Deckel darf dabei niemanden
+  // aussperren, der wirklich mitspielt.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-geheimzahl-'));
+  const port = 9300 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'geheimzahl-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  // Mira sitzt im zweiten Team – das erste ist am Zug, sie darf also buzzern.
+  const team = (await zustand(base)).teams[1];
+  const mira = await verbinde(base, 'mira', 'player');
+  await warte(150);
+  assert.equal((await mira.tu({ type: 'joinTeam', teamId: team.id, name: 'Mira' })).ok, true);
+
+  // 400 Wegwerf-Kennungen, doppelt so viele wie der Deckel erlaubt.
+  for (let i = 0; i < 400; i++) {
+    const c = new AbortController();
+    fetch(`${base}/api/events?clientId=wegwerf-${i}&role=player`, { signal: c.signal })
+      .then((r) => r.body.getReader().read())
+      .catch(() => {});
+    await warte(1);
+    c.abort();
+  }
+  await warte(400);
+
+  // Mira spielt weiter: Sie ist verbunden und steht in einem Team.
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'pass' });
+
+  // Das ist die eigentliche Probe. Wäre Miras Geheimnis beim Aufräumen
+  // mitgegangen, würde ihre Kennung wieder als „unbekannt" durchgehen – und
+  // ein fremdes Handy könnte für sie buzzern. Ein Aussperren wäre dagegen gar
+  // nicht zu sehen, weil eine unbekannte Kennung absichtlich durchkommt.
+  const fremd = await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'mira', geheim: 'nicht-ihrs', role: 'player', type: 'buzz' }),
+  }).then((r) => r.json());
+  assert.equal(fremd.ok, false, 'Miras Kennung ist weiter geschützt');
+  assert.match(fremd.error, /gehört jemand anderem/);
+
+  // Und sie selbst kommt durch.
+  const gebuzzert = await mira.tu({ type: 'buzz' });
+  assert.equal(gebuzzert.ok, true, gebuzzert.error || '');
+
+  // Der Server steht noch.
+  assert.equal((await fetch(`${base}/api/info`)).status, 200);
+});
