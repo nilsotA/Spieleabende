@@ -96,6 +96,29 @@
   .qrow .img-btn { display: flex; flex-direction: column; gap: .3rem; }
   .qrow img { max-width: 90px; max-height: 60px; border-radius: 6px; border: 2px solid #fff; background: #fff; }
   @media (max-width: 760px) { .qrow { grid-template-columns: 1fr; } .qrow .val { padding-top: 0; } }
+  /* Der Baukasten. host.css wird hier nicht geladen, also stehen die paar
+     Regeln für den Dialog hier – nach demselben Muster wie das Host-Menü. */
+  .menu { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center;
+          justify-content: center; padding: 1rem; background: rgba(2,4,9,.72); }
+  .menu[hidden] { display: none; }
+  .menu-card { width: min(680px, 100%); max-height: 88vh; overflow: auto; }
+  .bk-card #bk-suche { width: 100%; margin: .6rem 0; }
+  .bk-liste { display: grid; gap: .4rem; }
+  /* Ein Eintrag je Kategorie: Name groß, Herkunft klein darunter. Die vier
+     Fragen stehen nicht drin – wer sie sehen will, holt sie und liest sie im
+     Formular; eine Vorschau von 14 Sätzen wäre eine Wand. */
+  .bk-eintrag { display: block; width: 100%; text-align: left; padding: .55rem .7rem;
+                border-radius: 10px; border: 1px solid var(--line);
+                background: rgba(255,255,255,.03); color: var(--text); cursor: pointer; }
+  .bk-eintrag:hover, .bk-eintrag:focus-visible { background: rgba(255,255,255,.09); }
+  .bk-eintrag b { display: block; font-size: 1rem; }
+  .bk-eintrag span { color: var(--muted); font-size: .85rem; }
+  /* Was schon im eigenen Satz steht, bleibt sichtbar – aber als das, was es
+     ist: Sonst sucht man es und findet es nicht. */
+  .bk-eintrag.drin { opacity: .55; }
+  .bk-eintrag.drin b::after { content: ' · schon drin'; color: var(--muted); font-weight: 400; font-size: .8rem; }
+  @media (pointer: coarse) { .bk-eintrag { padding: .8rem .7rem; } }
+
   /* host.css mit seinem Reduced-Motion-Block wird hier nicht geladen. */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -170,6 +193,22 @@
 <!-- Die Meldungen dieser Seite (Fehler, Bestätigungen) waren nur zu sehen,
      nie zu hören: „Bitte trag deinen Namen ein." blieb einer Vorlesehilfe
      verborgen. `polite`, damit es nicht mitten in einen Satz platzt. -->
+<!-- Der Baukasten: eine fertige Kategorie aus einem anderen Satz holen. Genau
+     das, was der Zufallsmix auf der Leinwand auswürfelt – hier von Hand. -->
+<div id="baukasten" class="menu" hidden role="dialog" aria-modal="true" aria-labelledby="bk-titel">
+  <div class="card menu-card bk-card">
+    <h2 id="bk-titel">Kategorie holen</h2>
+    <p id="bk-ziel" class="muted small"></p>
+    <input id="bk-suche" type="search" placeholder="Kategorie oder Satz suchen …"
+           aria-label="Kategorien durchsuchen" autocomplete="off">
+    <p id="bk-stand" class="muted small" role="status" aria-live="polite">Lade Fragensätze …</p>
+    <div id="bk-liste" class="bk-liste"></div>
+    <div class="row" style="margin-top:0.8rem">
+      <button id="bk-zu" class="btn grow" type="button">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts" role="status" aria-live="polite"></div>
 <script type="module" src="/editor.js"></script>
 </body>

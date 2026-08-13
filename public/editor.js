@@ -1,4 +1,4 @@
-import { $, el, toast } from '/common.js';
+import { $, el, toast, setzeText } from '/common.js';
 import { verraeteneLoesungen } from '/fragenpruefung.js';
 
 const BASE_VALUES = [100, 200, 300, 500];
@@ -127,6 +127,13 @@ function render() {
               persistSoon();
             },
           }),
+          el('button', {
+            class: 'btn btn-sm btn-ghost',
+            type: 'button',
+            title: 'Eine fertige Kategorie aus einem anderen Satz hierher holen',
+            'aria-label': `Kategorie ${ci + 1} in Runde ${ri + 1} aus einem anderen Satz holen`,
+            onclick: () => oeffneBaukasten(ri, ci),
+          }, '⇱ Holen'),
           round.categories.length > 2
             ? el('button', {
               class: 'btn btn-sm btn-ghost',
@@ -620,6 +627,134 @@ function verwerfenOk() {
   const hatInhalt = set.rounds.some((r) => r.categories.some((c) => c.questions.some((q) => q.text?.trim() || q.answer?.trim())));
   return !hatInhalt || confirm('Der aktuelle Fragensatz wird ersetzt. Vorher heruntergeladen?');
 }
+
+/* ------------------------------------------------------------- Baukasten */
+
+/**
+ * Eine fertige Kategorie aus einem anderen Satz holen.
+ *
+ * Der Zufallsmix auf der Leinwand würfelt seit jeher sechs Kategorien aus allen
+ * Sätzen zusammen – und genau so ist der Abend gespielt worden, dessen Foto
+ * diese Reihe von Verbesserungen ausgelöst hat. Was fehlte, war das Gegenstück
+ * von Hand: sich die sechs selbst aussuchen, statt sie zu erwürfeln.
+ *
+ * Geholt wird die Kategorie mitsamt ihren vier Fragen, Antworten, Bildern und
+ * Zusätzen; im eigenen Satz ist sie danach eine ganz normale Kategorie und
+ * lässt sich weiterbearbeiten. Der Ursprungssatz bleibt unberührt – kopiert
+ * wird, nicht verschoben.
+ */
+let baukastenZiel = null;   // { ri, ci }
+let baukastenDaten = null;  // [{ satz, datei, runde, name, questions }]
+
+async function ladeAlleKategorien() {
+  if (baukastenDaten) return baukastenDaten;
+  const sets = await (await fetch('/api/sets')).json();
+  const alle = [];
+  // Nacheinander statt alle auf einmal: Es sind ein gutes Dutzend Dateien auf
+  // demselben Rechner, und ein Schwall paralleler Anfragen bringt hier nichts
+  // außer der Möglichkeit, dass eine davon durchrutscht.
+  for (const s of sets) {
+    if (s.error) continue;
+    try {
+      const roh = await (await fetch(`/api/set?file=${encodeURIComponent(s.file)}`)).json();
+      (roh.rounds || []).forEach((runde, ri) => {
+        for (const cat of runde.categories || []) {
+          if (!cat.name) continue;
+          alle.push({ satz: roh.name || s.name, datei: s.file, runde: ri + 1, name: cat.name, cat });
+        }
+      });
+    } catch {
+      /* Ein kaputter Satz nimmt nicht die anderen mit. */
+    }
+  }
+  baukastenDaten = alle;
+  return alle;
+}
+
+function zeigeBaukasten(suche = '') {
+  const liste = $('#bk-liste');
+  liste.innerHTML = '';
+  const s = suche.trim().toLowerCase();
+  // Was schon im eigenen Satz steht, wird nicht versteckt, sondern gekennzeichnet:
+  // Sonst sucht man eine Kategorie, findet sie nicht und hält den Baukasten für
+  // kaputt.
+  const drin = new Set(set.rounds.flatMap((r) => r.categories.map((c) => c.name.trim().toLowerCase())));
+  // Gesucht wird in beidem – im Kategorienamen und im Namen des Satzes. „Wer
+  // tippt schon den Satznamen?" – wer den ganzen Satz durchsehen will, und das
+  // ist beim Zusammenstellen der häufigere Fall. Treffer im Kategorienamen
+  // stehen aber oben: Sonst tippt man „Flaggen" und findet als Erstes
+  // „Hauptstädte", weil die zufällig im selben Satz steht.
+  const passt = (e) => e.name.toLowerCase().includes(s);
+  const treffer = baukastenDaten
+    .filter((e) => !s || passt(e) || e.satz.toLowerCase().includes(s))
+    .sort((a, b) => (s ? (passt(b) ? 1 : 0) - (passt(a) ? 1 : 0) : 0));
+  const saetze = new Set(treffer.map((e) => e.datei)).size;
+  setzeText($('#bk-stand'), treffer.length
+    ? `${treffer.length} Kategorien aus ${saetze === 1 ? 'einem Satz' : `${saetze} Sätzen`}`
+    : 'Nichts gefunden.');
+  for (const e of treffer) {
+    liste.append(el('button', {
+      class: `bk-eintrag ${drin.has(e.name.trim().toLowerCase()) ? 'drin' : ''}`,
+      type: 'button',
+      onclick: () => hole(e),
+    },
+    el('b', {}, e.name),
+    el('span', {}, `${e.satz} · Runde ${e.runde}`)));
+  }
+}
+
+function hole(eintrag) {
+  const ziel = set.rounds[baukastenZiel.ri]?.categories[baukastenZiel.ci];
+  if (!ziel) return;
+  const belegt = ziel.name.trim() || ziel.questions.some((q) => q.text.trim() || q.answer.trim());
+  if (belegt && !confirm(`„${ziel.name || 'Diese Kategorie'}" wird durch „${eintrag.name}" ersetzt. Weiter?`)) {
+    return;
+  }
+  // Tiefe Kopie: Sonst hinge die eigene Kategorie an denselben Fragen-Objekten
+  // wie die geladene, und ein zweites Holen derselben Kategorie in einen anderen
+  // Platz bearbeitete beide zugleich.
+  const kopie = structuredClone(eintrag.cat);
+  ziel.name = kopie.name || '';
+  ziel.questions = (kopie.questions || []).slice(0, 4).map((q) => ({
+    text: q.text || '', answer: q.answer || '', image: q.image || null, note: q.note || null,
+  }));
+  while (ziel.questions.length < 4) ziel.questions.push({ text: '', answer: '', image: null, note: null });
+  $('#baukasten').hidden = true;
+  persist();
+  render();
+  updateFortschritt();
+  alleLaengenMarkieren();
+  toast(`„${ziel.name}" geholt.`);
+}
+
+async function oeffneBaukasten(ri, ci) {
+  baukastenZiel = { ri, ci };
+  const ziel = set.rounds[ri]?.categories[ci];
+  setzeText($('#bk-ziel'),
+    `Kommt nach Runde ${ri + 1}, Platz ${ci + 1}${ziel?.name ? ` – ersetzt „${ziel.name}"` : ''}.`);
+  $('#bk-suche').value = '';
+  $('#bk-liste').innerHTML = '';
+  setzeText($('#bk-stand'), 'Lade Fragensätze …');
+  $('#baukasten').hidden = false;
+  $('#bk-suche').focus();
+  try {
+    await ladeAlleKategorien();
+    zeigeBaukasten('');
+  } catch {
+    setzeText($('#bk-stand'), 'Die Fragensätze konnten nicht gelesen werden.');
+  }
+}
+
+$('#bk-suche').addEventListener('input', (ev) => {
+  if (baukastenDaten) zeigeBaukasten(ev.target.value);
+});
+$('#bk-zu').addEventListener('click', () => { $('#baukasten').hidden = true; });
+$('#baukasten').addEventListener('click', (ev) => {
+  if (ev.target.id === 'baukasten') $('#baukasten').hidden = true;
+});
+addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape' && !$('#baukasten').hidden) $('#baukasten').hidden = true;
+});
 
 async function loadSetList() {
   try {
