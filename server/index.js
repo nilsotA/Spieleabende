@@ -248,8 +248,43 @@ function connectionsOf(clientId) {
   return [...connections.values()].filter((c) => c.clientId === clientId);
 }
 
+/* Geräte, die sich den Zustand einzeln abholen, statt am Strom zu hängen –
+   siehe /api/state. Wer sich länger nicht meldet, gilt als weg; ohne offene
+   Verbindung gibt es ja kein Auflegen, das man mitbekäme. */
+const abfragen = new Map(); // clientId -> { zeit, isHost }
+const ABFRAGE_FRIST = 12000;
+
+setInterval(() => {
+  const jetzt = Date.now();
+  let weg = false;
+  for (const [id, eintrag] of abfragen) {
+    if (jetzt - eintrag.zeit < ABFRAGE_FRIST) continue;
+    abfragen.delete(id);
+    if (connectionsOf(id).length === 0) {
+      G.setMemberOnline(state, id, false);
+      weg = true;
+    }
+  }
+  if (weg) broadcast();
+}, 5000).unref();
+
+/**
+ * Darf dieses Gerät den Abend führen?
+ *
+ * Die Rechte hängen nicht an einer Behauptung, sondern daran, dass der Server
+ * das Gerät selbst als Host bedient – über den Ereignisstrom oder, wenn der
+ * nicht durchkommt, über seine Abfragen. Beide Wege prüfen dieselbe Regel
+ * (`role=host` UND ein gültiger Hostschlüssel), also verschiebt der zweite
+ * nichts: Ohne Tunnel war ohnehin jeder im WLAN Host, mit Tunnel öffnet allein
+ * der Schlüssel diese Tür.
+ *
+ * Ohne den zweiten Weg stünde die Fernbedienung am Tunnel hilflos da: Sie sähe
+ * das Spiel, dürfte aber keinen einzigen Knopf drücken.
+ */
 function isHostClient(clientId) {
-  return connectionsOf(clientId).some((c) => c.isHost);
+  if (connectionsOf(clientId).some((c) => c.isHost)) return true;
+  const eintrag = abfragen.get(clientId);
+  return !!eintrag?.isHost && Date.now() - eintrag.zeit < ABFRAGE_FRIST;
 }
 
 function broadcast() {
@@ -275,13 +310,26 @@ function warteschlange() {
     if (conn.isHost || imTeam.has(conn.clientId)) continue;
     offen.add(conn.clientId); // ein Gerät, nicht eine Verbindung
   }
+  // Und die, die sich den Zustand selbst abholen – sonst zählte ausgerechnet
+  // das Handy nicht mit, dem der Ereignisstrom nicht durchkommt.
+  const jetzt = Date.now();
+  for (const [id, eintrag] of abfragen) {
+    if (eintrag.isHost || imTeam.has(id)) continue;
+    if (jetzt - eintrag.zeit < ABFRAGE_FRIST) offen.add(id);
+  }
   return offen.size;
 }
 
-function sendState(conn) {
-  const sicht = G.viewFor(state, { isHost: conn.isHost, clientId: conn.clientId });
+/**
+ * Die Sicht eines Geräts auf das Spiel – einmal gebaut, zweimal gebraucht.
+ *
+ * Über den Ereignisstrom geht sie bei jeder Änderung hinaus, über /api/state
+ * holt sie sich ein Handy selbst ab, wenn der Strom nicht durchkommt.
+ */
+function sichtFuer({ isHost, clientId }) {
+  const sicht = G.viewFor(state, { isHost, clientId });
   // Nur der Host kann zurücknehmen, also erfährt auch nur er davon.
-  if (conn.isHost) {
+  if (isHost) {
     sicht.rueckgaengig = rueckWeg.at(-1)?.was ?? null;
     // Wie viele Schritte noch gehen – der Knopf sagt es, sonst tippt der Host
     // ins Leere und weiß nicht, ob er am Ende des Weges ist.
@@ -289,7 +337,11 @@ function sendState(conn) {
     sicht.wiederhergestellt = wiederhergestelltAm;
     sicht.wartende = warteschlange();
   }
-  write(conn, 'state', sicht);
+  return sicht;
+}
+
+function sendState(conn) {
+  write(conn, 'state', sichtFuer(conn));
 }
 
 function write(conn, event, payload) {
@@ -737,7 +789,7 @@ const ROUTES = {
 // Ein Fragensatz (/api/set) enthält die Antworten und gehört ausdrücklich nicht
 // dazu.
 const NUR_HOST_SEITEN = new Set(['/host', '/remote', '/editor']);
-const AUCH_FUER_HANDYS = new Set(['/api/events', '/api/action', '/api/info']);
+const AUCH_FUER_HANDYS = new Set(['/api/events', '/api/state', '/api/action', '/api/info']);
 
 function hostNoetig(pathname) {
   if (NUR_HOST_SEITEN.has(pathname)) return true;
@@ -806,12 +858,21 @@ function sseHandler(req, res, url, rolle) {
   const isHost = url.searchParams.get('role') === 'host' && rolle === 'host';
   const connId = randomUUID();
 
+  // `Connection: keep-alive` stand hier früher ausdrücklich drin. Es ist weg,
+  // weil es nichts tat: Node setzt die Kopfzeile für HTTP/1.1 ohnehin selbst
+  // (gemessen), und was ein Vermittler daraus macht, entscheidet er allein.
+  // Was hier wirklich zählt, steht in den drei Zeilen darunter und im Vorspann.
   res.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
     'Cache-Control': 'no-cache, no-transform',
-    Connection: 'keep-alive',
     'X-Accel-Buffering': 'no',
   });
+  res.flushHeaders?.(); // die Kopfzeilen sollen sofort raus, nicht erst mit Inhalt
+  // Ein Vorspann aus Kommentarzeilen. Manche Vermittler halten eine Antwort
+  // zurück, bis genug Bytes beisammen sind – ein Ereignisstrom kommt dann nie
+  // an, weil er ja gerade nicht fertig wird. Zwei Kilobyte Kommentar lösen die
+  // Bremse, kosten einmalig nichts und werden von jedem Browser verworfen.
+  res.write(`: ${'x'.repeat(2048)}\n\n`);
   res.write('retry: 1000\n\n');
 
   const conn = { id: connId, res, clientId, isHost };
@@ -845,6 +906,30 @@ function sseHandler(req, res, url, rolle) {
 }
 
 async function apiHandler(req, res, url, pathname, rolle) {
+  /*
+   * Der Notweg zum Spielstand.
+   *
+   * Normalerweise kommt der Zustand von selbst über den Ereignisstrom. Der ist
+   * aber das Zerbrechlichste am ganzen Aufbau: eine Antwort, die nie endet.
+   * Firmen-WLAN, Virenscanner, ein sparsamer Mobilfunkvermittler oder der
+   * Tunnel selbst können sie zurückhalten – und dann passiert auf dem Handy
+   * genau nichts, ohne jede Fehlermeldung.
+   *
+   * Deshalb kann sich jedes Gerät den Zustand auch einzeln abholen. Der Client
+   * schaltet von selbst um, wenn der Strom stumm bleibt (siehe connect() in
+   * public/common.js). Das Spiel läuft dann etwas träger, aber es läuft.
+   */
+  if (pathname === '/api/state' && req.method === 'GET') {
+    const clientId = url.searchParams.get('clientId') || '';
+    const isHost = url.searchParams.get('role') === 'host' && rolle === 'host';
+    if (clientId && !abfragen.has(clientId) && connectionsOf(clientId).length === 0) {
+      // Erst beim Umschalten melden – nicht bei jeder Abfrage.
+      G.setMemberOnline(state, clientId, true);
+      broadcast();
+    }
+    if (clientId) abfragen.set(clientId, { zeit: Date.now(), isHost });
+    return sendJson(res, 200, sichtFuer({ isHost, clientId }));
+  }
   if (pathname === '/api/sets' && req.method === 'GET') {
     return sendJson(res, 200, await listSets());
   }

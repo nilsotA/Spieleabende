@@ -216,6 +216,27 @@ hergestellt. Der Host-Screen sagt dann oben, von wann der Stand ist, und bietet
 kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand,
 und „Spiel beenden“ im Host-Menü verwirft ihn sofort.
 
+### Ein Handy zeigt keine Teams
+
+Wenn unter „Team“ nichts steht, ist nicht die Seite kaputt – dann ist der
+**Spielstand nicht angekommen**. Die Handys bekommen ihn normalerweise über
+eine dauerhaft offene Verbindung, und die ist das Zerbrechlichste am ganzen
+Aufbau: Manche Vermittler im Netz sammeln eine Antwort erst einmal, bevor sie
+sie weiterreichen – eine Verbindung, die absichtlich nie endet, kommt dann nie
+an. Kein Fehler, keine Meldung, nur Stille.
+
+Dagegen stehen jetzt drei Dinge, ohne dass jemand etwas tun muss:
+
+* Unter dem Anmeldeknopf steht, woran es gerade hängt: „Verbinde mit dem
+  Spiel …“, „Die Live-Verbindung kommt nicht durch …“ oder der genaue Grund
+  einer Abweisung.
+* Bleibt die Verbindung acht Sekunden stumm, **holt sich das Handy den
+  Spielstand selbst ab** – jede anderthalb Sekunden. Das Spiel läuft dann
+  vollständig weiter, nur eine Idee träger. Kommt die Live-Verbindung später
+  doch zustande, schaltet es von selbst zurück.
+* Auch die Fernbedienung darf auf diesem Weg führen – sonst stünde sie am
+  Tunnel da, sähe alles und dürfte nichts.
+
 ### Ein Handy zeigt nur eine leere Seite
 
 Kommt praktisch nur bei Handys vor, die im **privaten Modus** surfen oder denen

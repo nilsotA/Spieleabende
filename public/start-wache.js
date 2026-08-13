@@ -97,4 +97,38 @@
   // etwa wenn das Modul selbst gar nicht erst ankommt. Acht Sekunden sind
   // reichlich; das Skript liegt im selben Haus wie die Seite.
   setTimeout(function () { zeige(''); }, 8000);
+
+  /*
+   * Für später: eine Panne, nachdem die Seite steht.
+   *
+   * Wirft das Zeichnen eines Spielstands, geschieht das in einem Ereignis-
+   * Handler – bisher lautlos. Die Seite fror ein und behauptete dabei, alles
+   * sei in Ordnung; am Tisch sucht man den Fehler dann beim WLAN.
+   *
+   * Bewusst nur ein Streifen und bewusst wegklickbar: Das Spielfeld darf
+   * niemals zugedeckt werden, und wer die Meldung gelesen hat, will
+   * weiterspielen. Derselbe Text bleibt stehen statt sich zu stapeln – ein
+   * kaputter Zustand kommt sonst zwanzigmal.
+   */
+  window.quizduellPanne = function (text) {
+    var streifen = document.getElementById('panne');
+    if (!document.body) return;
+    if (!streifen) {
+      streifen = document.createElement('div');
+      streifen.id = 'panne';
+      streifen.className = 'pannenstreifen';
+      streifen.setAttribute('role', 'alert');
+      var wort = document.createElement('span');
+      wort.id = 'panne-text';
+      streifen.appendChild(wort);
+      var zu = document.createElement('button');
+      zu.type = 'button';
+      zu.className = 'btn btn-ghost btn-sm';
+      zu.textContent = 'Verstanden';
+      zu.addEventListener('click', function () { streifen.remove(); });
+      streifen.appendChild(zu);
+      document.body.appendChild(streifen);
+    }
+    document.getElementById('panne-text').textContent = 'Es hakt: ' + text;
+  };
 }());

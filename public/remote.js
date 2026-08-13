@@ -51,6 +51,10 @@ keepScreenAwake();
 
 connect({
   role: 'host',
+  // Auch die Fernbedienung ist ein Handy am Tunnel – siehe player.js.
+  onStatus: (text) => {
+    if (!state) setzeText($('#r-phase'), text);
+  },
   onState: (next) => {
     state = next;
     render();

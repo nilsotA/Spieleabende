@@ -23,6 +23,13 @@ $('#view-join').classList.add('active');
 
 connect({
   role: 'player',
+  // Solange noch kein Spielstand da ist, steht hier, woran es gerade liegt.
+  // Vorher stand da gar nichts: eine Anmeldung ohne ein einziges Team und ohne
+  // einen Hinweis, warum – und der Gast tippt ratlos auf „Mitspielen“.
+  // Sobald der erste Zustand da ist, schreibt renderJoin() die Zeile ohnehin neu.
+  onStatus: (text) => {
+    if (!state) $('#join-hint').textContent = text;
+  },
   onState: (next) => {
     const prev = state;
     state = next;
@@ -400,18 +407,35 @@ function renderWappen(me) {
 
 function renderJoin() {
   const box = $('#team-choices');
+  // Erst der erklärende Satz, dann die Liste. Andersherum stünde bei einem
+  // Fehler beim Aufbauen der Liste eine Anmeldung ohne ein einziges Wort da –
+  // und genau die ist am Tisch nicht von „der Host hat halt noch nichts
+  // angelegt" zu unterscheiden.
+  //
+  // Während einer offenen Frage steht die Teamzuordnung still. „Du kannst
+  // trotzdem einsteigen" wäre dann ein Versprechen, das der Knopf gleich bricht.
+  $('#join-hint').textContent =
+    state.phase === 'lobby'
+      ? 'Für Zweierteams wählt ihr beide dasselbe Team.'
+      : state.phase === 'question'
+        ? 'Gerade läuft eine Frage – gleich danach kannst du einsteigen.'
+        : 'Das Spiel läuft schon – du kannst trotzdem einsteigen.';
+  // Ohne Teams ist die Liste leer, nicht kaputt: Käme je eine Sicht ohne dieses
+  // Feld an – ein Vermittler, der kürzt, eine Fassung, die nicht zusammenpasst –,
+  // riss der Aufbau hier ab und hinterließ eine Anmeldung ohne ein Wort darin.
+  const teams = state.teams || [];
   // Nur neu bauen, wenn sich wirklich etwas geändert hat – sonst geht ein
   // Antippen verloren, weil zwischendurch ein State-Update eintrudelt.
-  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.members.map((m) => m.name).join(',')}`).join('|')
+  const key = teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.members.map((m) => m.name).join(',')}`).join('|')
     + `#${selectedTeam}#${state.phase}`;
   if (box.dataset.key !== key) {
     box.dataset.key = key;
     box.innerHTML = '';
-    if (!state.teams.length && state.phase !== 'lobby') {
+    if (!teams.length && state.phase !== 'lobby') {
       box.append(el('p', { class: 'muted small' }, 'Der Host hat noch keine Teams angelegt. Gleich geht’s los …'));
     }
-    if (selectedTeam && !state.teams.some((t) => t.id === selectedTeam)) selectedTeam = null;
-    for (const team of state.teams) {
+    if (selectedTeam && !teams.some((t) => t.id === selectedTeam)) selectedTeam = null;
+    for (const team of teams) {
       box.append(
         el('button', {
           type: 'button',
@@ -434,7 +458,7 @@ function renderJoin() {
     // die Teams dann „Team 1" und „Team 2", weil das schneller ging als vier
     // Namen abzutippen. Jetzt tippt jeder seinen eigenen – der Host kann
     // weiterhin welche anlegen, umbenennen und entfernen.
-    if (state.phase === 'lobby' && state.teams.length < 8) {
+    if (state.phase === 'lobby' && teams.length < 8) {
       box.append(
         el('button', {
           type: 'button',
@@ -450,14 +474,6 @@ function renderJoin() {
       );
     }
   }
-  // Während einer offenen Frage steht die Teamzuordnung still. „Du kannst
-  // trotzdem einsteigen" wäre dann ein Versprechen, das der Knopf gleich bricht.
-  $('#join-hint').textContent =
-    state.phase === 'lobby'
-      ? 'Für Zweierteams wählt ihr beide dasselbe Team.'
-      : state.phase === 'question'
-        ? 'Gerade läuft eine Frage – gleich danach kannst du einsteigen.'
-        : 'Das Spiel läuft schon – du kannst trotzdem einsteigen.';
 }
 
 function renderQuestion() {

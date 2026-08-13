@@ -317,3 +317,24 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   color: #b9c6da;
   word-break: break-word;
 }
+
+/* Der Pannenstreifen: eine Meldung, nachdem die Seite schon steht – siehe
+   quizduellPanne() in start-wache.js. Oben, quer, wegklickbar, und bewusst
+   über dem Inhalt statt an seiner Stelle: Das Spielfeld bleibt lesbar. */
+.pannenstreifen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  padding: 0.7rem 1rem;
+  background: #4a1020;
+  border-bottom: 1px solid #f26d84;
+  color: #ffd9e0;
+  line-height: 1.4;
+}

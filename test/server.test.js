@@ -2418,3 +2418,139 @@ test('ein umbenannter Satz überschreibt nicht den geladenen', async (t) => {
   const mitJa = await speichere('umbenannt-test.json', 'Umbenannt Test', true);
   assert.equal(mitJa.ok, true, mitJa.error || '');
 });
+
+/* ------------------------------------------------------- Notweg zum Zustand */
+
+/*
+ * Der Ereignisstrom ist das Zerbrechlichste am ganzen Aufbau: eine Antwort, die
+ * nie endet. Ein Vermittler, der puffert, ein Mobilfunknetz, das zusammenfaltet,
+ * ein Tunnel, der eine in HTTP/2 verbotene Kopfzeile durchreicht – in all diesen
+ * Fällen passiert auf dem Handy gar nichts, ohne einen einzigen Fehler. Deshalb
+ * kann sich jedes Gerät den Zustand auch einzeln abholen.
+ */
+
+test('der Ereignisstrom kommt sofort und ungepuffert los', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-kopf-'));
+  const { proc, base } = await starteServer(9700 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const res = await fetch(`${base}/api/events?clientId=kopf1&role=player`);
+  assert.match(res.headers.get('content-type') || '', /text\/event-stream/);
+  // Kein Content-Length und keine Kodierung: Beides lädt einen Vermittler dazu
+  // ein, die Antwort zu sammeln statt durchzureichen – und eine Antwort, die
+  // nie endet, kommt dann nie an.
+  assert.equal(res.headers.get('content-length'), null);
+  assert.equal(res.headers.get('content-encoding'), null);
+  assert.match(res.headers.get('cache-control') || '', /no-transform/, 'niemand darf unterwegs daran drehen');
+  assert.equal(res.headers.get('x-accel-buffering'), 'no');
+
+  // Der Vorspann: Manche Vermittler halten eine Antwort zurück, bis genug Bytes
+  // beisammen sind. Deshalb gehen zuerst zwei Kilobyte Kommentar hinaus – und
+  // zwar mit dem allerersten Stück, nicht irgendwann.
+  const leser = res.body.getReader();
+  const { value } = await leser.read();
+  const erstes = new TextDecoder().decode(value);
+  assert.ok(erstes.startsWith(':'), 'das erste Stück ist der Kommentar-Vorspann');
+  assert.ok(erstes.length >= 2048, `der Vorspann misst nur ${erstes.length} Zeichen`);
+  await leser.cancel();
+});
+
+test('der Zustand lässt sich auch einzeln abholen', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-notweg-'));
+  const { proc, base } = await starteServer(9740 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'notweg_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  await tu({ type: 'addTeam', name: 'Blau' });
+
+  const abgeholt = await (await fetch(`${base}/api/state?clientId=handy1&role=player`)).json();
+  const gestroemt = await zustand(base, false);
+  assert.deepEqual(
+    abgeholt.teams.map((t2) => t2.name),
+    gestroemt.teams.map((t2) => t2.name),
+    'abgeholt und geströmt müssen dasselbe Spiel zeigen',
+  );
+  assert.equal(abgeholt.you.clientId, 'handy1', 'die eigene Sicht gehört dem abfragenden Gerät');
+});
+
+test('wer auf den Notweg wechselt, gilt wieder als anwesend', async (t) => {
+  // Der Fall aus dem Wohnzimmer: Das Handy hing am Strom, der Strom bricht weg,
+  // das Handy holt sich den Zustand ab jetzt selbst. Auf der Leinwand darf
+  // daneben kein grauer Punkt stehen bleiben – der Host würde jemanden
+  // rauswerfen, der gerade mitspielt.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-anwesend-'));
+  const { proc, base } = await starteServer(9780 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'anwesend_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  const team = (await zustand(base)).teams[0].id;
+
+  const handy = await verbinde(base, 'wechsel_handy', 'player');
+  await warte(150);
+  const bei = await handy.tu({ type: 'joinTeam', teamId: team, name: 'Wechsler' });
+  assert.equal(bei.ok, true, bei.error || '');
+
+  const mitglied = async () => (await zustand(base)).teams[0].members.find((m) => m.clientId === 'wechsel_handy');
+  assert.equal((await mitglied()).online, true, 'am Strom ist es anwesend');
+
+  // Der Strom bricht weg.
+  await handy.reader.cancel().catch(() => {});
+  for (let i = 0; i < 40 && (await mitglied()).online; i++) await warte(50);
+  assert.equal((await mitglied()).online, false, 'ohne Strom gilt es als weg');
+
+  // Und jetzt der Notweg: eine einzige Abfrage muss reichen.
+  await fetch(`${base}/api/state?clientId=wechsel_handy&role=player`);
+  await warte(150);
+  assert.equal(
+    (await mitglied()).online,
+    true,
+    'wer sich den Zustand abholt, ist da – sonst steht auf der Leinwand ein grauer Punkt bei jemandem, der mitspielt',
+  );
+});
+
+test('auch die Fernbedienung darf über den Notweg führen – aber nur mit Hostschlüssel', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-notweg-host-'));
+  const { proc, base, host, spiel } = await starteOnline(9820 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const handeln = (clientId, extra = {}) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: extra.cookie || '' },
+    body: JSON.stringify({ type: 'addTeam', name: 'Neu', role: 'host', clientId }),
+  }).then((r) => r.json());
+
+  // Ohne jede Abfrage: kein Host – auch mit Schlüssel nicht, denn die Rechte
+  // hängen daran, dass der Server das Gerät wirklich als Host bedient hat.
+  const ohne = await handeln('fern1', { cookie: `qd_host=${host}` });
+  assert.equal(ohne.ok, false, 'ohne Abfrage keine Hostrechte');
+
+  // Mit Hostschlüssel abgefragt: von da an darf das Gerät führen.
+  await fetch(`${base}/api/state?clientId=fern1&role=host`, { headers: { Cookie: `qd_host=${host}` } });
+  const mit = await handeln('fern1', { cookie: `qd_host=${host}` });
+  assert.equal(mit.ok, true, mit.error || 'mit Hostschlüssel muss die Fernbedienung führen dürfen');
+
+  // Ein Spielerschlüssel öffnet diese Tür nicht, auch nicht mit role=host.
+  await fetch(`${base}/api/state?clientId=gast1&role=host`, { headers: { Cookie: `qd_spiel=${spiel}` } });
+  const gast = await handeln('gast1', { cookie: `qd_spiel=${spiel}` });
+  assert.equal(gast.ok, false, 'ein Spielschlüssel darf niemals Hostrechte ergeben');
+});
+
+test('der Notweg steht hinter derselben Tür wie alles andere', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-notweg-tuer-'));
+  const { proc, base, host, spiel } = await starteOnline(9860 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const ohne = await fetch(`${base}/api/state?clientId=fremd&role=player`);
+  assert.equal(ohne.status, 403, 'ohne Schlüssel kein Spielstand');
+
+  const mit = await fetch(`${base}/api/state?clientId=gast&role=player`, { headers: { Cookie: `qd_spiel=${spiel}` } });
+  assert.equal(mit.status, 200);
+  const sicht = await mit.json();
+  // Genau wie über den Strom: Ein Handy bekommt niemals die Lösung.
+  assert.ok(!('answer' in (sicht.current || {})), 'die Antwort gehört nicht in die Spielersicht');
+
+  const alsHostSicht = await fetch(`${base}/api/state?clientId=beamer&role=host`, { headers: { Cookie: `qd_host=${host}` } });
+  assert.equal(alsHostSicht.status, 200);
+});

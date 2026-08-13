@@ -86,3 +86,42 @@ test('die Spieleransicht zeigt die Anmeldung schon vor dem ersten Spielstand', (
     'ohne diese Zeile bleibt das Handy leer, solange die Verbindung hakt',
   );
 });
+
+/*
+ * Der Notweg und der Meldeweg.
+ *
+ * Anlass: Beim Spiel über den Tunnel bekam ein iPhone nie einen Spielstand –
+ * die Anmeldung stand da, aber ohne ein einziges Team und ohne ein Wort dazu.
+ * Ein Ereignisstrom ist eine Antwort, die nie endet; wird sie unterwegs
+ * gepuffert oder abgewiesen, passiert auf dem Handy gar nichts. Seitdem holt
+ * sich die Seite den Zustand notfalls selbst ab und sagt, woran es hängt.
+ */
+
+test('bleibt der Ereignisstrom stumm, holt die Seite den Zustand selbst', () => {
+  const quelle = ohneKommentare(lies('common.js'));
+  assert.match(quelle, /\/api\/state\?clientId=/, 'ohne diesen Notweg hängt der Abend am Ereignisstrom allein');
+  assert.match(quelle, /setTimeout\(\s*\(\)\s*=>\s*notwegAuf\(/, 'der Notweg muss von selbst aufmachen, nicht erst auf einen Fehler warten');
+  assert.match(quelle, /addEventListener\('error'[\s\S]{0,400}notwegAuf\(/, 'und auch dann, wenn der Strom abgewiesen wird');
+  assert.match(quelle, /stromKam = true;[\s\S]{0,120}notwegZu\(\)/, 'sobald der Strom liefert, muss der Notweg wieder zumachen');
+});
+
+test('ein Fehler beim Zeichnen verschwindet nicht mehr lautlos', () => {
+  const quelle = ohneKommentare(lies('common.js'));
+  assert.match(
+    quelle,
+    /try \{\s*onState\(sicht\);\s*\} catch \(err\) \{\s*panne\(err/,
+    'wirft das Zeichnen, fror die Seite bisher ein und behauptete dabei, alles sei in Ordnung',
+  );
+  assert.match(quelle, /window\.quizduellPanne\?\.\(/, 'der Meldeweg führt zur Startwache');
+  assert.match(ohneKommentare(lies('start-wache.js')), /window\.quizduellPanne = function/, 'und die muss ihn bereitstellen');
+});
+
+test('die Handys sagen, woran es hängt, solange kein Spielstand da ist', () => {
+  for (const datei of ['player.js', 'remote.js']) {
+    assert.match(
+      ohneKommentare(lies(datei)),
+      /onStatus:\s*\(text\)\s*=>/,
+      `${datei}: ohne diese Zeile steht auf dem Handy eine leere Anmeldung ohne Erklärung`,
+    );
+  }
+});

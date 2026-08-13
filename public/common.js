@@ -221,14 +221,110 @@ function setOnline(next) {
   for (const fn of connectionListeners) fn(next);
 }
 
+/* So lange bekommt der Ereignisstrom Zeit, bevor der Notweg aufmacht. Acht
+   Sekunden sind großzügig: Im Heimnetz steht der Zustand nach Millisekunden da,
+   über den Tunnel nach einem Wimpernschlag. */
+const STROM_FRIST = 8000;
+const ABFRAGE_TAKT = 1500;
+
+/** Meldet der Seite eine Panne, ohne das Spiel abzuwürgen – siehe start-wache.js. */
+function panne(err, wo) {
+  try {
+    console.error(wo, err);
+    window.quizduellPanne?.(`${wo}: ${err?.message || err}`);
+  } catch {
+    /* eine Fehlermeldung darf niemals selbst der Fehler sein */
+  }
+}
+
 /**
  * Verbindet sich mit dem Server und ruft onState bei jeder Änderung auf.
  * Der Browser reconnected EventSource automatisch.
+ *
+ * Dazu zwei Sicherungen, beide aus einem echten Abend gelernt:
+ *
+ * Der Notweg: Ein Ereignisstrom ist eine Antwort, die nie endet – das
+ * Zerbrechlichste am ganzen Aufbau. Ein Vermittler, der sie puffert, ein
+ * Mobilfunknetz, das sie zusammenfaltet, ein Tunnel, der eine verbotene
+ * Kopfzeile durchreicht: In all diesen Fällen passiert auf dem Handy gar
+ * nichts, ohne einen einzigen Fehler. Bleibt der Strom stumm, holt sich die
+ * Seite den Zustand ab jetzt selbst. Träger, aber sichtbar.
+ *
+ * Und der Meldeweg: Wirft das Zeichnen eines Zustands, geschah das bisher
+ * lautlos in einem Ereignis-Handler – die Seite fror ein und behauptete dabei,
+ * alles sei in Ordnung. Jetzt sagt sie, was los ist.
  */
-export function connect({ role, onState, onEvent }) {
+export function connect({ role, onState, onEvent, onStatus }) {
   setRole(role);
   const id = clientId();
-  const source = new EventSource(`/api/events?clientId=${encodeURIComponent(id)}&role=${role}`);
+  let stromKam = false; // ist über den Strom je ein Zustand angekommen?
+  let abfrageTimer = null;
+
+  const melde = (text) => {
+    try {
+      onStatus?.(text);
+    } catch (err) {
+      panne(err, 'Statusmeldung');
+    }
+  };
+
+  const nimm = (sicht) => {
+    setOnline(true);
+    // Zentral gemerkt, damit weder Host-Screen noch Fernbedienung etwas davon
+    // wissen müssen – siehe `lage` weiter oben.
+    lage = sicht.lage || null;
+    try {
+      onState(sicht);
+    } catch (err) {
+      panne(err, 'Beim Zeichnen des Spielstands');
+    }
+  };
+
+  async function hole() {
+    try {
+      const res = await fetch(`/api/state?clientId=${encodeURIComponent(id)}&role=${role}`, { cache: 'no-store' });
+      if (!res.ok) {
+        setOnline(false);
+        return melde(res.status === 403
+          ? 'Dieser Zugang gilt nicht mehr – bitte den QR-Code neu scannen.'
+          : `Das Spiel antwortet mit ${res.status}.`);
+      }
+      nimm(await res.json());
+    } catch {
+      setOnline(false);
+      melde('Keine Verbindung zum Spiel.');
+    }
+  }
+
+  function notwegAuf(grund) {
+    if (abfrageTimer || stromKam) return;
+    melde(grund);
+    hole();
+    abfrageTimer = setInterval(hole, ABFRAGE_TAKT);
+  }
+
+  function notwegZu() {
+    if (!abfrageTimer) return;
+    clearInterval(abfrageTimer);
+    abfrageTimer = null;
+  }
+
+  melde('Verbinde mit dem Spiel …');
+  const fristTimer = setTimeout(
+    () => notwegAuf('Die Live-Verbindung kommt nicht durch – ich hole den Spielstand jetzt selbst.'),
+    STROM_FRIST,
+  );
+
+  let source;
+  try {
+    source = new EventSource(`/api/events?clientId=${encodeURIComponent(id)}&role=${role}`);
+  } catch (err) {
+    // Manche Browser verbieten Ereignisströme rundheraus. Dann eben zu Fuß.
+    panne(err, 'Live-Verbindung');
+    clearTimeout(fristTimer);
+    notwegAuf('Dieser Browser lässt keine Live-Verbindung zu – ich hole den Spielstand selbst.');
+    return null;
+  }
 
   // Der Nachweis, dass diese Gerätekennung uns gehört.
   //
@@ -246,12 +342,11 @@ export function connect({ role, onState, onEvent }) {
   });
 
   source.addEventListener('state', (ev) => {
-    setOnline(true);
-    const sicht = JSON.parse(ev.data);
-    // Zentral gemerkt, damit weder Host-Screen noch Fernbedienung etwas davon
-    // wissen müssen – siehe `lage` weiter oben.
-    lage = sicht.lage || null;
-    onState(sicht);
+    // Der Strom lebt – der Notweg wird nicht mehr gebraucht.
+    stromKam = true;
+    clearTimeout(fristTimer);
+    notwegZu();
+    nimm(JSON.parse(ev.data));
   });
   source.addEventListener('toast', (ev) => {
     const { level, text } = JSON.parse(ev.data);
@@ -262,7 +357,17 @@ export function connect({ role, onState, onEvent }) {
       source.addEventListener(name, (ev) => onEvent(name, JSON.parse(ev.data)));
     }
   }
-  source.addEventListener('error', () => setOnline(false));
+  // Ein Fehler, bevor je ein Zustand kam, heißt: Dieser Weg führt nicht hin.
+  // Der Browser probiert es zwar weiter, aber warten muss deshalb niemand –
+  // ab jetzt läuft der Notweg daneben und macht wieder zu, sobald der Strom
+  // doch noch etwas liefert.
+  source.addEventListener('error', () => {
+    setOnline(false);
+    if (!stromKam) {
+      clearTimeout(fristTimer);
+      notwegAuf('Die Live-Verbindung wird abgewiesen – ich hole den Spielstand jetzt selbst.');
+    }
+  });
 
   return source;
 }
