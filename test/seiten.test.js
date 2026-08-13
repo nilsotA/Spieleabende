@@ -125,3 +125,21 @@ test('die Handys sagen, woran es hängt, solange kein Spielstand da ist', () => 
     );
   }
 });
+
+test('was oben über allem liegt, rechnet den Streifen unter der Uhr mit', () => {
+  // Die Handyseiten stehen auf `viewport-fit=cover`: Die Layoutfläche reicht
+  // bis unter Statusleiste und Notch. Ein Kasten mit `top: 0` sitzt dort also
+  // hinter der Uhrzeit. Gemessen: Der Offline-Balken ist 43 px hoch, der
+  // verdeckte Streifen auf iPhones ab dem X 44 bis 59 px – der Balken war
+  // vollständig unsichtbar, den ganzen Abend, ohne dass es jemandem auffiel.
+  const css = fs.readFileSync(path.join(PUBLIC, 'style.css'), 'utf8');
+  for (const regel of ['.offline', '.pannenstreifen', '.startwache']) {
+    const block = new RegExp(`\\${regel} \\{[^}]*\\}`).exec(css)?.[0] || '';
+    assert.ok(block, `${regel} steht nicht in style.css`);
+    assert.match(
+      block,
+      /env\(safe-area-inset-top\)/,
+      `${regel} liegt sonst auf jedem iPhone mit Notch hinter der Statusleiste`,
+    );
+  }
+});

@@ -184,6 +184,13 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
 .toast.error { border-color: #f26d84; color: #ffd7de; }
 @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
 
+/* Der Balken liegt über allem – deshalb muss er den Streifen mitrechnen, den
+   Uhrzeit und Notch belegen. Die Seiten der Handys stehen auf
+   `viewport-fit=cover`: Die Layoutfläche reicht dort bis unter die
+   Statusleiste. Ohne diesen Abstand saß der ganze Balken auf jedem iPhone ab
+   dem X vollständig dahinter – gemessen 43 px hoch gegen 44 bis 59 px
+   verdeckten Streifen. Er war also da, den ganzen Abend, und niemand konnte
+   ihn sehen; „keine Verbindung" sah aus wie „alles in Ordnung". */
 .offline {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -192,7 +199,7 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   text-align: center;
   font-weight: 700;
   font-size: 0.85rem;
-  padding: 0.35rem;
+  padding: calc(0.35rem + env(safe-area-inset-top)) 0.35rem 0.35rem;
   z-index: 1000;
 }
 
@@ -294,7 +301,8 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   flex-direction: column;
   justify-content: center;
   gap: 0.9rem;
-  padding: 1.4rem;
+  /* Auch hier der Streifen unter der Uhr – siehe .offline. */
+  padding: max(1.4rem, env(safe-area-inset-top)) 1.4rem max(1.4rem, env(safe-area-inset-bottom));
   background: var(--bg);
   color: var(--text);
   font-size: 1.05rem;
@@ -332,7 +340,7 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.7rem;
-  padding: 0.7rem 1rem;
+  padding: calc(0.7rem + env(safe-area-inset-top)) 1rem 0.7rem;
   background: #4a1020;
   border-bottom: 1px solid #f26d84;
   color: #ffd9e0;
