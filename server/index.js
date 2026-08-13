@@ -26,7 +26,7 @@ const MIX = '__mix'; // Kennung für das gewürfelte Board
 // ändert sich nichts – im Heimnetz bleibt das Spiel ohne Schlüssel und ohne
 // Tunnel, so wie es gedacht ist.
 const ONLINE = process.env.QUIZDUELL_ONLINE === '1';
-const zugang = ONLINE ? neuerZugang() : null;
+let zugang = null; // wird unten aus der Sicherung geholt oder neu gewürfelt
 let tunnelAdresse = null;
 
 // Ein Spieleabend darf nicht daran scheitern, dass irgendein Randfall den Prozess
@@ -134,6 +134,35 @@ async function restore() {
   } catch {
     return null; // kein Spielstand da, oder er ist unbrauchbar
   }
+}
+
+/* Die Schlüssel des Abends liegen neben dem Spielstand.
+ *
+ * Sonst wäre der Neustart, auf den dieses Spiel so stolz ist, ausgerechnet
+ * online das Ende: Der Stand käme zurück, aber alle Schlüssel wären neu – und
+ * damit jedes Handy im Raum ausgesperrt, mitten im Spiel, mit einem QR-Code auf
+ * der Leinwand, den niemand mehr scannen kann. Nach zwölf Stunden gilt derselbe
+ * Schnitt wie beim Spielstand: Dann ist der Abend vorbei. */
+const ZUGANG_FILE = `${SAVE_FILE.replace(/\.json$/, '')}-zugang.json`;
+
+async function ladeZugang() {
+  try {
+    const roh = JSON.parse(await readFile(ZUGANG_FILE, 'utf8'));
+    if (roh?.spiel && roh?.host && Date.now() - (roh.gespeichert || 0) < SAVE_MAX_AGE_MS) {
+      return { spiel: roh.spiel, host: roh.host };
+    }
+  } catch {
+    /* keine Sicherung, oder sie ist unbrauchbar – dann eben neue */
+  }
+  const frisch = neuerZugang();
+  try {
+    await writeFile(ZUGANG_FILE, JSON.stringify({ gespeichert: Date.now(), ...frisch }), 'utf8');
+  } catch (err) {
+    // Schreiben ging schief: Das Spiel läuft trotzdem, nur ein Neustart würde
+    // dann aussperren. Das ist keinen Abbruch wert, aber eine Meldung.
+    console.error('Die Schlüssel ließen sich nicht sichern:', err.message);
+  }
+  return frisch;
 }
 
 async function forgetSave() {
@@ -909,6 +938,8 @@ const wiederhergestellt = await restore();
 if (wiederhergestellt) {
   state = wiederhergestellt;
 }
+// Vor dem ersten Lauschen: Sonst käme die erste Anfrage an eine Tür ohne Schloss.
+if (ONLINE) zugang = await ladeZugang();
 
 server.listen(PORT, async () => {
   console.log('\n  🎉  Quizduell für Spieleabende läuft!\n');

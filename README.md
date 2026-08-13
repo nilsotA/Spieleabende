@@ -219,7 +219,9 @@ zwei Schlüssel, die niemand tippt:
   deinem eigenen Handy für die Fernbedienung.
 
 Ohne Schlüssel kommt niemand an `/host`, `/remote`, den Editor oder die Fragensätze –
-dort stehen die Lösungen. Beide Schlüssel sind bei jedem Start neu und gelten 12 Stunden.
+dort stehen die Lösungen. Beide Schlüssel gelten 12 Stunden und liegen neben dem
+Spielstand: Stürzt der Server mitten im Spiel ab, kommen mit dem Stand auch die
+Schlüssel zurück, und kein Handy im Raum fliegt raus. Am nächsten Abend sind sie neu.
 
 ---
 

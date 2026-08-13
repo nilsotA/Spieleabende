@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
-import { rm, mkdtemp } from 'node:fs/promises';
+import { rm, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1927,4 +1927,46 @@ test('der Bildschirm geht auf, bevor der Tunnel antwortet', async (t) => {
   }
   assert.match(urls[0], /trycloudflare\.com$/);
   assert.match(ausgabe(), /Der Tunnel steht/);
+});
+
+test('ein Neustart sperrt die Handys nicht aus', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 's.json');
+  const port = 5300 + Math.floor(Math.random() * 200);
+  const erst = await starteOnline(port, stateFile);
+  t.after(async () => { await rm(dir, { recursive: true, force: true }); });
+
+  // Mitten im Spiel stirbt der Server. Der Stand kommt zurück – die Schlüssel
+  // müssen es auch, sonst steht auf der Leinwand ein QR-Code, den niemand mehr
+  // scannen kann, und jedes Handy im Raum ist draußen.
+  erst.proc.kill('SIGKILL');
+  await warte(300);
+  const wieder = await starteOnline(port, stateFile);
+  t.after(() => wieder.proc.kill());
+
+  assert.equal(wieder.host, erst.host, 'derselbe Hostschlüssel');
+  assert.equal(wieder.spiel, erst.spiel, 'derselbe Spielschlüssel');
+  assert.equal((await fetch(`${wieder.base}/play?k=${erst.spiel}`)).status, 200);
+});
+
+test('am nächsten Abend sind die Schlüssel neu', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 's.json');
+  const port = 5500 + Math.floor(Math.random() * 200);
+  const erst = await starteOnline(port, stateFile);
+  erst.proc.kill('SIGKILL');
+  await warte(300);
+  t.after(async () => { await rm(dir, { recursive: true, force: true }); });
+
+  // Dieselbe Frist wie beim Spielstand: Was älter als zwölf Stunden ist, gehört
+  // zu einem anderen Abend – und ein Schlüssel, der ewig gilt, ist keiner.
+  const datei = path.join(dir, 's-zugang.json');
+  const alt = JSON.parse(await readFile(datei, 'utf8'));
+  alt.gespeichert = Date.now() - 13 * 60 * 60 * 1000;
+  await writeFile(datei, JSON.stringify(alt), 'utf8');
+
+  const wieder = await starteOnline(port, stateFile);
+  t.after(() => wieder.proc.kill());
+  assert.notEqual(wieder.host, erst.host);
+  assert.equal((await fetch(`${wieder.base}/play?k=${erst.spiel}`)).status, 403, 'der alte Schlüssel öffnet nichts mehr');
 });
