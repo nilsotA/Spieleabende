@@ -53,11 +53,28 @@ async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
     let ausgabe = '';
     proc.on('exit', () => { beendet = true; });
     proc.stdout.on('data', (d) => { ausgabe += String(d); });
-    const lauscher = (d) => { if (/EADDRINUSE/.test(String(d))) belegt = true; };
+    // Auch die deutsche Meldung zählt: Den rohen Fehlernamen sieht man nur,
+    // solange niemand ihn abfängt – der Server fängt ihn ab und schreibt
+    // stattdessen „Port … ist schon belegt". Ohne diese zweite Fassung endete
+    // ein belegter Port in „Server startet nicht", also in einem harten
+    // Fehlschlag statt in einem zweiten Versuch auf dem nächsten Port.
+    const lauscher = (d) => { if (/EADDRINUSE|ist schon belegt/.test(String(d))) belegt = true; };
     proc.stderr.on('data', lauscher);
     const base = `http://127.0.0.1:${dieserPort}`;
     let oben = false;
     let schlechterPort = false;
+    /*
+     * Erst auf die eigene Begrüßung warten, dann erst fragen.
+     *
+     * Der Server schreibt sie im Lauschen-Rückruf – sie beweist, dass genau
+     * DIESER Prozess den Port hat. Ohne diesen Schritt genügte irgendeine
+     * Antwort auf dem Port: Lief dort zufällig ein anderer Server (ein
+     * vergessener Versuch, ein zweiter Testlauf), galt er als „oben", und der
+     * Test prüfte danach gegen den falschen. Das Ergebnis waren Fehlschläge,
+     * die es nicht gab und die beim nächsten Lauf verschwanden – gemessen,
+     * während nebenher mehrere Server offen standen.
+     */
+    for (let i = 0; i < 100 && !belegt && !beendet && !ausgabe.includes('🎉'); i++) await warte(50);
     for (let i = 0; i < 100 && !belegt && !beendet; i++) {
       try {
         const res = await fetch(`${base}/api/info`);
