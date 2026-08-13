@@ -20,10 +20,47 @@ Keine Datenbank, keine Abhängigkeiten, kein Build. Node installieren, starten, 
 
 Das Fenster bleibt offen, solange gespielt wird, und der Host-Screen geht von
 selbst im Browser auf. Fehlt Node.js noch, sagt das Fenster, wo es herkommt.
-Tut der Doppelklick auf macOS oder Linux nichts, fehlt einmalig das Ausführrecht:
+
+### Beim allerersten Start auf dem Mac
+
+macOS markiert alles, was aus dem Netz kommt – also auch den heruntergeladenen
+Ordner. Beim Doppelklick steht dann:
+
+> „Start-Quizduell.command" nicht geöffnet · Apple konnte nicht überprüfen, ob
+> die Datei frei von Schadsoftware ist.
+
+Das ist keine Warnung über *diese* Datei, sondern über jede unsignierte
+Startdatei aus dem Internet. **Nicht auf „In den Papierkorb legen" klicken** –
+auf „Fertig", und dann einmalig eines von beidem:
 
 ```bash
-chmod +x "Start-Quizduell.command"    # bzw. start-quizduell.sh
+cd Pfad/zum/Ordner
+xattr -dr com.apple.quarantine .      # nimmt die Netz-Markierung weg
+chmod +x *.command *.sh               # und setzt das Ausführrecht
+```
+
+Ohne Terminal: Rechtsklick auf die Datei → **„Öffnen"** → im Dialog noch einmal
+„Öffnen". Fehlt dieser Punkt (neuere macOS-Versionen), steht es unter
+**Systemeinstellungen → Datenschutz & Sicherheit** ganz unten: „… wurde
+blockiert" → **„Trotzdem öffnen"**.
+
+Das gilt je Datei: Wer `Start-Quizduell.command` schon einmal freigegeben hat,
+bekommt beim ersten Doppelklick auf `Start-Quizduell-Online.command` dieselbe
+Meldung noch einmal – macOS merkt sich die Freigabe pro Datei, nicht pro Ordner.
+Der Befehl oben mit `.` am Ende erledigt gleich beide.
+
+Beides ist nur beim ersten Mal nötig. Wer lieber gar nicht klickt, startet im
+Terminal – da fragt niemand:
+
+```bash
+npm start                       # der normale Abend
+QUIZDUELL_ONLINE=1 npm start    # mit Tunnel nach draußen
+```
+
+Unter Linux fehlt nach dem Entpacken oft nur das Ausführrecht:
+
+```bash
+chmod +x start-quizduell.sh
 ```
 
 Im Terminal geht es genauso:
