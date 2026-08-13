@@ -1349,6 +1349,32 @@ function pruefeEnge(box) {
     + 32 /* Pultpolster */ + 5 * 0.62 * zahlGrad;
   box.classList.toggle('eng', proPult < noetig);
 
+  // Passen die Pulte nicht mehr nebeneinander, kommt eine zweite Reihe.
+  //
+  // Die Mindestbreite stand fest auf 92px. Acht Pulte brauchen damit samt Fugen
+  // rund 849px – auf einem hochkant gehaltenen iPad (768px), das der
+  // Host-Screen ausdrücklich unterstützt, lief die Leiste über: Das achte Pult
+  // stand gemessen bei 734–826, also 58 seiner 92 Pixel hinter der
+  // Fensterkante, und von seiner Punktepille fehlten 34. Erreichbar war es nur
+  // durch seitliches Schieben – auf einer Leinwand, die der ganze Raum ansieht,
+  // ist ein Punktestand hinter der Kante aber schlicht nicht da.
+  //
+  // Sie enger zu stellen allein hätte das Loch nur verschoben: Bei 82px je Pult
+  // fehlten den Namen gemessen bis zu 97 Pixel, sie standen also mitten im Wort
+  // abgeschnitten da – und schon bei den bisherigen 92px waren es 87. Zwei
+  // Reihen zu vier Pulten geben jedem rund 180px, und damit stehen die Namen
+  // wieder ganz da. Kleiner wird dabei nichts: Die Schriftgrade hält
+  // pultSchriftAnpassen() weiter an ihrem Boden.
+  const MIN_PULT = 92; // dieselbe Zahl wie in host.css als Rückfallwert
+  const zweireihig = proPult < MIN_PULT && n > 2;
+  const proReihe = zweireihig ? Math.ceil(n / 2) : n;
+  // Ein Pixel Luft: Bei exakt aufgehender Rechnung entschied das Runden des
+  // Browsers, ob vier oder drei Pulte in eine Reihe passen – gemessen kamen
+  // dabei drei Reihen statt zweier heraus.
+  const breite = (innen - parseFloat(stil.columnGap || 0) * (proReihe - 1)) / proReihe - 1;
+  box.classList.toggle('zweireihig', zweireihig);
+  box.style.setProperty('--pult-min', `${Math.floor(breite)}px`);
+
   // Die schräge Schulter des Trapezes zieht mit der Pultbreite mit, die
   // Polsterung tat es nicht – Begründung und Messwerte stehen in host.css bei
   // `.player`. Gestapelte Pulte sind schmal, dort schneidet nichts: gemessen
@@ -1726,11 +1752,10 @@ function renderScoreboard() {
   if (halbzeit) {
     halbzeit.hidden = final;
     if (!final) {
-      const jetzigeSumme = (state.board?.categories || [])
-        .reduce((n, c) => n + c.cells.reduce((m, z) => m + z.value, 0), 0);
-      const jetzigerMult = state.board?.multiplier || 1;
-      const naechsterMult = state.round + 1 <= 1 ? 1 : 2;
-      const naechsteSumme = Math.round(jetzigeSumme * (naechsterMult / jetzigerMult));
+      // Die Zahl kommt vom Server: Nur er kennt die nächste Runde. Hier stand
+      // eine Hochrechnung aus dem laufenden Brett – die stimmte nur, solange
+      // beide Runden gleich viele Kategorien haben.
+      const naechsteSumme = state.naechsteSumme || 0;
       const rueckstand = ranked.length > 1 ? ranked[0].score - ranked[ranked.length - 1].score : 0;
       const zahl = (n) => n.toLocaleString('de-DE');
       setzeText(halbzeit, naechsteSumme
@@ -1791,6 +1816,7 @@ function renderScoreboard() {
     standVorRunde = new Map(ranked.map((t, i) => [t.id, { score: t.score, rang: raenge[i] }]));
   }
   zeigeRekorde(final, ranked);
+  passeStandEin();
   $('#btn-next-round').hidden = final;
   $('#btn-new-game').hidden = !final;
   $('#btn-zusammenfassung').hidden = !final;
@@ -1817,6 +1843,58 @@ function renderScoreboard() {
   }
   if (!final) konfettiGefallen = false;
 }
+
+/**
+ * Passt der Endstand auf die Bühne? Nachgemessen statt geschätzt.
+ *
+ * Ob eng gestellt wurde, entschied bisher allein die Zeilenzahl: ab elf Zeilen
+ * enger, darunter großzügig. Das ist eine Schätzung, und sie ging schief. Fünf
+ * Teams auf einem 720p-Beamer – ein ganz gewöhnlicher Spieleabend – ergaben
+ * neun Zeilen, also „passt schon": Gemessen war das Panel 564 Pixel hoch bei
+ * 550 Pixeln Platz. Abgeschnitten wird von unten, und unten stehen die
+ * Auszeichnungen und die ganze Knopfreihe. „📋 Zusammenfassung" und „Neues
+ * Spiel" endeten 22 Pixel hinter der Kante – lautlos, ohne Bildlaufbalken, ohne
+ * Hinweis. Der Host sieht einen Endstand, unter dem es nicht weitergeht.
+ *
+ * Nachgegeben wird in Stufen, vom Entbehrlichsten her: erst enger stellen, dann
+ * die Auszeichnungen von hinten wegnehmen. Kleiner wird dabei nichts – es geht
+ * nur Polsterung weg und zuletzt eine Zeile, die ohnehin schon gekürzt wird.
+ *
+ * Gemessen wird in Layoutmaßen, nie über getBoundingClientRect: Die Liste fährt
+ * beim Aufbau von unten herein, und während dieser Bewegung zeigt
+ * getBoundingClientRect eine Lage, die es hinterher nicht mehr gibt.
+ */
+function passeStandEin() {
+  requestAnimationFrame(() => {
+    const feld = $('#scoreboard');
+    const panel = feld?.querySelector('.scores-panel');
+    if (!feld || !panel || feld.hidden) return;
+    const stil = getComputedStyle(feld);
+    const platz = feld.clientHeight
+      - parseFloat(stil.paddingTop || 0) - parseFloat(stil.paddingBottom || 0);
+    if (!platz) return;
+    // Das Kopfschild sitzt halb über der oberen Panelkante und zählt in
+    // offsetHeight nicht mit – sein Überstand gehört trotzdem dazu.
+    const kopf = panel.querySelector('.q-head');
+    const kopfUeber = kopf ? kopf.offsetHeight / 2 : 0;
+    const passt = () => panel.offsetHeight + kopfUeber <= platz + 1;
+
+    // Erst alles zurück auf großzügig, sonst bliebe eine einmal weggenommene
+    // Auszeichnung den Rest des Abends weg.
+    const rekorde = $('#rekorde');
+    const zeilen = rekorde ? [...rekorde.children] : [];
+    for (const z of zeilen) z.hidden = false;
+    panel.classList.remove('voll');
+    if (passt()) return;
+
+    panel.classList.add('voll');
+    for (let i = zeilen.length - 1; i >= 0 && !passt(); i--) zeilen[i].hidden = true;
+  });
+}
+
+// Ein gedrehtes iPad oder ein Fenster, das schmaler gezogen wird, ändert den
+// Platz – dann gilt die Rechnung von eben nicht mehr.
+addEventListener('resize', passeStandEin);
 
 /**
  * Drei Auszeichnungen unter dem Endstand – das, was man am nächsten Tag noch

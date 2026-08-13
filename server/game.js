@@ -24,6 +24,21 @@ export function roundMultiplier(round) {
   return round <= 1 ? 1 : 2;
 }
 
+/**
+ * Summe aller Felder der nächsten Runde – 0, wenn keine mehr kommt.
+ *
+ * Gerechnet aus dem Fragensatz, nicht aus dem laufenden Brett: Nur der kennt
+ * die Kategorienzahl der nächsten Runde.
+ */
+export function naechsteRundenSumme(state) {
+  const runden = state.questionSet?.rounds;
+  const naechste = runden?.[state.round]; // state.round ist 1-basiert
+  if (!naechste) return 0;
+  const mult = roundMultiplier(state.round + 1);
+  const proKategorie = BASE_VALUES.reduce((n, v) => n + v * mult, 0);
+  return (naechste.categories || []).length * proKategorie;
+}
+
 /** Hälfte der Punkte – für Buzzer-Antworten. */
 export function halfPoints(value) {
   return Math.round(value / 2);
@@ -925,6 +940,15 @@ export function viewFor(state, { isHost, clientId }) {
         cells: cat.cells.map((c) => ({ value: c.value, used: c.used })),
       })),
     },
+    // Was in der nächsten Runde noch auf dem Brett liegt – für die Ansage am
+    // Rundenende. Der Host-Screen rechnete das bisher aus dem LAUFENDEN Brett
+    // hoch, mit dem Verhältnis der Multiplikatoren. Das stimmt nur, solange
+    // beide Runden gleich viele Kategorien haben – der Editor erlaubt aber je
+    // Runde unabhängig zwei bis acht. Gemessen an einem 6+2-Satz stand auf der
+    // Leinwand „In Runde 2 liegen 13.200 Punkte auf dem Brett – der Rückstand
+    // von 5.000 ist aufholbar", während dort in Wahrheit 4.400 lagen und der
+    // Rückstand rechnerisch nicht mehr aufzuholen war.
+    naechsteSumme: naechsteRundenSumme(state),
     current: null,
     you: null,
     // Womit sich eine Wertung zurückmelden muss – siehe lageSignatur().
@@ -988,6 +1012,12 @@ export function viewFor(state, { isHost, clientId }) {
       isMyTurn: !!team && state.teams[state.turnIndex]?.id === team.id,
       canBuzz:
         !!team &&
+        // In der Pause darf niemand drücken – der Server lehnt es ohnehin ab.
+        // Ohne diese Zeile meldete die Sicht dem Handy weiter „du darfst",
+        // und ein Tipp auf den Knopf, auf dem „PAUSE" steht, machte den vollen
+        // Buzz-Klang, ließ das Gerät summen, schickte einen Zug los und
+        // beantwortete ihn mit einem roten Fehlerkasten.
+        !state.pause &&
         state.phase === 'question' &&
         !!q &&
         q.step === 'buzz' &&

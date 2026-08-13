@@ -178,6 +178,15 @@ null, Board neu, aber **die Teams und ihre Handys bleiben stehen**. Niemand muss
 den QR-Code noch einmal scannen – auch nicht, wer sein Handy in der Pause weggelegt
 hat. Erst wer über zwei Stunden weg ist, wird beim nächsten Spiel aussortiert.
 
+### Viele Teams, kleiner Bildschirm
+
+Die Punkteleiste misst nach, statt zu schätzen: Passen acht Pulte nicht mehr
+nebeneinander – auf einem hochkant gehaltenen iPad zum Beispiel –, rückt sie in zwei
+Reihen zu vier, statt die letzten Teams hinter die Fensterkante zu schieben. Genauso
+der Endstand: Bleibt für Auszeichnungen und Knopfreihe nicht genug Höhe, wird erst
+enger gestellt und dann von hinten gekürzt, damit „Zusammenfassung" und „Neues Spiel"
+immer sichtbar bleiben.
+
 ### Auch ohne Handys spielbar
 
 Wenn ihr um einen Bildschirm herumsitzt, braucht ihr keine Handys: Der Host bewertet

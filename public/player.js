@@ -117,6 +117,9 @@ async function pressBuzzer() {
     }
     return;
   }
+  // In der Pause bleibt es still: Auf dem Knopf steht „PAUSE", das ist Antwort
+  // genug. Ein Toast wäre hier nur Lärm – und der Server lehnt ohnehin ab.
+  if (state?.pause) return;
   if (!isOnline()) return toast('Keine Verbindung – dein Buzz käme nicht an.', 'error');
 
   buzzLock = true;

@@ -2068,3 +2068,85 @@ test('ein kaputtes Cookie bekommt eine Antwort statt einer hängenden Leitung', 
   });
   assert.equal(gut.status, 200);
 });
+
+test('in der Pause meldet die Sicht keinem Handy mehr, es dürfe buzzern', async (t) => {
+  // Der Knopf auf dem Handy sagte „PAUSE" und feuerte trotzdem: voller
+  // Buzz-Klang, Vibration, ein Zug an den Server – und als Antwort ein roter
+  // Fehlerkasten. Der Riegel lag allein beim Server.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-pausebuzz-'));
+  const port = 8300 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'pb-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  const teams = (await zustand(base)).teams;
+  await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'pb-handy', role: 'player', type: 'joinTeam', teamId: teams[1].id, name: 'Bo' }),
+  });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'pass' });
+
+  const sicht = async () => {
+    const res = await fetch(`${base}/api/events?clientId=pb-handy&role=player`);
+    const reader = res.body.getReader();
+    let buf = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += new TextDecoder().decode(value);
+      const treffer = buf.match(/event: state\ndata: (.*)\n\n/);
+      if (treffer) { reader.cancel(); return JSON.parse(treffer[1]); }
+    }
+    throw new Error('kein Zustand');
+  };
+
+  assert.equal((await sicht()).you.canBuzz, true, 'vor der Pause darf das Handy');
+  await host({ type: 'pause', an: true });
+  assert.equal((await sicht()).you.canBuzz, false, 'in der Pause nicht mehr');
+  await host({ type: 'pause', an: false });
+  assert.equal((await sicht()).you.canBuzz, true, 'und danach wieder');
+});
+
+test('die Punkte der nächsten Runde kommen vom Server, nicht aus einer Hochrechnung', async (t) => {
+  // Der Host-Screen rechnete die nächste Runde aus dem laufenden Brett hoch.
+  // Das stimmt nur, solange beide Runden gleich viele Kategorien haben – der
+  // Editor erlaubt aber je Runde unabhängig zwei bis acht.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-halbzeit-'));
+  const port = 8500 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const kat = (n) => ({
+    name: n,
+    questions: Array.from({ length: 4 }, (_, i) => ({ text: `Frage ${n}${i}`, answer: `A${i}` })),
+  });
+  const host = await alsHost(base, 'halbzeit-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({
+    type: 'startGame',
+    set: {
+      name: 'Ungleiche Runden',
+      rounds: [
+        { categories: Array.from({ length: 6 }, (_, i) => kat(`K${i}`)) },
+        { categories: [kat('A'), kat('B')] },
+      ],
+    },
+  });
+
+  // Runde 2 hat zwei Kategorien: 2 × (100+200+300+500) × 2 = 4400.
+  const jetzt = await zustand(base);
+  assert.equal(jetzt.naechsteSumme, 4400, 'die Summe der nächsten Runde, nicht die hochgerechnete des Bretts');
+  const hochgerechnet = jetzt.board.categories
+    .reduce((n, c) => n + c.cells.reduce((m, z) => m + z.value, 0), 0) * 2;
+  assert.equal(hochgerechnet, 13200, 'so falsch war die alte Rechnung');
+});

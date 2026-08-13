@@ -1516,7 +1516,17 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
      also komplett außerhalb des Fensters. Erreichbar war es nur durch seitliches
      Schieben der Leiste – auf der Leinwand, die der ganze Raum ansieht, ist ein
      Punktestand hinter der Kante aber schlicht nicht da. */
-  min-width: 92px;
+  /* Die Breite kommt aus pruefeEnge(): Passen die Pulte nicht mehr in eine
+     Reihe, setzt sie den Wert so, dass die Leiste umbricht. Ohne JavaScript
+     bleibt es beim bisherigen Wert. */
+  min-width: var(--pult-min, 92px);
+}
+/* Zwei Reihen statt einer abgeschnittenen. Die Fuge zwischen den Reihen ist
+   kleiner als die zwischen den Pulten: Untereinander stehende Pulte gehören
+   sichtbar zusammen, nebeneinanderstehende sind Gegner. */
+.players.zweireihig {
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
 }
 /* Zentriert wird der Text, nicht das Feld. Ein per `justify-items: center`
    ausgerichtetes Grid-Kind bemisst sich nach fit-content – und weil der Name
