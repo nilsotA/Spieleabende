@@ -1869,6 +1869,17 @@ body.host.flat .tile {
 }
 .join-qr svg { width: 100%; height: auto; display: block; }
 
+/* Wenn die Auszeichnungen nicht mehr aufs Bild passen: eine Zeile statt fünf.
+   Bewusst in derselben Größe wie eine Auszeichnung – kleiner wäre sie aus vier
+   Metern nicht mehr zu lesen, und dann könnte sie auch ganz wegbleiben. */
+.rekord-rest {
+  /* Ohne eigenen Abstand: Die Liste darüber setzt ihre Abstände selbst, und in
+     der engsten Lage ist diese Zeile das Einzige, was noch dasteht – dann
+     entscheiden ein paar Pixel darüber, ob die Knopfreihe darunter noch passt. */
+  color: var(--muted);
+  font-style: italic;
+}
+
 /* Die Lagemeldung zum Tunnel. Gelb, solange er noch kommt – dann steht der
    QR-Code darunter auf der Heimnetz-Adresse und stellt sich noch um. Grün,
    sobald er trägt. Beides deutlich genug, um es aus zwei Metern zu sehen. */

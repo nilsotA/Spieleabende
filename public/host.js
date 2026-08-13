@@ -1910,14 +1910,39 @@ function passeStandEin() {
     // Erst alles zurück auf großzügig, sonst bliebe eine einmal weggenommene
     // Auszeichnung den Rest des Abends weg.
     const rekorde = $('#rekorde');
-    const zeilen = rekorde ? [...rekorde.children] : [];
+    // Die Restzeile zählt nicht als Auszeichnung – sie sagt nur, wie viele
+    // fehlen, und wird gleich neu beschriftet.
+    const zeilen = rekorde ? [...rekorde.children].filter((z) => !z.classList.contains('rekord-rest')) : [];
     for (const z of zeilen) z.hidden = false;
+    restZeile(rekorde).hidden = true;
     panel.classList.remove('voll');
     if (passt()) return;
 
     panel.classList.add('voll');
-    for (let i = zeilen.length - 1; i >= 0 && !passt(); i--) zeilen[i].hidden = true;
+    // Weggenommene Auszeichnungen bekommen eine Zeile, die sagt, wo sie
+    // geblieben sind. Ohne die stand am Ende eines Abends auf einem 1024er
+    // Schirm gar keine Auszeichnung mehr – und niemand konnte wissen, dass es
+    // welche gab. Der Hinweis kostet eine Zeile und spart bis zu fünf.
+    const rest = restZeile(rekorde);
+    for (let i = zeilen.length - 1; i >= 0 && !passt(); i--) {
+      zeilen[i].hidden = true;
+      const weg = zeilen.filter((z) => z.hidden).length;
+      rest.hidden = weg === 0;
+      rest.textContent = weg === 1
+        ? '1 weitere Auszeichnung steht in der Zusammenfassung'
+        : `${weg} weitere Auszeichnungen stehen in der Zusammenfassung`;
+    }
   });
+}
+
+/** Die Zeile für das, was nicht mehr aufs Bild passt – einmal angelegt, dann wiederverwendet. */
+function restZeile(rekorde) {
+  let node = rekorde?.querySelector('.rekord-rest');
+  if (!node && rekorde) {
+    node = el('div', { class: 'rekord-rest', hidden: true });
+    rekorde.append(node);
+  }
+  return node || { hidden: true };
 }
 
 // Ein gedrehtes iPad oder ein Fenster, das schmaler gezogen wird, ändert den

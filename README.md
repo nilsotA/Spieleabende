@@ -185,7 +185,9 @@ nebeneinander – auf einem hochkant gehaltenen iPad zum Beispiel –, rückt si
 Reihen zu vier, statt die letzten Teams hinter die Fensterkante zu schieben. Genauso
 der Endstand: Bleibt für Auszeichnungen und Knopfreihe nicht genug Höhe, wird erst
 enger gestellt und dann von hinten gekürzt, damit „Zusammenfassung" und „Neues Spiel"
-immer sichtbar bleiben.
+immer sichtbar bleiben. Statt der weggenommenen Auszeichnungen steht dann eine Zeile –
+„2 weitere Auszeichnungen stehen in der Zusammenfassung" –, denn im Text sind sie
+vollständig dabei, auch die, die der Bildschirm nicht mehr zeigen konnte.
 
 ### Auch ohne Handys spielbar
 
