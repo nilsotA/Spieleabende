@@ -127,7 +127,12 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 .p-team { font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
-.phead > div:last-child { position: relative; }
+/* Ausdrücklich benannt und nicht über „letztes Kind": Der Flieger mit dem
+   Punktesprung hängt an dieser Hülle, und ein zusätzliches Element in der
+   Kopfzeile hätte den Anker sonst lautlos verschoben – genau das war der Fall,
+   die Zahl flog in der oberen rechten Bildschirmecke weg statt neben der
+   Pille. */
+.p-score-box { position: relative; }
 .p-score {
   font-family: var(--font-num);
   font-style: italic;

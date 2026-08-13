@@ -496,7 +496,11 @@ export function buzz(state, clientId) {
   // Nur echte Handy-Buzz zählen für den Rekord: Drückt der Host stellvertretend,
   // misst die Zahl seine Reaktion, nicht die des Tisches.
   const ms = q.buzzedAt - q.buzzOpenedAt;
-  if (q.buzzOpenedAt && (!state.rekorde.schnellsterBuzz || ms < state.rekorde.schnellsterBuzz.ms)) {
+  // Nur eine positive Zeit ist eine gemessene Zeit. Steht der Beginn des
+  // Buzzers aus irgendeinem Grund in der Zukunft – ein Serverneustart mitten in
+  // der Pause reicht dafür –, wäre das Ergebnis ein Rekord, den niemand mehr
+  // unterbieten kann, und er stünde bis zum Abendende im Rückblick.
+  if (q.buzzOpenedAt && ms > 0 && (!state.rekorde.schnellsterBuzz || ms < state.rekorde.schnellsterBuzz.ms)) {
     state.rekorde.schnellsterBuzz = { teamId: team.id, name: q.buzzedBy, ms };
   }
   return state;
@@ -731,8 +735,18 @@ export function setPause(state, an) {
   if (state.pause && !vorher) {
     state.pauseSeit = Date.now();
   } else if (!state.pause && vorher && state.pauseSeit) {
-    const dauer = Date.now() - state.pauseSeit;
-    if (state.current?.buzzOpenedAt) state.current.buzzOpenedAt += dauer;
+    // Nur der Teil der Pause zählt, der nach dem Öffnen des Buzzers lag.
+    //
+    // Der Host darf in der Pause weiter werten – „Weiß nicht → Buzzer frei"
+    // geht also mitten in der Pause. Wurde dann die volle Pausendauer
+    // aufgeschlagen, lag der Beginn hinterher in der Zukunft: Die Uhr auf der
+    // Leinwand stand still, und der erste Buzz maß eine negative Zeit. Ein
+    // negativer Wert ist als „schnellster Buzz des Abends" von keinem ehrlichen
+    // Druck mehr zu unterbieten – gemessen −291 ms nach 600 ms Pause, bei einer
+    // echten Küchenpause entsprechend zehn Minuten.
+    const jetzt = Date.now();
+    const q = state.current;
+    if (q?.buzzOpenedAt) q.buzzOpenedAt += jetzt - Math.max(state.pauseSeit, q.buzzOpenedAt);
     state.pauseSeit = null;
   }
   return state;
@@ -949,8 +963,10 @@ export function viewFor(state, { isHost, clientId }) {
       // sich behalten – dabei ist genau das der Moment, über den danach geredet
       // wird. Nur bei einem echten Handy-Buzz: Wenn der Host stellvertretend
       // drückt, misst die Zahl seine Reaktion, nicht die des Tisches.
+      // Aus demselben Grund wie oben nie negativ: Neben dem Teamnamen stand
+      // sonst „· −4,35 s".
       buzzMs: q.buzzedAt && q.buzzOpenedAt && q.buzzQuelle === 'handy'
-        ? q.buzzedAt - q.buzzOpenedAt
+        ? Math.max(0, q.buzzedAt - q.buzzOpenedAt)
         : null,
       lockedOut: q.lockedOut,
       revealed: q.revealed,

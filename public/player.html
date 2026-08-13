@@ -46,7 +46,12 @@
         <div id="p-team" class="p-team">—</div>
         <div id="p-name" class="muted small">—</div>
       </div>
-      <div id="p-score" class="p-score">0</div>
+      <!-- Die Hülle trägt den fliegenden Punktesprung. In die Pille selbst darf
+           er nicht: Ihre Zahl läuft beim Werten hoch, und jedes Hochzählen
+           schreibt `textContent` neu – der Flieger wäre im nächsten Bild weg. -->
+      <div class="p-score-box">
+        <div id="p-score" class="p-score">0</div>
+      </div>
     </header>
 
     <!-- Wappen aussuchen. Nur in der Lobby zu sehen: Sobald gespielt wird, ist

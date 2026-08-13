@@ -299,6 +299,12 @@ function punktesprung(delta, von, bis) {
 
   const flieger = el('span', { class: `p-delta ${delta > 0 ? 'plus' : 'minus'}` },
     vorzeichen(delta));
+  // An die Hülle der Pille, nicht an die Kopfzeile: Positioniert ist die Hülle
+  // (.p-score-box). Vorher war es die unpositionierte Kopfzeile, und der
+  // Flieger bezog sich damit auf die Seitenkante – die Zahl flog in der oberen
+  // rechten Bildschirmecke weg statt neben der Pille, um die es geht. In die
+  // Pille selbst darf er auch nicht: Deren Zahl läuft beim Werten hoch, und
+  // jedes Hochzählen schreibt `textContent` neu und nimmt ihn mit.
   feld.parentElement.append(flieger);
   clearTimeout(sprungZeit);
   sprungZeit = setTimeout(() => {
@@ -495,7 +501,17 @@ function renderPicker() {
   const zeigen = state.phase === 'board' && state.you.isMyTurn && state.board && !state.pause;
   box.hidden = !zeigen;
   box.classList.toggle('nur-ansehen', nurAnsehen);
-  if (!zeigen) return;
+  // Beim Verschwinden auch den Aufbau-Schlüssel wegwerfen.
+  //
+  // Der Knopf färbt sich beim Antippen sofort grau, ohne auf den Server zu
+  // warten. Verwirft der Host die Frage danach, ist das Feld wieder offen –
+  // der Schlüssel aber derselbe wie vorher, das Raster wurde also nicht neu
+  // gebaut, und das Feld blieb für den Rest der Runde grau. Wer es antippte,
+  // bekam nichts: `if (cell.used) return` im Knopf darüber.
+  if (!zeigen) {
+    box.dataset.key = '';
+    return;
+  }
 
   // Fragensatz und Betriebsart mit in den Schlüssel: sonst zeigt ein neues
   // Spiel mit gleicher Feldbelegung noch die Kategorien des alten – und ein
@@ -519,11 +535,17 @@ function renderPicker() {
             : el('button', {
               type: 'button',
               class: cell.used ? 'used' : '',
-              onclick: (ev) => {
+              onclick: async (ev) => {
                 if (cell.used) return;
-                ev.currentTarget.classList.add('used');
+                const knopf = ev.currentTarget;
+                knopf.classList.add('used');
                 sound('pick');
-                action('pick', { catIdx, rowIdx, quiet: true });
+                // Kommt der Zug nicht durch – Funkloch, Pause, jemand war
+                // schneller –, muss die vorgezogene Färbung zurück. Sonst
+                // steht ein offenes Feld als gespielt da und lässt sich nicht
+                // mehr antippen.
+                const antwort = await action('pick', { catIdx, rowIdx, quiet: true });
+                if (antwort && antwort.ok === false) knopf.classList.remove('used');
               },
             }, String(cell.value)))),
         ),

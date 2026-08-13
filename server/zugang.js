@@ -39,14 +39,32 @@ export function neuerZugang() {
   return { spiel: neuerSchluessel(), host: neuerSchluessel() };
 }
 
-/** Einen einzelnen Cookie-Wert aus dem Kopf der Anfrage fischen. */
+/**
+ * Einen einzelnen Cookie-Wert aus dem Kopf der Anfrage fischen.
+ *
+ * `decodeURIComponent` wirft bei kaputten Prozentzeichen („%E4", „abc%") –
+ * und diese Prüfung läuft als Allererstes, vor jeder Adresse und ohne dass ein
+ * Schlüssel nötig wäre. Der Wurf landete deshalb im Fänger für unbehandelte
+ * Zusagen, die Antwort wurde nie geschrieben, und die Anfrage hing, bis Node
+ * nach Minuten von selbst aufräumte. Gemessen: curl lief in seinen Zeitablauf,
+ * ganz ohne Statuszeile.
+ *
+ * Im Zweifel gilt der Rohwert. Zu verlieren ist dabei nichts: Die Schlüssel
+ * bestehen nur aus a–z und 2–9, da ist nie etwas zu entschlüsseln.
+ */
 export function leseCookie(req, name) {
   const roh = req.headers?.cookie;
   if (!roh) return null;
   for (const teil of roh.split(';')) {
     const i = teil.indexOf('=');
     if (i < 0) continue;
-    if (teil.slice(0, i).trim() === name) return decodeURIComponent(teil.slice(i + 1).trim());
+    if (teil.slice(0, i).trim() !== name) continue;
+    const wert = teil.slice(i + 1).trim();
+    try {
+      return decodeURIComponent(wert);
+    } catch {
+      return wert;
+    }
   }
   return null;
 }

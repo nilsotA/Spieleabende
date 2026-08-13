@@ -1,5 +1,5 @@
 import {
-  $, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
+  $, $$, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
   setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
   punkte, delta as vorzeichen, starteUhr, verbergeSchluessel } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
@@ -394,6 +394,13 @@ function render(prev) {
     // Schlüssel deshalb noch derselbe: Das Board galt als „nicht frisch
     // gebaut", und die Rundenansage samt Ton blieb aus.
     $('#board').dataset.key = '';
+    // Der Wiederhergestellt-Balken folgt auch in der Lobby dem Zustand.
+    //
+    // Er lag früher hinter dieser Weiche und wurde dort nie erreicht: Wer auf
+    // „Neues Spiel" drückte, landete in der Lobby – und der goldene Balken mit
+    // dem Punktestand des gerade verworfenen Spiels blieb als feste Pille quer
+    // über dem Logo hängen, bis jemand die Seite neu lud.
+    renderWiederhergestellt();
     return renderLobby();
   }
 
@@ -849,6 +856,22 @@ function renderQuestion(prev) {
   const kennung = (z, lauf) => (z.stechen ? `s${lauf}` : `${z.catIdx}-${z.rowIdx}`);
   const neu = !prev?.current
     || kennung(prev.current, prev.stechenLauf) !== kennung(q, state.stechenLauf);
+  // Den Aufräum-Timer der Vorfrage abbestellen.
+  //
+  // Beim Schließen läuft 320 ms lang die Zuklapp-Bewegung, danach räumt ein
+  // Timer auf: `box.hidden = true`. Das Board ist in dieser Zeit aber schon
+  // wieder anklickbar – ausdrücklich so gewollt, damit der Host zügig
+  // weiterspielen kann. Ruft in diesen 320 ms jemand das nächste Feld auf,
+  // baute sich die neue Frage auf und der alte Timer blendete sie sofort
+  // wieder aus: leere Bühne, obwohl die Frage läuft, und der Host kann nichts
+  // vorlesen. Die Handys zeigten sie derweil ganz normal an.
+  clearTimeout(schliessZeit);
+  schliessZeit = null;
+  box.classList.remove('zu');
+  // Was der Timer noch erledigt hätte: Die Kachel der Vorfrage darf ihre
+  // Abschalt-Animation nicht behalten, sonst liefe sie beim nächsten Aufbau
+  // des Boards erneut.
+  for (const kachel of $$('.tile.picked')) kachel.classList.remove('picked');
   box.hidden = false;
   // Das Feld ist gewählt – egal ob auf der Leinwand angeklickt oder auf dem
   // Handy angetippt. `prev` ist nur beim allerersten Zustand leer: Ein Reload

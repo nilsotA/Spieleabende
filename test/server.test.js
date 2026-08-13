@@ -1970,3 +1970,101 @@ test('am nächsten Abend sind die Schlüssel neu', async (t) => {
   assert.notEqual(wieder.host, erst.host);
   assert.equal((await fetch(`${wieder.base}/play?k=${erst.spiel}`)).status, 403, 'der alte Schlüssel öffnet nichts mehr');
 });
+
+test('geht der Buzzer erst in der Pause auf, fängt die Uhr bei null an', async (t) => {
+  // Der Host darf in der Pause weiter werten – „Weiß nicht → Buzzer frei" geht
+  // also mitten in der Pause. Wurde dann die volle Pausendauer aufgeschlagen,
+  // lag der Beginn hinterher in der Zukunft: Die Uhr stand still, und der erste
+  // Buzz maß eine negative Zeit. Als „schnellster Buzz des Abends" wäre die von
+  // keinem ehrlichen Druck mehr zu unterbieten gewesen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-uhrspaet-'));
+  const port = 7700 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'uhrspaet-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'settings', settings: { buzzUhr: 20 } });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+
+  await host({ type: 'pause', an: true });
+  await warte(1200);
+  await host({ type: 'pass' });        // Buzzer geht mitten in der Pause auf
+  await host({ type: 'pause', an: false });
+
+  const sofort = (await zustand(base)).current.buzzOffenMs;
+  assert.ok(sofort >= 0 && sofort < 400, `die Uhr fängt bei null an, gemessen ${sofort} ms`);
+  await warte(400);
+  const spaeter = (await zustand(base)).current.buzzOffenMs;
+  assert.ok(spaeter - sofort > 250, `und sie läuft auch, gemessen ${spaeter - sofort} ms in 400 ms`);
+
+  // Der Rekord des Abends darf davon nichts abbekommen.
+  const zust = await zustand(base);
+  const blau = zust.teams[1].id;
+  await host({ type: 'buzzFor', teamId: blau });
+  const rekord = (await zustand(base)).rekorde?.schnellsterBuzz;
+  assert.ok(!rekord || rekord.ms > 0, `kein negativer Rekord, gemessen ${JSON.stringify(rekord)}`);
+});
+
+test('die Pause überlebt ein Zurücknehmen – und springt nicht von selbst an', async (t) => {
+  // Die Pause gehört zum Raum, nicht zum Spielzug. Wer in der Pause eine
+  // Fehlwertung zurücknimmt – genau wozu sie da ist –, hob sie damit auf:
+  // Feldwahl und Buzzer waren wieder scharf, während der Tisch in der Küche
+  // stand. Und andersherum fror ein Rückschritt auf einen Schnappschuss aus
+  // einer früheren Pause das laufende Spiel wieder ein.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-pauseundo-'));
+  const port = 7900 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'pauseundo-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });      // aus Versehen
+
+  await host({ type: 'pause', an: true });
+  assert.equal((await zustand(base)).pause, true);
+  await host({ type: 'undo' });
+  const nachUndo = await zustand(base);
+  assert.equal(nachUndo.pause, true, 'die Pause bleibt, wenn der Host in ihr etwas zurücknimmt');
+  assert.equal(nachUndo.teams[0].score, 0, 'zurückgenommen wurde trotzdem');
+
+  // Weiterspielen, dann eine Wertung aus der Pausenzeit zurücknehmen: Das darf
+  // das Spiel nicht wieder einfrieren.
+  await host({ type: 'pause', an: false });
+  await host({ type: 'judge', correct: true });
+  await host({ type: 'undo' });
+  assert.equal((await zustand(base)).pause, false, 'und ein Rückschritt legt keine Pause ein');
+});
+
+test('ein kaputtes Cookie bekommt eine Antwort statt einer hängenden Leitung', async (t) => {
+  // Die Türprüfung läuft vor allem anderen. Ein Wurf beim Entschlüsseln des
+  // Cookies landete deshalb im Fänger für unbehandelte Zusagen: keine Antwort,
+  // keine Fehlerseite, nur eine offene Verbindung – von außen auslösbar, ohne
+  // jeden Schlüssel.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-keks-'));
+  const { proc, base, host } = await starteOnline(8100 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  for (const keks of ['qd_spiel=%E4', 'qd_host=abc%', 'qd_spiel=%%%', 'qd_host=%C3%28']) {
+    const antwort = await fetch(`${base}/play`, {
+      headers: { cookie: keks },
+      signal: AbortSignal.timeout(5000),
+    });
+    assert.equal(antwort.status, 403, `${keks} führt zur Tür, nicht ins Leere`);
+  }
+  // Und der gültige Schlüssel kommt daran vorbei, auch neben einem kaputten Keks.
+  const gut = await fetch(`${base}/host?h=${host}`, {
+    headers: { cookie: 'qd_spiel=%E4' },
+    signal: AbortSignal.timeout(5000),
+  });
+  assert.equal(gut.status, 200);
+});

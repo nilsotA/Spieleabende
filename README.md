@@ -151,6 +151,10 @@ kann versehentlich ein Feld aufrufen oder buzzern. Die offene Frage bleibt
 stehen und läuft danach weiter; auch die Uhr am Buzzer hält an. Der Host darf in
 der Pause weiter alles – dafür ist sie oft da.
 
+Die Pause bleibt dabei, was der Host zuletzt gedrückt hat: Ein Zurücknehmen oder
+Verwerfen in der Pause hebt sie nicht auf – und umgekehrt legt ein Rückschritt mitten
+im Spiel keine Pause ein.
+
 Gegen den anderen Verklicker – „Richtig“ drücken, während in derselben Sekunde
 jemand buzzert – wirken zwei Sperren. Auf dem Gerät selbst ist jede Wertung
 400 ms lang gesperrt, damit ein zitternder Finger nicht zweimal zählt. Und jede

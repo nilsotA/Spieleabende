@@ -312,6 +312,17 @@ function uebernimm(alt, jetztStand) {
   for (const team of jetztStand.teams) {
     if (!bekannt.has(team.id)) alt.teams.push(team);
   }
+  // Die Pause gehört zum Raum, nicht zum Spielzug.
+  //
+  // Sie fuhr bisher aus dem Schnappschuss mit: Wer in der Pause eine
+  // Fehlwertung zurücknahm – genau wozu die Pause da ist –, hob damit die
+  // Pause auf. Auf der Leinwand stand wieder die offene Frage, Feldwahl und
+  // Buzzer waren wieder scharf, während der halbe Tisch in der Küche stand.
+  // In der Gegenrichtung noch unangenehmer: Ein Rückschritt auf einen
+  // Schnappschuss aus einer früheren Pause fror das laufende Spiel wieder ein,
+  // ohne dass jemand Pause gedrückt hätte.
+  alt.pause = jetztStand.pause;
+  alt.pauseSeit = jetztStand.pauseSeit;
   return alt;
 }
 
@@ -655,14 +666,24 @@ const server = http.createServer(async (req, res) => {
   // Tür: Ohne Tunnel steht sie offen (rolle ist dann immer 'host'), mit Tunnel
   // kommt nur herein, wer einen Schlüssel mitbringt – und der steckt im
   // QR-Code, den ohnehin jeder scannt.
-  const rolle = pruefeZugang(req, url, zugang);
-  if (zugang) {
-    const kekse = cookieKoepfe(url, zugang);
-    if (kekse.length) res.setHeader('Set-Cookie', kekse);
-    if (!rolle || (hostNoetig(pathname) && rolle !== 'host')) {
-      if (pathname.startsWith('/api/')) return sendJson(res, 403, { error: 'Kein Zugang.' });
-      return send(res, 403, 'text/html; charset=utf-8', TUER_ZU);
+  //
+  // Bewusst innerhalb des try: Diese Prüfung läuft vor allem anderen, und ein
+  // Wurf hier hätte keinen Fänger gehabt. Die Anfrage blieb dann offen liegen –
+  // keine Antwort, keine Fehlerseite, nur eine hängende Verbindung.
+  let rolle;
+  try {
+    rolle = pruefeZugang(req, url, zugang);
+    if (zugang) {
+      const kekse = cookieKoepfe(url, zugang);
+      if (kekse.length) res.setHeader('Set-Cookie', kekse);
+      if (!rolle || (hostNoetig(pathname) && rolle !== 'host')) {
+        if (pathname.startsWith('/api/')) return sendJson(res, 403, { error: 'Kein Zugang.' });
+        return send(res, 403, 'text/html; charset=utf-8', TUER_ZU);
+      }
     }
+  } catch (err) {
+    console.error('Türprüfung fehlgeschlagen:', err);
+    return send(res, 400, 'text/plain; charset=utf-8', 'Ungültige Anfrage');
   }
 
   try {
