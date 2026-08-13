@@ -182,6 +182,16 @@
       </div>
     </div>
 
+    <!-- Pausenbild. Liegt über allem, auch über einer offenen Frage: Wer in
+         die Küche geht, soll die Lösung nicht im Vorbeigehen mitlesen. -->
+    <div id="pause" class="question pause-schirm" hidden>
+      <div class="q-panel pause-panel">
+        <div class="pause-wort">Pause</div>
+        <p class="pause-zeile">Wir machen gleich weiter.</p>
+        <p id="pause-stand" class="pause-stand"></p>
+      </div>
+    </div>
+
     <!-- Rundenende / Endstand -->
     <div id="scoreboard" class="question" hidden>
       <div class="q-panel scores-panel">
@@ -262,7 +272,10 @@
     <!-- Nur sichtbar, solange eine Brettfrage läuft: Eine kaputte Frage merkt
          man beim Vorlesen, und dann steht der Host meist am Laptop, wenn er
          ohne Fernbedienung spielt. -->
-    <button id="btn-discard" class="btn btn-ghost" type="button" style="margin-top:1rem" hidden>
+    <button id="btn-pause" class="btn btn-ghost" type="button" style="margin-top:1rem">
+      ⏸ Pause
+    </button>
+    <button id="btn-discard" class="btn btn-ghost" type="button" style="margin-top:0.5rem" hidden>
       Frage verwerfen – Feld bleibt offen
     </button>
     <div class="row" style="margin-top:1rem">

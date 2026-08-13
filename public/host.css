@@ -691,6 +691,36 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   z-index: 20;
   overflow-y: auto;
 }
+/* Pausenbild: liegt über allem, auch über einer offenen Frage. Wer in die
+   Küche geht, soll die Lösung nicht im Vorbeigehen mitlesen – und wer
+   zurückkommt, soll aus vier Metern sehen, dass nichts kaputt ist. Deshalb ein
+   Wort in Schlagzeilengröße statt einer Zeile Kleingedrucktem. */
+.pause-schirm { z-index: 30; }
+.pause-panel { text-align: center; }
+.pause-wort {
+  font-family: var(--font-num);
+  font-size: clamp(3rem, 9vw, 9rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.pause-zeile {
+  font-size: clamp(1.1rem, 2.2vw, 2rem);
+  color: var(--text);
+  margin: 0.8rem 0 0;
+}
+/* Der Punktestand steht auch in der Pause an den Pulten – hier noch einmal in
+   einer Zeile, weil beim Zurückkommen zuerst gefragt wird „wie steht's?". */
+.pause-stand {
+  font-size: clamp(0.95rem, 1.6vw, 1.5rem);
+  color: var(--muted);
+  margin: 1.2rem 0 0;
+}
+
 /* Scrim statt Filter über der Wand – ein Vollbild-Blur pro Frame wäre zu teuer. */
 .question::before {
   content: '';

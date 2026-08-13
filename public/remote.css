@@ -269,6 +269,22 @@ body.remote #app {
   .r-bcell:active { transform: none; }
 }
 
+/* Der Pausenknopf steht oben und ist im Normalfall leise. Läuft die Pause,
+   wird er zum Hauptknopf: Dann gibt es auf diesem Gerät nichts Wichtigeres. */
+.r-pause {
+  width: 100%;
+  margin-bottom: 0.7rem;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+}
+.r-pause.laeuft {
+  background: linear-gradient(180deg, var(--gold-hell), var(--gold));
+  color: #3a2a00;
+  font-weight: 900;
+  font-size: 1.05rem;
+  border-color: transparent;
+}
+
 /* Streichen einer kaputten Frage: leise, am Fragenkasten, mit ganzer Breite
    für den Daumen. Nicht rot – es ist keine Katastrophe, sondern eine
    Korrektur, und sie ist zurücknehmbar. */

@@ -38,6 +38,8 @@ const act = hostAction;
 // Bewusst mit Rückfrage: Wer hier tippt, streicht eine Frage samt ihrer
 // Wertungen. Zurücknehmen geht zwar, aber erst muss man merken, dass man
 // danebengetippt hat.
+$('#r-pause').addEventListener('click', () => act('pause', { an: !state?.pause }));
+
 $('#r-discard').addEventListener('click', () => {
   const q = state?.current;
   if (!q) return;
@@ -111,6 +113,12 @@ function render() {
   // Streichen geht nur bei einer laufenden Brettfrage – eine Stechfrage hat
   // kein Feld, auf das etwas zurückfallen könnte.
   $('#r-discard').hidden = !q || !!q.stechen;
+  // Pausieren geht ab dem Moment, in dem gespielt wird – auch mitten in einer
+  // Frage; der Durst kommt nicht nur zwischen zwei Feldern.
+  const pausenKnopf = $('#r-pause');
+  pausenKnopf.hidden = state.phase === 'lobby';
+  pausenKnopf.classList.toggle('laeuft', !!state.pause);
+  setzeText(pausenKnopf, state.pause ? '▶ Weiterspielen' : '⏸ Pause');
   if (q) {
     $('#r-cat').textContent = q.stechen
       ? `Stechen · ${q.category}`

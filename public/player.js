@@ -454,7 +454,9 @@ function renderPicker() {
   // antwortet, wäre schlimmer als keins; eine leere Handyfläche, während man
   // gerade dran ist, aber auch.
   const nurAnsehen = state.settings.feldwahl === 'host';
-  const zeigen = state.phase === 'board' && state.you.isMyTurn && state.board;
+  // In der Pause verschwindet das Raster: Ein Tipp im Vorbeigehen prallt zwar
+  // am Server ab, aber ein Raster, das nichts tut, sieht nach kaputt aus.
+  const zeigen = state.phase === 'board' && state.you.isMyTurn && state.board && !state.pause;
   box.hidden = !zeigen;
   box.classList.toggle('nur-ansehen', nurAnsehen);
   if (!zeigen) return;
@@ -522,6 +524,14 @@ function renderBuzzer(prev) {
   if (!isOnline()) {
     setzeText(status, 'Keine Verbindung – warte kurz …');
     lock('OFFLINE');
+    return;
+  }
+  // Die Pause steht vor allem anderen: Wer in dem Moment aufs Handy schaut,
+  // soll nicht rätseln, warum sein Buzzer nichts tut. Der Knopf sagt es selbst,
+  // damit man dafür nicht zur Leinwand schauen muss.
+  if (state.pause) {
+    setzeText(status, 'Pause – gleich geht es weiter.');
+    lock('PAUSE');
     return;
   }
   if (state.phase === 'lobby') {

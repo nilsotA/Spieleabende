@@ -583,6 +583,74 @@ test('ohne Rückweg wird nichts gestrichen', async (t) => {
   assert.match(weg.error, /reicht nicht/);
 });
 
+test('in der Pause ruft kein Handy ein Feld auf und niemand buzzert', async (t) => {
+  // Zwei Stunden Spiel heißen mindestens einmal Küche. Blieb das Brett dabei
+  // offen, rief ein Tipp im Vorbeigehen ein Feld auf, das niemand hörte – und
+  // nach der Pause stand eine Frage da, die keiner gestellt hatte.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-pause-'));
+  const port = 6900 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const alsHandy = (id, body) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: id, role: 'player', ...body }),
+  }).then((r) => r.json());
+
+  const host = await alsHost(base, 'pause-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  const teams = (await zustand(base)).teams;
+  await alsHandy('handy-rot', { type: 'joinTeam', teamId: teams[0].id, name: 'Rosa' });
+  await alsHandy('handy-blau', { type: 'joinTeam', teamId: teams[1].id, name: 'Ben' });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+
+  // In der Lobby gibt es nichts zu pausieren.
+  await host({ type: 'backToLobby' });
+  const zuFrueh = await host({ type: 'pause', an: true });
+  assert.equal(zuFrueh.ok, false);
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+
+  assert.equal((await zustand(base)).pause, false, 'zu Beginn läuft keine Pause');
+  await host({ type: 'pause', an: true });
+  assert.equal((await zustand(base)).pause, true);
+
+  // Das Zugteam tippt im Vorbeigehen ein Feld an.
+  const wer = (await zustand(base)).teams[(await zustand(base)).turnIndex];
+  const handy = wer.name === 'Rot' ? 'handy-rot' : 'handy-blau';
+  const daneben = await alsHandy(handy, { type: 'pick', catIdx: 0, rowIdx: 0 });
+  assert.equal(daneben.ok, false);
+  assert.match(daneben.error, /Pause/);
+  assert.equal((await zustand(base)).current, null, 'es steht keine Frage da');
+
+  // Und der Buzzer bleibt still, auch wenn eine Frage offen ist.
+  await host({ type: 'pause', an: false });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'pass' });
+  await host({ type: 'pause', an: true });
+  const andere = handy === 'handy-rot' ? 'handy-blau' : 'handy-rot';
+  const buzz = await alsHandy(andere, { type: 'buzz' });
+  assert.equal(buzz.ok, false);
+  assert.match(buzz.error, /Pause/);
+
+  // Der Host darf weiter alles – dafür ist so eine Pause oft da.
+  const korrektur = await host({ type: 'adjustScore', teamId: teams[0].id, delta: 100 });
+  assert.equal(korrektur.ok, true, 'Punkte korrigieren geht auch in der Pause');
+
+  await host({ type: 'pause', an: false });
+  const weiter = await zustand(base);
+  assert.equal(weiter.pause, false);
+  assert.ok(weiter.current, 'die Frage von vorher steht noch');
+
+  // Ein neues Spiel fängt nicht in der Pause an.
+  await host({ type: 'pause', an: true });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  assert.equal((await zustand(base)).pause, false, 'ein neues Spiel räumt die Pause ab');
+});
+
 test('Zurücknehmen wirft ein frisch angelegtes Team nicht hinaus', async (t) => {
   // „Eigenes Team" darf jedes Handy jederzeit in der Lobby. Der Host darf dort
   // ebenso „dran" setzen, und das ist rücknehmbar. Vorher verschwand das neue

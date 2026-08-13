@@ -101,6 +101,10 @@ export function createState() {
       feldwahl: 'team',
     },
     message: null,
+    // Pause: Zwei Stunden Spiel heißen mindestens einmal Küche. Solange sie
+    // läuft, kann kein Handy ein Feld aufrufen und niemand buzzern – sonst
+    // steht der Abend nach der Pause an einer Frage, die keiner gestellt hat.
+    pause: false,
     // Was man sich am nächsten Tag erzählt. Reine Buchhaltung fürs Ende – auf
     // Punkte und Ablauf hat davon nichts Einfluss.
     rekorde: leereRekorde(),
@@ -312,6 +316,9 @@ export function startGame(state, questionSet) {
     team.bilanz = leereBilanz();
   }
   state.rekorde = leereRekorde();
+  // Ein neues Spiel fängt nicht in der Pause an – auch wenn das alte darin
+  // stecken geblieben ist.
+  state.pause = false;
   state.stechenLauf = 0;
   state.stechenTexte = [];
   state.stechenSieger = null;
@@ -345,6 +352,7 @@ export function startRound(state, round) {
 }
 
 export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
+  if (state.pause) throw new GameError('Ihr seid gerade in der Pause.');
   if (state.phase !== 'board') throw new GameError('Gerade ist keine Feldauswahl möglich.');
   const cat = state.board.categories[catIdx];
   const cell = cat && cat.cells[rowIdx];
@@ -463,6 +471,7 @@ export function openBuzz(state) {
 /** Ein Gerät buzzert. Erster Buzz gewinnt – der Server entscheidet. */
 export function buzz(state, clientId) {
   const q = requireQuestion(state);
+  if (state.pause) throw new GameError('Ihr seid gerade in der Pause.');
   if (q.step !== 'buzz') throw new GameError('Buzzer ist noch gesperrt.');
   if (q.buzzedTeamId) throw new GameError('Zu spät – jemand war schneller.');
   const team = teamOfClient(state, clientId);
@@ -681,6 +690,29 @@ export function nextRound(state) {
   return startRound(state, state.round + 1);
 }
 
+/**
+ * Pause an oder aus.
+ *
+ * Ein Spieleabend dauert zwei Stunden, und mindestens einmal steht der halbe
+ * Tisch in der Küche. Bisher blieb das Brett dabei offen stehen: Wer im
+ * Vorbeigehen aufs Handy tippte, rief ein Feld auf, das niemand hörte – und
+ * nach der Pause stand eine Frage da, die keiner gestellt hatte.
+ *
+ * Die Pause ändert nichts am Spielstand, sie legt ihn nur still. Der Host darf
+ * währenddessen weiter alles – Punkte korrigieren, zurücknehmen, das Menü
+ * benutzen; genau dafür ist so eine Pause oft da. Gesperrt sind die beiden
+ * Wege, die von den Handys kommen: ein Feld aufrufen und buzzern.
+ *
+ * Auch mitten in einer Frage möglich: Der Durst kommt nicht nur zwischen zwei
+ * Feldern. Die Frage bleibt stehen und läuft danach weiter.
+ */
+export function setPause(state, an) {
+  if (state.phase === 'lobby') throw new GameError('In der Lobby gibt es nichts zu pausieren.');
+  state.pause = !!an;
+  state.message = state.pause ? 'Pause' : null;
+  return state;
+}
+
 /* ----------------------------------------------------------------- Stechen */
 
 /** Alle Teams, die den Höchststand teilen. */
@@ -822,6 +854,7 @@ export function viewFor(state, { isHost, clientId }) {
     setName: state.setName,
     turnIndex: state.turnIndex,
     message: state.message,
+    pause: !!state.pause,
     settings: state.settings,
     // Die Auswahl kommt vom Server mit, damit die Liste nur an einer Stelle
     // steht. Sonst hätte das Handy eine eigene Kopie, die beim nächsten

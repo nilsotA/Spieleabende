@@ -292,9 +292,38 @@ function render(prev) {
   renderQuestion(prev);
   renderPlayers();
   renderScoreboard();
+  renderPause();
   renderControls();
   renderWiederhergestellt();
   if (!$('#menu').hidden) fillMenu();
+}
+
+/**
+ * Das Pausenbild.
+ *
+ * Es liegt über allem, auch über einer offenen Frage – wer in die Küche geht,
+ * soll die Lösung nicht im Vorbeigehen mitlesen. Und weil beim Zurückkommen
+ * zuerst „wie steht's?" gefragt wird, steht der Stand hier noch einmal in einer
+ * Zeile, obwohl er an den Pulten ohnehin klebt.
+ */
+function renderPause() {
+  const schirm = $('#pause');
+  schirm.hidden = !state.pause;
+  // Darüberlegen reicht nicht: Der Schleier des Overlays ist durchsichtig, und
+  // im Bild lugte die Lösungsbox der offenen Frage unter dem Pausenfeld hervor.
+  // In der Pause zeigt die Leinwand die Pause – und sonst nichts. Beim
+  // Weiterspielen stellt der nächste Durchlauf beides von selbst wieder her,
+  // denn renderQuestion und renderScoreboard laufen vor dieser Zeile.
+  if (state.pause) {
+    $('#question').hidden = true;
+    $('#scoreboard').hidden = true;
+  }
+  if (!state.pause) return;
+  const stand = [...state.teams]
+    .sort((a, b) => b.score - a.score)
+    .map((t) => `${t.wappen} ${t.name} ${punkte(t.score)}`)
+    .join('   ·   ');
+  setzeText($('#pause-stand'), stand);
 }
 
 function renderLobby() {
@@ -1932,6 +1961,11 @@ $('#btn-close-menu').addEventListener('click', closeMenu);
 $('#menu').addEventListener('click', (ev) => {
   if (ev.target.id === 'menu') closeMenu();
 });
+$('#btn-pause').addEventListener('click', () => {
+  act('pause', { an: !state.pause });
+  closeMenu();
+});
+
 // Mit Rückfrage: Wer hier tippt, streicht eine Frage samt ihrer Wertungen.
 // Zurücknehmen geht zwar, aber erst muss man merken, dass man danebentippte.
 $('#btn-discard').addEventListener('click', () => {
@@ -1969,6 +2003,7 @@ function openMenu() {
   // Streichen geht nur bei einer laufenden Brettfrage – eine Stechfrage hat
   // kein Feld, auf das etwas zurückfallen könnte.
   $('#btn-discard').hidden = !state.current || !!state.current.stechen;
+  setzeText($('#btn-pause'), state.pause ? '▶ Weiterspielen' : '⏸ Pause');
   $('#menu').hidden = false;
   // Alles dahinter stilllegen, sonst wandert der Tabulator aufs Board.
   $('#view-game').inert = true;

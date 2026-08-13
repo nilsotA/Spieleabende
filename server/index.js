@@ -208,7 +208,7 @@ const HOST_ACTIONS = new Set([
   'addTeam', 'renameTeam', 'removeTeam', 'removeMember', 'adjustScore', 'setTurn',
   'startGame', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion',
   'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz', 'buzzFor',
-  'undo', 'stechen', 'discard',
+  'undo', 'stechen', 'discard', 'pause',
 ]);
 
 /**
@@ -497,6 +497,9 @@ async function handleAction(clientId, body) {
       break;
     case 'nextRound':
       G.nextRound(state);
+      break;
+    case 'pause':
+      G.setPause(state, body.an);
       break;
     case 'stechen': {
       // Alles, was heute schon auf dem Brett stand, fällt raus – sonst kommt
