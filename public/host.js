@@ -208,8 +208,13 @@ async function loadUrls() {
         ? el('button', { class: 'url', type: 'button', onclick: () => zeigeQr(url, liste) }, ...adressTeile(url))
         : el('code', { class: 'url' }, ...adressTeile(url)));
     }
+    // Der Punkt „andere Adresse" hilft nur, wenn es überhaupt eine zweite gibt.
+    const mehrere = $('#kein-handy-adresse');
+    if (mehrere) mehrere.hidden = !waehlbar;
     zeigeQr(info.urls[0], liste);
-    $('#remote-url').textContent = `${info.urls[0]}/remote`;
+    // zeigeQr() setzt sie mit – hier nur der Startwert für den Fall, dass es
+    // gar keine Adresse gibt und der QR-Code deshalb nicht gebaut wird.
+    $('#remote-url').textContent = `${info.urls[0] || '…'}/remote`;
   } catch {
     /* egal */
   }
@@ -241,6 +246,14 @@ function zeigeQr(basis, liste) {
   // Damit man vergleichen kann, was das Handy nach dem Scannen anzeigt.
   const zielZeile = $('#qr-ziel');
   if (zielZeile) zielZeile.textContent = ziel;
+  // Die Fernbedienung zieht mit. Sie stand bisher fest auf der ersten Adresse,
+  // während QR-Code und Zielzeile umschalteten – und umgeschaltet wird genau
+  // dann, wenn die erste die falsche ist: Auf einem Rechner mit VPN-, Docker-
+  // oder VirtualBox-Karte steht dort eine Adresse, die im Heimnetz niemand
+  // erreicht. Der Host schickt seine Gäste dann richtig los und tippt sich
+  // selbst die unerreichbare ein.
+  const fern = $('#remote-url');
+  if (fern) fern.textContent = `${basis}/remote`;
   for (const node of liste.children) node.classList.toggle('aktiv', node.textContent === basis);
 }
 
@@ -434,12 +447,46 @@ function renderLobby() {
 
 /** Zeichnet den Anschlussstand über dem Startknopf. Der Text kommt aus
     common.js, weil die Fernbedienung ihn genauso braucht. */
+/**
+ * Wie viele Handys da sind – und was zu tun ist, wenn keins kommt.
+ *
+ * Die Zeile über dem Startknopf sagt seit jeher, wer verbunden ist. Was sie
+ * nicht sagte: was man tut, wenn nach fünf Minuten immer noch niemand da ist.
+ * Genau dort bleibt ein Abend hängen, und der häufigste Grund steht in keiner
+ * Fehlermeldung, weil er gar nicht bis zum Server kommt – die Windows-Firewall
+ * blockt die Verbindung, bevor sie ankommt.
+ *
+ * Die Hilfe steht deshalb nicht von Anfang an da: Bis das erste Handy kommt,
+ * ist alles normal, und drei Absätze Fehlersuche neben dem QR-Code lesen sich
+ * wie eine Warnung. Sie erscheint erst, wenn eine Minute lang niemand verbunden
+ * war, und verschwindet, sobald sich eins meldet.
+ */
+const HILFE_NACH_MS = 60000;
+let ohneHandySeit = null;
+
 function renderAnschluss() {
   const zeile = $('#lobby-stand');
   if (!zeile) return;
   const { text, bereit } = anschlussStand(state);
   zeile.classList.toggle('bereit', bereit);
   setzeText(zeile, text);
+
+  const hilfe = $('#kein-handy');
+  if (!hilfe) return;
+  const verbunden = (state.wartende || 0)
+    + state.teams.reduce((n, t) => n + t.members.filter((m) => m.online).length, 0);
+  if (verbunden > 0) {
+    ohneHandySeit = null;
+    hilfe.hidden = true;
+    return;
+  }
+  if (ohneHandySeit == null) {
+    ohneHandySeit = performance.now();
+    // Ohne diesen Wecker bliebe die Hilfe aus, solange sich sonst nichts tut –
+    // und wenn kein Handy kommt, tut sich genau gar nichts.
+    setTimeout(() => { if (state?.phase === 'lobby') renderAnschluss(); }, HILFE_NACH_MS + 200);
+  }
+  hilfe.hidden = performance.now() - ohneHandySeit < HILFE_NACH_MS;
 }
 
 /**

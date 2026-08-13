@@ -52,6 +52,21 @@
            einen Widerspruch. -->
       <p class="muted small qr-ziel-zeile">Der Code führt direkt auf <code id="qr-ziel">…/play</code>.
         Öffnet das Handy nichts, tippt die Adresse oben ein – und schaut, ob es im selben WLAN hängt.</p>
+      <!-- Erscheint erst, wenn nach einer Weile immer noch kein Handy da ist.
+           Bis dahin ist es kein Problem, sondern der normale Ablauf. -->
+      <div id="kein-handy" class="kein-handy" hidden>
+        <b>Noch kein Handy angekommen?</b>
+        <ul>
+          <li><b>Windows-Firewall:</b> Beim ersten Start fragt Windows einmal, ob das Programm
+            im Netzwerk erreichbar sein darf. Wurde das weggeklickt oder steht das WLAN als
+            „Öffentlich", sieht kein Handy den Rechner. In den Windows-Einstellungen unter
+            „Firewall &amp; Netzwerkschutz" freigeben.</li>
+          <li><b>Gast-WLAN:</b> Viele Router lassen Geräte im Gastnetz nicht miteinander reden.
+            Alle ins normale WLAN.</li>
+          <li id="kein-handy-adresse" hidden><b>Andere Adresse:</b> Dein Rechner hat mehrere –
+            tipp oben eine andere an, der Code baut sich neu.</li>
+        </ul>
+      </div>
       <!-- Zwei Hinweise, die man einmal liest und danach kennt. Ausgeklappt
            nahmen sie ein Sechstel der Lobby ein – und schoben die Karten unter
            den Startbalken. Zugeklappt bleibt der Weg dorthin eine Zeile weit. -->

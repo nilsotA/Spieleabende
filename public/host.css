@@ -1894,3 +1894,21 @@ body.host.flat .tile {
   padding: 0.7rem 0.8rem;
   resize: vertical;
 }
+
+/* Die Verbindungshilfe in der Lobby. Sie steht nicht von Anfang an da – bis
+   das erste Handy kommt, ist alles normal, und drei Absätze Fehlersuche neben
+   dem QR-Code lesen sich wie eine Warnung. Erst wenn nach einer Weile immer
+   noch niemand verbunden ist, ist sie das, was der Host braucht. */
+.kein-handy {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 197, 49, 0.35);
+  background: rgba(255, 197, 49, 0.07);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.kein-handy ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+.kein-handy li + li { margin-top: 0.35rem; }
+.kein-handy b { color: var(--gold-hell); }
