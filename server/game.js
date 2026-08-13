@@ -99,6 +99,11 @@ export function createState() {
       // 'team' = das Team, das dran ist, tippt es auf seinem Handy an
       // 'host' = nur der Host, über Leinwand oder Fernbedienung
       feldwahl: 'team',
+      // Sekunden für den freigegebenen Buzzer, 0 = aus. Voreingestellt aus:
+      // Die Regeln des Spiels kennen keine Uhr, und wer sie nicht will, soll
+      // sie nicht wegklicken müssen. Sie wertet auch nichts von selbst – sie
+      // zeigt nur, dass die Zeit läuft, und dem Host, dass er auflösen kann.
+      buzzUhr: 0,
     },
     message: null,
     // Pause: Zwei Stunden Spiel heißen mindestens einmal Küche. Solange sie
@@ -911,6 +916,11 @@ export function viewFor(state, { isHost, clientId }) {
       onTheHook: q.onTheHook,
       buzzedTeamId: q.buzzedTeamId,
       buzzedBy: q.buzzedBy || null,
+      // Wie lange der Buzzer schon offen steht – vom Server gerechnet, nicht
+      // vom Gerät. Die Uhr eines Handys geht gern zwei Minuten falsch, und ein
+      // Balken, der auf einem Gerät schon leer ist und auf dem anderen noch
+      // voll, wäre schlimmer als keiner.
+      buzzOffenMs: q.buzzOpenedAt ? Date.now() - q.buzzOpenedAt : null,
       // Wie knapp war das Rennen? Der Server weiß es längst, hat es aber für
       // sich behalten – dabei ist genau das der Moment, über den danach geredet
       // wird. Nur bei einem echten Handy-Buzz: Wenn der Host stellvertretend

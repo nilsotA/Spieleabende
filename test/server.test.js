@@ -651,6 +651,51 @@ test('in der Pause ruft kein Handy ein Feld auf und niemand buzzert', async (t) 
   assert.equal((await zustand(base)).pause, false, 'ein neues Spiel räumt die Pause ab');
 });
 
+test('die Buzzer-Uhr ist aus, bis jemand sie einschaltet', async (t) => {
+  // Die Regeln des Spiels kennen keine Uhr. Wer sie nicht will, soll sie nicht
+  // wegklicken müssen – und wer sie will, bekommt nur die angebotenen Stufen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-uhr-'));
+  const port = 7100 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'uhr-host');
+  assert.equal((await zustand(base)).settings.buzzUhr, 0, 'ab Werk aus');
+
+  await host({ type: 'settings', settings: { buzzUhr: 15 } });
+  assert.equal((await zustand(base)).settings.buzzUhr, 15);
+
+  // Krumme Werte fallen durch die Bereinigung, ohne den Spielstand zu vergiften.
+  // `null`, `false`, `''` und `[]` stehen hier mit Absicht: Number() macht aus
+  // allen vieren eine 0, und 0 heißt „aus" – sie hätten die Uhr stillschweigend
+  // abgeschaltet, statt abgewiesen zu werden. Genau das ist einmal passiert.
+  for (const krumm of [7, 0.5, -10, 'zehn', null, false, '', [], {}, Infinity]) {
+    await host({ type: 'settings', settings: { buzzUhr: krumm } });
+    assert.equal((await zustand(base)).settings.buzzUhr, 15,
+      `${JSON.stringify(krumm)} hätte nicht durchgehen dürfen`);
+  }
+  await host({ type: 'settings', settings: { buzzUhr: 0 } });
+  assert.equal((await zustand(base)).settings.buzzUhr, 0, 'ausschalten geht wieder');
+
+  // Und die Uhr wertet nichts: Der Server schickt nur, wie lange der Buzzer
+  // offen steht – gerechnet von ihm, nicht von der Uhr eines Handys.
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'pass' });
+  const offen = await zustand(base);
+  assert.equal(offen.current.step, 'buzz');
+  assert.ok(offen.current.buzzOffenMs >= 0 && offen.current.buzzOffenMs < 5000,
+    `plausible Laufzeit, gemessen ${offen.current.buzzOffenMs}`);
+  await warte(600);
+  const spaeter = await zustand(base);
+  assert.ok(spaeter.current.buzzOffenMs > offen.current.buzzOffenMs, 'und sie läuft weiter');
+  assert.equal(spaeter.current.step, 'buzz', 'ohne dass sich am Spiel etwas ändert');
+});
+
 test('Zurücknehmen wirft ein frisch angelegtes Team nicht hinaus', async (t) => {
   // „Eigenes Team" darf jedes Handy jederzeit in der Lobby. Der Host darf dort
   // ebenso „dran" setzen, und das ist rücknehmbar. Vorher verschwand das neue

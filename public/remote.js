@@ -3,9 +3,39 @@
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
   installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand,
-  aufzaehlung, punkte } from '/common.js';
+  aufzaehlung, punkte, starteUhr } from '/common.js';
 
 let state = null;
+/**
+ * Die Uhr beim freien Buzzer – hier als Sekundenzahl in der Lagezeile.
+ *
+ * Der Host sieht den Balken auf der Leinwand; auf diesem Gerät geht es darum,
+ * wann er auflösen kann. Gewertet wird nichts, entschieden wird am Tisch.
+ */
+let uhrStopp = null;
+let uhrSchluessel = null;
+let uhrText = '';
+
+function renderUhr() {
+  const q = state.current;
+  const dauer = (state.settings?.buzzUhr || 0) * 1000;
+  const laeuft = !!q && q.step === 'buzz' && !q.buzzedTeamId && dauer > 0 && !state.pause;
+  const schluessel = laeuft ? `${q.catIdx}:${q.rowIdx}:${(q.lockedOut || []).length}` : null;
+  if (!laeuft) {
+    uhrStopp?.();
+    uhrStopp = null;
+    uhrSchluessel = null;
+    return;
+  }
+  if (schluessel === uhrSchluessel) return;
+  uhrStopp?.();
+  uhrSchluessel = schluessel;
+  uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
+    const sek = Math.ceil(rest / 1000);
+    setzeText($('#r-phase'), rest > 0 ? `${uhrText}  ⏱ ${sek}` : `${uhrText}  ⏱ Zeit ist um`);
+  });
+}
+
 // Welche Frage zuletzt auf dem Schirm stand – siehe render(). Steht hier oben
 // bei den übrigen Modulwerten, nicht erst vor render(): connect() weiter unten
 // ruft render() zwar erst beim ersten Zustand vom Server auf, aber eine
@@ -202,9 +232,10 @@ function render() {
           big('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass')),
         );
       } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-        setzeText(phase, q.stechen
+        uhrText = q.stechen
           ? 'Stechen – wer zuerst drückt, antwortet.'
-          : `Buzzer ist frei · ${q.halfValue} Punkte`);
+          : `Buzzer ist frei · ${q.halfValue} Punkte`;
+        setzeText(phase, uhrText);
         // „Keiner weiß es" zuerst: Das ist der Knopf, der die Frage beendet,
         // und bei acht Teams stand er vorher unter sieben Vertreterknöpfen –
         // also außerhalb des Bildschirms, obwohl der Tisch längst wartet.
@@ -240,6 +271,8 @@ function render() {
   }
 
   renderRueckgaengig();
+  // Nach dem Setzen der Lagezeile: Die Uhr hängt ihre Sekunden daran.
+  renderUhr();
 
   const list = $('#r-teams');
   // Name und Wappen stehen in der Zeile, also gehören sie in den Schlüssel.

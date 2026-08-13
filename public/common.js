@@ -231,6 +231,42 @@ export function hostAction(type, payload = {}) {
   return action(type, daten, 'host');
 }
 
+/**
+ * Die Uhr für den freigegebenen Buzzer.
+ *
+ * Wie viel Zeit schon vergangen ist, rechnet der Server (`buzzOffenMs`) – die
+ * Uhr eines Handys geht gern zwei Minuten falsch, und ein Balken, der auf einem
+ * Gerät leer ist und auf dem anderen voll, wäre schlimmer als keiner. Von dort
+ * an zählt jedes Gerät für sich weiter; beim nächsten Zustand vom Server stellt
+ * es sich wieder gleich.
+ *
+ * Wer „Bewegung reduzieren" gesetzt hat, bekommt einen Schritt pro Sekunde
+ * statt eines Bildes pro Bild. Die Auskunft bleibt dieselbe, sie ruckelt nur –
+ * und genau das ist dort erwünscht.
+ *
+ * Gibt eine Funktion zurück, die die Uhr anhält.
+ */
+export function starteUhr(dauerMs, offenMs, tick) {
+  const ende = performance.now() + Math.max(0, dauerMs - (offenMs || 0));
+  const sanft = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let laeuft = true;
+  let handle = null;
+  const schritt = () => {
+    if (!laeuft) return;
+    const rest = Math.max(0, ende - performance.now());
+    tick(rest, dauerMs ? rest / dauerMs : 0);
+    if (rest <= 0) return;
+    handle = sanft ? setTimeout(schritt, 250) : requestAnimationFrame(schritt);
+  };
+  schritt();
+  return () => {
+    laeuft = false;
+    if (handle == null) return;
+    if (sanft) clearTimeout(handle);
+    else cancelAnimationFrame(handle);
+  };
+}
+
 /* ---------------------------------------------------------------- Sounds */
 
 let audio = null;

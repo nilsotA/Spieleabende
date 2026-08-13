@@ -1,7 +1,7 @@
 import {
   $, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
   setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
-  punkte, delta as vorzeichen } from '/common.js';
+  punkte, delta as vorzeichen, starteUhr } from '/common.js';
 import { qrSvg } from '/qr.js';
 
 let state = null;
@@ -143,6 +143,7 @@ for (const [id, key, parse] of [
   ['#set-penalty', 'wrongPenalty', (v) => v],
   ['#set-buzzcorrect', 'buzzAfterCorrect', (v) => v === 'true'],
   ['#set-feldwahl', 'feldwahl', (v) => v],
+  ['#set-buzzuhr', 'buzzUhr', (v) => Number(v)],
 ]) {
   $(id).addEventListener('change', (ev) => act('settings', { settings: { [key]: parse(ev.target.value) } }));
 }
@@ -293,9 +294,52 @@ function render(prev) {
   renderPlayers();
   renderScoreboard();
   renderPause();
+  renderUhr();
   renderControls();
   renderWiederhergestellt();
   if (!$('#menu').hidden) fillMenu();
+}
+
+/**
+ * Die Uhr beim freien Buzzer – wenn der Host sie eingeschaltet hat.
+ *
+ * Sie wertet nichts. Sie zeigt dem Raum, dass die Zeit läuft, und dem Host, dass
+ * er auflösen kann; entschieden wird weiter am Tisch. Genau deshalb steht sie
+ * auch nicht als eigenes Element auf der Bühne, sondern übernimmt den goldenen
+ * Lichtbalken, der ohnehin „Buzzer ist frei" bedeutet: Er zieht sich zur Mitte
+ * zusammen, statt einfach dazustehen.
+ */
+let uhrStopp = null;
+let uhrSchluessel = null;
+
+function renderUhr() {
+  const q = state.current;
+  const dauer = (state.settings.buzzUhr || 0) * 1000;
+  const laeuft = !!q && q.step === 'buzz' && !q.buzzedTeamId && dauer > 0 && !state.pause;
+  // Neu gestartet wird nur, wenn wirklich eine andere Buzz-Phase beginnt –
+  // sonst setzte jeder Zustand vom Server die Uhr zurück, und ein Handy, das
+  // aus dem Standby kommt, schenkte dem Raum zehn Sekunden.
+  const schluessel = laeuft ? `${q.catIdx}:${q.rowIdx}:${(q.lockedOut || []).length}` : null;
+  const stage = $('.stage');
+  if (!laeuft) {
+    uhrStopp?.();
+    uhrStopp = null;
+    uhrSchluessel = null;
+    stage.classList.remove('uhr-laeuft', 'uhr-aus');
+    stage.style.removeProperty('--uhr');
+    return;
+  }
+  if (schluessel === uhrSchluessel) return;
+  uhrStopp?.();
+  uhrSchluessel = schluessel;
+  stage.classList.add('uhr-laeuft');
+  stage.classList.remove('uhr-aus');
+  uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest, anteil) => {
+    stage.style.setProperty('--uhr', String(anteil));
+    if (rest > 0) return;
+    stage.classList.remove('uhr-laeuft');
+    stage.classList.add('uhr-aus');
+  });
 }
 
 /**
@@ -358,6 +402,7 @@ function renderLobby() {
   $('#set-penalty').value = state.settings.wrongPenalty;
   $('#set-buzzcorrect').value = String(state.settings.buzzAfterCorrect);
   $('#set-feldwahl').value = state.settings.feldwahl || 'team';
+  $('#set-buzzuhr').value = String(state.settings.buzzUhr || 0);
   $('#btn-start').disabled = state.teams.length < 2;
   renderAnschluss();
   // Das frisch angelegte Team ins Bild holen. Ab dem siebten Team reicht die
@@ -2120,6 +2165,9 @@ function fuelleSpickzettel() {
   }
   zeilen.push(['Runde 2', state.round >= 2 ? 'läuft – alles zählt doppelt' : 'zählt doppelt',
     state.round >= 2]);
+  if (s.buzzUhr) {
+    zeilen.push(['Uhr beim Buzzer', `${s.buzzUhr} Sekunden – sie zeigt nur die Zeit, gewertet wird nichts`]);
+  }
   zeilen.push(['Gleichstand am Ende', 'ein Stechen entscheidet: Buzzer frei, richtig gewinnt']);
 
   const liste = $('#spick-regeln');

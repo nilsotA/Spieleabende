@@ -285,6 +285,21 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
               background 160ms linear, box-shadow 160ms linear;
 }
 .stage.buzzopen .buzzline { transform: scaleX(1); opacity: 1; }
+/* Läuft die Uhr, ist der Lichtbalken die Uhr: Er zieht sich zur Mitte zusammen,
+   statt einfach dazustehen. Ein zweites Element wäre ein zweites Signal für
+   dieselbe Sache – und die Bühne hat schon genug. Der Übergang muss dabei
+   weichen, sonst läuft er gegen die Werte an, die host.js Bild für Bild setzt. */
+.stage.buzzopen.uhr-laeuft .buzzline {
+  transition: opacity 180ms linear, background 160ms linear, box-shadow 160ms linear;
+  transform: scaleX(var(--uhr, 1));
+}
+/* Zeit ist um: Der Balken bleibt stehen, wechselt aber die Farbe – niemand wird
+   ausgewertet, es ist eine Ansage an den Host, dass er auflösen kann. */
+.stage.buzzopen.uhr-aus .buzzline {
+  transform: scaleX(1);
+  background: linear-gradient(90deg, transparent, var(--red-1) 30%, var(--red-2) 50%, var(--red-1) 70%, transparent);
+  box-shadow: 0 0 26px rgba(224, 27, 70, 0.5);
+}
 .stage.buzzhit .buzzline {
   background: linear-gradient(90deg, transparent, #fff 50%, transparent);
   background: linear-gradient(90deg, transparent, var(--team, #fff) 50%, transparent);

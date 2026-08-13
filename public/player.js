@@ -1,7 +1,7 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash,
   installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
-  istStumm, setzeStumm, punkte, delta as vorzeichen } from '/common.js';
+  istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr } from '/common.js';
 
 let state = null;
 let selectedTeam = localStorage.getItem('quizduell.teamId') || null;
@@ -194,6 +194,9 @@ function render(prev) {
   renderQuestion();
   renderPicker();
   renderBuzzer(prev);
+  // Nach renderBuzzer: Der Renderer setzt den Grundtext der Statuszeile, die
+  // Uhr hängt ihre Sekunden daran.
+  renderUhr();
   renderBilanz(me);
   renderScores();
   zeigeMehr();
@@ -496,6 +499,41 @@ function renderPicker() {
   });
 }
 
+/**
+ * Die Uhr beim freien Buzzer – als Zahl, nicht als Balken.
+ *
+ * Auf dem Handy schaut man auf den Knopf, nicht an den Rand; die Sekunden
+ * stehen deshalb in der Zeile, die ohnehin sagt, worum es geht. Gewertet wird
+ * nichts – wenn die Zeit um ist, steht es da, und entschieden wird am Tisch.
+ * Der Knopf bleibt scharf: Wer eine Sekunde zu spät drückt, hat trotzdem
+ * gedrückt, und darüber entscheidet der Host.
+ */
+let uhrStopp = null;
+let uhrSchluessel = null;
+let uhrText = '';
+
+function renderUhr() {
+  const q = state.current;
+  const dauer = (state.settings?.buzzUhr || 0) * 1000;
+  const laeuft = !!q && q.step === 'buzz' && !q.buzzedTeamId && dauer > 0
+    && !state.pause && state.you?.canBuzz;
+  const status = $('#p-status');
+  const schluessel = laeuft ? `${q.catIdx}:${q.rowIdx}:${(q.lockedOut || []).length}` : null;
+  if (!laeuft) {
+    uhrStopp?.();
+    uhrStopp = null;
+    uhrSchluessel = null;
+    return;
+  }
+  if (schluessel === uhrSchluessel) return;
+  uhrStopp?.();
+  uhrSchluessel = schluessel;
+  uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
+    const sek = Math.ceil(rest / 1000);
+    setzeText(status, rest > 0 ? `${uhrText}  ⏱ ${sek}` : `${uhrText}  ⏱ Zeit ist um`);
+  });
+}
+
 function renderBuzzer(prev) {
   const q = state.current;
   const you = state.you;
@@ -585,9 +623,11 @@ function renderBuzzer(prev) {
   if (you.canBuzz) {
     buzzer.classList.add('armed');
     // Im Stechen geht es nicht um Punkte, sondern um den ganzen Abend.
-    setzeText(status, q.stechen
+    const grundtext = q.stechen
       ? 'Stechen! Wer zuerst drückt und richtig liegt, gewinnt.'
-      : `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`);
+      : `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`;
+    uhrText = grundtext;
+    setzeText(status, grundtext);
     status.classList.add('you');
     // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst
     // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.

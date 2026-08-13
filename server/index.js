@@ -537,6 +537,15 @@ function pickSettings(s = {}) {
   if (['none', 'half', 'full'].includes(s.wrongPenalty)) out.wrongPenalty = s.wrongPenalty;
   if (typeof s.buzzAfterCorrect === 'boolean') out.buzzAfterCorrect = s.buzzAfterCorrect;
   if (['team', 'host'].includes(s.feldwahl)) out.feldwahl = s.feldwahl;
+  // Nur die angebotenen Stufen – eine Uhr mit 0,5 Sekunden wäre kein Spiel mehr.
+  // Und erst prüfen, ob überhaupt eine Zahl gemeint ist: `Number(null)` ist 0,
+  // und 0 heißt „aus". Eine Einstellung mit `buzzUhr: null` hätte die Uhr damit
+  // stillschweigend abgeschaltet, statt abgewiesen zu werden – dasselbe für
+  // `false`, `''` und `[]`. Vom eigenen Test gefunden.
+  const uhr = typeof s.buzzUhr === 'number'
+    || (typeof s.buzzUhr === 'string' && s.buzzUhr.trim() !== '')
+    ? Number(s.buzzUhr) : NaN;
+  if ([0, 10, 15, 20, 30].includes(uhr)) out.buzzUhr = uhr;
   return out;
 }
 
