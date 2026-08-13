@@ -501,6 +501,13 @@ aus, hat aber fünf Zacken statt neun.
   echten Server – inklusive `SIGKILL` mitten im Spiel und anschließendem Neustart.
   Ein Test prüft außerdem, dass innerhalb einer Kategorie keine Frage die Lösung
   einer anderen verrät – so etwas verschenkt sonst ausgerechnet die teuerste Frage.
+  Dazu kommen Zufallsläufe: 250 Partien à 600 zufällige Züge gegen die Regeln,
+  plus 60 Läufe, die den Endstand mit Gleichstand von Hand aufbauen und erst dann
+  würfeln – dort wird gehalten, dass das Stechen keine Punkte vergibt, nur die
+  Punktgleichen buzzern dürfen und ein Sieger nur mit einer richtigen Antwort
+  feststeht. Nach jedem einzelnen Zug wird auch die Sicht geprüft, die über die
+  Leitung geht: Sie muss halten, und sie darf keinem Handy eine Lösung zeigen,
+  die es nicht sehen darf.
 
 ```
 Start-Quizduell.command/.bat, start-quizduell.sh   zum Doppelklicken

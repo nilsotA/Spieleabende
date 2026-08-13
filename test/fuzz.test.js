@@ -82,7 +82,10 @@ function pruefeZustand(state, spur) {
   const q = state.current;
   if (q) {
     assert.ok(['primary', 'buzz', 'result'].includes(q.step), `unbekannter Schritt „${q.step}" ${wo()}`);
-    assert.ok(ids.has(q.teamId), `Zugteam der Frage gibt es nicht mehr ${wo()}`);
+    // Eine Stechfrage hat kein Zugteam: Es gibt keinen, der sie zuerst
+    // bekommt – der Buzzer ist sofort frei, und zwar nur für die Punktgleichen.
+    if (q.stechen) assert.equal(q.teamId ?? null, null, `Stechfrage mit Zugteam ${wo()}`);
+    else assert.ok(ids.has(q.teamId), `Zugteam der Frage gibt es nicht mehr ${wo()}`);
     assert.equal(q.halfValue ?? G.halfPoints(q.value), G.halfPoints(q.value), `halbe Punkte falsch ${wo()}`);
     for (const id of q.lockedOut) assert.ok(ids.has(id), `gesperrtes Team gibt es nicht ${wo()}`);
     if (q.buzzedTeamId) {
@@ -107,6 +110,38 @@ function pruefeZustand(state, spur) {
         assert.ok(Number.isInteger(c.value) && c.value > 0, `Feldwert kaputt ${wo()}`);
       }
     }
+  }
+
+  // Die Sicht ist das, was wirklich über die Leitung geht – sie muss jeden
+  // dieser Zustände aushalten, und sie darf niemandem die Lösung verraten, der
+  // sie nicht sehen darf. Ein Zustand, an dem viewFor stolpert, wäre am
+  // Spieleabend eine schwarze Leinwand mitten im Spiel.
+  let sichtHost;
+  try {
+    sichtHost = G.viewFor(state, { isHost: true, clientId: 'c0' });
+  } catch (err) {
+    assert.fail(`viewFor für den Host wirft ${err.name}: ${err.message} ${wo()}`);
+  }
+  for (const client of ['c0', 'c3', 'unbekannt']) {
+    let sicht;
+    try {
+      sicht = G.viewFor(state, { isHost: false, clientId: client });
+    } catch (err) {
+      assert.fail(`viewFor für ${client} wirft ${err.name}: ${err.message} ${wo()}`);
+    }
+    if (sicht.current && !state.current.revealed) {
+      assert.equal(sicht.current.answer, null,
+        `die Lösung stand unaufgelöst in der Sicht von ${client} ${wo()}`);
+      assert.equal(sicht.current.note, null,
+        `der Zusatz stand unaufgelöst in der Sicht von ${client} ${wo()}`);
+    }
+    // Auch der ungespielte Rest des Fragensatzes gehört keinem Handy.
+    assert.equal(JSON.stringify(sicht).includes('questionSet'), false,
+      `der Fragensatz steckt in der Sicht von ${client} ${wo()}`);
+  }
+  if (state.current && !state.current.revealed) {
+    assert.ok(sichtHost.current.answer === state.current.answer,
+      `der Host bekommt seine Lösung nicht ${wo()}`);
   }
 }
 
@@ -141,6 +176,15 @@ function zuege(state, r) {
     ['nextRound', () => G.nextRound(state)],
     ['setTurn', () => team && G.setTurn(state, team.id)],
     ['backToLobby', () => Object.assign(state, G.backToLobby(state))],
+    // Die drei fehlten. Die Pause greift in jede Phase hinein – gemessen sind
+    // seither über 9000 der geprüften Zustände pausierte. Das Wappen ist der
+    // einzige Zug, den ein Handy am fremden Team versuchen kann. Und das
+    // Stechen prüft hier vor allem seine Absage: Zufallszüge kommen nie bis
+    // zum Endstand, also muss es in jeder anderen Lage sauber abprallen. Den
+    // gespielten Fall übernimmt der Endspiel-Lauf weiter unten.
+    ['setPause', () => G.setPause(state, r() < 0.5)],
+    ['setTeamWappen', () => team && G.setTeamWappen(state, team.id, zufall(G.TEAM_WAPPEN))],
+    ['startStechen', () => G.startStechen(state, { text: `Stechfrage ${Math.floor(r() * 1000)}`, answer: 'Antwort' })],
   ];
 }
 
@@ -251,6 +295,99 @@ test('die Punktestände sind genau die Summe der Wertungen', () => {
     for (const t of state.teams) {
       assert.equal(t.bilanz.geholt - t.bilanz.verloren, t.score,
         `${t.name}: Bilanz ${t.bilanz.geholt}−${t.bilanz.verloren} passt nicht zu ${t.score}`);
+    }
+  }
+});
+
+/**
+ * Zufallszüge im Endspiel.
+ *
+ * Der Zufall oben kommt nie bis zum Endstand: Dafür müssten 24 Felder in
+ * Folge sauber durchgespielt werden. Genau dort steht aber der Teil des
+ * Abends, der am wenigsten geübt ist – Gleichstand, Stechen, Sieger. Dieser
+ * Lauf baut den Endstand deshalb von Hand und würfelt erst dann.
+ */
+test('das Stechen hält auch zufälligen Zügen stand', () => {
+  for (let saat = 1; saat <= 60; saat++) {
+    const r = wuerfel(saat * 40503);
+    const state = G.createState();
+    for (const name of ['Rot', 'Blau', 'Grün']) G.addTeam(state, name);
+    for (let i = 0; i < 3; i++) G.joinTeam(state, `c${i}`, state.teams[i].id, `N${i}`);
+    G.startGame(state, SATZ);
+    // Alles auflösen, ohne zu werten: Am Ende steht es 0:0:0 – Gleichstand an
+    // der Spitze, also gibt es ein Stechen.
+    for (let runde = 0; runde < 2; runde++) {
+      for (const [c, cat] of state.board.categories.entries()) {
+        for (let z = 0; z < cat.cells.length; z++) {
+          G.pickCell(state, c, z, state.teams[state.turnIndex].id);
+          G.endQuestion(state);
+          G.closeQuestion(state);
+        }
+      }
+      if (runde === 0) G.nextRound(state);
+    }
+    assert.equal(state.phase, 'gameOver');
+    // Zwei gleichauf an der Spitze, einer dahinter: Nur so lässt sich prüfen,
+    // dass im Stechen wirklich nur die Punktgleichen buzzern dürfen. Stünden
+    // alle drei gleich, wäre jede Sperre unsichtbar.
+    G.adjustScore(state, state.teams[2].id, -100);
+    assert.equal(G.spitzenTeams(state).length, 2, 'zwei gleichauf an der Spitze');
+
+    const spur = ['Endstand'];
+    // Drei Zusicherungen, die das Handbuch für das Stechen gibt.
+    const staendeVorher = state.teams.map((t) => t.score).join(',');
+    let siegerVorher = null;
+    for (let schritt = 0; schritt < 120; schritt++) {
+      const zufall = (liste) => liste[Math.floor(r() * liste.length)];
+      const team = zufall(state.teams);
+      const client = `c${Math.floor(r() * 4)}`;
+      let gewertet = null; // welche Wertung dieser Schritt war, falls er durchkam
+      const [name, tun] = zufall([
+        ['stechen', () => G.startStechen(state, { text: `Stechfrage ${schritt}`, answer: 'Antwort' })],
+        ['buzz', () => G.buzz(state, client)],
+        ['buzzFor', () => G.buzzFor(state, team.id)],
+        ['judge', () => { const wie = r() < 0.5; G.judge(state, wie); gewertet = wie; }],
+        ['endQuestion', () => G.endQuestion(state)],
+        ['close', () => G.closeQuestion(state)],
+        ['resetBuzz', () => G.resetBuzz(state)],
+        ['pause', () => G.setPause(state, r() < 0.5)],
+      ]);
+      spur.push(name);
+      try {
+        tun();
+      } catch (err) {
+        assert.ok(err instanceof G.GameError,
+          `Saat ${saat}, Schritt ${schritt}: ${err.name}: ${err.message}\n  Spur: ${spur.slice(-8).join(' → ')}`);
+        gewertet = null;
+      }
+      pruefeZustand(state, spur);
+      const wo = () => `${spur.slice(-8).join(' → ')} (Saat ${saat})`;
+
+      // 1. Das Stechen vergibt keine Punkte – die Tafel bleibt, wie sie
+      //    gespielt wurde.
+      assert.equal(state.teams.map((t) => t.score).join(','), staendeVorher,
+        `das Stechen hat den Punktestand verändert ${wo()}`);
+
+      // 2. Buzzern darf nur, wer punktgleich an der Spitze steht.
+      if (state.current?.stechen && state.current.buzzedTeamId) {
+        const spitze = G.spitzenTeams(state).map((t) => t.id);
+        assert.ok(spitze.includes(state.current.buzzedTeamId),
+          `im Stechen hat ein Team gebuzzert, das nicht an der Spitze steht ${wo()}`);
+      }
+
+      // 3. Sieger wird man nur mit einer richtigen Antwort.
+      if (state.stechenSieger && !siegerVorher) {
+        assert.equal(gewertet, true,
+          `der Stechsieger stand fest, ohne dass richtig gewertet wurde ${wo()}`);
+      }
+      if (siegerVorher) {
+        assert.equal(state.stechenSieger, siegerVorher, `der Stechsieger hat sich geändert ${wo()}`);
+      }
+      siegerVorher = state.stechenSieger || siegerVorher;
+      if (state.stechenSieger) {
+        assert.ok(state.teams.some((t) => t.id === state.stechenSieger),
+          `der Stechsieger ist ein Team, das es gibt ${wo()}`);
+      }
     }
   }
 });
