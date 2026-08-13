@@ -54,6 +54,42 @@ export function verbergeSchluessel() {
 }
 
 /**
+ * Der Gerätespeicher – aber so, dass er das Spiel nie umbringt.
+ *
+ * `localStorage` ist kein sicherer Boden: Im privaten Modus von Safari, bei
+ * abgeschalteten Website-Daten und hinter mancher Jugendschutz- oder
+ * Firmeneinstellung wirft schon der Zugriff auf `window.localStorage` einen
+ * Fehler – nicht erst das Schreiben. Passiert das beim Laden eines Moduls,
+ * stirbt das ganze Skript an dieser Zeile, und weil beide Ansichten erst per
+ * JavaScript sichtbar geschaltet werden, bleibt auf dem Handy eine vollkommen
+ * leere dunkle Seite stehen. Genau das ist einem Gast beim Spiel über den
+ * Tunnel passiert.
+ *
+ * Deshalb geht ab hier jeder Zugriff durch diese beiden Funktionen. Klappt der
+ * echte Speicher nicht, merkt sich die Seite alles in einer Map: Der Abend
+ * läuft dann vollständig, nur ein Neuladen vergisst Name und Team – lästig,
+ * aber unsichtbar gegen eine tote Seite.
+ */
+const notizen = new Map();
+export function lies(schluessel) {
+  try {
+    const wert = localStorage.getItem(schluessel);
+    if (wert !== null) return wert;
+  } catch {
+    /* kein Speicher – dann eben aus der Map */
+  }
+  return notizen.has(schluessel) ? notizen.get(schluessel) : null;
+}
+export function merke(schluessel, wert) {
+  notizen.set(schluessel, wert);
+  try {
+    localStorage.setItem(schluessel, wert);
+  } catch {
+    /* siehe oben: der Wert lebt in der Map weiter, bis die Seite neu lädt */
+  }
+}
+
+/**
  * Der Nachweis für die eigene Gerätekennung – siehe connect().
  *
  * Er liegt neben der Kennung im Speicher des Geräts, nicht nur in der Seite:
@@ -66,18 +102,10 @@ function geheimSchluessel() {
   return `quizduell.geheim.${ROLE}`;
 }
 function holeGeheim() {
-  try {
-    return localStorage.getItem(geheimSchluessel()) || null;
-  } catch {
-    return null; // privater Modus ohne Speicher – dann eben ohne Nachweis
-  }
+  return lies(geheimSchluessel());
 }
 function merkeGeheim(wert) {
-  try {
-    if (wert) localStorage.setItem(geheimSchluessel(), wert);
-  } catch {
-    /* siehe oben */
-  }
+  if (wert) merke(geheimSchluessel(), wert);
 }
 
 export function setRole(role) {
@@ -86,10 +114,10 @@ export function setRole(role) {
 
 export function clientId() {
   const key = `quizduell.clientId.${ROLE}`;
-  let id = localStorage.getItem(key);
+  let id = lies(key);
   if (!id) {
     id = `c_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
-    localStorage.setItem(key, id);
+    merke(key, id);
   }
   return id;
 }
@@ -482,7 +510,7 @@ const KLAENGE = {
 /* Ton lässt sich abschalten – auf jedem Gerät für sich, denn der Beamer steht
    im Wohnzimmer und die Handys liegen zwischen den Leuten. */
 const TON_AUS = 'quizduell.stumm';
-let stumm = localStorage.getItem(TON_AUS) === '1';
+let stumm = lies(TON_AUS) === '1';
 
 export function istStumm() {
   return stumm;
@@ -490,7 +518,7 @@ export function istStumm() {
 
 export function setzeStumm(an) {
   stumm = !!an;
-  localStorage.setItem(TON_AUS, stumm ? '1' : '0');
+  merke(TON_AUS, stumm ? '1' : '0');
   return stumm;
 }
 

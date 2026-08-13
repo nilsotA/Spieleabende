@@ -433,3 +433,8 @@ function big(label, cls, onclick) {
     },
   }, label);
 }
+
+// Lebenszeichen für die Startwache (start-wache.js): Ab hier steht die Seite.
+// Fehlt diese Zeile, weil das Modul vorher gestorben ist, meldet sich die
+// Wache mit einer lesbaren Erklärung statt einer schwarzen Fläche.
+window.quizduellLaeuft = true;

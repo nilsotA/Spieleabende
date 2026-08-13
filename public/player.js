@@ -1,18 +1,25 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash,
   installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
-  istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr, verbergeSchluessel } from '/common.js';
+  istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr, verbergeSchluessel,
+  lies, merke } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
 
 let state = null;
-let selectedTeam = localStorage.getItem('quizduell.teamId') || null;
+let selectedTeam = lies('quizduell.teamId') || null;
 let pointerDown = false;
 
 installAudioUnlock();
 keepScreenAwake(); // auch nach einem Reload, nicht nur beim Beitreten
-$('#my-name').value = localStorage.getItem('quizduell.name') || '';
+$('#my-name').value = lies('quizduell.name') || '';
+// Bis der erste Spielstand eintrifft, gilt die Anmeldung. Beide Ansichten sind
+// per CSS versteckt und wurden bisher erst beim ersten Zustand sichtbar –
+// hakte die Verbindung, stand auf dem Handy so lange eine leere Seite statt
+// des Formulars. Die Anmeldung ist ohnehin das Richtige: beigetreten ist hier
+// noch niemand, und der erste Zustand rückt sie in derselben Sekunde zurecht.
+$('#view-join').classList.add('active');
 
 connect({
   role: 'player',
@@ -46,8 +53,8 @@ $('#join-form').addEventListener('submit', async (ev) => {
   document.activeElement?.blur?.(); // Tastatur wegräumen
   const res = await action('joinTeam', { teamId: selectedTeam, name });
   if (res.ok) {
-    localStorage.setItem('quizduell.name', name);
-    localStorage.setItem('quizduell.teamId', selectedTeam);
+    merke('quizduell.name', name);
+    merke('quizduell.teamId', selectedTeam);
   }
 });
 
@@ -69,7 +76,7 @@ async function eigenesTeam() {
   }
   document.activeElement?.blur?.();
   const res = await action('eigenesTeam', { name });
-  if (res.ok) localStorage.setItem('quizduell.name', name);
+  if (res.ok) merke('quizduell.name', name);
 }
 
 /* Stumm gilt pro Gerät: Wer neben dem Beamer sitzt, braucht seinen Buzzerton
@@ -884,3 +891,8 @@ function renderScores() {
     box.append(el('span', { class: cls }, `${team.wappen} ${team.name}: ${punkte(team.score)}`));
   }
 }
+
+// Lebenszeichen für die Startwache (start-wache.js): Ab hier steht die Seite.
+// Fehlt diese Zeile, weil das Modul vorher gestorben ist, meldet sich die
+// Wache mit einer lesbaren Erklärung statt einer schwarzen Fläche.
+window.quizduellLaeuft = true;

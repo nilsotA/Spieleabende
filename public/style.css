@@ -278,3 +278,42 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------ Startwache */
+
+/* Die Meldung, wenn das Skript beim Laden gestorben ist – siehe
+   start-wache.js. Sie liegt über allem, denn „allem" ist in diesem Fall eine
+   leere Seite. Bewusst großzügig gesetzt: Sie wird auf einem Handy gelesen,
+   im Halbdunkel, von jemandem, der gerade mitspielen will. */
+.startwache {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 1.4rem;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+.startwache h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  color: #ff8aa2;
+}
+.startwache p { margin: 0; }
+.startwache ul { margin: 0; padding-left: 1.2rem; }
+.startwache li { margin-bottom: 0.5rem; }
+.startwache .btn { margin-top: 0.4rem; }
+/* Der technische Grund: leiser, aber nicht kleiner und nicht blass – er wird
+   im Zweifel abgetippt oder vorgelesen. */
+.startwache-grund {
+  border-top: 1px solid var(--line);
+  padding-top: 0.8rem;
+  color: #b9c6da;
+  word-break: break-word;
+}

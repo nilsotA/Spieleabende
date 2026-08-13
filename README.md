@@ -216,6 +216,19 @@ hergestellt. Der Host-Screen sagt dann oben, von wann der Stand ist, und bietet
 kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand,
 und „Spiel beenden“ im Host-Menü verwirft ihn sofort.
 
+### Ein Handy zeigt nur eine leere Seite
+
+Kommt praktisch nur bei Handys vor, die im **privaten Modus** surfen oder denen
+jemand die Website-Daten gesperrt hat: Der Browser verweigert dann den kleinen
+Gerätespeicher, in dem Name, Team und die Gerätekennung liegen.
+
+Das Spiel läuft inzwischen auch ohne diesen Speicher weiter – der Abend geht
+also normal durch, nur ein Neuladen vergisst Name und Team. Und falls doch
+einmal etwas anderes beim Laden schiefgeht, steht das seit Neuestem auch da:
+Statt einer schwarzen Fläche erscheint „Die Seite konnte nicht starten“, was zu
+tun ist und der technische Grund zum Vorzeigen. Erster Griff bleibt trotzdem:
+einen normalen Tab öffnen und den QR-Code noch einmal scannen.
+
 ### Noch ein Satz?
 
 Nach dem Endstand führt „Spiel beenden“ im Menü zurück in die Lobby: Punkte auf

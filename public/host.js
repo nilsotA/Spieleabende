@@ -2820,3 +2820,8 @@ document.addEventListener('keydown', (ev) => {
   else if (key === ' ' && q.step === 'result') { ev.preventDefault(); act('close'); }
   else if (key === 'l') { ev.preventDefault(); peek = !peek; renderControls(); }
 });
+
+// Lebenszeichen für die Startwache (start-wache.js): Ab hier steht die Seite.
+// Fehlt diese Zeile, weil das Modul vorher gestorben ist, meldet sich die
+// Wache mit einer lesbaren Erklärung statt einer schwarzen Fläche.
+window.quizduellLaeuft = true;
