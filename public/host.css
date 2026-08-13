@@ -1141,6 +1141,24 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   78% { opacity: 1; }
   100% { opacity: 0; }
 }
+/* Die Ansage ist nicht die Verpackung der Runde, sie ist die Ansage.
+   Ohne die Ausnahme setzte die allgemeine Regel für „Bewegung reduzieren" ihre
+   Dauer auf 0,01 ms – und weil das letzte Bild Deckkraft 0 hat, stand sie ihre
+   vollen 1,8 Sekunden unsichtbar im Bild, während der Rundenton über eine leere
+   Leinwand lief. Dasselbe traf die fliegenden Punkte am Pult. Beide bewegen
+   sich nur in der Deckkraft; es geht also nichts von dem verloren, wovon die
+   Einstellung befreien soll. */
+@media (prefers-reduced-motion: reduce) {
+  .ansage.an { animation-duration: var(--dauer, 1800ms) !important; }
+  .hitmark { animation-duration: 900ms !important; }
+  /* Ohne Reise: sichtbar werden, stehen bleiben, ausblenden. */
+  @keyframes hit {
+    0% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
+    18% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+    70% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
+  }
+}
 .ansage-1 {
   font-weight: 900;
   text-transform: uppercase;

@@ -572,7 +572,19 @@ async function handleAction(clientId, body) {
       for (const runde of state.questionSet?.rounds || []) {
         for (const cat of runde.categories) for (const q of cat.questions) gespielt.push(q.text);
       }
-      G.startStechen(state, await stechenFrage([...gespielt, ...(state.stechenTexte || [])]));
+      // Erst warten, dann `state` lesen.
+      //
+      // Stand das `await` in der Argumentliste, war `state` schon gelesen,
+      // bevor gewartet wurde – und `undo`, `discard` und „Neues Spiel" weisen
+      // diesen Modulwert neu zu. Trifft einer davon in den Millisekunden ein,
+      // die das Einlesen der Fragensätze braucht, arbeitete das Stechen auf
+      // einem abgehängten Zustand: Es verpuffte spurlos (mit `ok: true`), und
+      // sein Schnappschuss landete trotzdem auf dem Rückweg – auch auf einem,
+      // den „Neues Spiel" gerade geleert hatte. Ein `undo` darauf holte das
+      // beendete Spiel zurück. Nachgestellt, dreimal von dreimal.
+      // `startGame` macht es an derselben Stelle schon richtig.
+      const frage = await stechenFrage([...gespielt, ...(state.stechenTexte || [])]);
+      G.startStechen(state, frage);
       break;
     }
     case 'backToLobby':

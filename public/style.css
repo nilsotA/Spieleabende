@@ -211,7 +211,14 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
    nicht ganz: Er ist auf einem stummgeschalteten iPhone das einzige Signal.
    Er blendet nur ohne Bewegung aus und deutlich sanfter. */
 @media (prefers-reduced-motion: reduce) {
-  .screenflash { animation-duration: 0.9s; }
+  /* `!important`, weil die allgemeine Regel weiter unten alle Animationen mit
+     `!important` auf 0,01 ms setzt – und die schlägt diese Ausnahme sonst,
+     egal wie genau sie zielt. Gemessen blieb vom Blitz genau ein Bild übrig
+     (Deckkraft 0,45 und im nächsten Bild 0), obwohl der Kommentar oben das
+     Gegenteil beschreibt. Es geht hier nicht um Zierde: Auf einem
+     stummgeschalteten iPhone ist der Blitz das einzige Zeichen, dass der Buzz
+     angekommen ist. Bewegung entsteht dabei keine, es wird nur ausgeblendet. */
+  .screenflash { animation-duration: 0.9s !important; }
   @keyframes screenflash { from { opacity: 0.45; } to { opacity: 0; } }
 }
 

@@ -236,8 +236,21 @@ async function loadUrls() {
     // wissen, dass sie funktioniert. Doppelte fallen weg – im Heimnetz ist sie
     // meist eine der Adressen, die der Server ohnehin nennt, und rückt damit
     // nur nach vorn.
+    // Läuft ein Tunnel, gehört seine Adresse an die erste Stelle – der QR-Code
+    // nimmt immer die erste. Die eigene Herkunft ist das Mittel gegen eine
+    // unerreichbare Serveradresse; mit Tunnel gibt es aber schon eine, die
+    // nachweislich von außen trägt. Ohne diese Zeile drängte sich die Herkunft
+    // davor, sobald der Host seinen Bildschirm über die Heimnetz-Adresse
+    // geöffnet hatte – und die Gäste von auswärts scannten einen QR-Code, der
+    // in ein WLAN führt, in dem sie nicht sind.
+    const tunnel = info.urls.find((u) => u.startsWith('https://'));
+    tunnelVorhanden = !!tunnel;
     const eigen = eigeneHerkunft();
-    info.urls = [...new Set([...(eigen ? [eigen] : []), ...info.urls])];
+    info.urls = [...new Set([
+      ...(tunnel ? [tunnel] : []),
+      ...(eigen ? [eigen] : []),
+      ...info.urls,
+    ])];
     // Bei mehreren Netzwerkkarten kann der Host die richtige antippen – dann ist
     // die Adresse ein echter Knopf. Bei nur einer gibt es nichts zu wählen: Sie
     // war trotzdem per Tab erreichbar und tat dort nichts, und mit `role=button`
@@ -281,8 +294,8 @@ async function loadUrls() {
     // Adresse und behielt ihn den ganzen Abend: Die Gäste von auswärts wären
     // an einer Adresse gelandet, die es für sie nicht gibt. Deshalb wird
     // nachgefragt, bis der Tunnel da ist – und danach nie wieder.
-    const tunnelDa = info.urls.some((u) => u.startsWith('https://'));
-    zeigeTunnel(tunnelDa);
+    const tunnelDa = tunnelVorhanden;
+    zeigeTunnel(tunnelDa); // deckt den Fall ab, dass gar keine Adresse gezeigt wird
     if (schluessel && !tunnelDa && !handverlesen && tunnelFragen < TUNNEL_FRAGEN_MAX) {
       tunnelFragen += 1;
       setTimeout(loadUrls, 2000);
@@ -308,8 +321,14 @@ function zeigeTunnel(da) {
     return;
   }
   box.hidden = false;
-  box.classList.toggle('steht', da);
-  if (da) box.textContent = '🌍 Über das Internet – eure Gäste brauchen kein gemeinsames WLAN.';
+  // Grün nur, wenn der QR-Code auch wirklich durch den Tunnel führt. Tippt der
+  // Host die Heimnetz-Adresse an, während ein Tunnel läuft, stimmte die
+  // Erfolgsmeldung nicht mehr zu dem, was auf der Leinwand steht.
+  const durchDenTunnel = da && !!gezeigteAdresse?.startsWith('https://');
+  box.classList.toggle('steht', durchDenTunnel);
+  if (da && !durchDenTunnel) {
+    box.textContent = '🌍 Der Tunnel läuft – dieser QR-Code führt aber ins Heimnetz.';
+  } else if (da) box.textContent = '🌍 Über das Internet – eure Gäste brauchen kein gemeinsames WLAN.';
   else if (tunnelFragen >= TUNNEL_FRAGEN_MAX) {
     box.textContent = '🌍 Kein Tunnel – heute geht es nur im Heimnetz. Fehlt cloudflared?';
   } else box.textContent = '🌍 Der Tunnel wird aufgebaut … der QR-Code stellt sich gleich um.';
@@ -331,7 +350,13 @@ function adressTeile(url) {
 }
 
 /** QR-Code auf die Mitspielen-Seite – Abtippen einer IP ist der lästigste Teil. */
+// Welche Adresse gerade im QR-Code steht – die Lagezeile richtet sich danach.
+let gezeigteAdresse = null;
+// Ob der Server überhaupt eine Tunneladresse nennt.
+let tunnelVorhanden = false;
+
 function zeigeQr(basis, liste) {
+  gezeigteAdresse = basis;
   const ziel = `${basis}/play${schluessel ? `?k=${schluessel}` : ''}`;
   try {
     $('#join-qr').innerHTML = qrSvg(ziel, { ecl: 'M', quiet: 4 });
@@ -353,6 +378,9 @@ function zeigeQr(basis, liste) {
   // Läuft ein Tunnel, hängt am Ende der Fernbedienungs-Adresse ein Schlüssel,
   // den niemand abtippt – und abtippen soll ihn auch keiner. Dann steht dort
   // ein zweiter QR-Code, den der Host mit seinem eigenen Handy scannt.
+  // Die Lagezeile hängt an der Adresse, die hier gerade gesetzt wurde – tippt
+  // der Host mitten im Tunnelabend die Heimnetz-Adresse an, soll sie das sagen.
+  zeigeTunnel(tunnelVorhanden);
   const fernQr = $('#remote-qr');
   if (fernQr) {
     fernQr.hidden = !hostSchluessel;
@@ -2199,8 +2227,29 @@ function renderControls() {
   }
 }
 
+/**
+ * Ein Knopf der Steuerleiste – 400 ms lang taub, so wie auf der Fernbedienung.
+ *
+ * Die Leiste tauscht sich mitten im Zug aus: Buzzert ein Handy, während der
+ * Host schon auf „Keiner weiß es → auflösen" zielt, stehen im selben Moment
+ * „Richtig ✓ / Falsch ✗ / Buzz zurücknehmen" dort. Der Klick, den niemand mehr
+ * abbremsen kann, landet dann auf einem Knopf, den der Host nie gemeint hat –
+ * nachgestellt gab er dem Team, das gerade gebuzzert hatte, ein „Falsch" samt
+ * 50 Punkten Abzug. Der Lage-Riegel greift dagegen nicht: Die Kennung kommt aus
+ * demselben Zustand, der den Knopf getauscht hat, passt also.
+ *
+ * Die Fernbedienung kennt diesen Schutz längst (big() in remote.js), der
+ * Zurücknehmen-Knopf auch – die Leiste auf der Leinwand war die letzte ohne.
+ */
 function button(label, cls, onclick, key) {
-  const node = el('button', { class: `btn ${cls}`, onclick }, label);
+  const geboren = performance.now();
+  const node = el('button', {
+    class: `btn ${cls}`,
+    onclick: () => {
+      if (performance.now() - geboren < 400) return;
+      onclick();
+    },
+  }, label);
   if (key) node.append(el('kbd', {}, key));
   return node;
 }
@@ -2651,6 +2700,15 @@ document.addEventListener('keydown', (ev) => {
   // Eine gehaltene Taste feuert im Sekundentakt nach. Bei „2“ hieße das: erst
   // ist das Zugteam falsch, dann das Team, das gerade gebuzzert hat.
   if (ev.repeat) return;
+  // Strg, Cmd und Alt gehören dem Browser, nicht dem Spiel.
+  //
+  // Ohne diese Zeile feuerten die Spieltasten als Teil ganz gewöhnlicher
+  // Browser-Kürzel mit: Strg+1 bis Strg+4 (Tab wechseln) wertete die laufende
+  // Frage, Strg+L (Adresszeile) deckte die Lösung auf der Leinwand auf, und
+  // Strg+F schaltete aufs Vollbild und schluckte die Suchleiste gleich mit.
+  // Der Browser führt sein Kürzel dabei trotzdem aus – die Wertung passiert
+  // also hinter dem Rücken des Hosts, der nur den Tab wechseln wollte.
+  if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
   if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
 
   const key = ev.key.toLowerCase();

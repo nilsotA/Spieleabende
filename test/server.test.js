@@ -22,9 +22,26 @@ const warte = (ms) => new Promise((r) => setTimeout(r, ms));
  * war. Solche Fehlschläge verdecken echte. Jetzt wird der Grund erkannt und mit
  * einem anderen Port weitergemacht.
  */
+/**
+ * Ports, die `fetch()` gar nicht erst anfasst.
+ *
+ * Die Fetch-Norm führt eine Liste gesperrter Ports (früher für die Abwehr von
+ * Protokollschmuggel gedacht), und Node setzt sie in `fetch` um. Würfelt ein
+ * Test so einen Port, startet der Server ganz normal und lauscht auch – aber
+ * jeder Abruf wirft „bad port". Die Schleife unten lief dann ihre vollen fünf
+ * Sekunden ab und meldete „Server startet nicht", also einen kaputten Server,
+ * wo nur die Zahl nicht erlaubt war. Gemessen traf es zwei von sechs Läufen,
+ * unter anderem 6697, 6667, 6000 und 5061.
+ */
+const GESPERRTE_PORTS = new Set([
+  1719, 1720, 1723, 2049, 3659, 4045, 4190, 4237, 4269, 4343,
+  5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668, 6669, 6679, 6697, 10080,
+]);
+
 async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
   for (let versuch = 0; versuch < versuche; versuch++) {
     const dieserPort = port + versuch * 37;
+    if (GESPERRTE_PORTS.has(dieserPort)) continue;
     const proc = spawn(process.execPath, [SERVER], {
       env: { ...process.env, PORT: String(dieserPort), QUIZDUELL_STATE_FILE: stateFile, ...extraEnv },
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -38,15 +55,26 @@ async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
     proc.stderr.on('data', lauscher);
     const base = `http://127.0.0.1:${dieserPort}`;
     let oben = false;
+    let schlechterPort = false;
     for (let i = 0; i < 100 && !belegt && !beendet; i++) {
       try {
         const res = await fetch(`${base}/api/info`);
         // 403 heißt: Der Server steht und hat die Tür zu – auch das ist „oben".
         if (res.ok || res.status === 403) { oben = true; break; }
-      } catch {
-        /* noch nicht oben */
+      } catch (err) {
+        // Den Grund nicht wegwerfen: Steckt „bad port" darin, ist der Server
+        // längst oben und nur die Portnummer nicht erlaubt. Dann sofort
+        // weiterziehen, statt fünf Sekunden auf etwas zu warten, das nie kommt.
+        if (/bad port/i.test(String(err?.cause?.message || err?.message || ''))) {
+          schlechterPort = true;
+          break;
+        }
       }
       await warte(50);
+    }
+    if (schlechterPort) {
+      proc.kill('SIGKILL');
+      continue;
     }
     if (oben) {
       proc.stderr.off('data', lauscher);
@@ -2149,4 +2177,51 @@ test('die Punkte der nächsten Runde kommen vom Server, nicht aus einer Hochrech
   const hochgerechnet = jetzt.board.categories
     .reduce((n, c) => n + c.cells.reduce((m, z) => m + z.value, 0), 0) * 2;
   assert.equal(hochgerechnet, 13200, 'so falsch war die alte Rechnung');
+});
+
+test('ein Stechen, das ein „Neues Spiel“ überholt, hinterlässt keinen Geisterzustand', async (t) => {
+  // `stechen` liest den Spielzustand und wartet dann darauf, dass die
+  // Fragensätze von der Platte kommen. Stand das Warten in der Argumentliste,
+  // war der Zustand schon gelesen – und ein gleichzeitiges „Neues Spiel“ oder
+  // „Zurücknehmen“ ersetzt genau dieses Objekt. Das Stechen arbeitete dann auf
+  // einem abgehängten Zustand, meldete trotzdem Erfolg, und sein Schnappschuss
+  // landete auf einem Rückweg, den „Neues Spiel“ gerade geleert hatte: Ein
+  // „Zurücknehmen“ holte danach das beendete Spiel zurück.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-stechrennen-'));
+  const port = 8700 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'stechrennen-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+
+  // Brett leerspielen, ohne zu werten: Am Ende steht es 0:0, also Gleichstand.
+  const board = (await zustand(base)).board;
+  for (let runde = 0; runde < 2; runde++) {
+    for (let c = 0; c < board.categories.length; c++) {
+      for (let r = 0; r < 4; r++) {
+        await host({ type: 'pick', catIdx: c, rowIdx: r });
+        await host({ type: 'endQuestion' });
+        await host({ type: 'close' });
+      }
+    }
+    if (runde === 0) await host({ type: 'nextRound' });
+  }
+  assert.equal((await zustand(base)).phase, 'gameOver');
+
+  // Beide Züge in derselben Sekunde – der eine vom Host-Screen, der andere von
+  // der Fernbedienung.
+  await Promise.all([host({ type: 'stechen' }), host({ type: 'backToLobby' })]);
+  const danach = await zustand(base);
+  if (danach.phase === 'lobby') {
+    assert.equal(danach.rueckwegTiefe, 0,
+      `„Neues Spiel“ hat den Rückweg geleert – dort darf nichts mehr liegen (${danach.rueckgaengig})`);
+  } else {
+    assert.equal(danach.phase, 'question', 'sonst läuft das Stechen – aber dann richtig');
+    assert.ok(danach.current?.stechen);
+  }
 });

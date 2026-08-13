@@ -493,6 +493,9 @@ aus, hat aber fünf Zacken statt neun.
   3 Fällen bitgenau identisch – die Maske beeinflusst nur die Robustheit.
 - **Spielstand:** liegt in `data/.spielstand.json` (eingebettete Bilder daneben) und
   wird beim Start zurückgeholt. Über `QUIZDUELL_STATE_FILE` umlenkbar.
+- **Bewegung reduzieren:** Wer die Einstellung gesetzt hat, bekommt keine Bewegung –
+  aber alles, was eine Auskunft trägt, bleibt sichtbar: Rundenansage, fliegende Punkte
+  und der Buzz-Blitz blenden dann nur ein und aus, statt zu wandern.
 - **Tests:** `npm test` (Node-Testrunner). Neben den Punkte- und Buzzer-Regeln,
   der Fragensatz-Prüfung und dem QR-Encoder laufen Integrationstests gegen einen
   echten Server – inklusive `SIGKILL` mitten im Spiel und anschließendem Neustart.
