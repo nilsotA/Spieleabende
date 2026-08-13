@@ -192,11 +192,36 @@ function describeSet(set) {
   });
 }
 
+/**
+ * Die Adresse, unter der dieser Bildschirm selbst erreicht wurde.
+ *
+ * Der Server kennt nur seine eigenen Netzwerkkarten. Das reicht im Heimnetz –
+ * aber nicht, sobald etwas dazwischensteht: ein Tunnel, ein vorgelagerter
+ * Server, ein Rechnername statt einer Zahl. Dann führte der QR-Code auf eine
+ * Adresse aus dem lokalen Netz, die von außen niemand erreicht, während die
+ * Adresse, über die der Host gerade selbst hier gelandet ist, nachweislich
+ * funktioniert – er benutzt sie ja in diesem Moment.
+ *
+ * `localhost` und Konsorten fallen raus: Auf dem Handy führt das ins eigene
+ * Gerät. Genau deshalb steht hier nicht einfach `location.origin`.
+ */
+function eigeneHerkunft() {
+  const h = location.hostname;
+  if (!h || h === 'localhost' || h === '127.0.0.1' || h === '[::1]' || h === '::1') return null;
+  return location.origin;
+}
+
 async function loadUrls() {
   try {
     const info = await (await fetch('/api/info')).json();
     const liste = $('#join-urls');
     liste.innerHTML = '';
+    // Die eigene Herkunft zuerst: Sie ist die einzige Adresse, von der wir
+    // wissen, dass sie funktioniert. Doppelte fallen weg – im Heimnetz ist sie
+    // meist eine der Adressen, die der Server ohnehin nennt, und rückt damit
+    // nur nach vorn.
+    const eigen = eigeneHerkunft();
+    info.urls = [...new Set([...(eigen ? [eigen] : []), ...info.urls])];
     // Bei mehreren Netzwerkkarten kann der Host die richtige antippen – dann ist
     // die Adresse ein echter Knopf. Bei nur einer gibt es nichts zu wählen: Sie
     // war trotzdem per Tab erreichbar und tat dort nichts, und mit `role=button`
