@@ -201,6 +201,11 @@ nichts**, weder auf dem Host-Screen noch auf den Handys. Nebenbei bringt https z
 Dinge mit, die im Heimnetz fehlen: Die Handys dürfen ihren Bildschirm wachhalten, und
 die Zusammenfassung landet per Knopf in der Zwischenablage.
 
+Der Host-Screen geht dabei **sofort** auf, nicht erst mit dem Tunnel: Die Lobby steht
+schon, Teams können sich anlegen, und oben im Kästchen „Handys verbinden“ sagt eine
+Zeile, woran man ist – gelb, solange der Tunnel kommt, grün, sobald er trägt. Der
+QR-Code stellt sich dann von selbst um; niemand muss die Seite neu laden.
+
 Einmalig nötig ist dafür [cloudflared](https://github.com/cloudflare/cloudflared/releases)
 – kostenlos, kein Konto, keine laufenden Kosten (`brew install cloudflared` auf dem Mac).
 Fehlt es, sagt das Fenster, wo es herkommt, und der Abend läuft im Heimnetz weiter.

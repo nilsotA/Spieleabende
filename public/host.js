@@ -215,6 +215,12 @@ function eigeneHerkunft() {
 // Sie kommen vom Server und stehen nur diesem Bildschirm zur Verfügung.
 let schluessel = '';
 let hostSchluessel = '';
+// Hat der Host selbst eine Adresse angetippt? Dann redet ihm das Nachfragen
+// unten nicht mehr hinein.
+let handverlesen = false;
+// Wie oft wurde schon nachgefragt, ob der Tunnel inzwischen steht.
+let tunnelFragen = 0;
+const TUNNEL_FRAGEN_MAX = 30; // gut eine Minute, dann kommt keiner mehr
 
 async function loadUrls() {
   try {
@@ -237,7 +243,11 @@ async function loadUrls() {
     const waehlbar = info.urls.length > 1;
     for (const url of info.urls) {
       liste.append(waehlbar
-        ? el('button', { class: 'url', type: 'button', onclick: () => zeigeQr(url, liste) }, ...adressTeile(url))
+        ? el('button', {
+          class: 'url',
+          type: 'button',
+          onclick: () => { handverlesen = true; zeigeQr(url, liste); },
+        }, ...adressTeile(url))
         : el('code', { class: 'url' }, ...adressTeile(url)));
     }
     // Der Punkt „andere Adresse" hilft nur, wenn es überhaupt eine zweite gibt.
@@ -259,11 +269,47 @@ async function loadUrls() {
     // Zeile lief früher hinter zeigeQr() und überschrieb deren Ergebnis: Beim
     // Spiel über den Tunnel stand danach eine Fernbedienungs-Adresse ohne
     // Hostschlüssel da – gemessen, sie führte auf die verschlossene Tür.
-    if (info.urls.length) zeigeQr(info.urls[0], liste);
-    else $('#remote-url').textContent = '…/remote';
+    if (info.urls.length && !handverlesen) zeigeQr(info.urls[0], liste);
+    else if (!info.urls.length) $('#remote-url').textContent = '…/remote';
+
+    // Der Tunnel braucht ein paar Sekunden, bis er seine Adresse nennt. Wer in
+    // dieser Zeit den Host-Screen selbst aufmacht – ungeduldig, oder weil er
+    // ihn vorhin schon offen hatte –, bekam einen QR-Code auf die Heimnetz-
+    // Adresse und behielt ihn den ganzen Abend: Die Gäste von auswärts wären
+    // an einer Adresse gelandet, die es für sie nicht gibt. Deshalb wird
+    // nachgefragt, bis der Tunnel da ist – und danach nie wieder.
+    const tunnelDa = info.urls.some((u) => u.startsWith('https://'));
+    zeigeTunnel(tunnelDa);
+    if (schluessel && !tunnelDa && !handverlesen && tunnelFragen < TUNNEL_FRAGEN_MAX) {
+      tunnelFragen += 1;
+      setTimeout(loadUrls, 2000);
+    }
   } catch {
     /* egal */
   }
+}
+
+/**
+ * Sagt in der Lobby, woran man ist – aber nur beim Spiel über den Tunnel.
+ *
+ * Ohne diese Zeile stünde die Auskunft ausschließlich im Terminalfenster, und
+ * das ist am Spieleabend minimiert oder steht auf einem anderen Rechner. Der
+ * Host sähe eine https-Adresse im Kästchen und wüsste trotzdem nicht, ob sie
+ * schon trägt.
+ */
+function zeigeTunnel(da) {
+  const box = $('#tunnel-lage');
+  if (!box) return;
+  if (!schluessel) {
+    box.hidden = true; // im Heimnetz gibt es nichts zu melden
+    return;
+  }
+  box.hidden = false;
+  box.classList.toggle('steht', da);
+  if (da) box.textContent = '🌍 Über das Internet – eure Gäste brauchen kein gemeinsames WLAN.';
+  else if (tunnelFragen >= TUNNEL_FRAGEN_MAX) {
+    box.textContent = '🌍 Kein Tunnel – heute geht es nur im Heimnetz. Fehlt cloudflared?';
+  } else box.textContent = '🌍 Der Tunnel wird aufgebaut … der QR-Code stellt sich gleich um.';
 }
 
 /**

@@ -1841,6 +1841,25 @@ body.host.flat .tile {
 }
 .join-qr svg { width: 100%; height: auto; display: block; }
 
+/* Die Lagemeldung zum Tunnel. Gelb, solange er noch kommt – dann steht der
+   QR-Code darunter auf der Heimnetz-Adresse und stellt sich noch um. Grün,
+   sobald er trägt. Beides deutlich genug, um es aus zwei Metern zu sehen. */
+.tunnel-lage {
+  margin: 0 0 0.6rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffdf9e;
+  background: #2a2113;
+  border: 1px solid #6b5320;
+}
+.tunnel-lage.steht {
+  color: #b8f5cd;
+  background: #0f2a1c;
+  border-color: #1f6b41;
+}
+
 /* Der QR-Code für die eigene Fernbedienung – nur beim Spiel über den Tunnel.
    Code und Erklärung stehen nebeneinander: Der Host hält sein Handy davor,
    während er vor dem Bildschirm sitzt, und liest daneben, warum ihn niemand

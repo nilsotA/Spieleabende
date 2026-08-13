@@ -10,6 +10,7 @@
  * Über QUIZDUELL_TUNNEL_ATTRAPPE steuerbar:
  *   'stumm'  – meldet nie eine Adresse (Tunnel kommt nicht hoch)
  *   'stderr' – schreibt sie nach stderr statt stdout (macht cloudflared auch)
+ *   'langsam'– lässt sich zwei Sekunden Zeit (der echte braucht auch welche)
  */
 
 const art = process.env.QUIZDUELL_TUNNEL_ATTRAPPE || '';
@@ -23,5 +24,5 @@ if (art !== 'stumm') {
     const zeile = `2024-01-01T00:00:00Z INF |  ${adresse}  |\n`;
     if (art === 'stderr') process.stderr.write(zeile);
     else process.stdout.write(zeile);
-  }, 50);
+  }, art === 'langsam' ? 2000 : 50);
 }

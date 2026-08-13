@@ -917,26 +917,30 @@ server.listen(PORT, async () => {
     console.log(`  Letzter Spielstand wiederhergestellt: ${teams || 'Lobby'}`);
     console.log('  „Spiel beenden" im Host-Menü verwirft ihn.\n');
   }
-  // Erst der Tunnel, dann die Adressen: Sonst stünde im Fenster eine Liste,
-  // die eine Zeile später schon nicht mehr stimmt.
-  if (ONLINE) {
-    console.log('  Tunnel wird aufgebaut – das dauert ein paar Sekunden …\n');
-    tunnelAdresse = await starteTunnel(PORT);
-  }
   console.log(`  Host-Screen (Beamer/TV):  ${hostAdresse()}`);
   for (const u of localUrls()) {
     console.log(`  Handys der Mitspieler:    ${u}`);
   }
   console.log(`  Fragen-Editor:            ${hostAdresse(`http://localhost:${PORT}`, '/editor')}\n`);
-  if (tunnelAdresse) {
-    console.log('  Der Tunnel läuft: Die Mitspieler brauchen kein gemeinsames WLAN mehr.');
-    console.log('  Den QR-Code in der Lobby scannen – er trägt den Schlüssel schon bei sich.\n');
-  }
   if (!PORT_GESETZT && portVersuche > 0) {
     console.log(`  (Port ${PORT - portVersuche} war belegt – daher ${PORT}.)\n`);
   }
+  // Der Bildschirm geht sofort auf, auch wenn der Tunnel noch braucht. Erst auf
+  // den Tunnel zu warten hieße: ein leeres Browserfenster und ein Host, der
+  // nicht weiß, ob noch etwas kommt. Die Lobby steht in der Zeit schon, Teams
+  // können sich schon anlegen – und den QR-Code stellt sie selbst um, sobald
+  // die Tunneladresse da ist (siehe zeigeTunnel() im Host-Screen).
   if (process.env.QUIZDUELL_BROWSER === '1') {
     oeffneImBrowser(hostAdresse());
+  }
+  if (ONLINE) {
+    console.log('  Tunnel wird aufgebaut – das dauert ein paar Sekunden …\n');
+    tunnelAdresse = await starteTunnel(PORT);
+    if (tunnelAdresse) {
+      console.log(`  Der Tunnel steht:         ${tunnelAdresse}`);
+      console.log('  Die Mitspieler brauchen jetzt kein gemeinsames WLAN mehr – der QR-Code');
+      console.log('  in der Lobby zeigt dorthin und trägt den Schlüssel schon bei sich.\n');
+    }
   }
 });
 

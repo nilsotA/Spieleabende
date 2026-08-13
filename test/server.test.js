@@ -1902,3 +1902,29 @@ test('cloudflared darf seine Adresse auch nach stderr schreiben', async (t) => {
   }
   assert.match(urls[0], /trycloudflare\.com$/);
 });
+
+test('der Bildschirm geht auf, bevor der Tunnel antwortet', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host, ausgabe } = await starteOnline(5100 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {
+    QUIZDUELL_TUNNEL_ATTRAPPE: 'langsam',
+    QUIZDUELL_TUNNEL_TIMEOUT: '10000',
+  });
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  // Erst auf den Tunnel zu warten hieße: ein leeres Browserfenster und ein
+  // Host, der nicht weiß, ob noch etwas kommt. Die Lobby steht vorher.
+  assert.equal((await fetch(`${base}/host?h=${host}`)).status, 200);
+  const jetzt = await (await fetch(`${base}/api/info?h=${host}`)).json();
+  assert.ok(!jetzt.urls.some((u) => u.startsWith('https://')), 'Tunnel ist noch gar nicht da');
+  assert.ok(!/trycloudflare/.test(ausgabe()), 'und steht folglich auch nicht im Fenster');
+
+  // … und wenn er dann kommt, holt der Host-Screen ihn sich beim Nachfragen ab.
+  let urls = [];
+  for (let i = 0; i < 100; i++) {
+    urls = (await (await fetch(`${base}/api/info?h=${host}`)).json()).urls;
+    if (urls[0]?.startsWith('https://')) break;
+    await warte(100);
+  }
+  assert.match(urls[0], /trycloudflare\.com$/);
+  assert.match(ausgabe(), /Der Tunnel steht/);
+});
