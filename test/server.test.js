@@ -22,16 +22,18 @@ const warte = (ms) => new Promise((r) => setTimeout(r, ms));
  * war. Solche Fehlschläge verdecken echte. Jetzt wird der Grund erkannt und mit
  * einem anderen Port weitergemacht.
  */
-async function starteServer(port, stateFile, versuche = 5) {
+async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
   for (let versuch = 0; versuch < versuche; versuch++) {
     const dieserPort = port + versuch * 37;
     const proc = spawn(process.execPath, [SERVER], {
-      env: { ...process.env, PORT: String(dieserPort), QUIZDUELL_STATE_FILE: stateFile },
+      env: { ...process.env, PORT: String(dieserPort), QUIZDUELL_STATE_FILE: stateFile, ...extraEnv },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let belegt = false;
     let beendet = false;
+    let ausgabe = '';
     proc.on('exit', () => { beendet = true; });
+    proc.stdout.on('data', (d) => { ausgabe += String(d); });
     const lauscher = (d) => { if (/EADDRINUSE/.test(String(d))) belegt = true; };
     proc.stderr.on('data', lauscher);
     const base = `http://127.0.0.1:${dieserPort}`;
@@ -39,7 +41,8 @@ async function starteServer(port, stateFile, versuche = 5) {
     for (let i = 0; i < 100 && !belegt && !beendet; i++) {
       try {
         const res = await fetch(`${base}/api/info`);
-        if (res.ok) { oben = true; break; }
+        // 403 heißt: Der Server steht und hat die Tür zu – auch das ist „oben".
+        if (res.ok || res.status === 403) { oben = true; break; }
       } catch {
         /* noch nicht oben */
       }
@@ -47,7 +50,7 @@ async function starteServer(port, stateFile, versuche = 5) {
     }
     if (oben) {
       proc.stderr.off('data', lauscher);
-      return { proc, base };
+      return { proc, base, ausgabe: () => ausgabe };
     }
     proc.kill('SIGKILL');
     if (!belegt) throw new Error(`Server startet nicht (Port ${dieserPort})`);
@@ -1730,4 +1733,172 @@ test('jedes Handy sucht sich das Wappen seines Teams selbst aus', async (t) => {
   assert.equal(ohne.ok, false);
   assert.match(ohne.error, /Team/);
   assert.equal((await zustand(base)).teams[1].wappen, fremd);
+});
+
+/* ------------------------------------------------ Tunnel und Zugang
+ *
+ * Diese Tests beschreiben den Abend, an dem nicht alle im selben WLAN sitzen.
+ * Der Tunnel ist dabei eine Attrappe – sie schreibt dieselbe Zeile wie
+ * cloudflared und geht nirgends hin.
+ */
+
+const ATTRAPPE = fileURLToPath(new URL('./hilfe/tunnel-attrappe.js', import.meta.url));
+
+/** Startet einen Server im Online-Modus und liest beide Schlüssel aus. */
+async function starteOnline(port, stateFile, mehr = {}) {
+  const s = await starteServer(port, stateFile, 5, {
+    QUIZDUELL_ONLINE: '1',
+    QUIZDUELL_TUNNEL_BIN: ATTRAPPE,
+    QUIZDUELL_TUNNEL_TIMEOUT: '2000',
+    ...mehr,
+  });
+  // Der Hostschlüssel steht in der Adresse, die das Fenster ausgibt – genau so
+  // findet ihn auch der Host, dessen Browser sie aufmacht.
+  let host = null;
+  // Großzügig: Der Schlüssel steht erst im Fenster, wenn der Tunnel geantwortet
+  // hat oder aufgegeben wurde – und mehrere Testdateien laufen gleichzeitig.
+  for (let i = 0; i < 200 && !host; i++) {
+    host = /\/host\?h=([a-z0-9]+)/.exec(s.ausgabe())?.[1] || null;
+    if (!host) await warte(50);
+  }
+  // Ohne Schlüssel bricht der Test hier ab – dann ist der Server aber schon
+  // gestartet und wird nirgends mehr aufgeräumt: Der Testlauf hing danach an
+  // den offenen Leitungen des Kindprozesses, bis jemand ihn abschoss. Erst
+  // abräumen, dann scheitern.
+  if (!host) {
+    s.proc.kill('SIGKILL');
+    assert.fail('kein Hostschlüssel in der Ausgabe');
+  }
+  const info = await (await fetch(`${s.base}/api/info?h=${host}`)).json();
+  return { ...s, host, spiel: info.schluessel, info };
+}
+
+test('ohne Tunnel bleibt das Spiel offen wie bisher', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base } = await starteServer(3700 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  // Im Heimnetz ist bewusst nichts abgeschlossen – und das darf der Zugang
+  // nicht versehentlich ändern.
+  for (const weg of ['/host', '/play', '/remote', '/editor', '/api/info', '/api/sets']) {
+    assert.equal((await fetch(base + weg)).status, 200, weg);
+  }
+  const info = await (await fetch(`${base}/api/info`)).json();
+  assert.equal(info.schluessel, undefined, 'ohne Tunnel gibt es keine Schlüssel');
+});
+
+test('mit Tunnel kommt nur herein, wer einen Schlüssel mitbringt', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host, spiel } = await starteOnline(3900 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  assert.ok(spiel && host && spiel !== host);
+
+  // Ohne alles: verschlossen – und zwar auch für die Bausteine der Seiten.
+  for (const weg of ['/host', '/play', '/remote', '/editor', '/style.css', '/api/info']) {
+    assert.equal((await fetch(base + weg)).status, 403, weg);
+  }
+
+  // Mit Spielschlüssel: die Mitspielerseite, sonst nichts.
+  assert.equal((await fetch(`${base}/play?k=${spiel}`)).status, 200);
+  assert.equal((await fetch(`${base}/style.css?k=${spiel}`)).status, 200);
+  assert.equal((await fetch(`${base}/host?k=${spiel}`)).status, 403, 'Spielschlüssel öffnet keine Hosttür');
+  assert.equal((await fetch(`${base}/remote?k=${spiel}`)).status, 403);
+  // Ein Fragensatz enthält die Lösungen – der gehört hinter dieselbe Tür.
+  assert.equal((await fetch(`${base}/api/sets?k=${spiel}`)).status, 403);
+  assert.equal((await fetch(`${base}/api/mix?k=${spiel}`)).status, 403);
+
+  // Mit Hostschlüssel: alles.
+  for (const weg of ['/host', '/remote', '/editor', '/play', '/api/sets']) {
+    assert.equal((await fetch(`${base}${weg}?h=${host}`)).status, 200, weg);
+  }
+});
+
+test('der Schlüssel aus dem QR-Code bleibt als Cookie am Handy', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, spiel } = await starteOnline(4100 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  // Gescannt wird einmal. Alles danach – Stylesheet, Skript, Neuladen – trägt
+  // keinen Schlüssel mehr in der Adresse.
+  const erste = await fetch(`${base}/play?k=${spiel}`);
+  const keks = erste.headers.get('set-cookie');
+  assert.match(keks || '', /qd_spiel=/);
+  assert.match(keks || '', /HttpOnly/);
+
+  const wert = /qd_spiel=([^;]+)/.exec(keks)[1];
+  const zweite = await fetch(`${base}/player.js`, { headers: { cookie: `qd_spiel=${wert}` } });
+  assert.equal(zweite.status, 200, 'mit Cookie geht es ohne Schlüssel in der Adresse weiter');
+  assert.equal((await fetch(`${base}/host`, { headers: { cookie: `qd_spiel=${wert}` } })).status, 403);
+});
+
+test('die Host-Rolle wird nachgewiesen, nicht behauptet', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host, spiel } = await starteOnline(4300 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  const alsWer = async (schluessel, art) => {
+    const res = await fetch(`${base}/api/events?clientId=x_${Math.random()}&role=host&${art}=${schluessel}`);
+    const reader = res.body.getReader();
+    let buf = '';
+    for (let i = 0; i < 40; i++) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += new TextDecoder().decode(value);
+      const treffer = /event: hello\ndata: (.*)\n\n/.exec(buf);
+      if (treffer) { reader.cancel(); return JSON.parse(treffer[1]); }
+    }
+    throw new Error('kein hello empfangen');
+  };
+
+  // Wer nur den Spielschlüssel hat, darf sich role=host in die Adresse
+  // schreiben, so viel er will – die Lösungen bekommt er trotzdem nicht.
+  assert.equal((await alsWer(spiel, 'k')).isHost, false);
+  assert.equal((await alsWer(host, 'h')).isHost, true);
+});
+
+test('die Tunneladresse steht vorn – der QR-Code nimmt die erste', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host } = await starteOnline(4500 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  let urls = [];
+  for (let i = 0; i < 60; i++) {
+    urls = (await (await fetch(`${base}/api/info?h=${host}`)).json()).urls;
+    if (urls[0]?.startsWith('https://')) break;
+    await warte(50);
+  }
+  assert.match(urls[0], /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/);
+});
+
+test('kommt der Tunnel nicht hoch, läuft der Abend im Heimnetz weiter', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host } = await starteOnline(4700 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {
+    QUIZDUELL_TUNNEL_ATTRAPPE: 'stumm',
+    QUIZDUELL_TUNNEL_TIMEOUT: '400',
+  });
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  // Kein Tunnel, aber ein laufendes Spiel: Ein fehlender Tunnel darf nie der
+  // Grund sein, dass gar nichts geht.
+  const info = await (await fetch(`${base}/api/info?h=${host}`)).json();
+  assert.ok(info.urls.length > 0);
+  assert.ok(!info.urls.some((u) => u.startsWith('https://')));
+  assert.equal((await fetch(`${base}/host?h=${host}`)).status, 200);
+});
+
+test('cloudflared darf seine Adresse auch nach stderr schreiben', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host } = await starteOnline(4900 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {
+    QUIZDUELL_TUNNEL_ATTRAPPE: 'stderr',
+  });
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  let urls = [];
+  for (let i = 0; i < 60; i++) {
+    urls = (await (await fetch(`${base}/api/info?h=${host}`)).json()).urls;
+    if (urls[0]?.startsWith('https://')) break;
+    await warte(50);
+  }
+  assert.match(urls[0], /trycloudflare\.com$/);
 });

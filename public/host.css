@@ -1840,6 +1840,31 @@ body.host.flat .tile {
   overflow: hidden;
 }
 .join-qr svg { width: 100%; height: auto; display: block; }
+
+/* Der QR-Code für die eigene Fernbedienung – nur beim Spiel über den Tunnel.
+   Code und Erklärung stehen nebeneinander: Der Host hält sein Handy davor,
+   während er vor dem Bildschirm sitzt, und liest daneben, warum ihn niemand
+   sonst scannen sollte. */
+.remote-qr {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0.5rem 0 0.2rem;
+}
+.remote-qr > p { margin: 0; }
+.remote-qr-bild {
+  flex: 0 0 auto;
+  /* Der Code trägt eine lange Adresse samt Schlüssel: rund 37 Kacheln je Kante.
+     Bei 96 px blieben knapp 2,6 Pixel pro Kachel – zu wenig für eine Kamera auf
+     Armlänge. 130 px machen gut 3,5 daraus. */
+  width: clamp(130px, 10vw, 190px);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+  line-height: 0;
+  overflow: hidden;
+}
+.remote-qr-bild svg { width: 100%; height: auto; display: block; }
 .join-urls { width: 100%; display: grid; gap: 0.4rem; margin: 0; }
 .join-urls .url {
   display: block;

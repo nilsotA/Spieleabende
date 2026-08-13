@@ -211,9 +211,16 @@ function eigeneHerkunft() {
   return location.origin;
 }
 
+// Die beiden Schlüssel des Abends – leer, solange im Heimnetz gespielt wird.
+// Sie kommen vom Server und stehen nur diesem Bildschirm zur Verfügung.
+let schluessel = '';
+let hostSchluessel = '';
+
 async function loadUrls() {
   try {
     const info = await (await fetch('/api/info')).json();
+    schluessel = info.schluessel || '';
+    hostSchluessel = info.hostSchluessel || '';
     const liste = $('#join-urls');
     liste.innerHTML = '';
     // Die eigene Herkunft zuerst: Sie ist die einzige Adresse, von der wir
@@ -236,10 +243,24 @@ async function loadUrls() {
     // Der Punkt „andere Adresse" hilft nur, wenn es überhaupt eine zweite gibt.
     const mehrere = $('#kein-handy-adresse');
     if (mehrere) mehrere.hidden = !waehlbar;
-    zeigeQr(info.urls[0], liste);
-    // zeigeQr() setzt sie mit – hier nur der Startwert für den Fall, dass es
-    // gar keine Adresse gibt und der QR-Code deshalb nicht gebaut wird.
-    $('#remote-url').textContent = `${info.urls[0] || '…'}/remote`;
+    // Beim Spiel über den Tunnel hängt am Ziel ein Schlüssel. Die Adresse im
+    // Kästchen darunter führt dann nur bis zur verschlossenen Tür – wer sie
+    // abtippt, weil die Kamera zickt, braucht die vollständige Zeile.
+    if (schluessel) {
+      const oben = $('#join-hinweis');
+      if (oben) oben.textContent = 'Scannen – das ist beim Spiel übers Internet der Weg hinein:';
+      const nachsatz = $('#qr-ziel-nachsatz');
+      if (nachsatz) {
+        nachsatz.textContent = 'Öffnet das Handy nichts, tippt genau diese Zeile ab – '
+          + 'die kurze Adresse darüber reicht heute nicht, der Schlüssel gehört dazu.';
+      }
+    }
+    // Nur wenn es gar keine Adresse gibt, steht hier ein Platzhalter. Diese
+    // Zeile lief früher hinter zeigeQr() und überschrieb deren Ergebnis: Beim
+    // Spiel über den Tunnel stand danach eine Fernbedienungs-Adresse ohne
+    // Hostschlüssel da – gemessen, sie führte auf die verschlossene Tür.
+    if (info.urls.length) zeigeQr(info.urls[0], liste);
+    else $('#remote-url').textContent = '…/remote';
   } catch {
     /* egal */
   }
@@ -262,7 +283,7 @@ function adressTeile(url) {
 
 /** QR-Code auf die Mitspielen-Seite – Abtippen einer IP ist der lästigste Teil. */
 function zeigeQr(basis, liste) {
-  const ziel = `${basis}/play`;
+  const ziel = `${basis}/play${schluessel ? `?k=${schluessel}` : ''}`;
   try {
     $('#join-qr').innerHTML = qrSvg(ziel, { ecl: 'M', quiet: 4 });
   } catch {
@@ -277,8 +298,23 @@ function zeigeQr(basis, liste) {
   // oder VirtualBox-Karte steht dort eine Adresse, die im Heimnetz niemand
   // erreicht. Der Host schickt seine Gäste dann richtig los und tippt sich
   // selbst die unerreichbare ein.
+  const fernZiel = `${basis}/remote${hostSchluessel ? `?h=${hostSchluessel}` : ''}`;
   const fern = $('#remote-url');
-  if (fern) fern.textContent = `${basis}/remote`;
+  if (fern) fern.textContent = fernZiel;
+  // Läuft ein Tunnel, hängt am Ende der Fernbedienungs-Adresse ein Schlüssel,
+  // den niemand abtippt – und abtippen soll ihn auch keiner. Dann steht dort
+  // ein zweiter QR-Code, den der Host mit seinem eigenen Handy scannt.
+  const fernQr = $('#remote-qr');
+  if (fernQr) {
+    fernQr.hidden = !hostSchluessel;
+    if (hostSchluessel) {
+      try {
+        fernQr.querySelector('.remote-qr-bild').innerHTML = qrSvg(fernZiel, { ecl: 'M', quiet: 3 });
+      } catch {
+        fernQr.hidden = true;
+      }
+    }
+  }
   for (const node of liste.children) node.classList.toggle('aktiv', node.textContent === basis);
 }
 

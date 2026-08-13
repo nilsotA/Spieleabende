@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url';
 import * as G from './game.js';
 import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, DATA_DIR } from './questions.js';
 import { oeffne as oeffneImBrowser } from './browser.js';
+import { starteTunnel, stoppeTunnel } from './tunnel.js';
+import { neuerZugang, pruefeZugang, cookieKoepfe, TUER_ZU } from './zugang.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -19,6 +21,13 @@ const PORT_GESETZT = !!process.env.PORT;
 let PORT = Number(process.env.PORT) || 3000;
 const MAX_BODY_BYTES = 32 * 1024 * 1024;
 const MIX = '__mix'; // Kennung für das gewürfelte Board
+
+// Der Abend geht nach draußen: Tunnel auf, Tür zu. Ohne diese Umgebungsvariable
+// ändert sich nichts – im Heimnetz bleibt das Spiel ohne Schlüssel und ohne
+// Tunnel, so wie es gedacht ist.
+const ONLINE = process.env.QUIZDUELL_ONLINE === '1';
+const zugang = ONLINE ? neuerZugang() : null;
+let tunnelAdresse = null;
 
 // Ein Spieleabend darf nicht daran scheitern, dass irgendein Randfall den Prozess
 // beendet – mit dem Prozess wäre der komplette Punktestand weg.
@@ -588,6 +597,21 @@ const ROUTES = {
   '/editor': 'editor.html',
 };
 
+// Seiten, hinter denen die Lösungen stehen. Bei den Schnittstellen ist die
+// Liste andersherum gedacht – alles ist Hostsache, außer den dreien, die ein
+// Handy wirklich braucht: die Live-Verbindung, sein Zug und die Adressen.
+// Ein Fragensatz (/api/set) enthält die Antworten und gehört ausdrücklich nicht
+// dazu.
+const NUR_HOST_SEITEN = new Set(['/host', '/remote', '/editor']);
+const AUCH_FUER_HANDYS = new Set(['/api/events', '/api/action', '/api/info']);
+
+function hostNoetig(pathname) {
+  if (NUR_HOST_SEITEN.has(pathname)) return true;
+  if (pathname.startsWith('/api/bild/')) return false; // Fragebilder sehen alle
+  if (pathname.startsWith('/api/')) return !AUCH_FUER_HANDYS.has(pathname);
+  return false;
+}
+
 const server = http.createServer(async (req, res) => {
   let pathname;
   let url;
@@ -599,9 +623,22 @@ const server = http.createServer(async (req, res) => {
     return send(res, 400, 'text/plain; charset=utf-8', 'Ungültige Adresse');
   }
 
+  // Tür: Ohne Tunnel steht sie offen (rolle ist dann immer 'host'), mit Tunnel
+  // kommt nur herein, wer einen Schlüssel mitbringt – und der steckt im
+  // QR-Code, den ohnehin jeder scannt.
+  const rolle = pruefeZugang(req, url, zugang);
+  if (zugang) {
+    const kekse = cookieKoepfe(url, zugang);
+    if (kekse.length) res.setHeader('Set-Cookie', kekse);
+    if (!rolle || (hostNoetig(pathname) && rolle !== 'host')) {
+      if (pathname.startsWith('/api/')) return sendJson(res, 403, { error: 'Kein Zugang.' });
+      return send(res, 403, 'text/html; charset=utf-8', TUER_ZU);
+    }
+  }
+
   try {
-    if (pathname === '/api/events') return sseHandler(req, res, url);
-    if (pathname.startsWith('/api/')) return await apiHandler(req, res, url, pathname);
+    if (pathname === '/api/events') return sseHandler(req, res, url, rolle);
+    if (pathname.startsWith('/api/')) return await apiHandler(req, res, url, pathname, rolle);
 
     if (pathname.startsWith('/bilder/')) {
       return serveFile(res, path.join(DATA_DIR, 'bilder', path.basename(pathname)));
@@ -617,9 +654,12 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-function sseHandler(req, res, url) {
+function sseHandler(req, res, url, rolle) {
   const clientId = url.searchParams.get('clientId') || `c_${randomUUID()}`;
-  const isHost = url.searchParams.get('role') === 'host';
+  // Die Host-Rolle behauptet man nicht, man weist sie nach: Über sie laufen die
+  // ungekürzten Zustände samt Lösung. Ohne Tunnel ist `rolle` immer 'host',
+  // dann bleibt es beim alten Verhalten.
+  const isHost = url.searchParams.get('role') === 'host' && rolle === 'host';
   const connId = randomUUID();
 
   res.writeHead(200, {
@@ -660,7 +700,7 @@ function sseHandler(req, res, url) {
   res.on('error', close);
 }
 
-async function apiHandler(req, res, url, pathname) {
+async function apiHandler(req, res, url, pathname, rolle) {
   if (pathname === '/api/sets' && req.method === 'GET') {
     return sendJson(res, 200, await listSets());
   }
@@ -716,7 +756,12 @@ async function apiHandler(req, res, url, pathname) {
     return res.end(bild.buffer);
   }
   if (pathname === '/api/info' && req.method === 'GET') {
-    return sendJson(res, 200, { urls: localUrls(), port: PORT });
+    // Die Schlüssel bekommt nur der Host-Screen: Er baut daraus die beiden
+    // QR-Codes. Ein Handy braucht sie nicht – es ist ja schon drin.
+    const geheim = zugang && rolle === 'host'
+      ? { schluessel: zugang.spiel, hostSchluessel: zugang.host }
+      : {};
+    return sendJson(res, 200, { urls: localUrls(), port: PORT, ...geheim });
   }
   if (pathname === '/api/action' && req.method === 'POST') {
     let body;
@@ -813,13 +858,20 @@ function tooLarge() {
 }
 
 function localUrls() {
-  const out = [];
+  // Die Tunneladresse zuerst: Läuft ein Tunnel, ist sie die einzige, die auch
+  // von außerhalb des WLANs trägt – und der QR-Code nimmt immer die erste.
+  const out = tunnelAdresse ? [tunnelAdresse] : [];
   for (const list of Object.values(os.networkInterfaces())) {
     for (const net of list || []) {
       if (net.family === 'IPv4' && !net.internal) out.push(`http://${net.address}:${PORT}`);
     }
   }
   return out.length ? out : [`http://localhost:${PORT}`];
+}
+
+/** Die Adresse des Host-Screens – mit Hostschlüssel, falls ein Tunnel läuft. */
+function hostAdresse(basis = `http://localhost:${PORT}`, seite = '/host') {
+  return zugang ? `${basis}${seite}?h=${zugang.host}` : `${basis}${seite}`;
 }
 
 // Ohne diese Werte baut jeder Buzz-POST in der Regel eine neue Verbindung auf.
@@ -858,22 +910,41 @@ if (wiederhergestellt) {
   state = wiederhergestellt;
 }
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log('\n  🎉  Quizduell für Spieleabende läuft!\n');
   if (wiederhergestellt) {
     const teams = state.teams.map((t) => `${t.name} ${t.score}`).join(' · ');
     console.log(`  Letzter Spielstand wiederhergestellt: ${teams || 'Lobby'}`);
     console.log('  „Spiel beenden" im Host-Menü verwirft ihn.\n');
   }
-  console.log(`  Host-Screen (Beamer/TV):  http://localhost:${PORT}/host`);
+  // Erst der Tunnel, dann die Adressen: Sonst stünde im Fenster eine Liste,
+  // die eine Zeile später schon nicht mehr stimmt.
+  if (ONLINE) {
+    console.log('  Tunnel wird aufgebaut – das dauert ein paar Sekunden …\n');
+    tunnelAdresse = await starteTunnel(PORT);
+  }
+  console.log(`  Host-Screen (Beamer/TV):  ${hostAdresse()}`);
   for (const u of localUrls()) {
     console.log(`  Handys der Mitspieler:    ${u}`);
   }
-  console.log(`  Fragen-Editor:            http://localhost:${PORT}/editor\n`);
+  console.log(`  Fragen-Editor:            ${hostAdresse(`http://localhost:${PORT}`, '/editor')}\n`);
+  if (tunnelAdresse) {
+    console.log('  Der Tunnel läuft: Die Mitspieler brauchen kein gemeinsames WLAN mehr.');
+    console.log('  Den QR-Code in der Lobby scannen – er trägt den Schlüssel schon bei sich.\n');
+  }
   if (!PORT_GESETZT && portVersuche > 0) {
     console.log(`  (Port ${PORT - portVersuche} war belegt – daher ${PORT}.)\n`);
   }
   if (process.env.QUIZDUELL_BROWSER === '1') {
-    oeffneImBrowser(`http://localhost:${PORT}/host`);
+    oeffneImBrowser(hostAdresse());
   }
 });
+
+// Der Tunnel ist ein zweites Programm – es soll mit uns gehen, nicht ohne uns
+// weiterlaufen.
+for (const zeichen of ['exit', 'SIGINT', 'SIGTERM']) {
+  process.on(zeichen, () => {
+    stoppeTunnel();
+    if (zeichen !== 'exit') process.exit(0);
+  });
+}

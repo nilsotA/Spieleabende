@@ -40,7 +40,7 @@
 
     <div class="card">
       <h2>2 · Handys verbinden</h2>
-      <p class="muted small">Scannen – oder die Adresse im Browser eintippen (gleiches WLAN):</p>
+      <p id="join-hinweis" class="muted small">Scannen – oder die Adresse im Browser eintippen (gleiches WLAN):</p>
       <div class="join-box">
         <div id="join-qr" class="join-qr" title="Mit der Handykamera scannen"></div>
         <div id="join-urls" class="join-urls"></div>
@@ -51,7 +51,7 @@
            auf dem Handy kurz die Zieladresse aufblitzen sah, hielt das für
            einen Widerspruch. -->
       <p class="muted small qr-ziel-zeile">Der Code führt direkt auf <code id="qr-ziel">…/play</code>.
-        Öffnet das Handy nichts, tippt die Adresse oben ein – und schaut, ob es im selben WLAN hängt.</p>
+        <span id="qr-ziel-nachsatz">Öffnet das Handy nichts, tippt die Adresse oben ein – und schaut, ob es im selben WLAN hängt.</span></p>
       <!-- Erscheint erst, wenn nach einer Weile immer noch kein Handy da ist.
            Bis dahin ist es kein Problem, sondern der normale Ablauf. -->
       <div id="kein-handy" class="kein-handy" hidden>
@@ -76,6 +76,15 @@
           <b>Fernbedienung:</b> Auf deinem eigenen Handy <code id="remote-url">…/remote</code> öffnen.
           Dort stehen Frage <i>und Lösung</i>, und du bewertest von dort – so steht die Lösung nie auf der Leinwand.
         </p>
+        <!-- Nur beim Spiel über den Tunnel: Dann hängt am Ende der Adresse ein
+             Schlüssel, und der wird gescannt, nicht getippt. Bewusst als eigener
+             Block und nicht mitten im Satz – dort lag der Code über zwei Zeilen
+             Text, gemessen an einem 1280er Schirm. -->
+        <div id="remote-qr" class="remote-qr" hidden>
+          <div class="remote-qr-bild"></div>
+          <p class="muted small">Das ist <b>deine</b> Fernbedienung – scann sie mit deinem eigenen Handy.
+            Wer sie sonst scannt, liest alle Lösungen mit.</p>
+        </div>
         <p id="vollbild-tipp" class="muted small" hidden>
           <b>Taste F</b> schaltet auf Vollbild – ohne Tableiste und Adresszeile bleibt mehr Bühne übrig.
         </p>

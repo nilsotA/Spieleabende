@@ -183,6 +183,39 @@ buzzert der Host für den, der als Erstes „hier!“ ruft. Teams, die ein Handy
 Hand haben, drücken selbst und bekommen deshalb keinen Knopf; fällt so ein Handy
 mitten in der Frage aus, taucht sein Knopf sofort wieder auf.
 
+### Wenn nicht alle im selben WLAN sitzen
+
+Für den Abend zu Hause ändert sich nichts – dafür ist der normale Start da. Sitzt ihr
+aber in verschiedenen Wohnungen, oder zickt ein fremdes WLAN, das die Geräte
+voneinander abschottet, gibt es einen zweiten Doppelklick:
+
+| System | Datei |
+|---|---|
+| macOS | `Start-Quizduell-Online.command` |
+| Windows | `Start-Quizduell-Online.bat` |
+| Linux | `start-quizduell-online.sh` |
+
+Dahinter steckt derselbe Server; davor legt sich nur ein Tunnel mit einer öffentlichen
+https-Adresse. Der QR-Code in der Lobby zeigt dann von selbst dorthin – **zu tippen ist
+nichts**, weder auf dem Host-Screen noch auf den Handys. Nebenbei bringt https zwei
+Dinge mit, die im Heimnetz fehlen: Die Handys dürfen ihren Bildschirm wachhalten, und
+die Zusammenfassung landet per Knopf in der Zwischenablage.
+
+Einmalig nötig ist dafür [cloudflared](https://github.com/cloudflare/cloudflared/releases)
+– kostenlos, kein Konto, keine laufenden Kosten (`brew install cloudflared` auf dem Mac).
+Fehlt es, sagt das Fenster, wo es herkommt, und der Abend läuft im Heimnetz weiter.
+
+**Was dabei zumacht:** Sobald der Tunnel läuft, ist das Spiel nicht mehr offen. Es gibt
+zwei Schlüssel, die niemand tippt:
+
+- Der **Spielschlüssel** steckt im QR-Code der Lobby. Die Mitspieler scannen wie immer.
+- Der **Hostschlüssel** steckt in der Adresse, die das Startskript selbst aufmacht – und
+  in einem zweiten, kleinen QR-Code unter „Tipps für den Host“. Den scannst du mit
+  deinem eigenen Handy für die Fernbedienung.
+
+Ohne Schlüssel kommt niemand an `/host`, `/remote`, den Editor oder die Fragensätze –
+dort stehen die Lösungen. Beide Schlüssel sind bei jedem Start neu und gelten 12 Stunden.
+
 ---
 
 ## Regeln
@@ -421,8 +454,14 @@ aus, hat aber fünf Zacken statt neun.
   bekommt sie auch nicht geschickt.
 - **Rollen:** Host ist, wer `/host` oder `/remote` offen hat – die Rechte hängen an der
   offenen Verbindung, nicht an einer Angabe im Request, damit nicht jedes Handy Punkte
-  verteilen kann. Ein Passwort gibt es bewusst nicht: Es ist ein Spieleabend im eigenen
-  WLAN, kein öffentlicher Dienst. Stell den Server nicht ins offene Internet.
+  verteilen kann. Im Heimnetz gibt es bewusst kein Passwort: Es ist ein Spieleabend im
+  eigenen WLAN, kein öffentlicher Dienst.
+- **Zugang nach draußen:** Nur mit `QUIZDUELL_ONLINE=1` (die Online-Startskripte) zieht
+  `server/tunnel.js` einen cloudflared-Tunnel hoch, und `server/zugang.js` schließt ab:
+  zwei Schlüssel pro Start, als Cookie gemerkt, Hostschlüssel für `/host`, `/remote`,
+  den Editor und jeden Fragensatz. Die Host-Rolle im Ereignisstrom wird dann
+  nachgewiesen statt behauptet – `role=host` allein genügt nicht mehr. Ohne die
+  Variable ist diese ganze Mechanik aus und der Server verhält sich wie zuvor.
 - **QR-Code:** eigener Encoder in `public/qr.js` (Byte-Modus, Version 1–10), damit
   auch dafür keine Abhängigkeit nötig ist. Die Ausgabe ist über 394 Zufallseingaben
   gegen eine unabhängige Implementierung geprüft und bis auf die Maskenwahl in
@@ -437,8 +476,10 @@ aus, hat aber fünf Zacken statt neun.
 
 ```
 Start-Quizduell.command/.bat, start-quizduell.sh   zum Doppelklicken
+Start-Quizduell-Online.*                          dasselbe, mit Tunnel nach draußen
 server/   game.js (Spielregeln) · questions.js (Fragensätze) · index.js (HTTP/SSE)
           browser.js (öffnet den Host-Screen beim Doppelklick-Start)
+          tunnel.js (cloudflared) · zugang.js (Schlüssel, nur mit Tunnel)
 public/   host.* (Board) · player.* (Handy) · remote.* (Fernbedienung)
           editor.* (Fragen) · index.html/start.css · common.js · qr.js · style.css
 data/     Fragensätze als JSON, Bilder unter data/bilder/
