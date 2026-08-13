@@ -273,6 +273,19 @@ function render() {
       setzeText(phase, '');
   }
 
+  // Die Pause gehört ganz nach vorn – auch hier.
+  //
+  // Auf der Leinwand liegt das Pausenbild, die Handys sagen „Pause", nur die
+  // Fernbedienung sagte weiter „Am Zug: Rot – wählt ein Feld." oder „Buzzer ist
+  // frei". Ausgerechnet auf dem Gerät, das der Host in der Hand hält: Der
+  // Knopf sprang zwar auf „▶ Weiterspielen" um, die Lage darüber widersprach
+  // ihm aber. Der bisherige Text bleibt darunter stehen – nach der Küche will
+  // der Host wissen, wo er weitermacht.
+  if (state.pause) {
+    setzeText(phase, `⏸ Pause – die Handys sind still.\n${phase.textContent}`.trim());
+    phase.classList.remove('bereit');
+  }
+
   renderRueckgaengig();
   // Nach dem Setzen der Lagezeile: Die Uhr hängt ihre Sekunden daran.
   renderUhr();

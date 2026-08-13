@@ -151,6 +151,10 @@ kann versehentlich ein Feld aufrufen oder buzzern. Die offene Frage bleibt
 stehen und läuft danach weiter; auch die Uhr am Buzzer hält an. Der Host darf in
 der Pause weiter alles – dafür ist sie oft da.
 
+Alle drei Bildschirme sagen dasselbe: Leinwand Pausenbild, Handys „Pause", und die
+Fernbedienung stellt „⏸ Pause – die Handys sind still." über die Lage, an der es
+weitergeht.
+
 Die Pause bleibt dabei, was der Host zuletzt gedrückt hat: Ein Zurücknehmen oder
 Verwerfen in der Pause hebt sie nicht auf – und umgekehrt legt ein Rückschritt mitten
 im Spiel keine Pause ein.

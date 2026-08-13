@@ -782,9 +782,13 @@ function renderBuzzer(prev) {
     lock('DURCH');
     return;
   }
+  // `vorzeichen` statt der rohen Zahl: Ein Abzug stand hier als „-50" mit
+  // Bindestrich da, während dieselbe Zahl zwei Zeilen höher in der Punktepille
+  // als „−50" mit echtem Minuszeichen steht. In der kursiven Ziffernschrift
+  // sieht der Bindestrich daneben aus wie ein Fleck.
   setzeText(status, !you.teamId ? 'Frage beendet.'
-    : eigen > 0 ? `+${eigen} Punkte für euch!`
-    : eigen < 0 ? `${eigen} Punkte für euch.`
+    : eigen > 0 ? `${vorzeichen(eigen)} Punkte für euch!`
+    : eigen < 0 ? `${vorzeichen(eigen)} Punkte für euch.`
     : 'Diesmal nichts für euch.');
   status.classList.toggle('you', eigen > 0);
   lock('DURCH');
