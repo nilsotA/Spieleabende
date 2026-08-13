@@ -1878,3 +1878,19 @@ body.host.flat .tile {
   letter-spacing: 0.12em;
   vertical-align: middle;
 }
+
+/* Der Rückfallweg der Zusammenfassung: ein Textfeld, aus dem man von Hand
+   kopiert. Feste Breitenschrift, weil darin eine Rangliste steht und
+   untereinanderstehende Zahlen sonst tanzen. */
+.zus-text {
+  width: 100%;
+  font-family: ui-monospace, 'SFMono-Regular', 'Consolas', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text);
+  background: rgba(4, 8, 16, 0.6);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  resize: vertical;
+}

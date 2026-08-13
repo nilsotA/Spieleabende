@@ -1613,6 +1613,7 @@ function renderScoreboard() {
   zeigeRekorde(final, ranked);
   $('#btn-next-round').hidden = final;
   $('#btn-new-game').hidden = !final;
+  $('#btn-zusammenfassung').hidden = !final;
   // Ein Abend, der mit „Unentschieden" endet, endet nicht wirklich. Der Knopf
   // steht nur da, wenn er gebraucht wird: am Ende, bei Gleichstand an der
   // Spitze, und solange das Stechen nicht schon entschieden ist.
@@ -2000,6 +2001,85 @@ function knopfAufschriften(teams) {
 
 $('#btn-next-round').addEventListener('click', () => act('nextRound'));
 $('#btn-stechen').addEventListener('click', () => act('stechen'));
+/**
+ * Der Abend als Text, zum Weiterschicken.
+ *
+ * Endstand, Auszeichnungen und Bilanz stehen am Ende auf der Leinwand – und
+ * sind zehn Minuten später weg. Am nächsten Tag fragt jemand im Gruppenchat
+ * „wie ging das nochmal aus?", und die Antwort ist ein Foto vom Fernseher.
+ *
+ * Rangliste und Auszeichnungen werden aus dem gelesen, was auf der Leinwand
+ * steht, nicht ein zweites Mal berechnet: Sonst gäbe es zwei Fassungen
+ * derselben Auswertung, und die eine liefe der anderen irgendwann davon. Die
+ * Bilanz je Team kommt aus dem Spielstand, die steht ohnehin nirgends.
+ */
+function zusammenfassung() {
+  const zeilen = [];
+  zeilen.push('Quizduell – Spieleabend');
+  const wann = new Date().toLocaleDateString('de-DE',
+    { day: '2-digit', month: 'long', year: 'numeric' });
+  zeilen.push(`${state.setName || 'Fragensatz'} · ${wann}`);
+  zeilen.push('');
+
+  const sieger = $('#score-winner');
+  if (sieger && !sieger.hidden && sieger.textContent.trim()) zeilen.push(sieger.textContent.trim());
+
+  for (const li of $('#score-list').children) {
+    // Die Zeile steht als Platz / Name / Punkte im DOM; zusammengesetzt ergibt
+    // das genau das, was der Raum gerade gelesen hat.
+    const teile = [...li.children].map((n) => n.textContent.trim()).filter(Boolean);
+    // Der Platz steht auf der Leinwand als bloße Ziffer in einer eigenen Spalte.
+    // In einer Textzeile braucht er den Punkt, sonst liest sich „1 🐻 Rakete
+    // Gladbach 8400" wie zwei Zahlen um einen Namen herum.
+    if (/^\d+$/.test(teile[0] || '')) teile[0] += '.';
+    zeilen.push(teile.join(' '));
+  }
+
+  const rek = $('#rekorde');
+  if (rek && !rek.hidden && rek.children.length) {
+    zeilen.push('', 'Auszeichnungen');
+    for (const r of rek.children) {
+      zeilen.push([...r.children].map((n) => n.textContent.trim()).join(': '));
+    }
+  }
+
+  zeilen.push('', 'Bilanz');
+  for (const t of [...state.teams].sort((a, b) => b.score - a.score)) {
+    const b = t.bilanz || {};
+    const teile = [
+      `${b.richtig || 0} richtig`,
+      `${b.falsch || 0} falsch`,
+      `${b.gepasst || 0}× weiß nicht`,
+    ];
+    if (b.geklaut) teile.push(`${b.geklaut}× gebuzzert`);
+    if (t.serieBest >= 3) teile.push(`beste Serie ${t.serieBest}`);
+    zeilen.push(`${t.wappen} ${t.name}: ${teile.join(', ')}`);
+  }
+  return zeilen.join('\n');
+}
+
+$('#btn-zusammenfassung').addEventListener('click', async () => {
+  const text = zusammenfassung();
+  // Die Zwischenablage gibt es nur im sicheren Kontext. Auf localhost – dem
+  // Normalfall für den Host-Screen – ist das gegeben; wer die Seite über die
+  // WLAN-Adresse geöffnet hat, bekommt sie nicht. Dann der Rückfallweg, statt
+  // einer Fehlermeldung ohne Ausweg.
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Zusammenfassung kopiert.', 'ok');
+  } catch {
+    const feld = $('#zus-text');
+    feld.value = text;
+    $('#zusammenfassung').hidden = false;
+    feld.focus();
+    feld.select();
+  }
+});
+$('#btn-zus-zu').addEventListener('click', () => { $('#zusammenfassung').hidden = true; });
+$('#zusammenfassung').addEventListener('click', (ev) => {
+  if (ev.target.id === 'zusammenfassung') $('#zusammenfassung').hidden = true;
+});
+
 $('#btn-new-game').addEventListener('click', () => act('backToLobby'));
 $('#btn-menu').addEventListener('click', openMenu);
 $('#btn-close-menu').addEventListener('click', closeMenu);

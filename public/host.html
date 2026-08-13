@@ -216,6 +216,9 @@
           <!-- Nur bei Gleichstand an der Spitze: eine Entscheidungsfrage. -->
           <button id="btn-stechen" class="btn btn-big btn-stechen" hidden
             title="Entscheidungsfrage: Wer zuerst buzzert und richtig liegt, gewinnt den Abend.">⚡ Stechen</button>
+          <!-- Nur am Ende: der Abend als Text, zum Weiterschicken. -->
+          <button id="btn-zusammenfassung" class="btn btn-big" type="button" hidden
+            title="Endstand, Auszeichnungen und Bilanz als Text in die Zwischenablage">📋 Zusammenfassung</button>
           <button id="btn-new-game" class="btn btn-primary btn-big" hidden>Neues Spiel</button>
         </div>
       </div>
@@ -292,6 +295,21 @@
       <button id="btn-ton" class="btn" title="Töne auf diesem Gerät an oder aus">🔊 Ton an</button>
       <button id="btn-close-menu" class="btn grow">Schließen</button>
       <button id="btn-abort" class="btn btn-bad">Spiel beenden</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rückfallweg für die Zusammenfassung: Die Zwischenablage gibt es nur im
+     sicheren Kontext. Auf localhost ist das gegeben – wer den Host-Screen aber
+     über die WLAN-Adresse eines anderen Rechners geöffnet hat, bekommt sie
+     nicht. Dann steht der Text hier und ist schon markiert. -->
+<div id="zusammenfassung" class="menu" hidden role="dialog" aria-modal="true" aria-labelledby="zus-titel">
+  <div class="card menu-card">
+    <h2 id="zus-titel">Zusammenfassung</h2>
+    <p class="muted small">Kopieren mit Strg+C (Mac: Cmd+C) – der Text ist schon markiert.</p>
+    <textarea id="zus-text" class="zus-text" rows="14" readonly aria-label="Zusammenfassung des Abends"></textarea>
+    <div class="row" style="margin-top:0.8rem">
+      <button id="btn-zus-zu" class="btn grow">Schließen</button>
     </div>
   </div>
 </div>
