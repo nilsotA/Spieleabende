@@ -259,6 +259,12 @@
       <h3>Tasten</h3>
       <dl id="spick-tasten" class="spick-liste"></dl>
     </div>
+    <!-- Nur sichtbar, solange eine Brettfrage läuft: Eine kaputte Frage merkt
+         man beim Vorlesen, und dann steht der Host meist am Laptop, wenn er
+         ohne Fernbedienung spielt. -->
+    <button id="btn-discard" class="btn btn-ghost" type="button" style="margin-top:1rem" hidden>
+      Frage verwerfen – Feld bleibt offen
+    </button>
     <div class="row" style="margin-top:1rem">
       <button id="btn-ton" class="btn" title="Töne auf diesem Gerät an oder aus">🔊 Ton an</button>
       <button id="btn-close-menu" class="btn grow">Schließen</button>

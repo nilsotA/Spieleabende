@@ -472,6 +472,117 @@ test('der Rückweg wächst nicht unbegrenzt', async (t) => {
   assert.match(weiter.error, /nichts zurückzunehmen/);
 });
 
+test('eine kaputte Frage lässt sich streichen – das Feld bleibt offen', async (t) => {
+  // Doppeldeutig gestellt, Lösung war vorhin schon gefallen, Tippfehler im Satz:
+  // Das merkt man erst beim Vorlesen. Vorher blieb nur „irgendwie werten" oder
+  // ein verbranntes Feld.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-verwerf-'));
+  const port = 6300 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'verwerf-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  const vorher = await zustand(base);
+  const wessenZug = vorher.turnIndex;
+
+  // Eine Frage aufrufen, falsch werten, Buzzer freigeben, jemand buzzert falsch.
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 });   // 500 Punkte
+  await host({ type: 'judge', correct: false });
+  await host({ type: 'buzzFor', teamId: vorher.teams[1].id });
+  await host({ type: 'judge', correct: false });
+  const mittendrin = await zustand(base);
+  assert.notEqual(mittendrin.teams[0].score, 0, 'es sind Punkte geflossen');
+  assert.notEqual(mittendrin.teams[1].score, 0, 'bei beiden');
+
+  // Und jetzt fällt auf, dass die Frage kaputt war.
+  const weg = await host({ type: 'discard' });
+  assert.equal(weg.ok, true, JSON.stringify(weg));
+  const danach = await zustand(base);
+  assert.equal(danach.current, null, 'die Frage ist weg');
+  assert.equal(danach.phase, 'board', 'und das Brett steht wieder da');
+  assert.equal(danach.board.categories[0].cells[3].used, false, 'das Feld ist wieder offen');
+  assert.equal(danach.teams[0].score, 0, 'die Punkte sind zurück');
+  assert.equal(danach.teams[1].score, 0);
+  assert.equal(danach.teams[0].bilanz.falsch, 0, 'und die Bilanz auch');
+  assert.equal(danach.teams[1].bilanz.falsch, 0);
+  assert.equal(danach.turnIndex, wessenZug, 'dasselbe Team ist weiter dran');
+
+  // Zurücknehmen holt die ganze Frage samt Wertung wieder her.
+  assert.equal(danach.rueckgaengig, 'Frage verworfen');
+  await host({ type: 'undo' });
+  const zurueck = await zustand(base);
+  assert.ok(zurueck.current, 'die Frage steht wieder');
+  assert.equal(zurueck.teams[0].score, mittendrin.teams[0].score, 'mit ihren Punkten');
+  assert.equal(zurueck.teams[1].score, mittendrin.teams[1].score);
+});
+
+test('eine Stechfrage lässt sich nicht streichen', async (t) => {
+  // Sie hat kein Feld, auf das etwas zurückfallen könnte – und der Weg dafür
+  // steht schon da: auflösen und die nächste Frage stellen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-verwerf2-'));
+  const port = 6500 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'verwerf2-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  // Alle Felder beider Runden abräumen, ohne zu werten – dann steht es 0:0.
+  for (let runde = 0; runde < 2; runde += 1) {
+    for (let kat = 0; kat < 6; kat += 1) {
+      for (let reihe = 0; reihe < 4; reihe += 1) {
+        await host({ type: 'pick', catIdx: kat, rowIdx: reihe });
+        await host({ type: 'endQuestion' });
+        await host({ type: 'close' });
+      }
+    }
+    if (runde === 0) await host({ type: 'nextRound' });
+  }
+  const ende = await zustand(base);
+  assert.equal(ende.phase, 'gameOver');
+  assert.equal(ende.teams[0].score, 0);
+  await host({ type: 'stechen' });
+  assert.ok((await zustand(base)).current?.stechen, 'das Stechen läuft');
+
+  const weg = await host({ type: 'discard' });
+  assert.equal(weg.ok, false);
+  assert.match(weg.error, /Stechfrage/);
+});
+
+test('ohne Rückweg wird nichts gestrichen', async (t) => {
+  // Nach einem Neustart des Servers ist der Rückweg leer – dann kann das
+  // Streichen nicht wissen, wohin zurück. Es sagt das, statt zu raten.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-verwerf3-'));
+  const port = 6700 + Math.floor(Math.random() * 200);
+  const stand = path.join(dir, 'stand.json');
+  const erst = await starteServer(port, stand);
+  const host1 = await alsHost(erst.base, 'v3-host');
+  for (const name of ['Rot', 'Blau']) await host1({ type: 'addTeam', name });
+  await host1({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host1({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await warte(700); // der Spielstand wird verzögert gesichert
+  erst.proc.kill('SIGKILL');
+
+  const zweit = await starteServer(port + 1, stand);
+  t.after(async () => {
+    zweit.proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+  const host2 = await alsHost(zweit.base, 'v3-host2');
+  assert.ok((await zustand(zweit.base)).current, 'die Frage steht noch offen');
+  const weg = await host2({ type: 'discard' });
+  assert.equal(weg.ok, false);
+  assert.match(weg.error, /reicht nicht/);
+});
+
 test('Zurücknehmen wirft ein frisch angelegtes Team nicht hinaus', async (t) => {
   // „Eigenes Team" darf jedes Handy jederzeit in der Lobby. Der Host darf dort
   // ebenso „dran" setzen, und das ist rücknehmbar. Vorher verschwand das neue

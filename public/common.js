@@ -216,6 +216,9 @@ let letzteWertung = -Infinity;
 let lage = null;
 const LAGEGEBUNDEN = new Set([
   'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close', 'resetBuzz', 'buzzFor',
+  // Streichen gehört dazu: Ein Tipp, der für die vorige Frage gedacht war, darf
+  // nicht die nächste treffen.
+  'discard',
 ]);
 
 export function hostAction(type, payload = {}) {

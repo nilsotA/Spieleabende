@@ -35,6 +35,18 @@ connect({
 
 const act = hostAction;
 
+// Bewusst mit Rückfrage: Wer hier tippt, streicht eine Frage samt ihrer
+// Wertungen. Zurücknehmen geht zwar, aber erst muss man merken, dass man
+// danebengetippt hat.
+$('#r-discard').addEventListener('click', () => {
+  const q = state?.current;
+  if (!q) return;
+  if (!confirm(`„${q.category} · ${q.value} Punkte" streichen?\n\n`
+    + 'Die Frage zählt nicht, das Feld bleibt offen, und alles, was an ihr hing,'
+    + ' wird zurückgerechnet.')) return;
+  act('discard');
+});
+
 $('#r-undo').addEventListener('click', () => {
   if (performance.now() - rueckSeitWann < 400) return;
   act('undo');
@@ -96,6 +108,9 @@ function render() {
   letzteFrage = frageKey;
 
   box.hidden = !q;
+  // Streichen geht nur bei einer laufenden Brettfrage – eine Stechfrage hat
+  // kein Feld, auf das etwas zurückfallen könnte.
+  $('#r-discard').hidden = !q || !!q.stechen;
   if (q) {
     $('#r-cat').textContent = q.stechen
       ? `Stechen · ${q.category}`

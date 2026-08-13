@@ -269,6 +269,16 @@ body.remote #app {
   .r-bcell:active { transform: none; }
 }
 
+/* Streichen einer kaputten Frage: leise, am Fragenkasten, mit ganzer Breite
+   für den Daumen. Nicht rot – es ist keine Katastrophe, sondern eine
+   Korrektur, und sie ist zurücknehmbar. */
+.r-discard {
+  width: 100%;
+  margin-top: 0.7rem;
+  padding: 0.7rem;
+  font-size: 0.9rem;
+}
+
 /* Zurücknehmen: über der Knopfleiste, nicht darin. Nach einer Wertung ist der
    Daumen unten unterwegs – ein Korrekturknopf gehört nicht in dieselbe Bahn.
    Er sitzt im gemeinsamen klebenden Fuß (siehe .r-foot), damit ihn die

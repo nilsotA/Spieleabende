@@ -1932,6 +1932,18 @@ $('#btn-close-menu').addEventListener('click', closeMenu);
 $('#menu').addEventListener('click', (ev) => {
   if (ev.target.id === 'menu') closeMenu();
 });
+// Mit Rückfrage: Wer hier tippt, streicht eine Frage samt ihrer Wertungen.
+// Zurücknehmen geht zwar, aber erst muss man merken, dass man danebentippte.
+$('#btn-discard').addEventListener('click', () => {
+  const q = state.current;
+  if (!q) return;
+  if (!confirm(`„${q.category} · ${q.value} Punkte" streichen?\n\n`
+    + 'Die Frage zählt nicht, das Feld bleibt offen, und alles, was an ihr hing,'
+    + ' wird zurückgerechnet.')) return;
+  act('discard');
+  closeMenu();
+});
+
 $('#btn-abort').addEventListener('click', () => {
   if (confirm('Spiel wirklich beenden und zurück in die Lobby?')) {
     act('backToLobby');
@@ -1954,6 +1966,9 @@ zeigeTonSchalter();
 function openMenu() {
   fillMenu();
   zeigeTonSchalter();
+  // Streichen geht nur bei einer laufenden Brettfrage – eine Stechfrage hat
+  // kein Feld, auf das etwas zurückfallen könnte.
+  $('#btn-discard').hidden = !state.current || !!state.current.stechen;
   $('#menu').hidden = false;
   // Alles dahinter stilllegen, sonst wandert der Tabulator aufs Board.
   $('#view-game').inert = true;

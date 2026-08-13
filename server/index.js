@@ -208,11 +208,11 @@ const HOST_ACTIONS = new Set([
   'addTeam', 'renameTeam', 'removeTeam', 'removeMember', 'adjustScore', 'setTurn',
   'startGame', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion',
   'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz', 'buzzFor',
-  'undo', 'stechen',
+  'undo', 'stechen', 'discard',
 ]);
 
 /**
- * Zurücknehmen – eine Stufe.
+ * Zurücknehmen – mehrere Stufen.
  *
  * Am Spieleabend passiert genau ein Fehler zuverlässig: „Richtig“ statt
  * „Falsch“, und schon hat der falsche Tisch 500 Punkte. Über das Menü ließe
@@ -227,7 +227,8 @@ const HOST_ACTIONS = new Set([
 /* Züge, die sich auf genau eine Situation der laufenden Frage beziehen.
    Punktekorrekturen und „dran" stehen bewusst nicht dabei: Die macht der Host
    absichtlich und oft, während sich nebenher etwas bewegt. */
-const LAGEGEBUNDEN = new Set(['judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close', 'resetBuzz', 'buzzFor']);
+const LAGEGEBUNDEN = new Set(['judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close', 'resetBuzz',
+  'buzzFor', 'discard']);
 
 const RUECKNEHMBAR = new Set([
   'pick', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close',
@@ -251,6 +252,30 @@ const RUECKNEHMBAR = new Set([
  */
 const RUECKWEG_TIEFE = 25;
 let rueckWeg = []; // [{ state, was }, …] – hinten liegt der nächste Rückschritt
+
+/**
+ * Einen früheren Spielstand übernehmen, ohne den Raum mit zurückzudrehen.
+ *
+ * Wer inzwischen beigetreten oder rausgeflogen ist, bleibt es auch:
+ * Zurückgenommen wird der Spielzug, nicht der Raum – sonst wirft ein
+ * Rückschritt das Handy hinaus, das sich zwei Sekunden vorher verbunden hat.
+ * Und Teams, die es im Schnappschuss noch gar nicht gab, bleiben ebenfalls.
+ * Sonst warf ein „Zurücknehmen" genau das Team hinaus, das sich ein Handy
+ * zwei Sekunden vorher selbst angelegt hat – samt Gerät: Der Host tippt in der
+ * Lobby auf „dran", jemand legt sein Team an, der Host nimmt den Zugwechsel
+ * zurück, und das Team ist weg. Nachgestellt.
+ */
+function uebernimm(alt, jetztStand) {
+  for (const team of alt.teams) {
+    const jetzt = jetztStand.teams.find((t) => t.id === team.id);
+    if (jetzt) team.members = jetzt.members;
+  }
+  const bekannt = new Set(alt.teams.map((t) => t.id));
+  for (const team of jetztStand.teams) {
+    if (!bekannt.has(team.id)) alt.teams.push(team);
+  }
+  return alt;
+}
 
 /** Menschenlesbar, damit der Knopf sagt, was er zurücknimmt. */
 function benenne(type, vorher) {
@@ -320,24 +345,43 @@ async function handleAction(clientId, body) {
   switch (type) {
     case 'undo': {
       if (!rueckWeg.length) throw new G.GameError('Es gibt nichts zurückzunehmen.');
-      const alt = rueckWeg.pop().state;
-      // Wer inzwischen beigetreten oder rausgeflogen ist, bleibt es auch.
-      // Zurückgenommen wird der Spielzug, nicht der Raum – sonst wirft ein Undo
-      // das Handy hinaus, das sich zwei Sekunden vorher verbunden hat.
-      for (const team of alt.teams) {
-        const jetzt = state.teams.find((t) => t.id === team.id);
-        if (jetzt) team.members = jetzt.members;
+      state = uebernimm(rueckWeg.pop().state, state);
+      break;
+    }
+
+    /**
+     * Eine Frage streichen: Sie zählt nicht, das Feld bleibt offen.
+     *
+     * Doppeldeutig gestellt, die Lösung war vorhin schon gefallen, im Fragensatz
+     * steht ein Fehler – so etwas merkt man erst beim Vorlesen. Bisher blieb nur
+     * die Wahl zwischen „irgendwie werten" und „Feld verbrannt": Das Feld war
+     * belegt, sobald es aufgerufen war.
+     *
+     * Gestrichen wird nicht durch Rückrechnen von Punkten, Bilanz und Serie –
+     * das wäre eine zweite Buchhaltung neben der ersten und ginge irgendwann
+     * auseinander. Stattdessen geht es den Weg zurück bis zu dem Zustand, in dem
+     * das Feld noch offen war. Damit stimmt alles wieder, was an dieser Frage
+     * hing, ohne dass es einzeln aufgezählt werden muss.
+     *
+     * Das Verwerfen selbst ist zurücknehmbar: Ein Rückschritt holt die ganze
+     * Frage samt Wertung wieder her.
+     */
+    case 'discard': {
+      const q = state.current;
+      if (!q) throw new G.GameError('Gerade läuft keine Frage.');
+      if (q.stechen) throw new G.GameError('Eine Stechfrage hat kein Feld – lös sie auf und stell die nächste.');
+      // Der Schnappschuss vor der Feldwahl ist der erste, in dem keine Frage
+      // offen steht. Alles darüber gehört zu dieser Frage und fällt mit ihr.
+      const bis = rueckWeg.findLastIndex((e) => !e.state.current);
+      if (bis < 0) {
+        throw new G.GameError('Der Weg zurück reicht nicht mehr bis zum Anfang dieser Frage.');
       }
-      // Und Teams, die es im Schnappschuss noch gar nicht gab, bleiben auch.
-      // Sonst warf ein „Zurücknehmen" genau das Team hinaus, das sich ein
-      // Handy zwei Sekunden vorher selbst angelegt hat – samt Gerät: Der Host
-      // tippt in der Lobby auf „dran", jemand legt sein Team an, der Host
-      // nimmt den Zugwechsel zurück, und das Team ist weg. Nachgestellt.
-      const bekannt = new Set(alt.teams.map((t) => t.id));
-      for (const team of state.teams) {
-        if (!bekannt.has(team.id)) alt.teams.push(team);
-      }
-      state = alt;
+      const vorher = { state: structuredClone(state), was: 'Frage verworfen' };
+      const ziel = rueckWeg[bis].state;
+      rueckWeg.length = bis;
+      state = uebernimm(ziel, state);
+      state.message = 'Frage gestrichen – das Feld ist wieder offen.';
+      rueckWeg.push(vorher);
       break;
     }
     case 'joinTeam':
