@@ -30,6 +30,29 @@ export function el(tag, props = {}, ...children) {
 // beide im selben Browser gegenseitig die Verbindung und die Host-Rechte wegnehmen.
 let ROLE = 'player';
 
+/**
+ * Nimmt den Schlüssel aus der Adresszeile, sobald er angekommen ist.
+ *
+ * Beim Spiel über den Tunnel steht er sonst den ganzen Abend oben im Browser –
+ * und genau dieser Bildschirm wird beim Spiel über die Ferne herumgezeigt: als
+ * Beamerbild, im Video-Call, auf jedem Foto vom Tisch. Wer den Hostschlüssel
+ * dort abliest, öffnet die Fernbedienung und liest alle Lösungen mit.
+ *
+ * Der Server hat ihn beim ersten Aufruf als Cookie zurückgegeben; von da an
+ * trägt ihn jede weitere Anfrage von selbst. Auf dem Cookie liegt ohnehin schon
+ * die ganze Seite: Stylesheet, Skript und Bilder holt der Browser ohne
+ * Adresszusatz. Diese Zeile hängt sich also an nichts Neues.
+ */
+export function verbergeSchluessel() {
+  const url = new URL(location.href);
+  if (!url.searchParams.has('h') && !url.searchParams.has('k')) return;
+  url.searchParams.delete('h');
+  url.searchParams.delete('k');
+  // replaceState statt pushState: Ein „Zurück" soll nicht auf die Fassung mit
+  // Schlüssel führen – die stünde sonst wieder in der Adresszeile.
+  history.replaceState(null, '', url.pathname + url.search + url.hash);
+}
+
 export function setRole(role) {
   ROLE = role === 'host' ? 'host' : 'player';
 }

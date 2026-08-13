@@ -3,7 +3,10 @@
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
   installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand,
-  aufzaehlung, punkte, starteUhr } from '/common.js';
+  aufzaehlung, punkte, starteUhr, verbergeSchluessel } from '/common.js';
+// Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
+verbergeSchluessel();
+
 
 let state = null;
 /**

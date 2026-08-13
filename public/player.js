@@ -1,7 +1,10 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash,
   installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
-  istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr } from '/common.js';
+  istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr, verbergeSchluessel } from '/common.js';
+// Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
+verbergeSchluessel();
+
 
 let state = null;
 let selectedTeam = localStorage.getItem('quizduell.teamId') || null;

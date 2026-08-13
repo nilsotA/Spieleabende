@@ -1,7 +1,10 @@
 import {
   $, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
   setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
-  punkte, delta as vorzeichen, starteUhr } from '/common.js';
+  punkte, delta as vorzeichen, starteUhr, verbergeSchluessel } from '/common.js';
+// Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
+verbergeSchluessel();
+
 import { qrSvg } from '/qr.js';
 
 let state = null;

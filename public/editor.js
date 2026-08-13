@@ -1,4 +1,7 @@
-import { $, el, toast, setzeText } from '/common.js';
+import { $, el, toast, setzeText, verbergeSchluessel } from '/common.js';
+// Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
+verbergeSchluessel();
+
 import { verraeteneLoesungen } from '/fragenpruefung.js';
 
 const BASE_VALUES = [100, 200, 300, 500];

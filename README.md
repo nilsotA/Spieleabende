@@ -218,6 +218,11 @@ zwei Schlüssel, die niemand tippt:
   in einem zweiten, kleinen QR-Code unter „Tipps für den Host“. Den scannst du mit
   deinem eigenen Handy für die Fernbedienung.
 
+Aus der Adresszeile verschwindet der Schlüssel, sobald die Seite steht – er liegt dann
+im Cookie. Das ist beim Spiel über die Ferne kein Detail: Der Host-Screen wird im
+Video-Call geteilt, abfotografiert und herumgezeigt, und wer den Hostschlüssel dort
+abliest, öffnet die Fernbedienung und liest alle Lösungen mit.
+
 Ohne Schlüssel kommt niemand an `/host`, `/remote`, den Editor oder die Fragensätze –
 dort stehen die Lösungen. Beide Schlüssel gelten 12 Stunden und liegen neben dem
 Spielstand: Stürzt der Server mitten im Spiel ab, kommen mit dem Stand auch die
