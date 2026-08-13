@@ -588,3 +588,27 @@ test('ohne Ausschlüsse ist der Vorrat der ganze Satz', async () => {
   assert.ok(topf.length > 400, `nur ${topf.length} Fragen im Topf`);
   assert.ok(topf.every((q) => q.text && q.answer));
 });
+
+test('kein Bilddateiname verrät die Lösung seiner Frage', async () => {
+  // Die Antwort wird sorgfältig zurückgehalten – der Bildpfad ging bisher
+  // ungefiltert an jedes Handy. Bei „Welches Land hat diese Flagge?" stand die
+  // Lösung damit im Quelltext der Seite: /bilder/flagge-jamaika.svg.
+  for (const datei of DATEIEN) {
+    const satz = JSON.parse(await readFile(new URL(datei, DATEN), 'utf8'));
+    for (const runde of satz.rounds || []) {
+      for (const kat of runde.categories || []) {
+        for (const frage of kat.questions || []) {
+          if (!frage.image || !frage.answer) continue;
+          const name = String(frage.image).toLowerCase();
+          // Jedes Wort der Lösung ab vier Zeichen – kürzere („Rom", „Ei")
+          // treffen zu leicht zufällig einen Dateinamen.
+          for (const wort of String(frage.answer).toLowerCase().split(/[^a-zäöüß]+/)) {
+            if (wort.length < 4) continue;
+            assert.ok(!name.includes(wort),
+              `${datei}: „${frage.image}" verrät „${frage.answer}"`);
+          }
+        }
+      }
+    }
+  }
+});

@@ -481,6 +481,13 @@ aus, hat aber fünf Zacken statt neun.
   offenen Verbindung, nicht an einer Angabe im Request, damit nicht jedes Handy Punkte
   verteilen kann. Im Heimnetz gibt es bewusst kein Passwort: Es ist ein Spieleabend im
   eigenen WLAN, kein öffentlicher Dienst.
+- **Geräte weisen sich aus:** Die Gerätekennung steht in jeder Sicht neben dem Namen –
+  der Host braucht sie, um eine Karteileiche zu entfernen. Damit niemand für ein fremdes
+  Handy handelt (buzzern, es aus seinem Team werfen, es woanders eintragen), bekommt
+  jede Kennung beim ersten Ereignisstrom ein Geheimnis, das nur über diesen Strom
+  herausgeht und mit jedem Zug wieder mitkommt. Eine Kennung, die der Server nicht
+  kennt, wird bewusst durchgelassen: Sonst stünde nach einem Serverneustart mitten im
+  Spiel jedes Handy vor einer Absage.
 - **Zugang nach draußen:** Nur mit `QUIZDUELL_ONLINE=1` (die Online-Startskripte) zieht
   `server/tunnel.js` einen cloudflared-Tunnel hoch, und `server/zugang.js` schließt ab:
   zwei Schlüssel pro Start, als Cookie gemerkt, Hostschlüssel für `/host`, `/remote`,

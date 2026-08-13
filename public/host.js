@@ -2138,6 +2138,19 @@ function renderControls() {
     bar.dataset.key = key;
     bar.innerHTML = '';
   }
+  // Der Bezugspunkt für die Anlaufsperre kennt die Handys nicht.
+  //
+  // Die Leiste baut sich auch neu, wenn nur ein Handy aus dem Standby kommt
+  // oder wegfällt – daran hängen die Vertreterknöpfe. Die Wertungsknöpfe
+  // stehen dabei unverändert an derselben Stelle, wurden aber trotzdem
+  // 400 ms taub, weil sie frische Knoten waren. Gemessen: Handy sperrt sich,
+  // Host drückt „Richtig" – nichts passiert. Deshalb zählt hier nur, was die
+  // Bedeutung der Knöpfe ausmacht.
+  const wertungsLage = [
+    state.phase, q?.step, q?.buzzedTeamId, q?.teamId,
+    (q?.lockedOut || []).join(','), state.stechenSieger,
+  ].join('#');
+  const seit = lageSeit('leiste', wertungsLage);
   const add = (...knoepfe) => { if (neu) bar.append(...knoepfe); };
 
   // Die Lösung gehört nicht ungefragt auf die Leinwand.
@@ -2187,9 +2200,9 @@ function renderControls() {
       ? `${teamName(q.teamId)} antwortet. Falsch oder „weiß nicht“ kostet ${abzug}.`
       : `${teamName(q.teamId)} antwortet.`);
     add(
-      button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
-      button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
-      button('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), '3'),
+      button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1', seit),
+      button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2', seit),
+      button('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), '3', seit),
     );
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
     setzeText(hint, q.stechen ? 'Stechen läuft – wer zuerst drückt, antwortet.' : 'Buzzer ist frei.');
@@ -2210,9 +2223,9 @@ function renderControls() {
       ? `${teamName(q.buzzedTeamId)} hat gebuzzert – richtig gewinnt, falsch ist raus.`
       : `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
     add(
-      button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1'),
-      button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2'),
-      button('Buzz zurücknehmen', 'btn-ghost btn-sm', () => act('resetBuzz')),
+      button('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), '1', seit),
+      button('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), '2', seit),
+      button('Buzz zurücknehmen', 'btn-ghost btn-sm', () => act('resetBuzz'), null, seit),
     );
   } else if (q.stechen) {
     // Nach der Stechfrage geht es zurück in den Endstand – mit Sieger oder für
@@ -2220,10 +2233,10 @@ function renderControls() {
     setzeText(hint, state.stechenSieger
       ? `${teamName(state.stechenSieger)} gewinnt den Abend.`
       : 'Das wusste keiner – zurück zum Endstand.');
-    add(button(state.stechenSieger ? 'Zum Endstand' : 'Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
+    add(button(state.stechenSieger ? 'Zum Endstand' : 'Weiter', 'btn-primary', () => act('close'), 'Leertaste', seit));
   } else {
     setzeText(hint, 'Frage beendet.');
-    add(button('Weiter', 'btn-primary', () => act('close'), 'Leertaste'));
+    add(button('Weiter', 'btn-primary', () => act('close'), 'Leertaste', seit));
   }
 }
 
@@ -2241,17 +2254,40 @@ function renderControls() {
  * Die Fernbedienung kennt diesen Schutz längst (big() in remote.js), der
  * Zurücknehmen-Knopf auch – die Leiste auf der Leinwand war die letzte ohne.
  */
-function button(label, cls, onclick, key) {
-  const geboren = performance.now();
+function button(label, cls, onclick, key, seit = performance.now()) {
   const node = el('button', {
     class: `btn ${cls}`,
     onclick: () => {
-      if (performance.now() - geboren < 400) return;
+      if (performance.now() - seit < 400) return;
       onclick();
     },
   }, label);
   if (key) node.append(el('kbd', {}, key));
   return node;
+}
+
+/**
+ * Seit wann diese Lage gilt – der Bezugspunkt für die Anlaufsperre oben.
+ *
+ * Die Sperre schützt davor, dass ein Knopf unter dem Daumen ausgetauscht wird.
+ * Sie hing bisher an der Geburt des Knotens, und das war zu streng: Die Leisten
+ * bauen sich auch neu, wenn sich nur eine Zahl geändert hat. Im Menü hieß das,
+ * dass jede angekommene Punktekorrektur die Knöpfe erneuerte und damit für
+ * 400 ms taub machte – gemessen kamen von drei zügigen Tipps auf „+100" genau
+ * einer an, von fünf zwei. Wer 300 Punkte nachtragen wollte, trug 100 nach.
+ *
+ * Gezählt wird deshalb ab dem Moment, in dem sich die Bedeutung geändert hat.
+ * Bleibt die Knopfreihe dieselbe, bleibt auch ihr Bezugspunkt stehen, und der
+ * ist längst abgelaufen.
+ */
+const lagenSeit = new Map();
+function lageSeit(name, signatur) {
+  const alt = lagenSeit.get(name);
+  if (!alt || alt.signatur !== signatur) {
+    lagenSeit.set(name, { signatur, seit: performance.now() });
+    return performance.now();
+  }
+  return alt.seit;
 }
 
 /**
@@ -2463,32 +2499,50 @@ function fillMenu() {
   // Solange das Menü offen ist, läuft das bei jedem Broadcast – auch wenn nur
   // ein Handy aus dem Standby kommt. Ohne Schlüssel würden dabei die Knöpfe
   // unter dem Finger des Hosts ausgetauscht, während er Punkte korrigiert.
-  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.score}:${t.members.filter((m) => !m.online).length}`).join('|')
+  // Der Punktestand steht bewusst NICHT im Schlüssel – sonst baut jede
+  // angekommene Korrektur die Reihe neu, und die frischen Knöpfe wären wieder
+  // taub. Er wird stattdessen nachgetragen, so wie die Mitgliederzeile am Pult.
+  // Die Zahl der abgemeldeten Geräte gehört dagegen hinein: Von ihr hängt ab,
+  // ob es den Knopf „Offline entfernen" überhaupt gibt.
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.members.some((m) => !m.online) ? 1 : 0}`).join('|')
     + `#${state.turnIndex}`;
-  if (list.dataset.key === key) return;
-  list.dataset.key = key;
-  list.innerHTML = '';
-  for (const team of state.teams) {
-    const offline = team.members.filter((m) => !m.online);
-    list.append(
-      el('li', {},
-        el('span', { class: 'dot', style: { background: team.color } }),
-        el('span', { class: 'tname' },
-          `${team.wappen} ${team.name}`,
+  const seit = lageSeit('menu', key);
+  if (list.dataset.key !== key) {
+    list.dataset.key = key;
+    list.innerHTML = '';
+    for (const team of state.teams) {
+      const offline = team.members.filter((m) => !m.online);
+      list.append(
+        el('li', { 'data-team': team.id },
+          el('span', { class: 'dot', style: { background: team.color } }),
+          el('span', { class: 'tname' },
+            `${team.wappen} ${team.name}`,
+            offline.length
+              ? el('span', { class: 'muted small offline-zahl' }, ` · ${offline.length} offline`)
+              : null),
+          el('span', { class: 'sc' }, punkte(team.score)),
+          button('−100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: -100 }), null, seit),
+          button('+100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: 100 }), null, seit),
+          button('dran', 'btn-sm btn-ghost', () => act('setTurn', { teamId: team.id }), null, seit),
           offline.length
-            ? el('span', { class: 'muted small' }, ` · ${offline.length} offline`)
-            : null),
-        el('span', { class: 'sc' }, punkte(team.score)),
-        button('−100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: -100 })),
-        button('+100', 'btn-sm btn-ghost', () => act('adjustScore', { teamId: team.id, delta: 100 })),
-        button('dran', 'btn-sm btn-ghost', () => act('setTurn', { teamId: team.id })),
-        offline.length
-          ? button('Offline entfernen', 'btn-sm btn-ghost', () => {
-            for (const m of offline) act('removeMember', { teamId: team.id, clientId: m.clientId });
-          })
-          : null,
-      ),
-    );
+            ? button('Offline entfernen', 'btn-sm btn-ghost', () => {
+              const weg = (state.teams.find((t) => t.id === team.id)?.members || []).filter((m) => !m.online);
+              for (const m of weg) act('removeMember', { teamId: team.id, clientId: m.clientId });
+            }, null, seit)
+            : null,
+        ),
+      );
+    }
+  }
+  // Punktestand und Zahl der abgemeldeten Geräte nachtragen, ohne die Reihe
+  // anzufassen – die Knöpfe bleiben damit stehen und bedienbar.
+  for (const zeile of list.children) {
+    const team = state.teams.find((t) => t.id === zeile.dataset.team);
+    if (!team) continue;
+    setzeText(zeile.querySelector('.sc'), punkte(team.score));
+    const offline = team.members.filter((m) => !m.online).length;
+    const zahl = zeile.querySelector('.offline-zahl');
+    if (zahl) setzeText(zahl, ` · ${offline} offline`);
   }
 }
 

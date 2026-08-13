@@ -87,16 +87,36 @@ async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
 }
 
 /** Öffnet eine Host-Verbindung und liefert eine Funktion zum Absenden von Aktionen. */
+/**
+ * Öffnet einen Ereignisstrom und fischt den Nachweis für diese Gerätekennung
+ * aus dem `hello` – genau das tut die Oberfläche auch. Ohne ihn lehnt der
+ * Server jeden Zug ab, sobald die Kennung schon einmal einen Strom offen hatte.
+ */
+async function verbinde(base, id, rolle = 'host') {
+  const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
+  const reader = res.body.getReader();
+  let geheim = null;
+  let buf = '';
+  for (let i = 0; i < 40 && !geheim; i++) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += new TextDecoder().decode(value);
+    const treffer = /event: hello\ndata: (.*)\n\n/.exec(buf);
+    if (treffer) geheim = JSON.parse(treffer[1]).geheim || null;
+  }
+  reader.read(); // weiterlesen, damit die Verbindung offen bleibt
+  const tu = (body) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: id, geheim, ...body }),
+  }).then((r) => r.json());
+  return { res, reader, geheim, tu };
+}
+
 async function alsHost(base, id) {
-  const res = await fetch(`${base}/api/events?clientId=${id}&role=host`);
-  res.body.getReader().read();
+  const { tu } = await verbinde(base, id, 'host');
   await warte(200);
-  return (body) =>
-    fetch(`${base}/api/action`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: id, ...body }),
-    }).then((r) => r.json());
+  return tu;
 }
 
 /** Liest den ersten State-Schnappschuss aus dem Ereignisstrom. */
@@ -226,14 +246,9 @@ test('Spielstand aus einer älteren Fassung bricht den ersten Buzz nicht', async
   });
 
   // Bea buzzert – genau hier lag der Absturz.
-  const res = await fetch(`${base}/api/events?clientId=g2&role=player`);
-  res.body.getReader().read();
+  const bea = await verbinde(base, 'g2', 'player');
   await warte(200);
-  const gebuzzert = await fetch(`${base}/api/action`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clientId: 'g2', type: 'buzz' }),
-  }).then((r) => r.json());
+  const gebuzzert = await bea.tu({ type: 'buzz' });
 
   assert.equal(gebuzzert.ok, true, gebuzzert.error || '');
   const stand = await zustand(base);
@@ -273,11 +288,10 @@ test('Host-Rechte hängen an der Verbindung, nicht an der Behauptung im Request'
     }).then((r) => r.json());
 
   // Ein Handy, das im Spiel sitzt, kann sich die Rechte nicht per Behauptung nehmen.
-  const spieler = await fetch(`${base}/api/events?clientId=irgendein-handy&role=player`);
-  spieler.body.getReader().read();
+  const handy = await verbinde(base, 'irgendein-handy', 'player');
   await warte(200);
 
-  const frech = await anmaßen('irgendein-handy');
+  const frech = await handy.tu({ role: 'host', type: 'addTeam', name: 'Eindringling' });
   assert.equal(frech.ok, false);
   assert.match(frech.error, /Host/);
 
@@ -1048,11 +1062,9 @@ test('acht Teams mit je zwei Handys überstehen Abbruch und Rückkehr', async (t
   for (const [i, team] of teams.entries()) {
     for (const zweit of [0, 1]) {
       const clientId = `handy-${i}-${zweit}`;
-      const res = await fetch(`${base}/api/events?clientId=${clientId}&role=player`);
-      const reader = res.body.getReader();
-      reader.read(); // Strom offen halten
-      stroeme.push({ clientId, reader });
-      geraete.push({ clientId, teamId: team.id });
+      const v = await verbinde(base, clientId, 'player');
+      stroeme.push({ clientId, reader: v.reader });
+      geraete.push({ clientId, teamId: team.id, geheim: v.geheim, tu: v.tu });
     }
   }
   await warte(300);
@@ -1060,7 +1072,7 @@ test('acht Teams mit je zwei Handys überstehen Abbruch und Rückkehr', async (t
     await fetch(`${base}/api/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: g.clientId, role: 'player', type: 'joinTeam', teamId: g.teamId, name: g.clientId }),
+      body: JSON.stringify({ clientId: g.clientId, geheim: g.geheim, role: 'player', type: 'joinTeam', teamId: g.teamId, name: g.clientId }),
     });
   }
   await warte(300);
@@ -1086,11 +1098,8 @@ test('acht Teams mit je zwei Handys überstehen Abbruch und Rückkehr', async (t
 
   // Das zweite Handy desselben Teams kann weiter buzzern – der Ausfall des
   // ersten darf das Team nicht aus dem Rennen nehmen.
-  const gebuzzert = await fetch(`${base}/api/action`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clientId: 'handy-3-1', role: 'player', type: 'buzz' }),
-  }).then((r) => r.json());
+  const gebuzzert = await geraete.find((g) => g.clientId === 'handy-3-1')
+    .tu({ role: 'player', type: 'buzz' });
   assert.ok(!gebuzzert.error, `Buzz sollte durchgehen, kam aber: ${gebuzzert.error}`);
 
   await host({ type: 'judge', correct: true });
@@ -1146,6 +1155,7 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
   // Eine einzige offene Verbindung, die den Zustand mitschreibt: Für jeden
   // Schritt eine neue zu öffnen wären hunderte Verbindungen.
   let stand = null;
+  let geheim = null;
   const res = await fetch(`${base}/api/events?clientId=abend&role=host`);
   const reader = res.body.getReader();
   (async () => {
@@ -1161,6 +1171,9 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
         puffer = puffer.slice(i + 2);
         const treffer = stueck.match(/^event: state\ndata: (.*)$/s);
         if (treffer) stand = JSON.parse(treffer[1]);
+        // Der Nachweis für diese Gerätekennung – ohne ihn lehnt der Server ab.
+        const hallo = stueck.match(/^event: hello\ndata: (.*)$/s);
+        if (hallo) geheim = JSON.parse(hallo[1]).geheim || null;
       }
     }
   })();
@@ -1175,7 +1188,7 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
     const antwort = await fetch(`${base}/api/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: 'abend', role: 'host', ...body }),
+      body: JSON.stringify({ clientId: 'abend', geheim, role: 'host', ...body }),
     });
     assert.ok(antwort.status < 500, `Serverfehler bei ${body.type}: ${antwort.status}`);
     const daten = await antwort.json();
@@ -1306,16 +1319,10 @@ test('die Pause zwischen zwei Sätzen kostet niemanden sein Team', async (t) => 
   const team = (await zustand(base)).teams[0];
 
   // Zwei Handys im selben Team – eines legt gleich das Display aus der Hand.
-  const strom = await fetch(`${base}/api/events?clientId=mira&role=player`);
-  const miraLiest = strom.body.getReader();
-  miraLiest.read();
+  const mira = await verbinde(base, 'mira', 'player');
+  const miraLiest = mira.reader;
   await warte(200);
-  const alsSpieler = (id, body) => fetch(`${base}/api/action`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clientId: id, ...body }),
-  }).then((r) => r.json());
-  assert.equal((await alsSpieler('mira', { type: 'joinTeam', teamId: team.id, name: 'Mira' })).ok, true);
+  assert.equal((await mira.tu({ type: 'joinTeam', teamId: team.id, name: 'Mira' })).ok, true);
 
   await host({ type: 'startGame', file: 'neunziger-nuller.json' });
 
@@ -1356,12 +1363,10 @@ test('der Host sieht, wie viele Handys noch auf ein Team warten', async (t) => {
     await rm(dir, { recursive: true, force: true });
   });
   const strom = async (id, rolle) => {
-    const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
-    const r = res.body.getReader();
-    r.read();
-    offen.push(r);
+    const v = await verbinde(base, id, rolle);
+    offen.push(v.reader);
     await warte(150);
-    return r;
+    return v;
   };
 
   const host = await alsHost(base, 'warte-host');
@@ -1370,7 +1375,7 @@ test('der Host sieht, wie viele Handys noch auf ein Team warten', async (t) => {
   assert.equal((await zustand(base)).wartende, 0, 'am Anfang wartet niemand');
 
   // Zwei Gäste haben gescannt, aber noch kein Team gewählt.
-  await strom('gast1', 'player');
+  const gast1 = await strom('gast1', 'player');
   await strom('gast2', 'player');
   assert.equal((await zustand(base)).wartende, 2);
 
@@ -1382,13 +1387,9 @@ test('der Host sieht, wie viele Handys noch auf ein Team warten', async (t) => {
   await strom('host-handy', 'host');
   assert.equal((await zustand(base)).wartende, 2);
 
-  // Einer tritt bei.
+  // Einer tritt bei – mit dem Nachweis seines Geräts, wie ein echtes Handy.
   const teams = (await zustand(base)).teams;
-  await fetch(`${base}/api/action`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clientId: 'gast1', type: 'joinTeam', teamId: teams[0].id, name: 'Mira' }),
-  });
+  await gast1.tu({ type: 'joinTeam', teamId: teams[0].id, name: 'Mira' });
   assert.equal((await zustand(base)).wartende, 1);
 
   // Spieler bekommen die Zahl nicht – sie ist eine Host-Angabe.
@@ -1518,20 +1519,26 @@ test('eine Wertung für die vorige Lage wird abgelehnt', async (t) => {
     proc.kill('SIGKILL');
     await rm(dir, { recursive: true, force: true });
   });
+  const geraete = new Map();
   const strom = async (id, rolle) => {
-    const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
-    const r = res.body.getReader();
-    r.read();
-    offen.push(r);
+    const v = await verbinde(base, id, rolle);
+    offen.push(v.reader);
+    geraete.set(id, v);
     await warte(150);
   };
-  const schick = (clientId, body) => fetch(`${base}/api/action`, {
+  const schick = (clientId, body) => (geraete.get(clientId)?.tu ?? ((b) => fetch(`${base}/api/action`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clientId, ...body }),
-  }).then((r) => r.json());
+    body: JSON.stringify({ clientId, ...b }),
+  }).then((r) => r.json())))(body);
 
-  const host = await alsHost(base, 'lage-host');
+  // Der Host steht mit in der Geräteliste: `schick` benutzt ihn weiter unten
+  // für den verspäteten Druck, und auch er muss sich ausweisen.
+  const hostGeraet = await verbinde(base, 'lage-host', 'host');
+  geraete.set('lage-host', hostGeraet);
+  offen.push(hostGeraet.reader);
+  await warte(200);
+  const host = hostGeraet.tu;
   await host({ type: 'addTeam', name: 'Zugteam' });
   await host({ type: 'addTeam', name: 'Buzzteam' });
   await strom('handy', 'player');
@@ -2224,4 +2231,88 @@ test('ein Stechen, das ein „Neues Spiel“ überholt, hinterlässt keinen Geis
     assert.equal(danach.phase, 'question', 'sonst läuft das Stechen – aber dann richtig');
     assert.ok(danach.current?.stechen);
   }
+});
+
+test('kein Handy handelt für ein fremdes Gerät', async (t) => {
+  // Die Gerätekennung steht in jeder Sicht neben dem Namen – der Host braucht
+  // sie, um eine Karteileiche zu entfernen. Ohne Nachweis konnte damit jedes
+  // Handy für ein anderes buzzern, es aus seinem Team werfen oder es woanders
+  // eintragen: ein einziger POST mit fremder Kennung.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-fremd-'));
+  const port = 8900 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'fremd-host');
+  for (const name of ['Rot', 'Blau', 'Grün']) await host({ type: 'addTeam', name });
+  const teams = (await zustand(base)).teams;
+
+  const anna = await verbinde(base, 'handy-anna', 'player');
+  const bea = await verbinde(base, 'handy-bea', 'player');
+  await warte(150);
+  await anna.tu({ type: 'joinTeam', teamId: teams[0].id, name: 'Anna' });
+  await bea.tu({ type: 'joinTeam', teamId: teams[1].id, name: 'Bea' });
+
+  // Die Kennung steht offen in der Sicht – genau daraus bestand der Angriff.
+  const sicht = await zustand(base);
+  assert.ok(sicht.teams[0].members.some((m) => m.clientId === 'handy-anna'),
+    'die Kennung steht weiterhin in der Sicht');
+
+  const alsWer = (clientId, geheim, body) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId, geheim, role: 'player', ...body }),
+  }).then((r) => r.json());
+
+  // Bea versucht, Anna aus ihrem Team zu werfen – mit Annas Kennung.
+  const rauswurf = await alsWer('handy-anna', bea.geheim, { type: 'leaveTeam' });
+  assert.equal(rauswurf.ok, false);
+  assert.match(rauswurf.error, /gehört jemand anderem/);
+  assert.ok((await zustand(base)).teams[0].members.some((m) => m.clientId === 'handy-anna'),
+    'Anna steht noch in ihrem Team');
+
+  // Und ohne jeden Nachweis geht es genauso wenig.
+  assert.equal((await alsWer('handy-anna', undefined, { type: 'leaveTeam' })).ok, false);
+
+  // Der Buzz für ein fremdes Team ebenfalls nicht.
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'pass' });
+  const fremderBuzz = await alsWer('handy-anna', bea.geheim, { type: 'buzz' });
+  assert.equal(fremderBuzz.ok, false, 'ein Buzz im Namen eines anderen Geräts');
+
+  // Mit dem eigenen Nachweis geht alles wie immer.
+  const eigener = await bea.tu({ type: 'buzz' });
+  assert.equal(eigener.ok, true, eigener.error || '');
+  assert.equal((await zustand(base)).current.buzzedTeamId, teams[1].id);
+});
+
+test('eine Kennung, die der Server nicht kennt, wird nicht ausgesperrt', async (t) => {
+  // Nachsicht mit Absicht: Nach einem Serverneustart mitten im Spiel hat der
+  // Server keine Geheimnisse mehr. Stünde dann jedes Handy vor einer Absage,
+  // wäre die Sicherung schlimmer als die Lücke – und zu gewinnen ist dabei
+  // nichts, denn eine frei erfundene Kennung gehört ohnehin niemandem.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-neuling-'));
+  const port = 9100 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'neuling-host');
+  await host({ type: 'addTeam', name: 'Rot' });
+  const team = (await zustand(base)).teams[0];
+
+  // Ein Handy, das noch nie einen Ereignisstrom hatte – so wie jedes Handy in
+  // der Sekunde, in der es beitritt.
+  const ohneStrom = await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: 'ganz-neu', role: 'player', type: 'joinTeam', teamId: team.id, name: 'Neu' }),
+  }).then((r) => r.json());
+  assert.equal(ohneStrom.ok, true, ohneStrom.error || '');
 });

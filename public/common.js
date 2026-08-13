@@ -53,6 +53,33 @@ export function verbergeSchluessel() {
   history.replaceState(null, '', url.pathname + url.search + url.hash);
 }
 
+/**
+ * Der Nachweis für die eigene Gerätekennung – siehe connect().
+ *
+ * Er liegt neben der Kennung im Speicher des Geräts, nicht nur in der Seite:
+ * Sonst wäre nach jedem Neuladen ein kurzes Loch, in dem ein Buzz abprallt,
+ * weil der Strom sein `hello` noch nicht geschickt hat. Kennung und Nachweis
+ * gehören zusammen und verschwinden auch zusammen – wer den Speicher leert,
+ * bekommt beides neu, und der Server kennt die neue Kennung dann noch nicht.
+ */
+function geheimSchluessel() {
+  return `quizduell.geheim.${ROLE}`;
+}
+function holeGeheim() {
+  try {
+    return localStorage.getItem(geheimSchluessel()) || null;
+  } catch {
+    return null; // privater Modus ohne Speicher – dann eben ohne Nachweis
+  }
+}
+function merkeGeheim(wert) {
+  try {
+    if (wert) localStorage.setItem(geheimSchluessel(), wert);
+  } catch {
+    /* siehe oben */
+  }
+}
+
 export function setRole(role) {
   ROLE = role === 'host' ? 'host' : 'player';
 }
@@ -175,6 +202,21 @@ export function connect({ role, onState, onEvent }) {
   const id = clientId();
   const source = new EventSource(`/api/events?clientId=${encodeURIComponent(id)}&role=${role}`);
 
+  // Der Nachweis, dass diese Gerätekennung uns gehört.
+  //
+  // Die Kennung selbst ist kein Geheimnis – sie steht in jeder Sicht neben dem
+  // Namen, damit der Host eine Karteileiche entfernen kann. Ohne Nachweis
+  // konnte damit jedes Handy für ein anderes buzzern oder es aus seinem Team
+  // werfen. Das Geheimnis kommt nur über diesen Strom herein und geht ab jetzt
+  // mit jedem Zug wieder hinaus.
+  source.addEventListener('hello', (ev) => {
+    try {
+      merkeGeheim(JSON.parse(ev.data).geheim);
+    } catch {
+      /* ohne Nachweis weiter – der Server lässt eine unbekannte Kennung durch */
+    }
+  });
+
   source.addEventListener('state', (ev) => {
     setOnline(true);
     const sicht = JSON.parse(ev.data);
@@ -202,7 +244,7 @@ export async function action(type, payload = {}, role = 'player') {
     const res = await fetch('/api/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, type, role, clientId: clientId() }),
+      body: JSON.stringify({ ...payload, type, role, clientId: clientId(), geheim: holeGeheim() }),
     });
     const data = await res.json().catch(() => ({ ok: false, error: 'Serverfehler' }));
     if (data.ok) setOnline(true);

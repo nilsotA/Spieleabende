@@ -179,6 +179,37 @@ async function forgetSave() {
  */
 const connections = new Map(); // connId -> { res, clientId, isHost }
 
+/**
+ * Ein Geheimnis je Gerätekennung – damit niemand für ein fremdes Handy handelt.
+ *
+ * Die Kennung steht im Anfragekörper, und sie ist kein Geheimnis: Die Sicht
+ * nennt zu jedem Team seine Mitglieder samt Kennung, damit der Host eine
+ * Karteileiche entfernen kann. Ohne Nachweis konnte damit jedes Handy für ein
+ * anderes buzzern, es aus seinem Team werfen oder es woanders eintragen –
+ * nachgestellt mit einem einzigen POST.
+ *
+ * Deshalb bekommt jede Kennung beim ersten Ereignisstrom ein Geheimnis, das
+ * nur über diesen Strom herausgeht (`hello`). Wer eine Kennung benutzt, für die
+ * eines hinterlegt ist, muss es mitschicken.
+ *
+ * Bewusst nachsichtig, wo nichts zu gewinnen ist: Für eine Kennung ohne
+ * hinterlegtes Geheimnis geht der Zug durch. Sonst stünde nach einem
+ * Serverneustart mitten im Spiel jedes Handy vor einer Absage, obwohl es nur
+ * seine eigene Kennung benutzt – und ein Angreifer gewänne dadurch nichts, denn
+ * eine frei erfundene Kennung gehört ohnehin niemandem.
+ */
+const geheimnisse = new Map(); // clientId -> Geheimnis
+
+function geheimnisFuer(clientId) {
+  if (!geheimnisse.has(clientId)) geheimnisse.set(clientId, randomUUID());
+  return geheimnisse.get(clientId);
+}
+
+function darfHandeln(clientId, mitgebracht) {
+  const erwartet = geheimnisse.get(clientId);
+  return !erwartet || erwartet === mitgebracht;
+}
+
 function connectionsOf(clientId) {
   return [...connections.values()].filter((c) => c.clientId === clientId);
 }
@@ -308,10 +339,27 @@ function uebernimm(alt, jetztStand) {
     const jetzt = jetztStand.teams.find((t) => t.id === team.id);
     if (jetzt) team.members = jetzt.members;
   }
+  // Entfernte Teams bleiben entfernt.
+  //
+  // Bisher schützte nur die Gegenrichtung: Teams, die es im Schnappschuss noch
+  // nicht gab, blieben. Ein Team, das der Host inzwischen weggeräumt hat, stand
+  // nach einem „Zurücknehmen" dagegen wieder da – samt seiner damaligen
+  // Mitglieder. Nachgestellt: Anna legt ihr eigenes Team an, wechselt dann zu
+  // Bernd, der Host räumt Annas leeres Team weg und nimmt danach einen
+  // Zugwechsel zurück. Danach gab es Annas Team wieder, und Annas Handy stand
+  // in zwei Teams gleichzeitig. Teams anzulegen und zu entfernen geht nur in
+  // der Lobby und steht in keinem Rückweg – der Raum gehört also dem Jetzt,
+  // genau wie die Mitglieder und die Pause.
+  const jetztIds = new Set(jetztStand.teams.map((t) => t.id));
+  alt.teams = alt.teams.filter((t) => jetztIds.has(t.id));
   const bekannt = new Set(alt.teams.map((t) => t.id));
   for (const team of jetztStand.teams) {
     if (!bekannt.has(team.id)) alt.teams.push(team);
   }
+  // Wie in removeTeam: Der Zeiger aufs Zugteam darf nicht hinter das Ende der
+  // Liste zeigen – dort wäre der nächste Feldaufruf kein abgelehnter Zug,
+  // sondern ein Absturz.
+  if (alt.turnIndex >= alt.teams.length) alt.turnIndex = 0;
   // Die Pause gehört zum Raum, nicht zum Spielzug.
   //
   // Sie fuhr bisher aus dem Schnappschuss mit: Wer in der Pause eine
@@ -736,7 +784,7 @@ function sseHandler(req, res, url, rolle) {
   connections.set(connId, conn);
   G.setMemberOnline(state, clientId, true);
 
-  write(conn, 'hello', { clientId, isHost });
+  write(conn, 'hello', { clientId, isHost, geheim: geheimnisFuer(clientId) });
   sendState(conn);
   broadcast(); // die anderen sehen sofort, dass jemand wieder online ist
 
@@ -833,6 +881,9 @@ async function apiHandler(req, res, url, pathname, rolle) {
       return sendJson(res, err.statusCode || 400, { ok: false, error: err.message });
     }
     const clientId = String(body.clientId || '');
+    if (!darfHandeln(clientId, body.geheim)) {
+      return sendJson(res, 200, { ok: false, error: 'Dieses Gerät gehört jemand anderem.' });
+    }
     try {
       await handleAction(clientId, body);
       return sendJson(res, 200, { ok: true });
