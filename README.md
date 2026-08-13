@@ -225,17 +225,38 @@ Aufbau: Manche Vermittler im Netz sammeln eine Antwort erst einmal, bevor sie
 sie weiterreichen – eine Verbindung, die absichtlich nie endet, kommt dann nie
 an. Kein Fehler, keine Meldung, nur Stille.
 
-Dagegen stehen jetzt drei Dinge, ohne dass jemand etwas tun muss:
+Dagegen stehen jetzt vier Dinge, ohne dass jemand etwas tun muss:
 
-* Unter dem Anmeldeknopf steht, woran es gerade hängt: „Verbinde mit dem
-  Spiel …“, „Die Live-Verbindung kommt nicht durch …“ oder der genaue Grund
-  einer Abweisung.
-* Bleibt die Verbindung acht Sekunden stumm, **holt sich das Handy den
+* Unter dem Anmeldeknopf steht in einer eigenen Zeile, woran es gerade hängt:
+  „Verbinde mit dem Spiel …“, „Live-Verbindung steht.“, „Notweg: Der Spielstand
+  wird alle 1,5 s abgeholt.“ oder der genaue Grund einer Abweisung. Diese Zeile
+  ist nie leer.
+* Bleibt die Verbindung vier Sekunden stumm, **holt sich das Handy den
   Spielstand selbst ab** – jede anderthalb Sekunden. Das Spiel läuft dann
   vollständig weiter, nur eine Idee träger. Kommt die Live-Verbindung später
   doch zustande, schaltet es von selbst zurück.
 * Auch die Fernbedienung darf auf diesem Weg führen – sonst stünde sie am
   Tunnel da, sähe alles und dürfte nichts.
+* Kommt nach zwölf Sekunden immer noch kein Spielstand, sagt die Seite das
+  ausdrücklich, statt weiter ruhig auszusehen.
+
+**„Was ist los?“** unter der Anmeldung klappt sieben Zeilen auf, die als Foto
+alles beantworten, was eine Ferndiagnose braucht:
+
+```
+Bau      2026-08-13 22:46
+Adresse  xyz.trycloudflare.com
+Weg      Notweg (abgeholt)
+Stände   2 · seit 7 s
+Strom    verbindet
+Fehler   –
+Gerät    Rand oben 0px · de-DE
+```
+
+`Strom offen` bei `Stände 0` heißt: Die Verbindung steht, es kommt nur nichts
+durch. `Strom geschlossen` mit einem Fehler daneben heißt: Sie wird abgewiesen.
+Und `Bau` verrät, ob auf dem Handy überhaupt die Fassung läuft, über die gerade
+gesprochen wird.
 
 ### Ein Handy zeigt nur eine leere Seite
 

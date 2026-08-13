@@ -38,6 +38,17 @@
       </div>
       <button class="btn btn-primary btn-block" type="submit">Mitspielen</button>
       <p id="join-hint" class="muted small"></p>
+      <!-- Diese Zeile ist nie leer. Sie sagt vom ersten Augenblick an, wie es um
+           die Verbindung steht – im Fließtext und nicht als Balken am oberen
+           Rand, wo eine Notch ihn verdecken kann. Genau dieser Satz hat an
+           einem Abend gefehlt: Die Anmeldung stand da, ohne Teams und ohne ein
+           Wort dazu, und niemand konnte sagen, ob es am Handy lag, am WLAN
+           oder am Gastgeber. -->
+      <p id="verbindung" class="verbindung" role="status" aria-live="polite">Verbinde mit dem Spiel …</p>
+      <!-- Und für den Fall, dass es doch jemand genauer wissen muss: sechs
+           Zeilen zum Abfotografieren. -->
+      <button id="btn-lage" class="btn btn-ghost btn-sm" type="button">Was ist los?</button>
+      <div id="lagebericht" class="lagebericht" hidden></div>
     </form>
   </section>
 

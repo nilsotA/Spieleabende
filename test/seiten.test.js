@@ -109,7 +109,7 @@ test('ein Fehler beim Zeichnen verschwindet nicht mehr lautlos', () => {
   const quelle = ohneKommentare(lies('common.js'));
   assert.match(
     quelle,
-    /try \{\s*onState\(sicht\);\s*\} catch \(err\) \{\s*panne\(err/,
+    /try \{\s*onState\(sicht\);[\s\S]{0,120}\} catch \(err\) \{\s*panne\(err/,
     'wirft das Zeichnen, fror die Seite bisher ein und behauptete dabei, alles sei in Ordnung',
   );
   assert.match(quelle, /window\.quizduellPanne\?\.\(/, 'der Meldeweg führt zur Startwache');
@@ -138,8 +138,54 @@ test('was oben über allem liegt, rechnet den Streifen unter der Uhr mit', () =>
     assert.ok(block, `${regel} steht nicht in style.css`);
     assert.match(
       block,
-      /env\(safe-area-inset-top\)/,
-      `${regel} liegt sonst auf jedem iPhone mit Notch hinter der Statusleiste`,
+      /env\(safe-area-inset-top, 0px\)/,
+      `${regel} liegt sonst hinter der Statusleiste – mit Rückfallwert, sonst fällt die ganze Regel weg`,
     );
   }
+});
+
+/*
+ * Die Auskunft, die auf dem Foto fehlte.
+ *
+ * Ein Gastgeber schickt ein Bild seines Handys – mehr bekommt eine
+ * Ferndiagnose nicht. Auf diesem Bild muss stehen, ob die Verbindung steht und
+ * bloß nichts kommt, ob sie abgewiesen wird oder ob sie abreißt. Sonst kostet
+ * dieselbe Frage wieder einen Abend.
+ */
+
+test('die Anmeldung hat eine Verbindungszeile, die nie leer ist', () => {
+  const html = lies('player.html');
+  assert.match(html, /id="verbindung"[^>]*>Verbinde mit dem Spiel/, 'sie muss schon im HTML einen Satz tragen – vor dem ersten Skript');
+  assert.match(html, /id="verbindung"[^>]*aria-live/, 'und vorgelesen werden');
+  // Und sie darf nicht am Hinweissatz von renderJoin() hängen: Der wird beim
+  // ersten Spielstand überschrieben, die Verbindungszeile soll den ganzen
+  // Abend schreibbar bleiben.
+  assert.match(
+    ohneKommentare(lies('player.js')),
+    /onStatus:\s*\(text\)\s*=>\s*setzeText\(\$\('#verbindung'\)/,
+    'die Statusmeldung gehört in die eigene Zeile, nicht in #join-hint',
+  );
+});
+
+test('das Handy kann seine Lage berichten', () => {
+  assert.match(lies('player.html'), /id="btn-lage"/, 'ohne Knopf keine Auskunft');
+  const js = ohneKommentare(lies('player.js'));
+  for (const zeile of ['Bau', 'Adresse', 'Weg', 'Strom', 'Fehler', 'Gerät']) {
+    assert.match(js, new RegExp(`\`${zeile}\\s`), `der Lagebericht braucht die Zeile „${zeile}"`);
+  }
+  assert.match(ohneKommentare(lies('common.js')), /export function verbindungsLage/, 'die Zahlen kommen aus common.js');
+  assert.match(ohneKommentare(lies('common.js')), /padding-top:env\(safe-area-inset-top/, 'der Rand oben wird gemessen, nicht geraten');
+});
+
+test('das zweite Lebenszeichen kommt erst mit dem ersten Spielstand', () => {
+  assert.match(
+    ohneKommentare(lies('common.js')),
+    /onState\(sicht\);[\s\S]{0,80}window\.quizduellSpielt = true;/,
+    'es darf erst fallen, wenn wirklich gezeichnet wurde – „Modul durchgelaufen" reicht nicht',
+  );
+  assert.match(
+    ohneKommentare(lies('start-wache.js')),
+    /quizduellSpielt === true\) return;/,
+    'und die Wache muss danach fragen, sonst ist sie nach 40 ms blind',
+  );
 });

@@ -221,11 +221,68 @@ function setOnline(next) {
   for (const fn of connectionListeners) fn(next);
 }
 
-/* So lange bekommt der Ereignisstrom Zeit, bevor der Notweg aufmacht. Acht
-   Sekunden sind großzügig: Im Heimnetz steht der Zustand nach Millisekunden da,
-   über den Tunnel nach einem Wimpernschlag. */
-const STROM_FRIST = 8000;
+/* So lange bekommt der Ereignisstrom Zeit, bevor der Notweg aufmacht. Vier
+   Sekunden sind reichlich: Im Heimnetz steht der Zustand nach Millisekunden da,
+   über den Tunnel nach einem Wimpernschlag. Vorher standen hier acht – das sind
+   acht Sekunden, in denen ein Gast auf ein Formular ohne Teams schaut und nicht
+   weiß, ob er etwas falsch gemacht hat. Der Notweg kostet nichts, solange der
+   Strom lebt: Er macht sofort wieder zu, sobald von dort etwas kommt. */
+const STROM_FRIST = 4000;
 const ABFRAGE_TAKT = 1500;
+
+/**
+ * Was diese Seite über ihre Verbindung weiß – zum Abfotografieren.
+ *
+ * Der Abend, aus dem das hier stammt, hat fünf Gutachten gebraucht, um eine
+ * Frage zu beantworten, die das Handy selbst hätte beantworten können: Steht
+ * die Verbindung und kommt bloß nichts an, oder wird sie abgewiesen, oder
+ * reißt sie ab? Das sieht man auf einem Foto der Seite nicht – aber genau ein
+ * Foto ist das, was ein Gastgeber schickt.
+ */
+const lageAkte = {
+  weg: '—',
+  zustaende: 0,
+  letzterFehler: null,
+  start: Date.now(),
+  strom: null,
+};
+
+export function verbindungsLage() {
+  const bereit = ['verbindet', 'offen', 'geschlossen'];
+  return {
+    weg: lageAkte.weg,
+    zustaende: lageAkte.zustaende,
+    strom: lageAkte.strom == null ? 'kein Strom' : (bereit[lageAkte.strom] ?? String(lageAkte.strom)),
+    letzterFehler: lageAkte.letzterFehler,
+    sekunden: Math.round((Date.now() - lageAkte.start) / 1000),
+    adresse: location.host,
+    sichererRand: sichererRandOben(),
+  };
+}
+
+/**
+ * Wie viel Platz oben belegen Uhrzeit und Notch wirklich?
+ *
+ * Über diese Zahl ist an einem Abend ernsthaft gestritten worden: Liegt der
+ * rote Verbindungsbalken hinter der Statusleiste oder nicht? In einem normalen
+ * Safari-Tab ist der Wert 0, auf dem Startbildschirm 44 bis 59 – aus der Ferne
+ * ist das nicht zu raten. Also fragt das Handy selbst.
+ *
+ * Gemessen wird an einem Probeklotz: Ein `env()` in einer eigenen Regel löst
+ * `getComputedStyle` auf, in einer Variablen dagegen nicht.
+ */
+function sichererRandOben() {
+  try {
+    const klotz = document.createElement('div');
+    klotz.style.cssText = 'position:absolute;visibility:hidden;padding-top:env(safe-area-inset-top, 0px)';
+    document.body.append(klotz);
+    const wert = getComputedStyle(klotz).paddingTop;
+    klotz.remove();
+    return wert;
+  } catch {
+    return '?';
+  }
+}
 
 /** Meldet der Seite eine Panne, ohne das Spiel abzuwürgen – siehe start-wache.js. */
 function panne(err, wo) {
@@ -268,13 +325,19 @@ export function connect({ role, onState, onEvent, onStatus }) {
     }
   };
 
-  const nimm = (sicht) => {
+  const nimm = (sicht, weg) => {
     setOnline(true);
+    lageAkte.weg = weg;
+    lageAkte.zustaende += 1;
     // Zentral gemerkt, damit weder Host-Screen noch Fernbedienung etwas davon
     // wissen müssen – siehe `lage` weiter oben.
     lage = sicht.lage || null;
     try {
       onState(sicht);
+      // Das zweite Lebenszeichen: Erst hier steht wirklich ein Spielstand auf
+      // dem Schirm. Das erste (am Ende des Moduls) heißt nur „das Skript ist
+      // durchgelaufen" – und genau dieser Unterschied war der ganze Abend.
+      window.quizduellSpielt = true;
     } catch (err) {
       panne(err, 'Beim Zeichnen des Spielstands');
     }
@@ -285,13 +348,16 @@ export function connect({ role, onState, onEvent, onStatus }) {
       const res = await fetch(`/api/state?clientId=${encodeURIComponent(id)}&role=${role}`, { cache: 'no-store' });
       if (!res.ok) {
         setOnline(false);
+        lageAkte.letzterFehler = `Abfrage: ${res.status}`;
         return melde(res.status === 403
           ? 'Dieser Zugang gilt nicht mehr – bitte den QR-Code neu scannen.'
           : `Das Spiel antwortet mit ${res.status}.`);
       }
-      nimm(await res.json());
+      nimm(await res.json(), 'Notweg (abgeholt)');
+      melde('Notweg: Der Spielstand wird alle 1,5 s abgeholt.');
     } catch {
       setOnline(false);
+      lageAkte.letzterFehler = 'Abfrage kam nicht durch';
       melde('Keine Verbindung zum Spiel.');
     }
   }
@@ -343,10 +409,12 @@ export function connect({ role, onState, onEvent, onStatus }) {
 
   source.addEventListener('state', (ev) => {
     // Der Strom lebt – der Notweg wird nicht mehr gebraucht.
+    const ersteMal = !stromKam;
     stromKam = true;
     clearTimeout(fristTimer);
     notwegZu();
-    nimm(JSON.parse(ev.data));
+    nimm(JSON.parse(ev.data), 'Live-Verbindung');
+    if (ersteMal) melde('Live-Verbindung steht.');
   });
   source.addEventListener('toast', (ev) => {
     const { level, text } = JSON.parse(ev.data);
@@ -363,11 +431,18 @@ export function connect({ role, onState, onEvent, onStatus }) {
   // doch noch etwas liefert.
   source.addEventListener('error', () => {
     setOnline(false);
+    lageAkte.strom = source.readyState;
+    lageAkte.letzterFehler = `Strom: ${source.readyState === 2 ? 'zu' : 'abgerissen'} nach ${lageAkte.zustaende} Zuständen`;
     if (!stromKam) {
       clearTimeout(fristTimer);
       notwegAuf('Die Live-Verbindung wird abgewiesen – ich hole den Spielstand jetzt selbst.');
     }
   });
+
+  // Der Zustand des Stroms gehört in die Akte, auch wenn nichts passiert:
+  // „offen, aber null Zustände" ist genau die Auskunft, die diesen Abend
+  // gekostet hat.
+  setInterval(() => { lageAkte.strom = source.readyState; }, 1000);
 
   return source;
 }

@@ -2571,3 +2571,45 @@ test('der Notweg steht hinter derselben Tür wie alles andere', async (t) => {
   const alsHostSicht = await fetch(`${base}/api/state?clientId=beamer&role=host`, { headers: { Cookie: `qd_host=${host}` } });
   assert.equal(alsHostSicht.status, 200);
 });
+
+test('die Startwache kommt auch ohne Schlüssel durch die Tür', async (t) => {
+  // Der Schlüssel steckt nur in der Adresse der Seite; Stylesheet und Skripte
+  // holt der Browser allein über den Keks. Legt ein Handy den nicht ab, bekommt
+  // es die Seite und danach für jede Datei eine Absage – auch für die Wache,
+  // die genau das melden soll. Diese eine Datei enthält nichts Geheimes.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-wache-'));
+  const { proc, base } = await starteOnline(9900 + Math.floor(Math.random() * 90), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const wache = await fetch(`${base}/start-wache.js`);
+  assert.equal(wache.status, 200, 'ohne sie bliebe das Handy stumm');
+  assert.match(await wache.text(), /quizduellPanne/);
+
+  // Alles andere bleibt zu – und meldet sich als das, was es ist.
+  const skript = await fetch(`${base}/player.js`);
+  assert.equal(skript.status, 403);
+  assert.match(skript.headers.get('content-type') || '', /text\/plain/, 'eine Absage für eine Datei ist keine Seite');
+  assert.equal(skript.headers.get('x-content-type-options'), 'nosniff');
+  assert.doesNotMatch(await skript.text(), /doctype/i, 'sonst stolpert das Modul über HTML statt über einen Ladefehler');
+
+  const seite = await fetch(`${base}/play`);
+  assert.equal(seite.status, 403);
+  assert.match(await seite.text(), /privat/, 'für eine Seite bleibt es bei der Tür-zu-Seite');
+
+  // Und der Rest der Tür steht unverändert: keine Lösungen, keine Schnittstelle.
+  for (const pfad of ['/host', '/editor', '/api/state?clientId=x', '/api/set?file=x.json']) {
+    assert.equal((await fetch(`${base}${pfad}`)).status, 403, `${pfad} muss zu bleiben`);
+  }
+});
+
+test('der Bauzeitpunkt steht in der Auskunft', async (t) => {
+  // Auf dem Handy lief einmal eine ältere Fassung als die, gegen die gemessen
+  // wurde – niemand konnte es sehen. Seitdem sagt der Server, wann zuletzt an
+  // ihm geschraubt wurde.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-bau-'));
+  const { proc, base } = await starteServer(9660 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const info = await (await fetch(`${base}/api/info`)).json();
+  assert.match(info.bau, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, `unbrauchbarer Bauzeitpunkt: ${info.bau}`);
+});

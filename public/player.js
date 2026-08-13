@@ -2,7 +2,7 @@ import {
   $, el, connect, action, toast, sound, vibrate, flash,
   installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
   istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr, verbergeSchluessel,
-  lies, merke } from '/common.js';
+  lies, merke, verbindungsLage } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
@@ -23,13 +23,11 @@ $('#view-join').classList.add('active');
 
 connect({
   role: 'player',
-  // Solange noch kein Spielstand da ist, steht hier, woran es gerade liegt.
-  // Vorher stand da gar nichts: eine Anmeldung ohne ein einziges Team und ohne
-  // einen Hinweis, warum – und der Gast tippt ratlos auf „Mitspielen“.
-  // Sobald der erste Zustand da ist, schreibt renderJoin() die Zeile ohnehin neu.
-  onStatus: (text) => {
-    if (!state) $('#join-hint').textContent = text;
-  },
+  // Die eigene Zeile für die Verbindung – nicht der Hinweissatz darüber, den
+  // renderJoin() beschreibt. Sie bleibt den ganzen Abend schreibbar: Bricht die
+  // Verbindung mitten im Spiel weg und läuft der Notweg an, soll das dastehen
+  // und nicht nur im Balken am oberen Rand, den eine Notch verdecken kann.
+  onStatus: (text) => setzeText($('#verbindung'), text),
   onState: (next) => {
     const prev = state;
     state = next;
@@ -66,6 +64,51 @@ $('#join-form').addEventListener('submit', async (ev) => {
 });
 
 $('#btn-leave').addEventListener('click', () => action('leaveTeam'));
+
+/**
+ * „Was ist los?" – sechs Zeilen, die eine Ferndiagnose zu einem Foto machen.
+ *
+ * Der Abend, aus dem das stammt, hat Stunden gekostet, weil auf dem Foto eines
+ * Handys genau die Auskunft fehlte, die es selbst hatte: Steht die Verbindung
+ * und kommt bloß nichts an? Wird sie abgewiesen? Reißt sie ab? Läuft überhaupt
+ * die Fassung, gegen die gemessen wird? Jede dieser Zeilen beantwortet eine
+ * Frage, über die vorher gerätselt wurde.
+ */
+const lageKnopf = $('#btn-lage');
+const lageFeld = $('#lagebericht');
+let lageTakt = null;
+
+async function zeichneLage() {
+  const l = verbindungsLage();
+  let bau = '?';
+  try {
+    bau = (await (await fetch('/api/info', { cache: 'no-store' })).json()).bau || '?';
+  } catch {
+    bau = 'Server nicht erreichbar';
+  }
+  // Kurze Zeilen mit Absicht: Auf 390 Pixeln bricht jede längere um, und ein
+  // umgebrochener Lagebericht ist auf einem Foto schwerer zu lesen als sieben
+  // kurze Zeilen.
+  lageFeld.textContent = [
+    `Bau      ${bau}`,
+    `Adresse  ${l.adresse}`,
+    `Weg      ${l.weg}`,
+    `Stände   ${l.zustaende} · seit ${l.sekunden} s`,
+    `Strom    ${l.strom}`,
+    `Fehler   ${l.letzterFehler || '–'}`,
+    `Gerät    Rand oben ${l.sichererRand} · ${navigator.language}`,
+  ].join('\n');
+}
+
+lageKnopf.addEventListener('click', () => {
+  lageFeld.hidden = !lageFeld.hidden;
+  lageKnopf.textContent = lageFeld.hidden ? 'Was ist los?' : 'Ausblenden';
+  clearInterval(lageTakt);
+  if (lageFeld.hidden) return;
+  zeichneLage();
+  // Mitlaufen lassen: Wer hinschaut, will sehen, ob sich etwas bewegt.
+  lageTakt = setInterval(zeichneLage, 2000);
+});
 
 /**
  * „Eigenes Team": Legt ein Team unter dem eigenen Namen an und tritt ihm bei.

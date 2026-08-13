@@ -14,6 +14,27 @@ import { neuerZugang, pruefeZugang, cookieKoepfe, TUER_ZU } from './zugang.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+
+/*
+ * Der Bauzeitpunkt: Wann wurde zuletzt an dieser Fassung geschraubt?
+ *
+ * Steht im Diagnosefeld auf dem Handy. Klingt nach Kleinigkeit, hat aber einen
+ * ganzen Abend gekostet: Auf dem Handy lief eine ältere Fassung als die, gegen
+ * die gemessen wurde, und niemand konnte es sehen. Zwei Dateien genügen als
+ * Zeuge – die eine trägt den Server, die andere alles, was die Handys tun.
+ */
+const BAU = await (async () => {
+  try {
+    const zeiten = await Promise.all([
+      stat(path.join(__dirname, 'index.js')),
+      stat(path.join(PUBLIC_DIR, 'common.js')),
+    ]);
+    const neuste = Math.max(...zeiten.map((z) => z.mtimeMs));
+    return new Date(neuste).toISOString().slice(0, 16).replace('T', ' ');
+  } catch {
+    return '?';
+  }
+})();
 // Ein selbst gesetzter Port gilt genau so. Ohne Angabe darf der Server sich
 // den nächsten freien suchen: Wer das Startskript zweimal doppelklickt, soll
 // nicht vor „Port belegt" und einer Kommandozeile stehen.
@@ -824,6 +845,33 @@ const server = http.createServer(async (req, res) => {
       if (kekse.length) res.setHeader('Set-Cookie', kekse);
       if (!rolle || (hostNoetig(pathname) && rolle !== 'host')) {
         if (pathname.startsWith('/api/')) return sendJson(res, 403, { error: 'Kein Zugang.' });
+        /*
+         * Die Startwache kommt auch ohne Schlüssel durch.
+         *
+         * Der Schlüssel steckt nur in der Adresse der Seite; Stylesheet und
+         * Skripte holt der Browser ohne Adresszusatz und damit allein über den
+         * Keks. Legt ein Handy den nicht ab, bekommt es die Seite – und dann
+         * für jede Datei danach eine Absage, auch für die Wache, die genau das
+         * melden sollte. Diese eine Datei enthält nichts: keinen Spielstand,
+         * keine Frage, keine Lösung, nur die Meldung selbst. Sie zu verstecken
+         * schützt nichts und kostet die einzige Auskunft, die der Gast dann
+         * noch bekommen kann.
+         */
+        if (pathname === '/start-wache.js') return serveFile(res, path.join(PUBLIC_DIR, 'start-wache.js'));
+        /*
+         * Eine Absage für eine Datei ist keine Seite.
+         *
+         * Bisher ging auch auf `.js` und `.css` die Tür-zu-Seite als HTML
+         * hinaus. Ein Modul lehnt das schon wegen der Art ab, ein Stylesheet
+         * verschluckt es still – in beiden Fällen steht im Browser eine
+         * Fehlermeldung, die vom Falschen redet. Nackter Text mit `nosniff`
+         * kommt als das an, was es ist: eine Datei, die nicht geladen werden
+         * durfte.
+         */
+        if (/\.(js|css|mjs|map)$/.test(pathname)) {
+          res.setHeader('X-Content-Type-Options', 'nosniff');
+          return send(res, 403, 'text/plain; charset=utf-8', 'Kein Zugang.');
+        }
         return send(res, 403, 'text/html; charset=utf-8', TUER_ZU);
       }
     }
@@ -870,9 +918,13 @@ function sseHandler(req, res, url, rolle) {
   res.flushHeaders?.(); // die Kopfzeilen sollen sofort raus, nicht erst mit Inhalt
   // Ein Vorspann aus Kommentarzeilen. Manche Vermittler halten eine Antwort
   // zurück, bis genug Bytes beisammen sind – ein Ereignisstrom kommt dann nie
-  // an, weil er ja gerade nicht fertig wird. Zwei Kilobyte Kommentar lösen die
+  // an, weil er ja gerade nicht fertig wird. Acht Kilobyte Kommentar lösen die
   // Bremse, kosten einmalig nichts und werden von jedem Browser verworfen.
-  res.write(`: ${'x'.repeat(2048)}\n\n`);
+  //
+  // Acht und nicht zwei: Der erste Schub misst mit Vorspann, Begrüßung und
+  // Spielstand rund 3,5 kB. Eine Bremse, die bei vier Kilobyte löst, hätte er
+  // damit knapp verfehlt – und knapp verfehlt ist hier dasselbe wie gar nicht.
+  res.write(`: ${'x'.repeat(8192)}\n\n`);
   res.write('retry: 1000\n\n');
 
   const conn = { id: connId, res, clientId, isHost };
@@ -889,7 +941,11 @@ function sseHandler(req, res, url, rolle) {
     } catch {
       clearInterval(ping);
     }
-  }, 20000);
+    // Alle zehn Sekunden statt alle zwanzig: Der Ping hält nicht nur die
+    // Verbindung wach, er ist auch das einzige Lebenszeichen zwischen zwei
+    // Zügen – und je öfter etwas fließt, desto weniger Gelegenheit hat ein
+    // Vermittler, die Leitung für tot zu halten.
+  }, 10000);
 
   const close = () => {
     clearInterval(ping);
@@ -990,7 +1046,7 @@ async function apiHandler(req, res, url, pathname, rolle) {
     const geheim = zugang && rolle === 'host'
       ? { schluessel: zugang.spiel, hostSchluessel: zugang.host }
       : {};
-    return sendJson(res, 200, { urls: localUrls(), port: PORT, ...geheim });
+    return sendJson(res, 200, { urls: localUrls(), port: PORT, bau: BAU, ...geheim });
   }
   if (pathname === '/api/action' && req.method === 'POST') {
     let body;

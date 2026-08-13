@@ -99,6 +99,27 @@
   setTimeout(function () { zeige(''); }, 8000);
 
   /*
+   * Das zweite Netz – und der eigentliche Fang.
+   *
+   * Die Fahne oben heißt nur „das Modul ist durchgelaufen". Sie fällt nach
+   * vierzig Millisekunden, und ab da war die Wache blind. Genau in dieser
+   * Blindheit stand an einem Abend ein Handy: Seite fertig, Skript gesund, und
+   * trotzdem kam nie ein Spielstand an – niemand hat es der Seite angesehen.
+   *
+   * Deshalb ein zweites Lebenszeichen, das common.js erst setzt, wenn wirklich
+   * ein Spielstand gezeichnet wurde. Fehlt es nach zwölf Sekunden, sagt die
+   * Seite das – als Streifen, nicht als Vorhang: Das Spiel könnte im selben
+   * Moment doch noch losgehen.
+   */
+  setTimeout(function () {
+    if (window.quizduellSpielt === true) return;
+    window.quizduellPanne(
+      'Die Seite steht, aber es ist kein Spielstand angekommen. '
+      + 'Meist hilft Neuladen; sonst den QR-Code noch einmal scannen.',
+    );
+  }, 12000);
+
+  /*
    * Für später: eine Panne, nachdem die Seite steht.
    *
    * Wirft das Zeichnen eines Spielstands, geschieht das in einem Ereignis-

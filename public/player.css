@@ -792,3 +792,29 @@ html, body { touch-action: manipulation; }
   font-size: 0.85rem;
   line-height: 1.45;
 }
+
+/* Die Verbindungszeile in der Anmeldung. Bewusst in der normalen Schriftgröße
+   und in voller Helligkeit: Sie ist im Zweifel die einzige Auskunft, die ein
+   Gast bekommt, und wird im Halbdunkel gelesen. */
+.verbindung {
+  margin: 0;
+  color: #cfe0f5;
+  line-height: 1.45;
+}
+
+/* Der Lagebericht – sechs Zeilen zum Abfotografieren. Feste Zeichenbreite,
+   damit die Werte untereinander stehen; umbrechend, damit auf einem schmalen
+   Handy nichts abgeschnitten wird. */
+.lagebericht {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #0b0f18;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+}
