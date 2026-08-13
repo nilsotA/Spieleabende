@@ -10,6 +10,10 @@ const STORAGE_KEY = 'quizduell.editor';
 const gemerkt = load();
 let set = gemerkt?.set || blankSet();
 let zielDatei = gemerkt?.zielDatei || null; // zuletzt geladene Datei – dorthin wird gespeichert
+// Wie der Satz hieß, als diese Datei geladen wurde. Solange der Name derselbe
+// ist, gehört das Speichern in dieselbe Datei; ein anderer Name ist dagegen
+// ein anderer Satz – siehe zielJetzt().
+let zielName = gemerkt?.zielName ?? null;
 
 function blankRound() {
   return {
@@ -51,7 +55,7 @@ function persist() {
     // Auch merken, wohin gespeichert wird: Nach einem Neuladen war das sonst
     // vergessen, und „Speichern" legte plötzlich eine zweite Datei unter dem
     // Namen des Satzes an, statt die geladene zu aktualisieren.
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ set, zielDatei }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ set, zielDatei, zielName }));
     zeigeSpeicherwarnung(false);
   } catch {
     // Passiert bei vielen eingebetteten Bildern. Ein Toast wäre hier fatal: Er
@@ -296,13 +300,29 @@ function hoeheAnpassen(feld) {
   feld.style.height = 'auto';
   feld.style.height = `${feld.scrollHeight}px`;
 }
+/**
+ * Wohin „Auf dem Server speichern" schreibt.
+ *
+ * In die geladene Datei – aber nur, solange der Satz noch so heißt wie beim
+ * Laden. Wer einen mitgelieferten Satz lädt, ihn umbenennt und speichert, will
+ * seine eigene Fassung anlegen und nicht das Original zerstören. Genau das
+ * passierte: Nachgestellt hieß „der-klassiker.json" hinterher „Zwischenablage
+ * Test", und der Klassiker war weg. Die Rückfrage („gibt es schon,
+ * überschreiben?") sah dabei nach der üblichen Bestätigung aus.
+ */
+function zielJetzt() {
+  const gleicherName = zielName !== null && set.name === zielName;
+  return zielDatei && gleicherName ? zielDatei : `${slug(set.name)}.json`;
+}
+
 /** Wohin „Auf dem Server speichern" schreibt – vorher wusste man das erst danach. */
 function zeigeZiel() {
   const ziel = $('#ziel-datei');
   if (!ziel) return;
-  ziel.textContent = zielDatei
-    ? `Speichern schreibt nach data/${zielDatei}`
-    : `Speichern legt data/${slug(set.name)}.json an`;
+  const datei = zielJetzt();
+  ziel.textContent = datei === zielDatei
+    ? `Speichern schreibt nach data/${datei}`
+    : `Speichern legt data/${datei} an`;
 }
 
 /** Bilder werden als Data-URL eingebettet – der Fragensatz bleibt eine einzige Datei. */
@@ -420,11 +440,13 @@ async function save(overwrite) {
     const res = await fetch('/api/sets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ set, file: zielDatei || `${slug(set.name)}.json`, overwrite }),
+      body: JSON.stringify({ set, file: zielJetzt(), overwrite }),
     });
     const data = await res.json();
     if (data.ok) {
       zielDatei = data.file;
+      zielName = set.name;
+      persist();
       zeigeZiel();
       toast(`Gespeichert als ${data.file}`);
       loadSetList();
@@ -596,6 +618,7 @@ $('#file-input').addEventListener('change', async (ev) => {
     if (!verwerfenOk()) return;
     set = normalizeLoaded(raw);
     zielDatei = file.name;
+    zielName = set.name;
     persist();
     render();
     toast('Geladen.');
@@ -617,6 +640,7 @@ $('#btn-load').addEventListener('click', async () => {
     if (!verwerfenOk()) return;
     set = normalizeLoaded(raw);
     zielDatei = file;
+    zielName = set.name;
     persist();
     render();
     toast('Geladen.');

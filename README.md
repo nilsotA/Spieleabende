@@ -403,6 +403,10 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   sagt das die Fragensatz-Auswahl – sonst wäre die Frage im Spiel stumm verbrannt.
 - `note` ist optional und erscheint beim Auflösen als kleiner Zusatz – auf der
   Leinwand und auf den Handys. Genau darüber redet die Runde danach.
+- **Umbenennen legt eine eigene Datei an.** Wer einen mitgelieferten Satz lädt, ihm
+  einen neuen Namen gibt und speichert, bekommt eine neue Datei – das Original bleibt.
+  Solange der Name derselbe ist, aktualisiert Speichern die geladene Datei. Wohin es
+  geht, steht immer unter den Knöpfen, schon bevor man drückt.
 - **Kurz halten.** Passt eine Frage nicht auf die Bühne, rechnet der Host-Screen
   die Schrift herunter, bis sie passt – bei einem ganzen Absatz landet sie dabei
   bei einem Bruchteil ihrer Größe und ist aus vier Metern nicht mehr zu lesen.

@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url';
 // Logiktests nicht können – Verbindungen, Rollen, Abstürze und Neustarts.
 
 const SERVER = fileURLToPath(new URL('../server/index.js', import.meta.url));
+// Fragensätze liegen hier – Tests, die welche anlegen, räumen sie wieder weg.
+const DATEN_URL = new URL('../data/', import.meta.url);
 const warte = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
@@ -2371,4 +2373,43 @@ test('die Geheimnisse der Geräte wachsen nicht ins Unendliche', async (t) => {
 
   // Der Server steht noch.
   assert.equal((await fetch(`${base}/api/info`)).status, 200);
+});
+
+test('ein umbenannter Satz überschreibt nicht den geladenen', async (t) => {
+  // Der Editor merkt sich, aus welcher Datei ein Satz kam – sonst legte ein
+  // Neuladen der Seite eine zweite Datei an. Wer einen Satz aber lädt,
+  // umbenennt und speichert, will seine eigene Fassung: Dort muss der Name
+  // gewinnen. Diese Regel steht im Editor; hier wird gehalten, dass der Server
+  // beide Wege sauber trennt und nichts stillschweigend überschreibt.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-umbenannt-'));
+  const port = 9500 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  const angelegt = [];
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    const { unlink } = await import('node:fs/promises');
+    for (const f of angelegt) await unlink(new URL(f, DATEN_URL)).catch(() => {});
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const speichere = (datei, name, overwrite = false) => fetch(`${base}/api/sets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ file: datei, overwrite, set: { name, rounds: SATZ.rounds } }),
+  }).then((r) => r.json());
+
+  // Neu anlegen geht ohne Rückfrage.
+  const neu = await speichere('umbenannt-test.json', 'Umbenannt Test');
+  assert.equal(neu.ok, true, neu.error || '');
+  angelegt.push('umbenannt-test.json');
+
+  // Dieselbe Datei ein zweites Mal: Der Server fragt zurück, statt einfach zu
+  // überschreiben – darauf baut die Rückfrage im Editor.
+  const nochmal = await speichere('umbenannt-test.json', 'Umbenannt Test');
+  assert.equal(nochmal.ok, false);
+  assert.equal(nochmal.exists, true, 'der Server meldet die vorhandene Datei');
+
+  // Und mit ausdrücklichem Ja geht es durch.
+  const mitJa = await speichere('umbenannt-test.json', 'Umbenannt Test', true);
+  assert.equal(mitJa.ok, true, mitJa.error || '');
 });
