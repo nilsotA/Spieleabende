@@ -521,6 +521,80 @@ test('eine kaputte Frage lässt sich streichen – das Feld bleibt offen', async
   assert.equal(zurueck.teams[1].score, mittendrin.teams[1].score);
 });
 
+test('Streichen, zurücknehmen, noch einmal streichen trifft nur die eigene Frage', async (t) => {
+  // Der Ankerpunkt im Rückweg wurde beim Streichen verbraucht. Nahm der Host das
+  // Streichen zurück, stand die Frage wieder da – aber ihr Anker war weg, und
+  // ein zweites Streichen fand den Anfang der VORHERIGEN Frage. Nachgestellt
+  // wurde damit eine längst abgeschlossene, fremde Frage mitgelöscht.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-verwerf4-'));
+  const port = 7300 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'verwerf4-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+
+  // Eine Frage ganz normal durchspielen – die geht niemanden mehr etwas an.
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });
+  await host({ type: 'endQuestion' });
+  await host({ type: 'close' });
+  const nachErster = await zustand(base);
+  const summe = (st) => st.teams.reduce((n, x) => n + x.score, 0);
+  const gespielt = (st) => st.board.categories
+    .flatMap((c, ci) => c.cells.map((x, ri) => (x.used ? `${ci}/${ri}` : null))).filter(Boolean).join(',');
+  assert.equal(summe(nachErster), 100);
+  assert.equal(gespielt(nachErster), '0/0');
+
+  // Zweite Frage: streichen, zurücknehmen, noch einmal streichen.
+  await host({ type: 'pick', catIdx: 1, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });
+  assert.equal((await host({ type: 'discard' })).ok, true);
+  assert.equal((await host({ type: 'undo' })).ok, true);
+  assert.ok((await zustand(base)).current, 'die gestrichene Frage steht wieder da');
+  const nochmal = await host({ type: 'discard' });
+  assert.equal(nochmal.ok, true, `zweites Streichen: ${JSON.stringify(nochmal)}`);
+
+  const danach = await zustand(base);
+  assert.equal(summe(danach), 100, 'die Punkte der ersten Frage stehen noch');
+  assert.equal(gespielt(danach), '0/0', 'und ihr Feld ist weiter verbraucht');
+  assert.equal(danach.current, null);
+});
+
+test('in der Pause steht auch die Buzzer-Uhr still', async (t) => {
+  // Die Uhr hängt daran, seit wann der Buzzer offen steht – und das lief in der
+  // Pause weiter. Nach einer echten Küchenpause hätte sie beim Weiterspielen
+  // sofort „Zeit ist um" gezeigt, obwohl niemand nachgedacht hatte.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-uhrpause-'));
+  const port = 7500 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'uhrpause-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'settings', settings: { buzzUhr: 10 } });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'pass' });
+  const vorher = (await zustand(base)).current.buzzOffenMs;
+
+  await host({ type: 'pause', an: true });
+  await warte(1200);
+  await host({ type: 'pause', an: false });
+  const nachher = (await zustand(base)).current.buzzOffenMs;
+
+  assert.ok(nachher - vorher < 900,
+    `die Pause darf nicht mitzählen – gemessen ${nachher - vorher} ms für 1,2 s Pause`);
+  assert.ok(nachher >= vorher, 'rückwärts läuft sie aber auch nicht');
+});
+
 test('eine Stechfrage lässt sich nicht streichen', async (t) => {
   // Sie hat kein Feld, auf das etwas zurückfallen könnte – und der Weg dafür
   // steht schon da: auflösen und die nächste Frage stellen.

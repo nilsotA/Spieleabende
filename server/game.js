@@ -110,6 +110,9 @@ export function createState() {
     // läuft, kann kein Handy ein Feld aufrufen und niemand buzzern – sonst
     // steht der Abend nach der Pause an einer Frage, die keiner gestellt hat.
     pause: false,
+    // Seit wann die Pause läuft – nur, um die Buzzer-Uhr um dieselbe Zeit nach
+    // hinten zu schieben. Auf dem Bildschirm taucht das nie auf.
+    pauseSeit: null,
     // Was man sich am nächsten Tag erzählt. Reine Buchhaltung fürs Ende – auf
     // Punkte und Ablauf hat davon nichts Einfluss.
     rekorde: leereRekorde(),
@@ -324,6 +327,7 @@ export function startGame(state, questionSet) {
   // Ein neues Spiel fängt nicht in der Pause an – auch wenn das alte darin
   // stecken geblieben ist.
   state.pause = false;
+  state.pauseSeit = null;
   state.stechenLauf = 0;
   state.stechenTexte = [];
   state.stechenSieger = null;
@@ -713,8 +717,24 @@ export function nextRound(state) {
  */
 export function setPause(state, an) {
   if (state.phase === 'lobby') throw new GameError('In der Lobby gibt es nichts zu pausieren.');
+  const vorher = !!state.pause;
   state.pause = !!an;
   state.message = state.pause ? 'Pause' : null;
+
+  // Die Uhr am freigegebenen Buzzer hält mit an.
+  //
+  // Sie hängt daran, seit wann der Buzzer offen steht – und das lief in der
+  // Pause munter weiter. Nachgestellt: drei Sekunden Pause, und die Uhr stand
+  // 3,4 Sekunden weiter; nach einer echten Küchenpause hätte sie beim
+  // Weiterspielen sofort „Zeit ist um" gezeigt, obwohl niemand nachgedacht
+  // hatte. Der Beginn wandert deshalb um die Dauer der Pause nach vorn.
+  if (state.pause && !vorher) {
+    state.pauseSeit = Date.now();
+  } else if (!state.pause && vorher && state.pauseSeit) {
+    const dauer = Date.now() - state.pauseSeit;
+    if (state.current?.buzzOpenedAt) state.current.buzzOpenedAt += dauer;
+    state.pauseSeit = null;
+  }
   return state;
 }
 
@@ -920,7 +940,11 @@ export function viewFor(state, { isHost, clientId }) {
       // vom Gerät. Die Uhr eines Handys geht gern zwei Minuten falsch, und ein
       // Balken, der auf einem Gerät schon leer ist und auf dem anderen noch
       // voll, wäre schlimmer als keiner.
-      buzzOffenMs: q.buzzOpenedAt ? Date.now() - q.buzzOpenedAt : null,
+      // Nie negativ: Wird der Server während einer Pause neu gestartet, ist
+      // `pauseSeit` aus dem geholten Spielstand alt, und die Verschiebung beim
+      // Weiterspielen kann den Beginn in die Zukunft legen. Ein Balken mit
+      // scaleX über 1 stünde dann über die Bühne hinaus.
+      buzzOffenMs: q.buzzOpenedAt ? Math.max(0, Date.now() - q.buzzOpenedAt) : null,
       // Wie knapp war das Rennen? Der Server weiß es längst, hat es aber für
       // sich behalten – dabei ist genau das der Moment, über den danach geredet
       // wird. Nur bei einem echten Handy-Buzz: Wenn der Host stellvertretend

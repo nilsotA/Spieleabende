@@ -377,11 +377,25 @@ async function handleAction(clientId, body) {
         throw new G.GameError('Der Weg zurück reicht nicht mehr bis zum Anfang dieser Frage.');
       }
       const vorher = { state: structuredClone(state), was: 'Frage verworfen' };
-      const ziel = rueckWeg[bis].state;
-      rueckWeg.length = bis;
+      // Der Ankerpunkt bleibt im Stapel stehen, und übernommen wird eine Kopie.
+      //
+      // Vorher wurde er verbraucht (`rueckWeg.length = bis`). Nahm der Host das
+      // Streichen dann zurück, stand die Frage wieder da – aber ihr Anker war
+      // weg. Ein zweites Streichen suchte den nächsten Zustand ohne offene
+      // Frage und fand den Anfang der VORHERIGEN Frage: Nachgestellt wurde
+      // damit eine längst abgeschlossene, fremde Frage stillschweigend
+      // mitgelöscht, samt ihrer Punkte. Bleibt der Anker liegen, findet ihn
+      // auch der zweite Versuch. Kopiert werden muss dabei, weil `uebernimm`
+      // den übergebenen Zustand verändert – sonst stünde im Stapel danach ein
+      // verbogener Schnappschuss.
+      const ziel = structuredClone(rueckWeg[bis].state);
+      rueckWeg.length = bis + 1;
       state = uebernimm(ziel, state);
       state.message = 'Frage gestrichen – das Feld ist wieder offen.';
       rueckWeg.push(vorher);
+      // Auch hier den Deckel halten: Der Anker bleibt liegen, und ohne diese
+      // Zeile stünde nach dem Streichen ein Schritt mehr im Stapel als erlaubt.
+      if (rueckWeg.length > RUECKWEG_TIEFE) rueckWeg.shift();
       break;
     }
     case 'joinTeam':
