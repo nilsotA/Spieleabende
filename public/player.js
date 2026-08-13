@@ -640,7 +640,11 @@ function renderBuzzer(prev) {
     label.textContent = 'PROBE';
     return;
   }
-  if (state.phase === 'roundEnd') { setzeText(status, 'Runde vorbei – gleich geht’s weiter.'); lock('PAUSE'); return; }
+  // „RUNDE AUS" statt „PAUSE": Seit es die echte Pause gibt, stand dasselbe
+  // Wort für zwei verschiedene Dinge – am Rundenende („der Satz ist durch")
+  // und in der Küchenpause („der Host hat angehalten"). Auf einem Knopf, der
+  // sonst nichts erklärt, ist das ein Wort zu wenig.
+  if (state.phase === 'roundEnd') { setzeText(status, 'Runde vorbei – gleich geht’s weiter.'); lock('RUNDE AUS'); return; }
   if (state.phase === 'gameOver') {
     const best = Math.max(...state.teams.map((t) => t.score));
     const spitze = state.teams.filter((t) => t.score === best);
