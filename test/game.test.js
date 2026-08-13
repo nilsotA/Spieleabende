@@ -619,6 +619,9 @@ test('ein neues Spiel setzt die Bilanz zurück', () => {
   G.closeQuestion(state);
   assert.equal(state.teams[0].bilanz.richtig, 1);
 
+  // Über die Lobby, wie „Neues Spiel" auf dem Host-Screen: Ein Satz lässt sich
+  // nicht mitten aus einer laufenden Runde heraus neu starten.
+  Object.assign(state, G.backToLobby(state));
   G.startGame(state, SET);
   assert.deepEqual(
     state.teams.map((t) => t.bilanz.richtig + t.bilanz.geholt),
@@ -814,8 +817,7 @@ test('„nur der Host wählt" hält das Handy vom Feldaufruf ab', () => {
   // Manche Runden laufen besser, wenn der Host die Felder aufruft: Er sieht das
   // Brett, der Tisch ruft zu, und niemand tippt versehentlich das teuerste Feld
   // an. Das Handy muss dann abprallen – aber mit einer Erklärung.
-  const state = setup();
-  G.startGame(state, SET);
+  const state = setup(); // startet den Satz bereits
   const dran = state.teams[state.turnIndex];
 
   // Voreinstellung: Das Zugteam darf selbst.
@@ -842,8 +844,7 @@ test('„nur der Host wählt" hält das Handy vom Feldaufruf ab', () => {
 });
 
 test('die Feldwahl lässt sich mitten im Spiel umstellen', () => {
-  const state = setup();
-  G.startGame(state, SET);
+  const state = setup(); // startet den Satz bereits
   state.settings.feldwahl = 'host';
   assert.throws(() => G.pickCell(state, 0, 0, state.teams[state.turnIndex].id), /Host ruft/);
   state.settings.feldwahl = 'team';
@@ -954,8 +955,30 @@ test('ein neues Spiel weiß nichts mehr vom Stechen', () => {
   G.judge(state, true);
   G.closeQuestion(state);
   assert.ok(state.stechenSieger);
+  Object.assign(state, G.backToLobby(state));
   G.startGame(state, SET);
   assert.equal(state.stechenSieger, null);
   assert.equal(state.stechenLauf, 0);
   assert.deepEqual(state.stechenTexte, []);
+});
+
+test('ein Satz lässt sich nicht mitten im Spiel neu starten', () => {
+  // „Spiel starten" gibt es auf dem Host-Screen nur in der Lobby. Der Server
+  // ließ es trotzdem in jeder Lage zu – auch bei einer offenen Frage auf der
+  // Leinwand. Alle Punkte auf null, neues Brett, und zurückzunehmen ist davon
+  // nichts: Der Spielstart räumt den Rückweg selbst ab.
+  const state = setup();
+  G.pickCell(state, 0, 0);
+  G.judge(state, true);
+  assert.equal(state.teams[0].score > 0, true);
+
+  assert.throws(() => G.startGame(state, SET), /Neues Spiel/);
+  assert.equal(state.phase, 'question', 'die laufende Frage steht noch');
+  assert.ok(state.teams[0].score > 0, 'und die Punkte auch');
+
+  // Über die Lobby geht es – und dann ist auch wirklich alles zurückgesetzt.
+  Object.assign(state, G.backToLobby(state));
+  G.startGame(state, SET);
+  assert.equal(state.phase, 'board');
+  assert.deepEqual(state.teams.map((t) => t.score), [0, 0, 0]);
 });

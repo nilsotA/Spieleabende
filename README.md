@@ -166,6 +166,10 @@ Wertung nennt dem Server die Lage, für die sie gedacht war: Hat sich die
 inzwischen geändert, prallt sie ab, statt dem falschen Team Punkte zu geben.
 Das greift auch dann, wenn Leinwand und Fernbedienung kurz auseinanderlaufen.
 
+Einen Satz starten geht nur aus der Lobby. Mitten in einer Runde würde das alle
+Punkte löschen, und zurücknehmen ließe sich davon nichts – wer neu anfangen will,
+geht über „Neues Spiel" zurück, und der Knopf fragt dort nach.
+
 ### Wenn etwas abstürzt
 
 Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Board

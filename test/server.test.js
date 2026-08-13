@@ -766,8 +766,13 @@ test('in der Pause ruft kein Handy ein Feld auf und niemand buzzert', async (t) 
   assert.equal(weiter.pause, false);
   assert.ok(weiter.current, 'die Frage von vorher steht noch');
 
-  // Ein neues Spiel fängt nicht in der Pause an.
+  // Ein neues Spiel fängt nicht in der Pause an. Der Weg dorthin führt über die
+  // Lobby – mitten aus einer laufenden Runde heraus lässt sich kein Satz
+  // starten, das würde den ganzen Abend löschen.
   await host({ type: 'pause', an: true });
+  const mittendrin = await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  assert.equal(mittendrin.ok, false, 'kein Neustart mitten im Spiel');
+  await host({ type: 'backToLobby' });
   await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
   assert.equal((await zustand(base)).pause, false, 'ein neues Spiel räumt die Pause ab');
 });

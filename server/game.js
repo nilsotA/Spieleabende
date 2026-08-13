@@ -323,6 +323,19 @@ export function adjustScore(state, teamId, delta) {
 /* ------------------------------------------------------------------- Spiel */
 
 export function startGame(state, questionSet) {
+  // Nur aus der Lobby heraus.
+  //
+  // Ohne diese Zeile startete `startGame` in jeder Lage – auch mitten in einer
+  // laufenden Frage. Nachgestellt: Rot führt 100:0, eine Frage steht auf der
+  // Leinwand, ein zweiter Start setzt beide auf 0 und legt ein neues Brett
+  // hin. Zurückzunehmen ist davon nichts, denn der Spielstart räumt den
+  // Rückweg ab. Die Oberfläche bietet den Knopf ohnehin nur in der Lobby an –
+  // ein Zug, der nirgends angeboten wird, aber alles löscht, gehört nicht
+  // durchgelassen. Wer neu anfangen will, geht über „Neues Spiel" zurück in
+  // die Lobby; genau dafür fragt der Knopf dort nach.
+  if (state.phase !== 'lobby') {
+    throw new GameError('Erst „Neues Spiel“ – dann lässt sich ein Satz starten.');
+  }
   if (state.teams.length < 2) throw new GameError('Mindestens 2 Teams / Spieler nötig.');
   if (!questionSet || !Array.isArray(questionSet.rounds) || questionSet.rounds.length === 0) {
     throw new GameError('Kein gültiger Fragensatz geladen.');
