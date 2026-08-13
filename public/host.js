@@ -1732,8 +1732,13 @@ function renderUndo() {
     undoSeitWann = performance.now();
   }
   if (!was) return;
-  knopf.title = `${was} zurücknehmen`;
-  knopf.setAttribute('aria-label', `${was} zurücknehmen`);
+  // Wie viele Schritte noch gehen, steht im Titel: Seit der Rückweg ein Stapel
+  // ist, kann der Host mehrfach tippen – ohne die Zahl weiß er nicht, ob der
+  // nächste Tipp noch etwas bewirkt.
+  const tiefe = state.rueckwegTiefe || 1;
+  const zusatz = tiefe > 1 ? ` (${tiefe} Schritte möglich)` : '';
+  knopf.title = `${was} zurücknehmen${zusatz}`;
+  knopf.setAttribute('aria-label', `${was} zurücknehmen${zusatz}`);
 }
 
 $('#btn-undo').addEventListener('click', () => {

@@ -179,7 +179,10 @@ function sendState(conn) {
   const sicht = G.viewFor(state, { isHost: conn.isHost, clientId: conn.clientId });
   // Nur der Host kann zurücknehmen, also erfährt auch nur er davon.
   if (conn.isHost) {
-    sicht.rueckgaengig = rueckStand?.was ?? null;
+    sicht.rueckgaengig = rueckWeg.at(-1)?.was ?? null;
+    // Wie viele Schritte noch gehen – der Knopf sagt es, sonst tippt der Host
+    // ins Leere und weiß nicht, ob er am Ende des Weges ist.
+    sicht.rueckwegTiefe = rueckWeg.length;
     sicht.wiederhergestellt = wiederhergestelltAm;
     sicht.wartende = warteschlange();
   }
@@ -232,7 +235,22 @@ const RUECKNEHMBAR = new Set([
   'stechen',
 ]);
 
-let rueckStand = null; // { state, was }
+/**
+ * Der Rückweg ist ein Stapel, keine einzelne Schublade.
+ *
+ * Mit nur einem gemerkten Zug war jeder Fehler, der erst eine Frage später
+ * auffällt, nicht mehr zurückzunehmen – und genau so fallen sie auf: „Moment,
+ * das war doch gar nicht falsch." Übrig blieb die Punktekorrektur von Hand, und
+ * damit stimmen Bilanz und Rekorde am Ende nicht mehr, weil die nicht an den
+ * Punkten hängen, sondern an den Wertungen.
+ *
+ * Fünfundzwanzig Schritte reichen für jede Reue eines Abends und kosten nichts:
+ * Ein Spielstand misst gemessen rund 10 kB, der ganze Stapel also 250 kB.
+ * Er wird nicht mitgesichert – nach einem Neustart des Servers gibt es nichts
+ * zurückzunehmen, das war auch vorher so.
+ */
+const RUECKWEG_TIEFE = 25;
+let rueckWeg = []; // [{ state, was }, …] – hinten liegt der nächste Rückschritt
 
 /** Menschenlesbar, damit der Knopf sagt, was er zurücknimmt. */
 function benenne(type, vorher) {
@@ -288,7 +306,7 @@ async function handleAction(clientId, body) {
   // Erst sichern, dann handeln – aber übernommen wird der Schnappschuss erst,
   // wenn der Zug auch durchgegangen ist.
   //
-  // Vorher stand er sofort in `rueckStand`, und ein abgelehnter Zug hat damit
+  // Vorher stand er sofort im Rückweg, und ein abgelehnter Zug hat damit
   // den Rückweg überschrieben: Host wertet „Richtig" für Rot (100 Punkte,
   // Knopf sagt „Wertung für Rot"), tippt gleich darauf auf ein Feld, das
   // gerade nicht wählbar ist – der Knopf sagt danach „Feldwahl", und
@@ -301,8 +319,8 @@ async function handleAction(clientId, body) {
 
   switch (type) {
     case 'undo': {
-      if (!rueckStand) throw new G.GameError('Es gibt nichts zurückzunehmen.');
-      const alt = rueckStand.state;
+      if (!rueckWeg.length) throw new G.GameError('Es gibt nichts zurückzunehmen.');
+      const alt = rueckWeg.pop().state;
       // Wer inzwischen beigetreten oder rausgeflogen ist, bleibt es auch.
       // Zurückgenommen wird der Spielzug, nicht der Raum – sonst wirft ein Undo
       // das Handy hinaus, das sich zwei Sekunden vorher verbunden hat.
@@ -320,7 +338,6 @@ async function handleAction(clientId, body) {
         if (!bekannt.has(team.id)) alt.teams.push(team);
       }
       state = alt;
-      rueckStand = null;
       break;
     }
     case 'joinTeam':
@@ -389,7 +406,7 @@ async function handleAction(clientId, body) {
       bilder = images;
       // Über einen Spielstart hinweg zurückzunehmen, hieße das alte Spiel
       // wiederauferstehen zu lassen – mitten in einem neuen.
-      rueckStand = null;
+      rueckWeg = [];
       G.startGame(state, set);
       await saveImages();
       break;
@@ -450,7 +467,7 @@ async function handleAction(clientId, body) {
     }
     case 'backToLobby':
       state = G.backToLobby(state);
-      rueckStand = null;
+      rueckWeg = [];
       bilder = new Map();
       await forgetSave();
       break;
@@ -460,7 +477,10 @@ async function handleAction(clientId, body) {
   // Bis hierher kommt nur, was nicht geworfen hat. `undo` und `backToLobby`
   // räumen den Rückweg selbst ab und stehen nicht in RUECKNEHMBAR – ihr
   // Schnappschuss ist null und überschreibt deshalb nichts.
-  if (schnappschuss) rueckStand = schnappschuss;
+  if (schnappschuss) {
+    rueckWeg.push(schnappschuss);
+    if (rueckWeg.length > RUECKWEG_TIEFE) rueckWeg.shift();
+  }
   broadcast();
 }
 

@@ -288,6 +288,11 @@ function renderRueckgaengig() {
   }
   if (!was) return;
   setzeText(knopf, `↩ ${was} zurücknehmen`);
+  // Auf dem Handy steht die Zahl nicht im Knopf – dort ist die Beschriftung
+  // ohnehin lang genug –, aber eine Vorlesehilfe soll sie kennen.
+  const tiefe = state.rueckwegTiefe || 1;
+  knopf.setAttribute('aria-label',
+    tiefe > 1 ? `${was} zurücknehmen – ${tiefe} Schritte möglich` : `${was} zurücknehmen`);
 }
 
 /**

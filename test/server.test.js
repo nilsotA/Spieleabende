@@ -384,7 +384,92 @@ test('ein abgelehnter Zug überschreibt den Rückweg nicht', async (t) => {
   await host({ type: 'undo' });
   const nachher = await zustand(base);
   assert.equal(nachher.teams[0].score, 0, 'die Wertung ist wirklich zurückgenommen');
-  assert.equal(nachher.rueckgaengig, null);
+  // Seit der Rückweg ein Stapel ist, liegt danach die Feldwahl obenauf – der
+  // abgelehnte Griff daneben hat sie nicht verdrängt, und genau darum geht es.
+  assert.equal(nachher.rueckgaengig, 'Feldwahl');
+});
+
+test('der Rückweg reicht über mehrere Züge', async (t) => {
+  // Ein Fehler fällt selten sofort auf: „Moment, das war doch gar nicht falsch"
+  // kommt eine Frage später. Mit nur einem gemerkten Zug war dann nichts mehr zu
+  // machen – außer Punkte von Hand zu schieben, womit Bilanz und Rekorde
+  // auseinanderlaufen, weil die an den Wertungen hängen und nicht am Punktestand.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-rueckweg-'));
+  const port = 5900 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'rueckweg-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+
+  // Drei Fragen hintereinander, alle richtig gewertet.
+  for (let i = 0; i < 3; i += 1) {
+    await host({ type: 'pick', catIdx: 0, rowIdx: i });
+    await host({ type: 'judge', correct: true });
+    await host({ type: 'endQuestion' });
+    await host({ type: 'close' });
+  }
+  // Wer die Punkte bekommt, hängt am Zugwechsel – die Summe nicht.
+  const summe = (st) => st.teams.reduce((n, t) => n + t.score, 0);
+  assert.equal(summe(await zustand(base)), 600, '100 + 200 + 300');
+
+  const stand = await zustand(base);
+  assert.ok(stand.rueckwegTiefe >= 12, `der Stapel merkt sich mehrere Züge, hat aber ${stand.rueckwegTiefe}`);
+
+  // Schrittweise zurück, bis nur noch die erste Wertung steht. Wie viele
+  // Schritte das sind, wird nicht vorgerechnet – gezählt wird, dass es mehr als
+  // einer ist, denn genau das konnte der Rückweg vorher nicht.
+  let schritte = 0;
+  while (summe(await zustand(base)) > 100 && schritte < 20) {
+    const a = await host({ type: 'undo' });
+    assert.equal(a.ok, true, `Rückschritt ${schritte + 1} ging nicht: ${JSON.stringify(a)}`);
+    schritte += 1;
+  }
+  const vorWertung = await zustand(base);
+  assert.equal(summe(vorWertung), 100, 'die Wertungen zwei und drei sind zurückgenommen');
+  assert.ok(schritte > 1, `dafür brauchte es mehrere Schritte, gemessen ${schritte}`);
+  assert.ok(vorWertung.rueckgaengig, 'und der Weg geht danach weiter');
+});
+
+test('der Rückweg wächst nicht unbegrenzt', async (t) => {
+  // Ein Stapel ohne Deckel wäre ein Leck: Jeder Schritt hält einen vollständigen
+  // Spielstand fest. Die Grenze soll greifen, ohne dass etwas kaputtgeht.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-rwtiefe-'));
+  const port = 6100 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'rwtiefe-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  const rot = (await zustand(base)).teams[0].id;
+  const antworten = [];
+  for (let i = 0; i < 40; i += 1) antworten.push(await host({ type: 'adjustScore', teamId: rot, delta: 10 }));
+  const abgelehnt = antworten.filter((a) => !a.ok);
+  assert.equal(abgelehnt.length, 0, `abgelehnt: ${JSON.stringify(abgelehnt.slice(0, 3))}`);
+
+  const stand = await zustand(base);
+  assert.ok(stand.rueckwegTiefe <= 25, `der Stapel bleibt gedeckelt, hat aber ${stand.rueckwegTiefe}`);
+  assert.equal(stand.teams[0].score, 400, `Teams: ${JSON.stringify(stand.teams.map((t) => [t.name, t.score]))}`);
+  // Und der Weg zurück funktioniert bis zum letzten gemerkten Schritt.
+  const rueck = [];
+  for (let i = 0; i < 25; i += 1) rueck.push(await host({ type: 'undo' }));
+  assert.equal(rueck.filter((a) => !a.ok).length, 0,
+    `alle 25 Rückschritte gehen: ${JSON.stringify(rueck.filter((a) => !a.ok).slice(0, 2))}`);
+  const leer = await zustand(base);
+  assert.equal(leer.rueckwegTiefe, 0, 'der Stapel ist leer');
+  assert.equal(leer.rueckgaengig, null, 'danach ist der Weg zu Ende');
+  assert.equal(leer.teams[0].score, 150, 'zurück auf den Stand vor den letzten 25 Korrekturen');
+  const weiter = await host({ type: 'undo' });
+  assert.equal(weiter.ok, false, 'und ein weiterer Versuch sagt das auch');
+  assert.match(weiter.error, /nichts zurückzunehmen/);
 });
 
 test('Zurücknehmen wirft ein frisch angelegtes Team nicht hinaus', async (t) => {
@@ -469,7 +554,8 @@ test('Zurücknehmen macht die letzte Wertung rückgängig', async (t) => {
   assert.equal(z.teams[0].serie, 0, 'Serie zurück');
   assert.equal(z.teams[0].bilanz.richtig, 0, 'Bilanz zurück');
   assert.equal(z.current.step, 'primary', 'die Frage steht wieder offen');
-  assert.equal(z.rueckgaengig, null, 'nur eine Stufe');
+  // Der Rückweg ist ein Stapel: Danach liegt die Feldwahl obenauf, nicht nichts.
+  assert.equal(z.rueckgaengig, 'Feldwahl');
 
   // Und danach lässt sich normal weiterspielen: diesmal falsch – das kostet
   // voreingestellt die Hälfte.
