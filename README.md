@@ -523,7 +523,7 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 
 ### Mitgeliefert
 
-Vierzehn fertige Sätze mit je 48 Fragen – zusammen 672, keine doppelt:
+Fünfzehn fertige Sätze mit je 48 Fragen – zusammen 720, keine doppelt:
 
 | Satz | Kategorien |
 |---|---|
@@ -541,6 +541,7 @@ Vierzehn fertige Sätze mit je 48 Fragen – zusammen 672, keine doppelt:
 | **Schule & Uni** | Schulfächer, Latein, Notenkunde, Pausenhof, Uni-Latein, Prüfungszeit |
 | **Der Klassiker** | Hauptstädte, Zahlen, der Mensch, „Wer war das?“, Abkürzungen, Tiere & Pflanzen |
 | **Weltgeschichte** | Ritter & Römer, Kriege & Krisen, Herrscher, Entdecker, Weltreiche, Kalter Krieg |
+| **Groß und Klein** | Tierkinder, Märchen, Wald & Wiese, „Wie heißt das Ding?“, Trickfilm-Helden, Berufe & Werkzeug |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit
@@ -552,6 +553,13 @@ Für den **Familienabend** ist „Drei Generationen“ gebaut: In jeder Kategori
 jemand anders Bescheid – die Eltern beim Wohnzimmer von früher und beim Telefon mit
 Wählscheibe, die Jüngeren bei „cringe“ und „geghostet“. Niemand sitzt eine ganze
 Runde lang nur daneben.
+
+Für denselben Abend mit **Kindern am Tisch** gibt es „Groß und Klein“. Er stellt
+die Aufgaben nicht nach Jahrgängen, sondern nach Welten: Bei den Tierkindern und
+den Märchen sind die Kleinen vorn, bei der Lärche und beim Fassmacher die Großen,
+und beim Warentrenner an der Supermarktkasse steht die ganze Familie gemeinsam
+im Dunkeln. Die Zusatzinfo unter jeder Lösung ist hier besonders gefüttert – aus
+ihr wird am Tisch die nächste Frage.
 
 Für die **Uni-Runde** gibt es „Zahlen & Formen“, „Anpfiff“ und „Schule & Uni“.
 Sie sind so geschrieben, dass Fachwissen hilft, aber nicht Voraussetzung ist:

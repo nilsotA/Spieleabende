@@ -1,0 +1,314 @@
+{
+  "name": "Groß und Klein",
+  "description": "Für den Abend, an dem drei Generationen am selben Tisch sitzen: Bei den Tierkindern und den Märchen sind die Kleinen vorn, bei den Fassmachern und den Federwolken die Großen – und beim Warentrenner im Supermarkt weiß es meistens niemand.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Tierkinder",
+          "questions": [
+            {
+              "text": "Wie heißt das Junge eines Schafs?",
+              "answer": "Lamm",
+              "note": "Nach dem ersten Geburtstag ist Schluss mit Lamm – dann heißt es Schaf."
+            },
+            {
+              "text": "Wie nennt man ein weibliches Pferd?",
+              "answer": "Stute",
+              "note": "Das männliche heißt Hengst, das Junge Fohlen."
+            },
+            {
+              "text": "Wie heißt das Junge einer Ziege?",
+              "answer": "Zicklein (auch: Kitz)",
+              "note": "Beim Reh heißt das Junge ebenfalls Kitz – deshalb wird es gern verwechselt."
+            },
+            {
+              "text": "Wie nennt man ein weibliches Wildschwein?",
+              "answer": "Bache",
+              "note": "Das männliche ist der Keiler, die Jungen sind die Frischlinge."
+            }
+          ]
+        },
+        {
+          "name": "Märchen & Kinderbücher",
+          "questions": [
+            {
+              "text": "Wie viele Zwerge leben bei Schneewittchen?",
+              "answer": "Sieben",
+              "note": "Namen bekamen sie erst im Disney-Film von 1937 – bei Grimm sind sie namenlos."
+            },
+            {
+              "text": "In welchem Märchen legen zwei Kinder eine Spur aus Brotkrumen durch den Wald?",
+              "answer": "Hänsel und Gretel",
+              "note": "Beim ersten Mal nehmen sie Kieselsteine – die funktionieren, die Krumen fressen die Vögel."
+            },
+            {
+              "text": "Wie heißt der Affe von Pippi Langstrumpf?",
+              "answer": "Herr Nilsson",
+              "note": "Ihr Pferd hat es einfacher: Es heißt schlicht „Kleiner Onkel“."
+            },
+            {
+              "text": "Wie heißen die beiden Brüder Grimm mit Vornamen?",
+              "answer": "Jacob und Wilhelm",
+              "note": "Gesammelt haben sie die Märchen nicht im Wald, sondern überwiegend im Wohnzimmer – bei Bekannten in Kassel."
+            }
+          ]
+        },
+        {
+          "name": "Wald & Wiese",
+          "questions": [
+            {
+              "text": "An welchem Baum wachsen Eicheln?",
+              "answer": "An der Eiche",
+              "note": "Eine einzelne Eiche kann über tausend Jahre alt werden."
+            },
+            {
+              "text": "Welcher heimische Baum hat einen weißen Stamm mit schwarzen Streifen?",
+              "answer": "Die Birke",
+              "note": "Das Weiß stammt von Betulin in der Rinde – es schützt den Stamm vor der Wintersonne."
+            },
+            {
+              "text": "Welcher heimische Nadelbaum wirft im Winter seine Nadeln ab?",
+              "answer": "Die Lärche",
+              "note": "Der einzige unter den heimischen Nadelbäumen – im Herbst wird sie vorher leuchtend gelb."
+            },
+            {
+              "text": "Ein Pilz im Wald ist nur der Fruchtkörper. Wie heißt das eigentliche Pilzgeflecht im Boden?",
+              "answer": "Myzel",
+              "note": "Das größte bekannte Myzel in Oregon bedeckt mehrere Quadratkilometer – ein einziger Organismus."
+            }
+          ]
+        },
+        {
+          "name": "Wie heißt das Ding?",
+          "questions": [
+            {
+              "text": "Wie heißt die kleine Linse in der Wohnungstür, durch die man nach draußen schaut?",
+              "answer": "Türspion",
+              "note": "Ein Weitwinkel – deshalb sieht der Besucher draußen so gekrümmt aus."
+            },
+            {
+              "text": "Wie heißt das gebogene Rohrstück unter dem Waschbecken, das den Geruch aus dem Abfluss fernhält?",
+              "answer": "Siphon (Geruchsverschluss)",
+              "note": "Im Bogen steht immer etwas Wasser – genau das ist der Verschluss."
+            },
+            {
+              "text": "Wie heißt die kleine Rinne zwischen Nase und Oberlippe?",
+              "answer": "Philtrum",
+              "note": "Griechisch für „Liebestrank“ – sie entsteht, wenn im Mutterleib die Gesichtshälften zusammenwachsen."
+            },
+            {
+              "text": "Wie heißt der Stab, mit dem man an der Supermarktkasse seine Waren von denen des Nächsten trennt?",
+              "answer": "Warentrenner (Warentrennstab)",
+              "note": "Manche Läden nennen ihn auch Kundentrenner – ein Wort, das jeder kennt und keiner sagt."
+            }
+          ]
+        },
+        {
+          "name": "Wetter & Himmel",
+          "questions": [
+            {
+              "text": "Was steht am Himmel, wenn Sonne und Regen gleichzeitig da sind?",
+              "answer": "Ein Regenbogen",
+              "note": "Er steht immer genau gegenüber der Sonne – man hat sie also im Rücken."
+            },
+            {
+              "text": "Womit misst man den Luftdruck?",
+              "answer": "Mit dem Barometer",
+              "note": "Fällt der Zeiger schnell, kommt Wind: Tiefdruck bringt das schlechte Wetter."
+            },
+            {
+              "text": "Warum sieht man den Blitz, bevor man den Donner hört?",
+              "answer": "Weil Licht viel schneller ist als Schall",
+              "note": "Drei Sekunden zwischen Blitz und Donner sind ungefähr ein Kilometer."
+            },
+            {
+              "text": "Wie heißen die feinen, federartigen Eiswolken in großer Höhe?",
+              "answer": "Zirruswolken (Federwolken)",
+              "note": "Sie hängen in acht bis zwölf Kilometern Höhe und bestehen nur aus Eiskristallen."
+            }
+          ]
+        },
+        {
+          "name": "Rund ums Jahr",
+          "questions": [
+            {
+              "text": "Wie viele Tage hat ein Schaltjahr?",
+              "answer": "366",
+              "note": "Der zusätzliche Tag ist der 29. Februar."
+            },
+            {
+              "text": "In welchem Monat ist bei uns der längste Tag des Jahres?",
+              "answer": "Im Juni",
+              "note": "Um den 21. Juni – die Sommersonnenwende."
+            },
+            {
+              "text": "Nach welcher Regel richtet sich das Osterdatum?",
+              "answer": "Erster Sonntag nach dem ersten Vollmond im Frühling",
+              "note": "Deshalb wandert Ostern zwischen dem 22. März und dem 25. April."
+            },
+            {
+              "text": "Alle vier Jahre ist Schaltjahr – aber volle Hundertjahre fallen aus. Welche sind trotzdem Schaltjahre?",
+              "answer": "Die durch 400 teilbaren",
+              "note": "1900 war keins, 2000 schon – die meisten Lebenden haben also die Ausnahme erlebt, nicht die Regel."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Unter Wasser",
+          "questions": [
+            {
+              "text": "Wie viele Arme hat ein Seestern üblicherweise?",
+              "answer": "Fünf",
+              "note": "Verliert er einen, wächst er nach – aus manchen Armen wird sogar ein ganzer neuer Seestern."
+            },
+            {
+              "text": "Welches Meerestier besteht fast ganz aus Wasser und nesselt bei Berührung?",
+              "answer": "Die Qualle",
+              "note": "Ohne Herz, ohne Gehirn, ohne Knochen – und trotzdem gab es sie schon lange vor den Dinosauriern."
+            },
+            {
+              "text": "Welcher Fisch bläst sich bei Gefahr zu einer stacheligen Kugel auf?",
+              "answer": "Der Kugelfisch",
+              "note": "Er saugt dafür Wasser in einen dehnbaren Magensack – der Fisch verdreifacht sein Volumen."
+            },
+            {
+              "text": "Bei welchen Meerestieren trägt das Männchen die Jungen aus und bringt sie zur Welt?",
+              "answer": "Bei den Seepferdchen",
+              "note": "Das Weibchen legt die Eier in seine Bruttasche – nach Wochen presst er die Jungen heraus."
+            }
+          ]
+        },
+        {
+          "name": "Spiele & Spielzeug",
+          "questions": [
+            {
+              "text": "Wie viele Figuren hat jeder Spieler bei „Mensch ärgere Dich nicht“?",
+              "answer": "Vier",
+              "note": "Und alle vier müssen ins Haus – die letzte ist immer die zäheste."
+            },
+            {
+              "text": "Aus welchem Land kommt der Baustein-Klassiker Lego?",
+              "answer": "Aus Dänemark",
+              "note": "Der Name kommt von „leg godt“ – dänisch für „spiel gut“."
+            },
+            {
+              "text": "Wie viele Steine hat jeder Spieler beim Mühle-Spiel?",
+              "answer": "Neun",
+              "note": "Wer auf drei Steine herunterfällt, darf springen – die letzte Chance im Spiel."
+            },
+            {
+              "text": "Wie viele Spielsteine liegen bei einem deutschen Scrabble im Beutel?",
+              "answer": "102",
+              "note": "100 Buchstaben und zwei Blankosteine – im Englischen sind es nur 100."
+            }
+          ]
+        },
+        {
+          "name": "Im Garten",
+          "questions": [
+            {
+              "text": "Welches Gartentier rollt sich bei Gefahr zu einer Kugel zusammen?",
+              "answer": "Der Igel",
+              "note": "Rund 8000 Stacheln – und darunter ein Muskel, der sie wie eine Kapuze zuzieht."
+            },
+            {
+              "text": "Welche Blume wird über zwei Meter hoch und richtet sich nach der Sonne?",
+              "answer": "Die Sonnenblume",
+              "note": "Nur die jungen drehen mit. Ausgewachsene stehen fest nach Osten – da wärmen sie sich morgens schneller auf."
+            },
+            {
+              "text": "Welches Insekt bestäubt die meisten Obstbäume und lebt in einem Volk mit einer Königin?",
+              "answer": "Die Honigbiene",
+              "note": "Für ein Glas Honig fliegt ein Volk ungefähr dreimal um die Erde."
+            },
+            {
+              "text": "Wie nennt man es, wenn ein Gärtner den Trieb einer Sorte auf eine andere Pflanze setzt?",
+              "answer": "Veredeln (Pfropfen)",
+              "note": "Fast jeder Apfelbaum im Garten ist so entstanden – aus einem Kern wächst nie dieselbe Sorte nach."
+            }
+          ]
+        },
+        {
+          "name": "Sprichwörter mit Tieren",
+          "questions": [
+            {
+              "text": "„Da liegt der … im Pfeffer.“ Welches Tier?",
+              "answer": "Der Hase",
+              "note": "Pfeffer meint hier eine dunkle Soße – der Hase darin ist nicht mehr zu retten."
+            },
+            {
+              "text": "„Die … pfeifen es von den Dächern.“ Welches Tier?",
+              "answer": "Die Spatzen",
+              "note": "Gemeint ist: Es ist längst kein Geheimnis mehr."
+            },
+            {
+              "text": "„Da wird ja der … in der Pfanne verrückt.“ Welches Tier?",
+              "answer": "Der Hund",
+              "note": "Aus einer Geschichte vom Till Eulenspiegel, in der ein Hund zu Schmalz ausgelassen wird."
+            },
+            {
+              "text": "„Jemandem einen … aufbinden.“ Welches Tier?",
+              "answer": "Einen Bären",
+              "note": "Der Bär stand früher für eine schwere Last – wer sie aufgebunden bekam, trug an einer Lüge."
+            }
+          ]
+        },
+        {
+          "name": "Trickfilm-Helden",
+          "questions": [
+            {
+              "text": "Welche Maus ist das Wahrzeichen von Disney?",
+              "answer": "Micky Maus",
+              "note": "1928 in „Steamboat Willie“ – einem der ersten Zeichentrickfilme mit Ton."
+            },
+            {
+              "text": "Wie heißt der junge Löwe in „Der König der Löwen“?",
+              "answer": "Simba",
+              "note": "Suaheli für „Löwe“ – auch Rafiki, Pumbaa und Simbas Vater Mufasa tragen Suaheli-Namen."
+            },
+            {
+              "text": "Wie heißt der Schneemann in „Die Eiskönigin“?",
+              "answer": "Olaf",
+              "note": "Er träumt vom Sommer – ausgerechnet."
+            },
+            {
+              "text": "Wie heißt das japanische Zeichentrickstudio von Hayao Miyazaki?",
+              "answer": "Studio Ghibli",
+              "note": "Von ihm stammen „Mein Nachbar Totoro“ und „Chihiros Reise ins Zauberland“."
+            }
+          ]
+        },
+        {
+          "name": "Berufe & Werkzeug",
+          "questions": [
+            {
+              "text": "Wie heißt der Beruf, der Schuhe herstellt und repariert?",
+              "answer": "Schuhmacher (Schuster)",
+              "note": "„Schuster, bleib bei deinen Leisten“ – der Leisten ist die Fußform aus Holz."
+            },
+            {
+              "text": "Welches Werkzeug braucht man für eine Schraube mit Kreuzschlitz?",
+              "answer": "Einen Kreuzschlitz-Schraubendreher",
+              "note": "Der Kreuzschlitz wurde erfunden, damit der Dreher bei zu viel Kraft von selbst herausrutscht."
+            },
+            {
+              "text": "Wie heißt der Handwerker, der Fässer und Bottiche baut?",
+              "answer": "Böttcher (Küfer)",
+              "note": "Je nach Gegend auch Fassbinder oder Schäffler – ein Beruf mit vielen Namen und wenigen Leuten."
+            },
+            {
+              "text": "Womit prüft ein Maurer, ob eine Wand wirklich senkrecht steht?",
+              "answer": "Mit dem Senklot (Lot)",
+              "note": "Ein Gewicht an der Schnur – seit Jahrtausenden unschlagbar, denn die Schwerkraft irrt nie."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
