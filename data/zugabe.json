@@ -1,0 +1,314 @@
+{
+  "name": "Zugabe",
+  "description": "Der Satz für alles, was klingt: von Beethovens Neunter über Kraftwerk bis zum Didgeridoo. Gespielt wird nichts – gefragt wird nach dem, was man ohnehin im Ohr hat, und nach dem, was dahintersteckt.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Instrumente",
+          "questions": [
+            {
+              "text": "Wie viele Saiten hat eine gewöhnliche Gitarre?",
+              "answer": "Sechs",
+              "note": "Die Bassgitarre hat vier – dafür doppelt so dick und eine Oktave tiefer."
+            },
+            {
+              "text": "Zu welcher Instrumentenfamilie gehört das Saxophon?",
+              "answer": "Zu den Holzblasinstrumenten",
+              "note": "Obwohl es aus Messing ist: Entscheidend ist das Rohrblatt im Mundstück, nicht das Material."
+            },
+            {
+              "text": "Welches Instrument bedient man mit Manualen, Pedalen und Registern?",
+              "answer": "Die Orgel",
+              "note": "Die „Königin der Instrumente“ – die größten haben über zehntausend Pfeifen."
+            },
+            {
+              "text": "Wie heißt das Schlaginstrument mit Holzstäben und Resonanzröhren, das tiefer klingt als ein Xylophon?",
+              "answer": "Die Marimba",
+              "note": "Die Röhren unter den Stäben sind unterschiedlich lang – jede ist auf ihren Ton gestimmt."
+            }
+          ]
+        },
+        {
+          "name": "Klassik",
+          "questions": [
+            {
+              "text": "Wer schrieb die „Kleine Nachtmusik“?",
+              "answer": "Wolfgang Amadeus Mozart",
+              "note": "Der Titel stammt nicht von ihm – er notierte nur „Eine kleine Nachtmusik“ in sein Werkverzeichnis."
+            },
+            {
+              "text": "Wer schrieb die Ballette „Schwanensee“ und „Der Nussknacker“?",
+              "answer": "Pjotr Tschaikowsky",
+              "note": "„Schwanensee“ fiel bei der Uraufführung durch – berühmt wurde es erst nach seinem Tod."
+            },
+            {
+              "text": "Wie heißt Vivaldis berühmtester Zyklus aus vier Violinkonzerten?",
+              "answer": "Die vier Jahreszeiten",
+              "note": "Zu jedem Konzert gehört ein Gedicht – die Musik erzählt es Zeile für Zeile nach."
+            },
+            {
+              "text": "Welche Sinfonie Beethovens endet mit einem Chor auf Schillers „Ode an die Freude“?",
+              "answer": "Die Neunte",
+              "note": "Ihr Thema ist heute die Europahymne. Beethoven war bei der Uraufführung längst taub."
+            }
+          ]
+        },
+        {
+          "name": "Musik in Zahlen",
+          "questions": [
+            {
+              "text": "Wie viele Saiten hat eine Geige?",
+              "answer": "Vier",
+              "note": "Gestimmt in Quinten: g – d – a – e."
+            },
+            {
+              "text": "Welche Instrumente spielen in einem Streichquartett?",
+              "answer": "Zwei Geigen, eine Bratsche und ein Cello",
+              "note": "Die Besetzung geht auf Haydn zurück – er schrieb über 60 Quartette dafür."
+            },
+            {
+              "text": "Wie viele Linien hat ein Notensystem?",
+              "answer": "Fünf",
+              "note": "Wird es höher oder tiefer, behilft man sich mit kurzen Hilfslinien darüber und darunter."
+            },
+            {
+              "text": "In wie viele Halbtonschritte ist eine Oktave geteilt?",
+              "answer": "Zwölf",
+              "note": "Auf dem Klavier: sieben weiße und fünf schwarze Tasten, bis der Ton wiederkehrt."
+            }
+          ]
+        },
+        {
+          "name": "Woher der Bandname?",
+          "questions": [
+            {
+              "text": "Welche Band aus Liverpool bestand aus John, Paul, George und Ringo?",
+              "answer": "The Beatles",
+              "note": "Der Name ist ein Wortspiel aus „beat“ und „beetles“ – Käfer."
+            },
+            {
+              "text": "Welche Popgruppe aus Stockholm setzte ihren Namen aus den Anfangsbuchstaben der vier Vornamen zusammen?",
+              "answer": "ABBA",
+              "note": "Agnetha, Björn, Benny und Anni-Frid."
+            },
+            {
+              "text": "Welche britische Band benannte sich nach einem Lied von Muddy Waters?",
+              "answer": "The Rolling Stones",
+              "note": "Nach „Rollin’ Stone“ – die Platte lag beim ersten Telefonat gerade auf dem Tisch."
+            },
+            {
+              "text": "Aus welcher Stadt kommt die Band Kraftwerk, die als Wegbereiterin der elektronischen Musik gilt?",
+              "answer": "Aus Düsseldorf",
+              "note": "Ihr Klangbild aus den Siebzigern steckt heute in Techno, Hip-Hop und Popmusik weltweit."
+            }
+          ]
+        },
+        {
+          "name": "Filmmusik",
+          "questions": [
+            {
+              "text": "In welchem Film kündigen zwei tiefe, immer schnellere Töne einen Hai an?",
+              "answer": "Der weiße Hai",
+              "note": "Zwei Töne, mehr nicht – der Regisseur hielt die Idee zuerst für einen Scherz."
+            },
+            {
+              "text": "Aus welchem Film stammt „My Heart Will Go On“?",
+              "answer": "Titanic",
+              "note": "Céline Dion sang die Demoaufnahme nur widerwillig – genau die landete im Film."
+            },
+            {
+              "text": "Wer komponierte die Musik zu „Star Wars“, „Indiana Jones“ und „Jurassic Park“?",
+              "answer": "John Williams",
+              "note": "Er wurde über 50-mal für den Oscar nominiert – öfter als jeder andere lebende Mensch."
+            },
+            {
+              "text": "Wer schrieb die Musik zu Sergio Leones Western, darunter „Spiel mir das Lied vom Tod“?",
+              "answer": "Ennio Morricone",
+              "note": "Die Mundharmonika ist dort kein Instrument, sondern eine Figur der Handlung."
+            }
+          ]
+        },
+        {
+          "name": "Fachbegriffe",
+          "questions": [
+            {
+              "text": "Was bedeutet „forte“ in den Noten?",
+              "answer": "Laut",
+              "note": "Das Gegenstück ist „piano“ – leise. Beides zusammen ergab den Namen des Pianoforte."
+            },
+            {
+              "text": "Was heißt „a cappella“?",
+              "answer": "Gesang ohne Instrumente",
+              "note": "Wörtlich „nach Art der Kapelle“ – gemeint ist die Kirchenmusik ohne Begleitung."
+            },
+            {
+              "text": "Wie heißt das Zeichen, das einen Ton um einen Halbton erhöht?",
+              "answer": "Das Kreuz (♯)",
+              "note": "Das Gegenstück heißt B und senkt um einen Halbton."
+            },
+            {
+              "text": "Was verlangt die Anweisung „pizzicato“ von einem Geiger?",
+              "answer": "Die Saiten zu zupfen statt zu streichen",
+              "note": "Aufgehoben wird sie mit „arco“ – wieder mit dem Bogen."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Oper & Musical",
+          "questions": [
+            {
+              "text": "In welchem Musical singt eine Gesellschaft von Katzen nachts auf einem Schrottplatz?",
+              "answer": "Cats",
+              "note": "Die Vorlage ist ein Gedichtband von T. S. Eliot – eigentlich für seine Patenkinder geschrieben."
+            },
+            {
+              "text": "Welches Musical spielt in der Pariser Oper und handelt von einem maskierten Mann im Keller?",
+              "answer": "Das Phantom der Oper",
+              "note": "Unter der Pariser Oper liegt tatsächlich ein Wasserbecken – daher die Legende vom See."
+            },
+            {
+              "text": "In welchem Land spielt Verdis Oper „Aida“?",
+              "answer": "In Ägypten",
+              "note": "Uraufgeführt 1871 in Kairo – bestellt zur Eröffnung eines neuen Opernhauses."
+            },
+            {
+              "text": "Wie heißt Richard Wagners vierteiliger Opernzyklus?",
+              "answer": "Der Ring des Nibelungen",
+              "note": "Rund fünfzehn Stunden Musik, verteilt auf vier Abende – 26 Jahre Arbeit."
+            }
+          ]
+        },
+        {
+          "name": "Deutsche Töne",
+          "questions": [
+            {
+              "text": "Wer sang „Ich war noch niemals in New York“?",
+              "answer": "Udo Jürgens",
+              "note": "Aus dem Lied wurde später ein Musical – mit über zwanzig seiner Titel."
+            },
+            {
+              "text": "Welcher Liedermacher wurde mit „Über den Wolken“ bekannt?",
+              "answer": "Reinhard Mey",
+              "note": "Er ist selbst Pilot – das Lied entstand nach einer Wartezeit am Flugplatz."
+            },
+            {
+              "text": "Wofür steht die Abkürzung NDW?",
+              "answer": "Neue Deutsche Welle",
+              "note": "Anfang der Achtziger – erst Untergrund, dann drei Jahre lang überall."
+            },
+            {
+              "text": "Welche Band der Neuen Deutschen Welle hatte einen Welthit mit „Da Da Da“?",
+              "answer": "Trio",
+              "note": "Drei Musiker, eine Heimorgel für 100 Mark – und ein Hit in über dreißig Ländern."
+            }
+          ]
+        },
+        {
+          "name": "Rock-Legenden",
+          "questions": [
+            {
+              "text": "Welche Rockband aus Australien sang „Highway to Hell“?",
+              "answer": "AC/DC",
+              "note": "Der Name stammt vom Typenschild einer Nähmaschine – Wechsel- und Gleichstrom."
+            },
+            {
+              "text": "Welcher Gitarrist spielte 1969 in Woodstock die amerikanische Hymne?",
+              "answer": "Jimi Hendrix",
+              "note": "Er spielte am Montagmorgen vor den letzten Übriggebliebenen – und wurde damit unsterblich."
+            },
+            {
+              "text": "Welche Band veröffentlichte das Album „The Dark Side of the Moon“?",
+              "answer": "Pink Floyd",
+              "note": "Es stand über 700 Wochen in den US-Charts – mehr als vierzehn Jahre."
+            },
+            {
+              "text": "Wie hieß Freddie Mercury mit bürgerlichem Namen?",
+              "answer": "Farrokh Bulsara",
+              "note": "Geboren auf Sansibar, aufgewachsen in Indien, berühmt geworden in London."
+            }
+          ]
+        },
+        {
+          "name": "Eurovision",
+          "questions": [
+            {
+              "text": "Welche Sängerin gewann 2010 für Deutschland mit „Satellite“?",
+              "answer": "Lena",
+              "note": "Sie trat im Jahr darauf gleich noch einmal an – als Titelverteidigerin im eigenen Land."
+            },
+            {
+              "text": "Welche Sängerin gewann 1988 für die Schweiz und wurde später mit Filmballaden weltberühmt?",
+              "answer": "Céline Dion",
+              "note": "Sie gewann mit einem französischen Lied für ein Land, in dem sie nicht lebte – erlaubt ist das bis heute."
+            },
+            {
+              "text": "Wie hieß der Eurovision Song Contest im Deutschen jahrzehntelang?",
+              "answer": "Grand Prix Eurovision de la Chanson",
+              "note": "Erst 2002 setzte sich auch bei uns der englische Name durch."
+            },
+            {
+              "text": "Wie viele Punkte vergibt eine Jury an ihren Favoriten – die Höchstwertung?",
+              "answer": "Zwölf",
+              "note": "„Douze points“ – der einzige französische Satz, den halb Europa auswendig kann."
+            }
+          ]
+        },
+        {
+          "name": "Wer steckt dahinter?",
+          "questions": [
+            {
+              "text": "Unter welchem Namen wurde Reginald Dwight weltberühmt?",
+              "answer": "Elton John",
+              "note": "Den Nachnamen borgte er sich von einem Bandkollegen, den Vornamen vom Saxophonisten."
+            },
+            {
+              "text": "Unter welchem Künstlernamen wurde Stefani Germanotta bekannt?",
+              "answer": "Lady Gaga",
+              "note": "Der Name geht auf den Queen-Song „Radio Ga Ga“ zurück."
+            },
+            {
+              "text": "Wie hieß Bob Dylan bei seiner Geburt?",
+              "answer": "Robert Zimmerman",
+              "note": "Den Künstlernamen wählte er nach dem Dichter Dylan Thomas."
+            },
+            {
+              "text": "Wie heißt der Sänger Sting mit bürgerlichem Namen?",
+              "answer": "Gordon Sumner",
+              "note": "Der Spitzname kam von einem gestreiften Pullover – gelb-schwarz wie eine Wespe."
+            }
+          ]
+        },
+        {
+          "name": "Instrumente der Welt",
+          "questions": [
+            {
+              "text": "Aus welchem Land kennt man den Dudelsack in seiner bekanntesten Form?",
+              "answer": "Aus Schottland",
+              "note": "Dudelsäcke gibt es von Spanien bis Indien – der schottische ist nur der lauteste Botschafter."
+            },
+            {
+              "text": "Wie heißt das lange Rohr, auf dem die Ureinwohner Australiens mit Dauerton spielen?",
+              "answer": "Didgeridoo",
+              "note": "Der Dauerton gelingt durch Zirkularatmung: durch die Nase ein, durch den Mund weiter aus."
+            },
+            {
+              "text": "Aus welchem Land stammt die dreisaitige Shamisen?",
+              "answer": "Aus Japan",
+              "note": "Gespielt wird sie mit einem großen Plektrum, das an einen Spachtel erinnert."
+            },
+            {
+              "text": "Wie heißt die indische Langhalslaute, die George Harrison in der Popmusik bekannt machte?",
+              "answer": "Sitar",
+              "note": "Unter den Spielsaiten liegen Resonanzsaiten – die klingen von selbst mit."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

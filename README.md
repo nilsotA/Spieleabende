@@ -523,7 +523,7 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 
 ### Mitgeliefert
 
-Fünfzehn fertige Sätze mit je 48 Fragen – zusammen 720, keine doppelt:
+Sechzehn fertige Sätze mit je 48 Fragen – zusammen 768, keine doppelt:
 
 | Satz | Kategorien |
 |---|---|
@@ -542,6 +542,7 @@ Fünfzehn fertige Sätze mit je 48 Fragen – zusammen 720, keine doppelt:
 | **Der Klassiker** | Hauptstädte, Zahlen, der Mensch, „Wer war das?“, Abkürzungen, Tiere & Pflanzen |
 | **Weltgeschichte** | Ritter & Römer, Kriege & Krisen, Herrscher, Entdecker, Weltreiche, Kalter Krieg |
 | **Groß und Klein** | Tierkinder, Märchen, Wald & Wiese, „Wie heißt das Ding?“, Trickfilm-Helden, Berufe & Werkzeug |
+| **Zugabe** | Instrumente, Klassik, Bandnamen, Filmmusik, Oper & Musical, Rock-Legenden, Eurovision |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit
@@ -553,6 +554,10 @@ Für den **Familienabend** ist „Drei Generationen“ gebaut: In jeder Kategori
 jemand anders Bescheid – die Eltern beim Wohnzimmer von früher und beim Telefon mit
 Wählscheibe, die Jüngeren bei „cringe“ und „geghostet“. Niemand sitzt eine ganze
 Runde lang nur daneben.
+
+„Zugabe“ ist der Satz für Musik – und der, bei dem am meisten mitgesummt wird:
+von Beethovens Neunter über den Namen hinter ABBA bis zum Didgeridoo. Gespielt
+wird dabei nichts; gefragt ist, was ohnehin im Ohr sitzt, und was dahintersteckt.
 
 Für denselben Abend mit **Kindern am Tisch** gibt es „Groß und Klein“. Er stellt
 die Aufgaben nicht nach Jahrgängen, sondern nach Welten: Bei den Tierkindern und
