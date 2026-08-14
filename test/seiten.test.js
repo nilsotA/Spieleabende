@@ -209,3 +209,14 @@ test('der Notweg macht handlungsfähig und wird am Buzzer schneller', () => {
   assert.ok(heiss <= 500, `${heiss} ms sind am Buzzer zu träge`);
   assert.match(quelle, /sicht\.phase === 'question'/, 'umgeschaltet wird an der laufenden Frage');
 });
+
+test('das Handy lässt seine Anfrage liegen, statt im Takt zu fragen', () => {
+  const quelle = ohneKommentare(lies('common.js'));
+  assert.match(quelle, /&seit=\$\{letzteNummer\}/, 'ohne „seit" kann der Server die Anfrage nicht halten');
+  assert.match(quelle, /async function notwegSchleife/, 'die Schleife ersetzt den Wecker');
+  // Und der Riegel gegen das Freidrehen: Antwortet ein Server sofort und
+  // unverändert, darf die Schleife nicht so schnell fragen, wie die Leitung
+  // hergibt. Genau das ist bei einer Gegenprobe passiert.
+  assert.match(quelle, /haeltNichts = warten && letzteNummer != null && letzteNummer === vorher/);
+  assert.match(quelle, /letzteNummer == null \|\| haeltNichts\) await schlaf/);
+});

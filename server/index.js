@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { createReadStream } from 'node:fs';
 import { stat, writeFile, rename, readFile, unlink } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomBytes } from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -260,6 +260,18 @@ function vergissAlteGeheimnisse() {
   }
 }
 
+/*
+ * Der Vorspann des Ereignisstroms – acht Kilobyte, die sich nicht
+ * zusammenfalten lassen.
+ *
+ * Vorher stand hier acht Kilobyte „x". Gegen einen Vermittler, der schlicht
+ * Bytes zählt, hilft das; gegen einen, der unterwegs komprimiert, überhaupt
+ * nicht: Achttausend gleiche Zeichen schrumpfen auf rund dreißig Byte, und die
+ * Bremse löst nie. Zufällige Zeichen schrumpfen nicht. Einmal beim Start
+ * gewürfelt, dann kostet er nichts mehr.
+ */
+const VORSPANN = randomBytes(6144).toString('base64');
+
 function darfHandeln(clientId, mitgebracht) {
   const erwartet = geheimnisse.get(clientId);
   return !erwartet || erwartet === mitgebracht;
@@ -273,7 +285,11 @@ function connectionsOf(clientId) {
    siehe /api/state. Wer sich länger nicht meldet, gilt als weg; ohne offene
    Verbindung gibt es ja kein Auflegen, das man mitbekäme. */
 const abfragen = new Map(); // clientId -> { zeit, isHost }
-const ABFRAGE_FRIST = 12000;
+/* Länger als der Warteraum hält (HALTE_ZEIT): Ein Handy, dessen Anfrage
+   gerade offen liegt, meldet sich in dieser Zeit ja gerade nicht – es wartet.
+   Dass jemand wirklich weg ist, merkt der Server schneller und genauer daran,
+   dass seine wartende Anfrage auflegt. */
+const ABFRAGE_FRIST = 40000;
 
 setInterval(() => {
   const jetzt = Date.now();
@@ -308,8 +324,56 @@ function isHostClient(clientId) {
   return !!eintrag?.isHost && Date.now() - eintrag.zeit < ABFRAGE_FRIST;
 }
 
+/*
+ * Der Warteraum – damit der Notweg sich nicht wie ein Notweg anfühlt.
+ *
+ * Alle anderthalb Sekunden nachzufragen ist ehrlich, aber am Spieltisch spürbar:
+ * Die Frage steht auf der Leinwand, und auf dem Handy passiert eine Sekunde
+ * lang nichts. Wer alle 200 ms fragt, belastet dafür Leitung und Akku, ohne das
+ * Problem zu lösen – die Antwort kommt trotzdem im Schnitt eine halbe
+ * Taktlänge zu spät.
+ *
+ * Also andersherum: Das Handy fragt und sagt dazu, welchen Stand es schon hat.
+ * Ist nichts Neues da, bleibt die Anfrage einfach offen liegen – bis sich
+ * wirklich etwas ändert. Dann geht sie in derselben Millisekunde hinaus, in der
+ * auch die Live-Verbindung bedient wird. Aus „bis zu 1,5 Sekunden" wird „einmal
+ * hin und zurück".
+ *
+ * Der Unterschied zum Ereignisstrom, an dem dieser ganze Abend hängt: Diese
+ * Antwort endet. Ein Vermittler, der sammelt, gibt sie deshalb heraus – er
+ * wartet ja nur darauf, dass sie fertig wird.
+ */
+let standNummer = 0;
+const wartende = new Set();
+/* Kürzer als jede übliche Geduld eines Vermittlers. Über die Umgebung
+   verstellbar, weil ein Test sonst 25 Sekunden lang zusehen müsste – dieselbe
+   Klappe wie beim Spielstandpfad und beim Tunnelprogramm. */
+const HALTE_ZEIT = Number(process.env.QUIZDUELL_HALTE_MS) || 25000;
+
+function weckeWartende() {
+  if (!wartende.size) return;
+  for (const w of [...wartende]) {
+    wartende.delete(w);
+    clearTimeout(w.timer);
+    try {
+      antworteMitStand(w.res, w);
+    } catch {
+      /* die Leitung ist weg – dann eben nicht */
+    }
+  }
+}
+
+function antworteMitStand(res, { isHost, clientId }) {
+  const sicht = sichtFuer({ isHost, clientId });
+  sicht.nummer = standNummer;
+  if (clientId) sicht.geheim = geheimnisFuer(clientId);
+  sendJson(res, 200, sicht);
+}
+
 function broadcast() {
+  standNummer += 1;
   for (const conn of connections.values()) sendState(conn);
+  weckeWartende();
   saveSoon();
 }
 
@@ -924,7 +988,7 @@ function sseHandler(req, res, url, rolle) {
   // Acht und nicht zwei: Der erste Schub misst mit Vorspann, Begrüßung und
   // Spielstand rund 3,5 kB. Eine Bremse, die bei vier Kilobyte löst, hätte er
   // damit knapp verfehlt – und knapp verfehlt ist hier dasselbe wie gar nicht.
-  res.write(`: ${'x'.repeat(8192)}\n\n`);
+  res.write(`: ${VORSPANN}\n\n`);
   res.write('retry: 1000\n\n');
 
   const conn = { id: connId, res, clientId, isHost };
@@ -999,9 +1063,34 @@ async function apiHandler(req, res, url, pathname, rolle) {
      * Strom öffnen, und der gibt dasselbe Geheimnis für dieselbe Kennung
      * heraus. Beide Türen sind dieselbe Tür.
      */
-    const sicht = sichtFuer({ isHost, clientId });
-    if (clientId) sicht.geheim = geheimnisFuer(clientId);
-    return sendJson(res, 200, sicht);
+    /*
+     * Und die Wartefassung: `seit=<Nummer>` heißt „ich habe diesen Stand
+     * schon". Ist nichts Neues da, bleibt die Anfrage offen liegen, bis sich
+     * etwas ändert – siehe Warteraum weiter oben. Ohne `seit` antwortet der
+     * Server sofort, so wie ein Handy es beim ersten Mal braucht.
+     */
+    const seit = Number(url.searchParams.get('seit'));
+    if (Number.isFinite(seit) && seit >= standNummer) {
+      const warte = { res, isHost, clientId };
+      warte.timer = setTimeout(() => {
+        wartende.delete(warte);
+        antworteMitStand(res, warte);
+      }, HALTE_ZEIT);
+      req.on('close', () => {
+        if (!wartende.delete(warte)) return;
+        clearTimeout(warte.timer);
+        // Legt ein wartendes Handy auf, ist es weg – das merkt man hier sofort
+        // und muss nicht auf die Frist warten.
+        if (clientId && connectionsOf(clientId).length === 0) {
+          abfragen.delete(clientId);
+          G.setMemberOnline(state, clientId, false);
+          broadcast();
+        }
+      });
+      wartende.add(warte);
+      return undefined;
+    }
+    return antworteMitStand(res, { isHost, clientId });
   }
   if (pathname === '/api/sets' && req.method === 'GET') {
     return sendJson(res, 200, await listSets());

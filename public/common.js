@@ -324,7 +324,9 @@ export function connect({ role, onState, onEvent, onStatus }) {
   setRole(role);
   const id = clientId();
   let stromKam = false; // ist über den Strom je ein Zustand angekommen?
-  let abfrageTimer = null;
+  let notwegLaeuft = false;
+  let letzteNummer = null; // Stand, den dieses Handy schon hat
+  let haeltNichts = false; // hält dieser Server wartende Anfragen wirklich?
   let heiss = false; // läuft gerade eine Frage?
 
   const takt = () => (heiss ? ABFRAGE_TAKT_HEISS : ABFRAGE_TAKT);
@@ -341,15 +343,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
     setOnline(true);
     lageAkte.weg = weg;
     lageAkte.zustaende += 1;
-    // Den Takt an die Lage anpassen, solange abgefragt wird.
-    const jetztHeiss = sicht.phase === 'question';
-    if (jetztHeiss !== heiss) {
-      heiss = jetztHeiss;
-      if (abfrageTimer) {
-        clearInterval(abfrageTimer);
-        abfrageTimer = setInterval(hole, takt());
-      }
-    }
+    heiss = sicht.phase === 'question';
     // Zentral gemerkt, damit weder Host-Screen noch Fernbedienung etwas davon
     // wissen müssen – siehe `lage` weiter oben.
     lage = sicht.lage || null;
@@ -364,40 +358,82 @@ export function connect({ role, onState, onEvent, onStatus }) {
     }
   };
 
-  async function hole() {
+  /**
+   * Einmal nachfragen. Mit `warten` bleibt die Anfrage beim Server liegen, bis
+   * sich wirklich etwas ändert – dann kommt die Antwort in derselben
+   * Millisekunde heraus, in der auch die Live-Verbindung bedient wird.
+   *
+   * Gibt zurück, ob es geklappt hat: Danach richtet sich, ob die Schleife
+   * gleich weiterfragt oder erst einmal Luft holt.
+   */
+  async function hole(warten = false) {
     try {
-      const res = await fetch(`/api/state?clientId=${encodeURIComponent(id)}&role=${role}`, { cache: 'no-store' });
+      const seit = warten && letzteNummer != null ? `&seit=${letzteNummer}` : '';
+      const res = await fetch(
+        `/api/state?clientId=${encodeURIComponent(id)}&role=${role}${seit}`,
+        { cache: 'no-store' },
+      );
       if (!res.ok) {
         setOnline(false);
         lageAkte.letzterFehler = `Abfrage: ${res.status}`;
-        return melde(res.status === 403
+        melde(res.status === 403
           ? 'Dieser Zugang gilt nicht mehr – bitte den QR-Code neu scannen.'
           : `Das Spiel antwortet mit ${res.status}.`);
+        return false;
       }
       const sicht = await res.json();
       // Der Nachweis kommt hier mit, weil das `hello` des Stroms nie ankam –
       // ohne ihn dürfte dieses Handy zuschauen und sonst nichts.
       merkeGeheim(sicht.geheim);
-      nimm(sicht, 'Notweg (abgeholt)');
-      melde(`Notweg: Der Spielstand wird alle ${(takt() / 1000).toLocaleString('de-DE')} s abgeholt.`);
+      const vorher = letzteNummer;
+      letzteNummer = typeof sicht.nummer === 'number' ? sicht.nummer : null;
+      // Kam eine Wartefassung sofort und unverändert zurück, hält dieser Server
+      // nichts – dann darf die Schleife nicht sofort wieder fragen, sonst
+      // hämmert sie so schnell, wie die Leitung hergibt. Gemessen, als eine
+      // Gegenprobe genau das ausgelöst hat.
+      haeltNichts = warten && letzteNummer != null && letzteNummer === vorher;
+      nimm(sicht, letzteNummer == null ? 'Notweg (im Takt)' : 'Notweg (wartend)');
+      melde(letzteNummer == null
+        ? `Notweg: Der Spielstand wird alle ${(takt() / 1000).toLocaleString('de-DE')} s abgeholt.`
+        : 'Notweg: Der Spielstand kommt, sobald sich etwas ändert.');
+      return true;
     } catch {
       setOnline(false);
       lageAkte.letzterFehler = 'Abfrage kam nicht durch';
       melde('Keine Verbindung zum Spiel.');
+      return false;
+    }
+  }
+
+  const schlaf = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  /**
+   * Der Notweg als Schleife statt als Wecker.
+   *
+   * Beim ersten Mal ohne Wartefassung – da will das Handy sofort etwas sehen.
+   * Danach immer wartend: Die Anfrage liegt beim Server, bis sich etwas tut.
+   * Kennt der Server das nicht (ältere Fassung, kein `nummer` in der Antwort),
+   * fällt die Schleife von selbst auf den alten Takt zurück.
+   */
+  async function notwegSchleife() {
+    let erstes = true;
+    while (notwegLaeuft && !stromKam) {
+      const ok = await hole(!erstes);
+      erstes = false;
+      if (!ok) await schlaf(ABFRAGE_TAKT); // nicht in einer Endlosschleife hämmern
+      else if (letzteNummer == null || haeltNichts) await schlaf(takt());
     }
   }
 
   function notwegAuf(grund) {
-    if (abfrageTimer || stromKam) return;
+    if (notwegLaeuft || stromKam) return;
     melde(grund);
-    hole();
-    abfrageTimer = setInterval(hole, takt());
+    notwegLaeuft = true;
+    notwegSchleife();
   }
 
   function notwegZu() {
-    if (!abfrageTimer) return;
-    clearInterval(abfrageTimer);
-    abfrageTimer = null;
+    notwegLaeuft = false;
   }
 
   melde('Verbinde mit dem Spiel …');

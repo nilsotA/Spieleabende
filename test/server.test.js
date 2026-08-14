@@ -2674,3 +2674,95 @@ test('der Notweg macht handlungsfähig, nicht nur sehend', async (t) => {
     'das Handy steht im Team',
   );
 });
+
+/* ------------------------------------------------------------- Warteraum */
+
+test('eine wartende Anfrage bleibt liegen und kommt bei der Änderung sofort', async (t) => {
+  /*
+   * Der Notweg im Takt war ehrlich, aber am Spieltisch spürbar: Die Frage
+   * steht auf der Leinwand, und auf dem Handy passiert eine Sekunde lang
+   * nichts. Gemessen im Browser: 886 ms im Mittel, schlechtester Fall 1185 ms.
+   * Mit dem Warteraum sind es 10 ms – dieselbe Größenordnung wie über den
+   * Ereignisstrom.
+   */
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-warteraum-'));
+  const { proc, base } = await starteServer(9560 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'warte_host');
+  const jetzt = await (await fetch(`${base}/api/state?clientId=warte_handy&role=player`)).json();
+  assert.equal(typeof jetzt.nummer, 'number', 'ohne Nummer kann kein Handy sagen, was es schon hat');
+
+  // Die Anfrage mit `seit` darf nicht sofort antworten …
+  let da = false;
+  const wartend = fetch(`${base}/api/state?clientId=warte_handy&role=player&seit=${jetzt.nummer}`)
+    .then((r) => r.json())
+    .then((d) => { da = true; return d; });
+  await warte(600);
+  assert.equal(da, false, 'ohne Änderung darf die Antwort nicht kommen – sonst fragt das Handy im Kreis');
+
+  // … und bei der ersten Änderung sofort.
+  const los = Date.now();
+  await tu({ type: 'addTeam', name: 'Rot' });
+  const antwort = await wartend;
+  const gedauert = Date.now() - los;
+  assert.ok(antwort.teams.some((team) => team.name === 'Rot'), 'die Änderung muss drinstehen');
+  assert.ok(antwort.nummer > jetzt.nummer, 'und die Nummer weitergezählt sein');
+  assert.ok(gedauert < 400, `die Antwort kam erst nach ${gedauert} ms`);
+});
+
+test('eine wartende Anfrage kommt auch ohne Änderung zurück', async (t) => {
+  // Sonst hinge sie, bis irgendein Vermittler die Geduld verliert – und das
+  // sieht auf dem Handy wieder aus wie ein Strom, der nicht ankommt.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-warteraum2-'));
+  const { proc, base } = await starteServer(
+    9590 + Math.floor(Math.random() * 20),
+    path.join(dir, 's.json'),
+    5,
+    { QUIZDUELL_HALTE_MS: '700' },
+  );
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const jetzt = await (await fetch(`${base}/api/state?clientId=geduld&role=player`)).json();
+  const los = Date.now();
+  const antwort = await (await fetch(`${base}/api/state?clientId=geduld&role=player&seit=${jetzt.nummer}`)).json();
+  const gedauert = Date.now() - los;
+  assert.ok(gedauert >= 600, `zu früh zurück (${gedauert} ms) – dann hält der Warteraum nichts`);
+  assert.ok(gedauert < 5000, `zu spät zurück (${gedauert} ms)`);
+  assert.equal(antwort.nummer, jetzt.nummer, 'unverändert heißt: dieselbe Nummer');
+});
+
+test('wer wartend auflegt, ist sofort weg', async (t) => {
+  // Ohne das stünde auf der Leinwand noch eine halbe Minute ein grüner Punkt
+  // bei jemandem, der das Fenster längst zugemacht hat.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-warteraum3-'));
+  const { proc, base } = await starteServer(9420 + Math.floor(Math.random() * 20), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'weg_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  const team = (await zustand(base)).teams[0].id;
+
+  const start = await (await fetch(`${base}/api/state?clientId=weg_handy&role=player`)).json();
+  await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'joinTeam', clientId: 'weg_handy', teamId: team, name: 'Geht', geheim: start.geheim }),
+  });
+
+  const abbruch = new AbortController();
+  const wartend = fetch(
+    `${base}/api/state?clientId=weg_handy&role=player&seit=${start.nummer + 1}`,
+    { signal: abbruch.signal },
+  ).catch(() => null);
+  await warte(300);
+  abbruch.abort();
+  await wartend;
+
+  for (let i = 0; i < 40; i++) {
+    const m = (await zustand(base)).teams[0].members.find((x) => x.clientId === 'weg_handy');
+    if (m && m.online === false) return; // gut
+    await warte(50);
+  }
+  assert.fail('das Handy gilt immer noch als anwesend');
+});
