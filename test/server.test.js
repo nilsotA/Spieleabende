@@ -2535,8 +2535,15 @@ test('auch die Fernbedienung darf über den Notweg führen – aber nur mit Host
   const handeln = (clientId, extra = {}) => fetch(`${base}/api/action`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Cookie: extra.cookie || '' },
-    body: JSON.stringify({ type: 'addTeam', name: 'Neu', role: 'host', clientId }),
+    body: JSON.stringify({ type: 'addTeam', name: 'Neu', role: 'host', clientId, geheim: extra.geheim }),
   }).then((r) => r.json());
+
+  // Der Notweg gibt den Nachweis für die eigene Kennung mit heraus – ein echter
+  // Client legt ihn weg und schickt ihn ab dann bei jedem Zug mit.
+  const abfrage = async (clientId, keks) => (await (await fetch(
+    `${base}/api/state?clientId=${clientId}&role=host`,
+    { headers: { Cookie: keks } },
+  )).json()).geheim;
 
   // Ohne jede Abfrage: kein Host – auch mit Schlüssel nicht, denn die Rechte
   // hängen daran, dass der Server das Gerät wirklich als Host bedient hat.
@@ -2544,14 +2551,16 @@ test('auch die Fernbedienung darf über den Notweg führen – aber nur mit Host
   assert.equal(ohne.ok, false, 'ohne Abfrage keine Hostrechte');
 
   // Mit Hostschlüssel abgefragt: von da an darf das Gerät führen.
-  await fetch(`${base}/api/state?clientId=fern1&role=host`, { headers: { Cookie: `qd_host=${host}` } });
-  const mit = await handeln('fern1', { cookie: `qd_host=${host}` });
+  const geheimFern = await abfrage('fern1', `qd_host=${host}`);
+  const mit = await handeln('fern1', { cookie: `qd_host=${host}`, geheim: geheimFern });
   assert.equal(mit.ok, true, mit.error || 'mit Hostschlüssel muss die Fernbedienung führen dürfen');
 
-  // Ein Spielerschlüssel öffnet diese Tür nicht, auch nicht mit role=host.
-  await fetch(`${base}/api/state?clientId=gast1&role=host`, { headers: { Cookie: `qd_spiel=${spiel}` } });
-  const gast = await handeln('gast1', { cookie: `qd_spiel=${spiel}` });
+  // Ein Spielerschlüssel öffnet diese Tür nicht, auch nicht mit role=host –
+  // und zwar aus dem richtigen Grund: Der Nachweis stimmt, die Rolle nicht.
+  const geheimGast = await abfrage('gast1', `qd_spiel=${spiel}`);
+  const gast = await handeln('gast1', { cookie: `qd_spiel=${spiel}`, geheim: geheimGast });
   assert.equal(gast.ok, false, 'ein Spielschlüssel darf niemals Hostrechte ergeben');
+  assert.doesNotMatch(gast.error, /gehört jemand anderem/, 'sonst prüft dieser Test den falschen Riegel');
 });
 
 test('der Notweg steht hinter derselben Tür wie alles andere', async (t) => {
@@ -2612,4 +2621,56 @@ test('der Bauzeitpunkt steht in der Auskunft', async (t) => {
 
   const info = await (await fetch(`${base}/api/info`)).json();
   assert.match(info.bau, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, `unbrauchbarer Bauzeitpunkt: ${info.bau}`);
+});
+
+test('der Notweg macht handlungsfähig, nicht nur sehend', async (t) => {
+  /*
+   * Der Bug, den ein Gast am Tisch gefunden hat: Vollständige Teamliste vor
+   * sich, auf „Mitspielen" getippt – roter Kasten, „Dieses Gerät gehört jemand
+   * anderem". Schon das Öffnen des Ereignisstroms legt für die Kennung ein
+   * Geheimnis an; ausgeliefert wird es aber im `hello`, also über genau den
+   * Strom, der nicht ankommt. Das Handy sah alles und durfte nichts.
+   *
+   * Der erste Versuch, das zu prüfen, ging daneben: Im Browser wurde die
+   * Anfrage abgefangen, bevor sie den Server erreichte – dann legt der Server
+   * gar kein Geheimnis an, und alles sah gesund aus. Hier kommt die Anfrage an,
+   * nur die Antwort nicht zurück. Das ist der echte Fall.
+   */
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-notweg-tat-'));
+  const { proc, base } = await starteServer(9620 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'tat_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  const team = (await zustand(base)).teams[0].id;
+
+  // Der Strom wird geöffnet – der Server legt jetzt ein Geheimnis an –, aber
+  // das Handy liest kein einziges Byte daraus.
+  const strom = await fetch(`${base}/api/events?clientId=stummes_handy&role=player`);
+  const leser = strom.body.getReader();
+  t.after(() => leser.cancel().catch(() => {}));
+
+  const beitreten = (geheim) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'joinTeam', clientId: 'stummes_handy', teamId: team, name: 'Stumm', geheim }),
+  }).then((r) => r.json());
+
+  // Ohne Nachweis: abgewiesen. Genau das stand auf dem Handy.
+  const ohne = await beitreten(null);
+  assert.equal(ohne.ok, false);
+  assert.match(ohne.error, /gehört jemand anderem/);
+
+  // Der Notweg liefert den Nachweis mit – sonst bliebe er eine Falle.
+  const sicht = await (await fetch(`${base}/api/state?clientId=stummes_handy&role=player`)).json();
+  assert.ok(sicht.geheim, 'ohne Nachweis darf dieses Handy nichts tun');
+
+  const mit = await beitreten(sicht.geheim);
+  assert.equal(mit.ok, true, mit.error || 'mit Nachweis muss der Beitritt durchgehen');
+
+  const danach = await zustand(base);
+  assert.ok(
+    danach.teams[0].members.some((m) => m.clientId === 'stummes_handy'),
+    'das Handy steht im Team',
+  );
 });

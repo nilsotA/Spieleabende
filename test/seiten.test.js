@@ -189,3 +189,23 @@ test('das zweite Lebenszeichen kommt erst mit dem ersten Spielstand', () => {
     'und die Wache muss danach fragen, sonst ist sie nach 40 ms blind',
   );
 });
+
+test('der Notweg macht handlungsfähig und wird am Buzzer schneller', () => {
+  const quelle = ohneKommentare(lies('common.js'));
+  // Ohne den Nachweis sieht das Handy alles und darf nichts: Schon das Öffnen
+  // des Stroms legt für die Kennung ein Geheimnis an, ausgeliefert wird es aber
+  // nur über genau den Strom, der nicht ankommt.
+  assert.match(
+    quelle,
+    /merkeGeheim\(sicht\.geheim\)/,
+    'ohne diese Zeile prallt jeder Zug mit „Dieses Gerät gehört jemand anderem" ab',
+  );
+  // Und der Takt: Zwischen den Fragen gemächlich, am Buzzer schnell – sonst
+  // verliert jedes Handy im Notweg jeden Wettlauf gegen eine Live-Verbindung.
+  assert.match(quelle, /ABFRAGE_TAKT_HEISS = (\d+)/, 'es braucht einen schnellen Takt');
+  const ruhig = Number(/ABFRAGE_TAKT = (\d+)/.exec(quelle)[1]);
+  const heiss = Number(/ABFRAGE_TAKT_HEISS = (\d+)/.exec(quelle)[1]);
+  assert.ok(heiss < ruhig, `der schnelle Takt (${heiss}) muss kürzer sein als der ruhige (${ruhig})`);
+  assert.ok(heiss <= 500, `${heiss} ms sind am Buzzer zu träge`);
+  assert.match(quelle, /sicht\.phase === 'question'/, 'umgeschaltet wird an der laufenden Frage');
+});

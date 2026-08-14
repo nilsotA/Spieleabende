@@ -984,7 +984,24 @@ async function apiHandler(req, res, url, pathname, rolle) {
       broadcast();
     }
     if (clientId) abfragen.set(clientId, { zeit: Date.now(), isHost });
-    return sendJson(res, 200, sichtFuer({ isHost, clientId }));
+    /*
+     * Der Nachweis muss denselben Weg nehmen können wie der Spielstand.
+     *
+     * Sonst wird der Notweg zur Falle, und zwar auf die gemeinste Art: Schon
+     * das Öffnen des Ereignisstroms legt für diese Kennung ein Geheimnis an –
+     * ausgeliefert wird es aber im `hello`, also über genau den Strom, der beim
+     * Handy nicht ankommt. Das Handy sieht dann alles und darf nichts: Jeder
+     * Zug prallt mit „Dieses Gerät gehört jemand anderem" ab. Am Tisch stand
+     * damit ein Gast vor einer vollständigen Teamliste, tippte auf
+     * „Mitspielen" und bekam einen roten Kasten.
+     *
+     * Neues verrät das nicht: Wer diese Abfrage stellen darf, dürfte auch den
+     * Strom öffnen, und der gibt dasselbe Geheimnis für dieselbe Kennung
+     * heraus. Beide Türen sind dieselbe Tür.
+     */
+    const sicht = sichtFuer({ isHost, clientId });
+    if (clientId) sicht.geheim = geheimnisFuer(clientId);
+    return sendJson(res, 200, sicht);
   }
   if (pathname === '/api/sets' && req.method === 'GET') {
     return sendJson(res, 200, await listSets());

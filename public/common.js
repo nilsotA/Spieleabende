@@ -228,7 +228,16 @@ function setOnline(next) {
    weiß, ob er etwas falsch gemacht hat. Der Notweg kostet nichts, solange der
    Strom lebt: Er macht sofort wieder zu, sobald von dort etwas kommt. */
 const STROM_FRIST = 4000;
+/* Zwei Takte für den Notweg.
+ *
+ * Zwischen den Fragen genügt ein gemächlicher: Es passiert nichts, worauf
+ * jemand in derselben Sekunde reagieren müsste. Während einer Frage ist das
+ * anders – da entscheidet sich am Buzzer ein Wettlauf, und wer die Freigabe
+ * anderthalb Sekunden später sieht, hat schon verloren, bevor er den Daumen
+ * hebt. Vier Zehntel sind kein Gleichstand mit einer Live-Verbindung, aber sie
+ * halten den Abend fair genug, dass niemand es merkt. */
 const ABFRAGE_TAKT = 1500;
+const ABFRAGE_TAKT_HEISS = 400;
 
 /**
  * Was diese Seite über ihre Verbindung weiß – zum Abfotografieren.
@@ -316,6 +325,9 @@ export function connect({ role, onState, onEvent, onStatus }) {
   const id = clientId();
   let stromKam = false; // ist über den Strom je ein Zustand angekommen?
   let abfrageTimer = null;
+  let heiss = false; // läuft gerade eine Frage?
+
+  const takt = () => (heiss ? ABFRAGE_TAKT_HEISS : ABFRAGE_TAKT);
 
   const melde = (text) => {
     try {
@@ -329,6 +341,15 @@ export function connect({ role, onState, onEvent, onStatus }) {
     setOnline(true);
     lageAkte.weg = weg;
     lageAkte.zustaende += 1;
+    // Den Takt an die Lage anpassen, solange abgefragt wird.
+    const jetztHeiss = sicht.phase === 'question';
+    if (jetztHeiss !== heiss) {
+      heiss = jetztHeiss;
+      if (abfrageTimer) {
+        clearInterval(abfrageTimer);
+        abfrageTimer = setInterval(hole, takt());
+      }
+    }
     // Zentral gemerkt, damit weder Host-Screen noch Fernbedienung etwas davon
     // wissen müssen – siehe `lage` weiter oben.
     lage = sicht.lage || null;
@@ -353,8 +374,12 @@ export function connect({ role, onState, onEvent, onStatus }) {
           ? 'Dieser Zugang gilt nicht mehr – bitte den QR-Code neu scannen.'
           : `Das Spiel antwortet mit ${res.status}.`);
       }
-      nimm(await res.json(), 'Notweg (abgeholt)');
-      melde('Notweg: Der Spielstand wird alle 1,5 s abgeholt.');
+      const sicht = await res.json();
+      // Der Nachweis kommt hier mit, weil das `hello` des Stroms nie ankam –
+      // ohne ihn dürfte dieses Handy zuschauen und sonst nichts.
+      merkeGeheim(sicht.geheim);
+      nimm(sicht, 'Notweg (abgeholt)');
+      melde(`Notweg: Der Spielstand wird alle ${(takt() / 1000).toLocaleString('de-DE')} s abgeholt.`);
     } catch {
       setOnline(false);
       lageAkte.letzterFehler = 'Abfrage kam nicht durch';
@@ -366,7 +391,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
     if (abfrageTimer || stromKam) return;
     melde(grund);
     hole();
-    abfrageTimer = setInterval(hole, ABFRAGE_TAKT);
+    abfrageTimer = setInterval(hole, takt());
   }
 
   function notwegZu() {

@@ -232,9 +232,11 @@ Dagegen stehen jetzt vier Dinge, ohne dass jemand etwas tun muss:
   wird alle 1,5 s abgeholt.“ oder der genaue Grund einer Abweisung. Diese Zeile
   ist nie leer.
 * Bleibt die Verbindung vier Sekunden stumm, **holt sich das Handy den
-  Spielstand selbst ab** – jede anderthalb Sekunden. Das Spiel läuft dann
-  vollständig weiter, nur eine Idee träger. Kommt die Live-Verbindung später
-  doch zustande, schaltet es von selbst zurück.
+  Spielstand selbst ab** – zwischen den Fragen jede anderthalb Sekunden,
+  während einer Frage alle vier Zehntel, damit am Buzzer niemand benachteiligt
+  ist. Das Spiel läuft dann vollständig weiter: beitreten, wählen, buzzern,
+  gewertet werden. Kommt die Live-Verbindung später doch zustande, schaltet es
+  von selbst zurück.
 * Auch die Fernbedienung darf auf diesem Weg führen – sonst stünde sie am
   Tunnel da, sähe alles und dürfte nichts.
 * Kommt nach zwölf Sekunden immer noch kein Spielstand, sagt die Seite das
