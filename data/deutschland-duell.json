@@ -14,15 +14,18 @@
             },
             {
               "text": "Welche Stadt hat das Kennzeichen M?",
-              "answer": "München"
+              "answer": "München",
+              "note": "Ein Buchstabe bekamen nur die größten Städte: B, M, K, F, S, H."
             },
             {
               "text": "Welche Stadt hat das Kennzeichen KI?",
-              "answer": "Kiel"
+              "answer": "Kiel",
+              "note": "Nicht zu verwechseln mit KL – das ist Kaiserslautern."
             },
             {
               "text": "Welche Stadt hat das Kennzeichen HRO?",
-              "answer": "Rostock"
+              "answer": "Rostock",
+              "note": "Drei Buchstaben heißt in der Regel: kein Stadtkreis der ersten Reihe. HRO steht für Hansestadt Rostock."
             }
           ]
         },
@@ -31,19 +34,23 @@
           "questions": [
             {
               "text": "Wie viele Bundesländer hat Deutschland?",
-              "answer": "16"
+              "answer": "16",
+              "note": "Elf im Westen, fünf im Osten – seit 1990, als die DDR-Bezirke wieder zu Ländern wurden."
             },
             {
               "text": "Wie heißt die Hauptstadt von Nordrhein-Westfalen?",
-              "answer": "Düsseldorf"
+              "answer": "Düsseldorf",
+              "note": "Nicht Köln, obwohl das größer ist – ein Streit, den man in beiden Städten gern führt."
             },
             {
               "text": "Welches Bundesland ist flächenmäßig das größte?",
-              "answer": "Bayern"
+              "answer": "Bayern",
+              "note": "Rund ein Fünftel der Fläche Deutschlands. Nach Einwohnern liegt Nordrhein-Westfalen vorn."
             },
             {
               "text": "Welches Bundesland ist flächenmäßig das kleinste?",
-              "answer": "Bremen"
+              "answer": "Bremen",
+              "note": "Es besteht aus zwei getrennten Teilen: der Stadt Bremen und Bremerhaven, 60 Kilometer entfernt."
             }
           ]
         },
@@ -52,19 +59,23 @@
           "questions": [
             {
               "text": "Wie heißt der höchste Berg Deutschlands?",
-              "answer": "Die Zugspitze"
+              "answer": "Die Zugspitze",
+              "note": "2962 Meter. Der Gipfel liegt genau auf der Grenze zu Österreich."
             },
             {
               "text": "Welcher Fluss fließt durch Köln?",
-              "answer": "Der Rhein"
+              "answer": "Der Rhein",
+              "note": "Der Dom steht keine hundert Meter vom Ufer – deshalb kommt bei Hochwasser die Altstadt zuerst dran."
             },
             {
               "text": "Welcher Fluss fließt durch Dresden?",
-              "answer": "Die Elbe"
+              "answer": "Die Elbe",
+              "note": "Sie kommt aus Tschechien und mündet bei Cuxhaven in die Nordsee."
             },
             {
               "text": "Welcher Fluss bildet einen Teil der Grenze zu Polen?",
-              "answer": "Die Oder"
+              "answer": "Die Oder",
+              "note": "Zusammen mit der Neiße – daher der Name Oder-Neiße-Linie."
             }
           ]
         },
@@ -73,19 +84,23 @@
           "questions": [
             {
               "text": "Welche Automarke baut den Golf?",
-              "answer": "Volkswagen"
+              "answer": "Volkswagen",
+              "note": "Seit 1974 und in acht Generationen – eines der meistgebauten Autos der Welt."
             },
             {
               "text": "Welche deutsche Firma ist für Gummibärchen bekannt?",
-              "answer": "Haribo"
+              "answer": "Haribo",
+              "note": "Der Name ist ein Kürzel: Hans Riegel, Bonn."
             },
             {
               "text": "Welcher Sportartikelhersteller mit drei Streifen sitzt in Herzogenaurach?",
-              "answer": "Adidas"
+              "answer": "Adidas",
+              "note": "Auch der Name ist ein Kürzel: Adi Dassler. Sein Bruder Rudolf gründete gegenüber Puma."
             },
             {
               "text": "Welche Firma stellt die Küchenmaschine Thermomix her?",
-              "answer": "Vorwerk"
+              "answer": "Vorwerk",
+              "note": "Verkauft wird er bis heute fast nur an der Haustür, nicht im Handel."
             }
           ]
         },
@@ -94,15 +109,18 @@
           "questions": [
             {
               "text": "Aus welchem Bundesland kommt die Weißwurst?",
-              "answer": "Aus Bayern"
+              "answer": "Aus Bayern",
+              "note": "Eine alte Regel sagt, sie dürfe das Zwölfuhrläuten nicht mehr hören – aus der Zeit ohne Kühlung."
             },
             {
               "text": "Aus welchem Gemüse wird Sauerkraut gemacht?",
-              "answer": "Aus Weißkohl"
+              "answer": "Aus Weißkohl",
+              "note": "Gesäuert wird er von Milchsäurebakterien. Auf langen Seereisen war er das Mittel gegen Skorbut."
             },
             {
               "text": "Welche Stadt ist für ihren Lebkuchen berühmt?",
-              "answer": "Nürnberg"
+              "answer": "Nürnberg",
+              "note": "Die „Elisenlebkuchen“ dürfen höchstens ein Zehntel Mehl enthalten – sonst heißen sie anders."
             },
             {
               "text": "Welche Zutaten erlaubt das Reinheitsgebot für Bier?",
@@ -116,19 +134,23 @@
           "questions": [
             {
               "text": "Wie heißt die Nachrichtensendung der ARD um 20 Uhr?",
-              "answer": "Tagesschau"
+              "answer": "Tagesschau",
+              "note": "Seit 1952 – die älteste noch laufende Nachrichtensendung im deutschen Fernsehen."
             },
             {
               "text": "Welche Krimireihe läuft sonntags um 20:15 Uhr?",
-              "answer": "Tatort"
+              "answer": "Tatort",
+              "note": "Jede Anstalt liefert eigene Teams zu. Der Vorspann mit dem Fadenkreuz ist seit 1970 fast unverändert."
             },
             {
               "text": "Welche deutsche Sängerin hatte den Welthit „99 Luftballons“?",
-              "answer": "Nena"
+              "answer": "Nena",
+              "note": "Auch die englische Fassung lief in den USA – und trotzdem schaffte es die deutsche Urfassung in die Charts."
             },
             {
               "text": "Wie heißt die Sesamstraßen-Figur, die in einer Mülltonne wohnt?",
-              "answer": "Oscar"
+              "answer": "Oscar",
+              "note": "Im Original heißt er Oscar the Grouch – auf Deutsch schlicht Oscar."
             }
           ]
         }
@@ -141,19 +163,23 @@
           "questions": [
             {
               "text": "Dieses Tor in Berlin war das Wahrzeichen der geteilten Stadt.",
-              "answer": "Was ist das Brandenburger Tor?"
+              "answer": "Was ist das Brandenburger Tor?",
+              "note": "Die Quadriga oben drauf war zeitweise in Paris: Napoleon ließ sie abtransportieren."
             },
             {
               "text": "Dieses Fest in München gilt als größtes Volksfest der Welt.",
-              "answer": "Was ist das Oktoberfest?"
+              "answer": "Was ist das Oktoberfest?",
+              "note": "Es beginnt im September, weil es abends dann noch wärmer ist."
             },
             {
               "text": "Diese Kathedrale mit zwei Türmen steht direkt am Hauptbahnhof einer Millionenstadt am Rhein.",
-              "answer": "Was ist der Kölner Dom?"
+              "answer": "Was ist der Kölner Dom?",
+              "note": "Gebaut wurde von 1248 bis 1880 – mit über 300 Jahren Pause dazwischen."
             },
             {
               "text": "Dieser Bundeskanzler wird „Kanzler der Einheit“ genannt.",
-              "answer": "Wer ist Helmut Kohl?"
+              "answer": "Wer ist Helmut Kohl?",
+              "note": "Sechzehn Jahre im Amt – länger als jeder andere Bundeskanzler."
             }
           ]
         },
@@ -162,19 +188,23 @@
           "questions": [
             {
               "text": "Wofür stand die Abkürzung DDR?",
-              "answer": "Deutsche Demokratische Republik"
+              "answer": "Deutsche Demokratische Republik",
+              "note": "Gegründet im Oktober 1949, ein halbes Jahr nach der Bundesrepublik."
             },
             {
               "text": "Wer war der erste Bundeskanzler der Bundesrepublik?",
-              "answer": "Konrad Adenauer"
+              "answer": "Konrad Adenauer",
+              "note": "Er trat mit 73 an und blieb vierzehn Jahre – gewählt wurde er beim ersten Mal mit einer Stimme Mehrheit: seiner eigenen."
             },
             {
               "text": "In welchem Jahr wurde die Berliner Mauer gebaut?",
-              "answer": "1961"
+              "answer": "1961",
+              "note": "Gebaut wurde in einer einzigen Nacht, vom 12. auf den 13. August."
             },
             {
               "text": "In welchem Jahr wurde das Deutsche Kaiserreich gegründet?",
-              "answer": "1871"
+              "answer": "1871",
+              "note": "Ausgerufen im Spiegelsaal von Versailles – nicht in Berlin."
             }
           ]
         },
@@ -183,19 +213,23 @@
           "questions": [
             {
               "text": "In welcher Stadt steht der größte Flughafen Deutschlands?",
-              "answer": "In Frankfurt am Main"
+              "answer": "In Frankfurt am Main",
+              "note": "Rund 60 Millionen Passagiere im Jahr. Der zweitgrößte ist München."
             },
             {
               "text": "Welche Stadt war von 1949 bis 1990 Hauptstadt der Bundesrepublik?",
-              "answer": "Bonn"
+              "answer": "Bonn",
+              "note": "Als „Provisorium“ gedacht – daraus wurden 41 Jahre."
             },
             {
               "text": "Welche Stadt wird „Elbflorenz“ genannt?",
-              "answer": "Dresden"
+              "answer": "Dresden",
+              "note": "Der Name stammt aus dem 18. Jahrhundert und meint die Barockbauten an der Elbe."
             },
             {
               "text": "Welche Stadt hat den größten Binnenhafen Deutschlands?",
-              "answer": "Duisburg"
+              "answer": "Duisburg",
+              "note": "Der größte Binnenhafen der Welt – rund 20 Kilometer Kaimauer, wo Rhein und Ruhr zusammenkommen."
             }
           ]
         },
@@ -204,15 +238,18 @@
           "questions": [
             {
               "text": "Wer erfand den Buchdruck mit beweglichen Lettern?",
-              "answer": "Johannes Gutenberg"
+              "answer": "Johannes Gutenberg",
+              "note": "Um 1450 in Mainz. Seine Bibel gilt als das erste in Serie gedruckte Buch Europas."
             },
             {
               "text": "Welches Fahrzeug baute Carl Benz als Erster?",
-              "answer": "Das Automobil"
+              "answer": "Das Automobil",
+              "note": "1886, mit drei Rädern. Die erste Fernfahrt machte seine Frau Bertha – ohne sein Wissen."
             },
             {
               "text": "Wer entdeckte die Röntgenstrahlen?",
-              "answer": "Wilhelm Conrad Röntgen"
+              "answer": "Wilhelm Conrad Röntgen",
+              "note": "1895, durch Zufall. Er verzichtete auf ein Patent – die Entdeckung sollte allen gehören."
             },
             {
               "text": "Welches deutsche Institut war maßgeblich an der Entwicklung von MP3 beteiligt?",
@@ -226,19 +263,23 @@
           "questions": [
             {
               "text": "Wie geht es weiter? „Der Apfel fällt nicht weit …“",
-              "answer": "… vom Stamm"
+              "answer": "… vom Stamm",
+              "note": "Gemeint sind Kinder, die ihren Eltern ähneln – meist gesagt, wenn es keine Freude ist."
             },
             {
               "text": "Wie geht es weiter? „Morgenstund hat …“",
-              "answer": "… Gold im Mund"
+              "answer": "… Gold im Mund",
+              "note": "Vermutlich eine Übersetzung aus dem Lateinischen: „aurora habet aurum in ore“."
             },
             {
               "text": "Wie geht es weiter? „Wer anderen eine Grube gräbt, …“",
-              "answer": "… fällt selbst hinein"
+              "answer": "… fällt selbst hinein",
+              "note": "Der Satz steht schon in der Bibel, im Buch der Sprüche."
             },
             {
               "text": "Wie geht es weiter? „Was Hänschen nicht lernt, …“",
-              "answer": "… lernt Hans nimmermehr"
+              "answer": "… lernt Hans nimmermehr",
+              "note": "Stimmt so nicht: Lernen geht bis ins hohe Alter, nur langsamer."
             }
           ]
         },
@@ -247,15 +288,18 @@
           "questions": [
             {
               "text": "Wo in Deutschland grüßt man mit „Moin“?",
-              "answer": "Im Norden"
+              "answer": "Im Norden",
+              "note": "Es ist keine Abkürzung von „Guten Morgen“ – gesagt wird es zu jeder Tageszeit."
             },
             {
               "text": "Was bedeutet das bayerische „Servus“?",
-              "answer": "Hallo – und auch Tschüss"
+              "answer": "Hallo – und auch Tschüss",
+              "note": "Von lateinisch „servus“, der Sklave: „Ich bin dein Diener.“"
             },
             {
               "text": "Was ist im Schwäbischen ein „Fleischkäs“?",
-              "answer": "Leberkäse"
+              "answer": "Leberkäse",
+              "note": "Weder Leber noch Käse sind drin. Der Name kommt vermutlich von „Laib“."
             },
             {
               "text": "Was heißt „Et hätt noch immer jot jejange“?",

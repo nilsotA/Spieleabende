@@ -14,15 +14,18 @@
             },
             {
               "text": "Welcher Film?\n🦁 👑",
-              "answer": "Der König der Löwen"
+              "answer": "Der König der Löwen",
+              "note": "Die Namen sind Suaheli: Simba heißt Löwe, Rafiki Freund, Pumbaa Dummkopf."
             },
             {
               "text": "Welcher Film?\n🐠 🔎",
-              "answer": "Findet Nemo"
+              "answer": "Findet Nemo",
+              "note": "Nemo ist Latein für „niemand“."
             },
             {
               "text": "Welche Filmreihe?\n🧙‍♂️ 💍 🌋",
-              "answer": "Der Herr der Ringe"
+              "answer": "Der Herr der Ringe",
+              "note": "Gedreht wurde alles auf einmal – die drei Filme entstanden in einem Rutsch in Neuseeland."
             }
           ]
         },
@@ -31,7 +34,8 @@
           "questions": [
             {
               "text": "Aus welcher Filmreihe stammt „Ich bin dein Vater“?",
-              "answer": "Star Wars"
+              "answer": "Star Wars",
+              "note": "Im Original heißt es nicht „Luke, ich bin dein Vater“, sondern „Nein, ich bin dein Vater“."
             },
             {
               "text": "In welcher Filmreihe wird der Martini „geschüttelt, nicht gerührt“ bestellt?",
@@ -40,11 +44,13 @@
             },
             {
               "text": "In welchem Film heißt es „Das Leben ist wie eine Schachtel Pralinen“?",
-              "answer": "Forrest Gump"
+              "answer": "Forrest Gump",
+              "note": "Der Satz stammt von seiner Mutter – im Film sagt er ihn auf einer Parkbank in Savannah."
             },
             {
               "text": "Aus welchem Film stammt „Ich mache ihm ein Angebot, das er nicht ablehnen kann“?",
-              "answer": "Der Pate"
+              "answer": "Der Pate",
+              "note": "„Ein Angebot, das er nicht ablehnen kann“ – im Original der meistzitierte Satz der Filmgeschichte."
             }
           ]
         },
@@ -53,19 +59,23 @@
           "questions": [
             {
               "text": "Welche Fast-Food-Kette wirbt mit „Ich liebe es“?",
-              "answer": "McDonald’s"
+              "answer": "McDonald’s",
+              "note": "Seit 2003 weltweit derselbe Spruch, nur übersetzt – im Original „I’m lovin’ it“."
             },
             {
               "text": "Welche Schokolade ist „Quadratisch. Praktisch. Gut.“?",
-              "answer": "Ritter Sport"
+              "answer": "Ritter Sport",
+              "note": "Die quadratische Form kam 1932: Die Tafel sollte in jede Sportjackentasche passen, ohne zu brechen."
             },
             {
               "text": "Welches Möbelhaus fragt „Wohnst du noch oder lebst du schon?“",
-              "answer": "IKEA"
+              "answer": "IKEA",
+              "note": "Der Spruch ist nur im deutschsprachigen Raum bekannt – anderswo wirbt die Kette ganz anders."
             },
             {
               "text": "Welche Automarke warb mit „Nichts ist unmöglich“?",
-              "answer": "Toyota"
+              "answer": "Toyota",
+              "note": "Der Spruch lief in Deutschland ab den 1980ern und wurde zur Redewendung – die Marke dahinter kennen die wenigsten."
             }
           ]
         },
@@ -74,11 +84,13 @@
           "questions": [
             {
               "text": "In welchem Land spielt die Serie „Squid Game“?",
-              "answer": "In Südkorea"
+              "answer": "In Südkorea",
+              "note": "Die Spiele sind koreanische Kinderspiele. Das titelgebende „Squid Game“ heißt auf Deutsch Tintenfischspiel."
             },
             {
               "text": "Wie heißt das Café, in dem die „Friends“ ständig sitzen?",
-              "answer": "Central Perk"
+              "answer": "Central Perk",
+              "note": "Ein Wortspiel mit dem Central Park – gedreht wurde in einem Studio in Kalifornien."
             },
             {
               "text": "Wie heißt der Chemielehrer aus „Breaking Bad“ mit Nachnamen?",
@@ -87,7 +99,8 @@
             },
             {
               "text": "Wie heißt die Kleinstadt, in der „Stranger Things“ spielt?",
-              "answer": "Hawkins"
+              "answer": "Hawkins",
+              "note": "Die Serie spielt in den 1980ern in Indiana; gedreht wurde in Georgia."
             }
           ]
         },
@@ -96,19 +109,23 @@
           "questions": [
             {
               "text": "Welcher Sänger wird „King of Pop“ genannt?",
-              "answer": "Michael Jackson"
+              "answer": "Michael Jackson",
+              "note": "„Thriller“ von 1982 ist bis heute das meistverkaufte Album der Welt."
             },
             {
               "text": "Welche Band sang „Bohemian Rhapsody“?",
-              "answer": "Queen"
+              "answer": "Queen",
+              "note": "Sechs Minuten ohne Refrain – die Plattenfirma hielt das für unspielbar im Radio."
             },
             {
               "text": "Welche schwedische Band gewann 1974 den Grand Prix mit „Waterloo“?",
-              "answer": "ABBA"
+              "answer": "ABBA",
+              "note": "Der Auftritt in Brighton war der Beginn einer Weltkarriere; vorher kannte die Band kaum jemand."
             },
             {
               "text": "Auf welchem Beatles-Album ist der berühmte Zebrastreifen abgebildet?",
-              "answer": "Abbey Road"
+              "answer": "Abbey Road",
+              "note": "Aufgenommen 1969 – als letztes gemeinsames Album der Band, obwohl „Let It Be“ später erschien."
             }
           ]
         },
@@ -117,15 +134,18 @@
           "questions": [
             {
               "text": "In welchem Spiel löst man Reihen aus fallenden Klötzchen auf?",
-              "answer": "Tetris"
+              "answer": "Tetris",
+              "note": "Erfunden 1984 in Moskau von Alexei Paschitnow. Der Name mischt „Tetra“ mit „Tennis“."
             },
             {
               "text": "Wie heißt Nintendos Klempner mit der roten Mütze?",
-              "answer": "Mario"
+              "answer": "Mario",
+              "note": "Anfangs hieß er schlicht „Jumpman“. Die Mütze gab es, weil Haare in der damaligen Auflösung nicht darstellbar waren."
             },
             {
               "text": "Welches Tier ist Segas Maskottchen Sonic?",
-              "answer": "Ein Igel"
+              "answer": "Ein Igel",
+              "note": "Blau, weil das zur Hausfarbe von Sega passte – und schnell, weil Sega etwas gegen Mario brauchte."
             },
             {
               "text": "Womit verdiente Nintendo sein Geld, bevor es Videospiele machte?",
@@ -143,19 +163,23 @@
           "questions": [
             {
               "text": "Dieser Physiker formulierte die Relativitätstheorie.",
-              "answer": "Wer ist Albert Einstein?"
+              "answer": "Wer ist Albert Einstein?",
+              "note": "Den Nobelpreis bekam er nicht dafür, sondern für die Erklärung des photoelektrischen Effekts."
             },
             {
               "text": "Dieses Land schenkte den USA die Freiheitsstatue.",
-              "answer": "Was ist Frankreich?"
+              "answer": "Was ist Frankreich?",
+              "note": "Sie kam 1885 in 214 Kisten zerlegt über den Atlantik."
             },
             {
               "text": "Dieses Getränk entsteht aus Wasser, Hopfen, Malz und Hefe.",
-              "answer": "Was ist Bier?"
+              "answer": "Was ist Bier?",
+              "note": "Die Hefe fehlt im Reinheitsgebot von 1516 – man kannte sie damals noch nicht."
             },
             {
               "text": "Dieser Planet ist der Sonne am nächsten.",
-              "answer": "Was ist Merkur?"
+              "answer": "Was ist Merkur?",
+              "note": "Trotzdem ist er nicht der heißeste Planet: Die Venus hat eine dichte Atmosphäre, er gar keine."
             }
           ]
         },
@@ -164,19 +188,23 @@
           "questions": [
             {
               "text": "Wofür steht „PDF“?",
-              "answer": "Portable Document Format"
+              "answer": "Portable Document Format",
+              "note": "1993 von Adobe entwickelt – damit ein Dokument überall gleich aussieht, egal auf welchem Gerät."
             },
             {
               "text": "Wofür steht „DIY“?",
-              "answer": "Do it yourself"
+              "answer": "Do it yourself",
+              "note": "Der Begriff kam in den 1950ern auf, als Heimwerken zum Hobby wurde."
             },
             {
               "text": "Wofür steht „ASAP“?",
-              "answer": "As soon as possible"
+              "answer": "As soon as possible",
+              "note": "Wörtlich „so bald wie möglich“ – im Büroalltag meist: sofort."
             },
             {
               "text": "Wofür steht die Bilddatei-Endung „GIF“?",
-              "answer": "Graphics Interchange Format"
+              "answer": "Graphics Interchange Format",
+              "note": "Von 1987 und eigentlich längst überholt – überlebt hat es wegen der Endlosschleife."
             }
           ]
         },
@@ -185,19 +213,23 @@
           "questions": [
             {
               "text": "Welcher Konzern hat einen angebissenen Apfel im Logo?",
-              "answer": "Apple"
+              "answer": "Apple",
+              "note": "Der Biss ist da, damit man den Apfel nicht für eine Kirsche hält."
             },
             {
               "text": "Welche Kaffeehauskette hat eine grüne Meerjungfrau im Logo?",
-              "answer": "Starbucks"
+              "answer": "Starbucks",
+              "note": "Es ist eine Sirene aus der griechischen Sage – zweischwänzig, im Logo inzwischen stark beschnitten."
             },
             {
               "text": "Welcher Softwarekonzern hat vier farbige Quadrate im Logo?",
-              "answer": "Microsoft"
+              "answer": "Microsoft",
+              "note": "Die vier Farben stehen für die Produktfamilien: Windows, Office, Xbox und Bing."
             },
             {
               "text": "Welches Tier ziert das Logo von Lacoste?",
-              "answer": "Ein Krokodil"
+              "answer": "Ein Krokodil",
+              "note": "Der Spitzname des Gründers, Tennisspieler René Lacoste – wegen einer Wette um einen Krokodilledergepäckkoffer."
             }
           ]
         },
@@ -206,19 +238,23 @@
           "questions": [
             {
               "text": "Welches Zeichen leitet einen Hashtag ein?",
-              "answer": "Die Raute #"
+              "answer": "Die Raute #",
+              "note": "Im Deutschen heißt das Zeichen Raute, im Englischen hash – daher das Wort."
             },
             {
               "text": "Welches Videoportal kaufte Google im Jahr 2006?",
-              "answer": "YouTube"
+              "answer": "YouTube",
+              "note": "Für 1,65 Milliarden Dollar – damals hielten viele das für viel zu teuer."
             },
             {
               "text": "In welchem Jahr ging Wikipedia online?",
-              "answer": "2001"
+              "answer": "2001",
+              "note": "Der Name ist ein Wortspiel aus dem hawaiischen „wiki wiki“ – schnell – und Enzyklopädie."
             },
             {
               "text": "Wie hieß die Suchmaschine von Larry Page und Sergey Brin, bevor sie Google hieß?",
-              "answer": "BackRub"
+              "answer": "BackRub",
+              "note": "Der Name kam von den „Backlinks“, die das Programm auswertete. Umbenannt wurde es 1997."
             }
           ]
         },
@@ -227,19 +263,23 @@
           "questions": [
             {
               "text": "Welches Tier ist an Land das schnellste?",
-              "answer": "Der Gepard"
+              "answer": "Der Gepard",
+              "note": "Über 100 km/h – aber nur für rund 400 Meter, dann droht die Überhitzung."
             },
             {
               "text": "Welches ist das größte Tier der Erde?",
-              "answer": "Der Blauwal"
+              "answer": "Der Blauwal",
+              "note": "Sein Herz wiegt so viel wie ein Kleinwagen, sein Ruf ist über Hunderte Kilometer zu hören."
             },
             {
               "text": "Wie viele Herzen hat ein Oktopus?",
-              "answer": "Drei"
+              "answer": "Drei",
+              "note": "Zwei pumpen durch die Kiemen, eines durch den Körper – und sein Blut ist blau."
             },
             {
               "text": "Welches Landtier trägt am längsten, nämlich rund 22 Monate?",
-              "answer": "Der Elefant"
+              "answer": "Der Elefant",
+              "note": "Fast zwei Jahre. Das Kalb wiegt bei der Geburt schon rund 100 Kilo."
             }
           ]
         },
@@ -248,19 +288,23 @@
           "questions": [
             {
               "text": "In welchem Jahr kam der erste „Star Wars“-Film ins Kino?",
-              "answer": "1977"
+              "answer": "1977",
+              "note": "Damals hieß er schlicht „Krieg der Sterne“ – die Nummerierung kam erst später dazu."
             },
             {
               "text": "In welchem Jahr kam das erste iPhone auf den Markt?",
-              "answer": "2007"
+              "answer": "2007",
+              "note": "Vorgestellt von Steve Jobs als drei Geräte in einem: Telefon, iPod und Internetgerät."
             },
             {
               "text": "In welchem Jahr lief die erste Folge der „Simpsons“ im US-Fernsehen?",
-              "answer": "1989"
+              "answer": "1989",
+              "note": "Als Weihnachtsfolge. Die Familie gab es aber schon seit 1987 als Kurzfilme in einer anderen Show."
             },
             {
               "text": "In welchem Jahr trennten sich die Beatles?",
-              "answer": "1970"
+              "answer": "1970",
+              "note": "Offiziell durch Paul McCartneys Ankündigung im April – gestritten wurde danach noch jahrelang."
             }
           ]
         }

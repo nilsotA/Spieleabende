@@ -9,19 +9,23 @@
           "questions": [
             {
               "text": "In welchem Fach lernt man Molekülformeln und das Periodensystem?",
-              "answer": "Chemie"
+              "answer": "Chemie",
+              "note": "Der Name kommt aus dem Arabischen: „al-kimiya“."
             },
             {
               "text": "In welchem Fach lernt man über Ströme, Kräfte und Wellen?",
-              "answer": "Physik"
+              "answer": "Physik",
+              "note": "Griechisch für „Naturkunde“ – bis ins 19. Jahrhundert hieß das Fach bei uns schlicht Naturlehre."
             },
             {
               "text": "Welches Fach beschäftigt sich mit Karten, Klima und Ländern?",
-              "answer": "Erdkunde"
+              "answer": "Erdkunde",
+              "note": "Früher hieß es Geographie – „Erdbeschreibung“."
             },
             {
               "text": "Wie heißt das Fach, in dem es um Staat, Recht und Gesellschaft geht?",
-              "answer": "Politik oder Sozialkunde"
+              "answer": "Politik oder Sozialkunde",
+              "note": "In manchen Bundesländern heißt es Gemeinschaftskunde, in anderen Politik-Wirtschaft. Gemeint ist dasselbe."
             }
           ]
         },
@@ -35,15 +39,18 @@
             },
             {
               "text": "Was heißt „curriculum“ auf Deutsch?",
-              "answer": "Lauf oder Umlauf"
+              "answer": "Lauf oder Umlauf",
+              "note": "Daher auch der Lebenslauf: „curriculum vitae“, der Lauf des Lebens."
             },
             {
               "text": "Woher kommt das Wort „Klasse“ und was bedeutete es bei den Römern?",
-              "answer": "Eine Abteilung der Bürgerschaft"
+              "answer": "Eine Abteilung der Bürgerschaft",
+              "note": "„Classis“ war die Vermögensklasse der römischen Bürger – ein Ordnungsbegriff, kein Schulbegriff."
             },
             {
               "text": "Was bedeutet „Gymnasium“ im Ursprung, dem Griechischen?",
-              "answer": "Ort für Leibesübungen"
+              "answer": "Ort für Leibesübungen",
+              "note": "„Gymnos“ heißt nackt: Geturnt wurde ohne Kleidung."
             }
           ]
         },
@@ -52,19 +59,23 @@
           "questions": [
             {
               "text": "Welche Schulnote ist in Deutschland die beste?",
-              "answer": "Die 1"
+              "answer": "Die 1",
+              "note": "Die Skala läuft andersherum als in vielen Ländern – in den USA ist A die beste Note, in Frankreich die 20."
             },
             {
               "text": "Welchen Notenschnitt hat ein Abitur mit der Bestnote?",
-              "answer": "1,0"
+              "answer": "1,0",
+              "note": "Ein Komma steht dahinter, weil der Schnitt aus vielen Einzelnoten entsteht."
             },
             {
               "text": "Ab welcher Schulnote gilt eine Arbeit als nicht mehr ausreichend?",
-              "answer": "Ab der 5"
+              "answer": "Ab der 5",
+              "note": "Ausreichend ist die 4 – die 5 heißt mangelhaft."
             },
             {
               "text": "Wie viele Punkte kann man in der Oberstufe für einen Kurs höchstens bekommen?",
-              "answer": "15"
+              "answer": "15",
+              "note": "15 Punkte entsprechen einer glatten 1+; 0 Punkte einer 6."
             }
           ]
         },
@@ -73,19 +84,23 @@
           "questions": [
             {
               "text": "Welches Signal beendet in vielen Schulen die Pause?",
-              "answer": "Die Klingel"
+              "answer": "Die Klingel",
+              "note": "In manchen Schulen ersetzt heute ein Gong oder eine Melodie das Klingeln."
             },
             {
               "text": "Wie nennt man den Dienst, bei dem eine Lehrkraft in der Pause auf dem Hof aufpasst?",
-              "answer": "Die Pausenaufsicht"
+              "answer": "Die Pausenaufsicht",
+              "note": "Rechtlich ist sie Aufsichtspflicht: Was auf dem Hof passiert, fällt in die Verantwortung der Schule."
             },
             {
               "text": "Bei welchem Kreisspiel läuft einer außen herum und lässt ein Tuch hinter jemandem fallen?",
-              "answer": "Der Plumpsack"
+              "answer": "Der Plumpsack",
+              "note": "Das Lied dazu kennt fast jeder: „Dreh dich nicht um, der Plumpsack geht um.“"
             },
             {
               "text": "Wie heißt das Fangspiel, bei dem Gefangene erstarren, bis jemand sie befreit?",
-              "answer": "Versteinern"
+              "answer": "Versteinern",
+              "note": "Andernorts heißt es Einfrieren oder Kettenfangen – Regeln und Namen wechseln von Schulhof zu Schulhof."
             }
           ]
         },
@@ -94,15 +109,18 @@
           "questions": [
             {
               "text": "Wie heißt an der Uni die Veranstaltung, in der man selbst vorträgt statt nur zuzuhören?",
-              "answer": "Das Seminar"
+              "answer": "Das Seminar",
+              "note": "Vom lateinischen „serere“, säen. Gesät wird hier die eigene Arbeit statt der Vortrag von vorn."
             },
             {
               "text": "Wofür steht die Abkürzung „WS“ im Vorlesungsverzeichnis?",
-              "answer": "Wintersemester"
+              "answer": "Wintersemester",
+              "note": "Das Gegenstück ist SS, das Sommersemester. Dazwischen liegen die vorlesungsfreien Zeiten."
             },
             {
               "text": "Wie heißt die höchste Auszeichnung einer Doktorarbeit?",
-              "answer": "Summa cum laude"
+              "answer": "Summa cum laude",
+              "note": "Darunter folgen magna cum laude, cum laude und rite."
             },
             {
               "text": "Wofür steht „c.t.“ in einer Vorlesungsankündigung?",
@@ -116,19 +134,23 @@
           "questions": [
             {
               "text": "Welcher Grieche unterrichtete Platon und musste den Schierlingsbecher trinken?",
-              "answer": "Sokrates"
+              "answer": "Sokrates",
+              "note": "Geschrieben hat er nichts. Alles, was wir von ihm wissen, stammt von seinen Schülern."
             },
             {
               "text": "Wer war der Lehrer Alexanders des Großen?",
-              "answer": "Aristoteles"
+              "answer": "Aristoteles",
+              "note": "Er unterrichtete den jungen Alexander drei Jahre lang – vermutlich in Mieza in Makedonien."
             },
             {
               "text": "Welche italienische Ärztin entwickelte eine bis heute verbreitete Pädagogik?",
-              "answer": "Maria Montessori"
+              "answer": "Maria Montessori",
+              "note": "Sie durfte in Italien zunächst nicht Medizin studieren und setzte die Zulassung durch."
             },
             {
               "text": "Welcher Pädagoge gründete 1840 den ersten Kindergarten?",
-              "answer": "Friedrich Fröbel"
+              "answer": "Friedrich Fröbel",
+              "note": "Das Wort „Kindergarten“ ist von ihm – und wanderte unübersetzt in viele Sprachen."
             }
           ]
         }
@@ -141,19 +163,23 @@
           "questions": [
             {
               "text": "Wer entscheidet in Deutschland über Lehrpläne – Bund oder Länder?",
-              "answer": "Die Länder"
+              "answer": "Die Länder",
+              "note": "Deshalb unterscheiden sich Ferien, Lehrpläne und sogar die Namen der Schulformen von Land zu Land."
             },
             {
               "text": "Wie viele Schuljahre umfasst die Grundschule in den meisten Bundesländern?",
-              "answer": "4"
+              "answer": "4",
+              "note": "In Berlin und Brandenburg sind es sechs Jahre."
             },
             {
               "text": "Wie heißt die Schulform, die Haupt-, Real- und Gymnasialzweig unter einem Dach vereint?",
-              "answer": "Die Gesamtschule"
+              "answer": "Die Gesamtschule",
+              "note": "Sie entstand in den 1970er-Jahren als Gegenentwurf zum dreigliedrigen System."
             },
             {
               "text": "Wie nennt man die Zeit, in der angehende Lehrkräfte nach dem Studium an einer Schule arbeiten?",
-              "answer": "Das Referendariat"
+              "answer": "Das Referendariat",
+              "note": "Es dauert je nach Land ein bis zwei Jahre und endet mit dem Zweiten Staatsexamen."
             }
           ]
         },
@@ -162,19 +188,23 @@
           "questions": [
             {
               "text": "Welches Drama von Friedrich Schiller handelt von einem Schweizer Freiheitskämpfer mit Armbrust?",
-              "answer": "Wilhelm Tell"
+              "answer": "Wilhelm Tell",
+              "note": "Schiller war nie in der Schweiz. Die Landschaft kannte er nur aus Berichten."
             },
             {
               "text": "In welchem Werk von Goethe schließt ein Gelehrter einen Pakt mit dem Teufel?",
-              "answer": "Faust"
+              "answer": "Faust",
+              "note": "Der Pakt gilt für einen einzigen Augenblick: „Verweile doch, du bist so schön.“"
             },
             {
               "text": "Welcher Roman von Erich Kästner spielt in einem Internat und heißt nach einer Klasse?",
-              "answer": "Das fliegende Klassenzimmer"
+              "answer": "Das fliegende Klassenzimmer",
+              "note": "Kästner schrieb dazu drei Vorworte – er fand, ein Buch für Kinder brauche eine ordentliche Einleitung."
             },
             {
               "text": "Wie heißt Bertolt Brechts Stück über einen Physiker und seine Verantwortung?",
-              "answer": "Leben des Galilei"
+              "answer": "Leben des Galilei",
+              "note": "Brecht schrieb es zweimal um: nach Hiroshima fiel sein Urteil über den Forscher deutlich härter aus."
             }
           ]
         },
@@ -183,19 +213,23 @@
           "questions": [
             {
               "text": "Wofür steht die Abkürzung „AG“ im Stundenplan einer Schule?",
-              "answer": "Arbeitsgemeinschaft"
+              "answer": "Arbeitsgemeinschaft",
+              "note": "Anders als im Vereinsrecht ist damit keine Aktiengesellschaft gemeint."
             },
             {
               "text": "Wofür steht das „G“ in „G8“ und „G9“?",
-              "answer": "Gymnasium"
+              "answer": "Gymnasium",
+              "note": "G8 bedeutete Abitur nach acht Jahren; viele Länder sind inzwischen zu G9 zurückgekehrt."
             },
             {
               "text": "Wofür steht „BAföG“ dem Sinn nach?",
-              "answer": "Die staatliche Ausbildungsförderung"
+              "answer": "Die staatliche Ausbildungsförderung",
+              "note": "Rückzahlen muss man später nur die Hälfte – und höchstens einen gedeckelten Betrag."
             },
             {
               "text": "Was bedeutet „ECTS“ im Studium?",
-              "answer": "Ein Punktesystem für Studienleistungen"
+              "answer": "Ein Punktesystem für Studienleistungen",
+              "note": "Ein Punktesystem, das Studienleistungen europaweit vergleichbar machen soll. Ein Punkt steht für etwa 25 bis 30 Arbeitsstunden."
             }
           ]
         },
@@ -204,19 +238,23 @@
           "questions": [
             {
               "text": "Wie nennt man das Buch, in dem Anwesenheit und Stoff eingetragen werden?",
-              "answer": "Das Klassenbuch"
+              "answer": "Das Klassenbuch",
+              "note": "Es ist ein amtliches Dokument – wer darin radiert, fälscht eine Urkunde."
             },
             {
               "text": "Welches Schreibgerät machte die Kreide an vielen Schulen überflüssig?",
-              "answer": "Der Whiteboard-Marker"
+              "answer": "Der Whiteboard-Marker",
+              "note": "Die Kreide verschwand nicht wegen des Staubs, sondern weil die Tafeln mit den Beamern kamen."
             },
             {
               "text": "Wie heißt das Gerät, das Folien an die Wand wirft?",
-              "answer": "Der Overheadprojektor"
+              "answer": "Der Overheadprojektor",
+              "note": "Erfunden fürs Militär, groß geworden in der Schule – heute steht er meist im Keller."
             },
             {
               "text": "Wie heißt die Sitzordnung, bei der die Tische im offenen Halbkreis zur Tafel stehen?",
-              "answer": "Die Hufeisenform"
+              "answer": "Die Hufeisenform",
+              "note": "Sie kostet Platz, bringt aber alle ins Blickfeld: Jeder sieht jeden, nicht nur den Hinterkopf davor."
             }
           ]
         },
@@ -225,19 +263,23 @@
           "questions": [
             {
               "text": "In welchem Land tragen Schulkinder besonders häufig Uniform?",
-              "answer": "In Großbritannien"
+              "answer": "In Großbritannien",
+              "note": "Es gibt keine landesweite Pflicht – die Schulen entscheiden selbst, und die meisten halten daran fest."
             },
             {
               "text": "In welchem Land beginnt das Schuljahr im April?",
-              "answer": "In Japan"
+              "answer": "In Japan",
+              "note": "Es beginnt zur Kirschblüte. Auch das Geschäftsjahr startet dort im April."
             },
             {
               "text": "Welches skandinavische Land gilt seit Jahren als Vorbild für sein Schulsystem?",
-              "answer": "Finnland"
+              "answer": "Finnland",
+              "note": "Berühmt wurde das Land durch die PISA-Studien um 2000 – seither reisen Delegationen dorthin."
             },
             {
               "text": "Wie heißt die Abschlussprüfung in Frankreich, die dem Abitur entspricht?",
-              "answer": "Das Baccalauréat"
+              "answer": "Das Baccalauréat",
+              "note": "Es gibt es in drei Zweigen: allgemeinbildend, technisch und beruflich."
             }
           ]
         },
@@ -246,19 +288,23 @@
           "questions": [
             {
               "text": "Wie heißt die schriftliche Abschlussarbeit eines Bachelorstudiums?",
-              "answer": "Die Bachelorarbeit"
+              "answer": "Die Bachelorarbeit",
+              "note": "Sie ist meist die erste größere Arbeit im Studium und dauert je nach Fach zwei bis vier Monate."
             },
             {
               "text": "Wie heißt das Verfahren, mit dem Hochschulen Texte auf Abschreiben prüfen?",
-              "answer": "Plagiatsprüfung"
+              "answer": "Plagiatsprüfung",
+              "note": "Die Programme vergleichen mit Milliarden Texten – auffällig ist nicht das einzelne Wort, sondern der Satzbau."
             },
             {
               "text": "Wie nennt man eine Prüfung, die mündlich vor mehreren Prüfern stattfindet?",
-              "answer": "Ein Kolloquium"
+              "answer": "Ein Kolloquium",
+              "note": "Vom lateinischen „colloquium“, dem Gespräch. Verteidigt wird dabei die eigene Arbeit."
             },
             {
               "text": "Wie viele Versuche hat man an deutschen Hochschulen für eine Prüfung meist höchstens?",
-              "answer": "3"
+              "answer": "3",
+              "note": "Nach dem dritten ist an deutschen Hochschulen in der Regel Schluss – im ganzen Fach, bundesweit."
             }
           ]
         }

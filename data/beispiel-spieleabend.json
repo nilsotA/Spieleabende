@@ -9,19 +9,23 @@
           "questions": [
             {
               "text": "Welches Land hat die Form eines Stiefels?",
-              "answer": "Italien"
+              "answer": "Italien",
+              "note": "Der Absatz heißt Apulien, die Spitze Kalabrien – und Sizilien ist der Ball davor."
             },
             {
               "text": "Welcher Fluss fließt durch Wien, Budapest und Belgrad?",
-              "answer": "Die Donau"
+              "answer": "Die Donau",
+              "note": "Sie berührt zehn Länder, mehr als jeder andere Fluss der Erde."
             },
             {
               "text": "Zu welchem Land gehören die Kanarischen Inseln?",
-              "answer": "Spanien"
+              "answer": "Spanien",
+              "note": "Sie liegen auf der Höhe der Sahara, rund tausend Kilometer vom spanischen Festland entfernt."
             },
             {
               "text": "Welches ist das flächengrößte Land Afrikas?",
-              "answer": "Algerien"
+              "answer": "Algerien",
+              "note": "Erst seit 2011: Vorher war der Sudan größer – bis der Süden ein eigener Staat wurde."
             }
           ]
         },
@@ -30,19 +34,23 @@
           "questions": [
             {
               "text": "Welche Band veröffentlichte das Album „Abbey Road“?",
-              "answer": "The Beatles"
+              "answer": "The Beatles",
+              "note": "Der Zebrastreifen vom Cover ist bis heute ein Wallfahrtsort – und eine ganz normale Straße mit Verkehr."
             },
             {
               "text": "Wie viele Saiten hat eine klassische Konzertgitarre?",
-              "answer": "Sechs"
+              "answer": "Sechs",
+              "note": "Gestimmt E–A–d–g–h–e. Die Bassgitarre hat vier Saiten, das Banjo meist fünf."
             },
             {
               "text": "Welche Künstlerin sang „Rolling in the Deep“?",
-              "answer": "Adele"
+              "answer": "Adele",
+              "note": "Ihre Alben heißen nach ihrem Alter bei der Aufnahme: 19, 21, 25, 30."
             },
             {
               "text": "Wie heißt der Sänger von Rammstein mit vollem Namen?",
-              "answer": "Till Lindemann"
+              "answer": "Till Lindemann",
+              "note": "Vor der Musik war er Leistungsschwimmer."
             }
           ]
         },
@@ -51,19 +59,23 @@
           "questions": [
             {
               "text": "In welcher Stadt spielt die Serie „Friends“?",
-              "answer": "New York"
+              "answer": "New York",
+              "note": "Gedreht wurde in Kalifornien – das Café Central Perk stand nie in New York."
             },
             {
               "text": "Wie heißt der Zauberschul-Direktor in Harry Potter?",
-              "answer": "Albus Dumbledore"
+              "answer": "Albus Dumbledore",
+              "note": "Sein Name ist altes Englisch für „Hummel“. Rowling stellte sich vor, wie er summend durchs Schloss geht."
             },
             {
               "text": "Welcher Film gewann 2020 als erster nicht-englischsprachiger Film den Oscar als bester Film?",
-              "answer": "Parasite"
+              "answer": "Parasite",
+              "note": "In derselben Nacht gewann er vier Oscars, darunter Regie und Drehbuch."
             },
             {
               "text": "Wie heißt der Schöpfer der Serie „Breaking Bad“?",
-              "answer": "Vince Gilligan"
+              "answer": "Vince Gilligan",
+              "note": "Er beschrieb seine Serie als „aus Mr. Chips wird Scarface“."
             }
           ]
         },
@@ -72,19 +84,23 @@
           "questions": [
             {
               "text": "Aus welchem Land stammt die Paella ursprünglich?",
-              "answer": "Spanien (Valencia)"
+              "answer": "Spanien (Valencia)",
+              "note": "Traditionell mit Kaninchen und Huhn – die Meeresfrüchte kamen erst mit den Touristen dazu."
             },
             {
               "text": "Welches Gewürz ist das teuerste der Welt?",
-              "answer": "Safran"
+              "answer": "Safran",
+              "note": "Die Fäden werden von Hand gezupft; für ein Kilo braucht es rund 150.000 Blüten."
             },
             {
               "text": "Woraus wird Tofu hergestellt?",
-              "answer": "Aus Sojabohnen"
+              "answer": "Aus Sojabohnen",
+              "note": "Erfunden in China vor über 2000 Jahren – hergestellt wie Käse, nur aus Sojamilch."
             },
             {
               "text": "Welche Nudelsorte heißt übersetzt „Schmetterlinge“?",
-              "answer": "Farfalle"
+              "answer": "Farfalle",
+              "note": "Wörtlich „Schmetterlinge“ – auf Deutsch sagt man auch Schleifchennudeln."
             }
           ]
         },
@@ -93,15 +109,18 @@
           "questions": [
             {
               "text": "Welche Farbe hat das Trikot des Führenden bei der Tour de France?",
-              "answer": "Gelb"
+              "answer": "Gelb",
+              "note": "Seit 1919, und der Grund ist banal: Die veranstaltende Zeitung wurde auf gelbem Papier gedruckt."
             },
             {
               "text": "Wie viele Spieler stehen beim Volleyball pro Team auf dem Feld?",
-              "answer": "Sechs"
+              "answer": "Sechs",
+              "note": "Nach jedem gewonnenen Aufschlagrecht rückt die Mannschaft eine Position im Uhrzeigersinn weiter."
             },
             {
               "text": "In welchem Land fanden die Olympischen Sommerspiele 2021 statt?",
-              "answer": "Japan (Tokio)"
+              "answer": "Japan (Tokio)",
+              "note": "Die Spiele hießen weiterhin „Tokio 2020“ – verschoben, aber nicht umbenannt."
             },
             {
               "text": "In welchem Jahr wurde Deutschland zuletzt Fußball-Weltmeister?",
@@ -115,19 +134,23 @@
           "questions": [
             {
               "text": "Welche Farbe entsteht, wenn man Blau und Gelb mischt?",
-              "answer": "Grün"
+              "answer": "Grün",
+              "note": "Das gilt für Farbe im Topf. Licht mischt sich andersherum: Dort ergeben Rot und Grün zusammen Gelb."
             },
             {
               "text": "Wie heißt das größte Organ des menschlichen Körpers?",
-              "answer": "Die Haut"
+              "answer": "Die Haut",
+              "note": "Rund zwei Quadratmeter groß und je nach Körperstelle zwischen einem und vier Millimetern dick."
             },
             {
               "text": "Welches Tier kann seinen Kopf um fast 270 Grad drehen?",
-              "answer": "Die Eule"
+              "answer": "Die Eule",
+              "note": "Ihre Augen sitzen starr in den Höhlen. Drehen kann sie nur den Hals – dafür mit doppelt so vielen Wirbeln wie wir."
             },
             {
               "text": "Wie viele Minuten hat ein Tag?",
-              "answer": "1440"
+              "answer": "1440",
+              "note": "24 mal 60. Eine Woche hat 10.080, ein normales Jahr 525.600."
             }
           ]
         }
@@ -140,19 +163,23 @@
           "questions": [
             {
               "text": "Wofür steht „GmbH“?",
-              "answer": "Gesellschaft mit beschränkter Haftung"
+              "answer": "Gesellschaft mit beschränkter Haftung",
+              "note": "Beschränkt ist die Haftung, nicht die Gesellschaft: Sie haftet nur mit dem Firmenvermögen."
             },
             {
               "text": "Wofür steht die Abkürzung „WLAN“?",
-              "answer": "Wireless Local Area Network"
+              "answer": "Wireless Local Area Network",
+              "note": "Im Englischen sagt das kaum jemand – dort heißt es Wi-Fi."
             },
             {
               "text": "Wofür steht „TÜV“?",
-              "answer": "Technischer Überwachungsverein"
+              "answer": "Technischer Überwachungsverein",
+              "note": "Entstanden aus den Dampfkessel-Überwachungsvereinen des 19. Jahrhunderts, nach reihenweise explodierten Kesseln."
             },
             {
               "text": "Wofür steht „LASER“?",
-              "answer": "Light Amplification by Stimulated Emission of Radiation"
+              "answer": "Light Amplification by Stimulated Emission of Radiation",
+              "note": "Das Wort ist selbst eine Abkürzung – im Englischen wird es deshalb bis heute manchmal großgeschrieben."
             }
           ]
         },
@@ -161,15 +188,18 @@
           "questions": [
             {
               "text": "In welchem Jahr fiel die Berliner Mauer?",
-              "answer": "1989"
+              "answer": "1989",
+              "note": "Die entscheidende Pressekonferenz war ein Missverständnis: „Ab sofort, unverzüglich“ stand so in keinem Beschluss."
             },
             {
               "text": "Wer war der erste Mensch auf dem Mond?",
-              "answer": "Neil Armstrong"
+              "answer": "Neil Armstrong",
+              "note": "Über seinen ersten Satz wird bis heute gestritten – hat er das „a“ vor „man“ gesagt oder nicht?"
             },
             {
               "text": "In welchem Jahr begann der Erste Weltkrieg?",
-              "answer": "1914"
+              "answer": "1914",
+              "note": "Auslöser war das Attentat von Sarajevo Ende Juni; einen Monat später erklärte Österreich-Ungarn Serbien den Krieg."
             },
             {
               "text": "In welchem antiken Staat war Julius Cäsar Diktator?",
@@ -183,19 +213,23 @@
           "questions": [
             {
               "text": "Welches chemische Element hat das Symbol „Fe“?",
-              "answer": "Eisen"
+              "answer": "Eisen",
+              "note": "Von lateinisch „ferrum“. Viele Symbole kommen aus dem Latein: Na für Natrium, Au für Aurum, Gold."
             },
             {
               "text": "Wie viele Planeten hat unser Sonnensystem?",
-              "answer": "Acht"
+              "answer": "Acht",
+              "note": "Seit 2006 – damals wurde Pluto zum Zwergplaneten herabgestuft."
             },
             {
               "text": "Wie heißt der Vorgang, bei dem Pflanzen aus Licht Energie gewinnen?",
-              "answer": "Photosynthese"
+              "answer": "Photosynthese",
+              "note": "Sie läuft im Blattgrün ab, dem Chlorophyll – das den Blättern zugleich die Farbe gibt."
             },
             {
               "text": "Wie schnell ist das Licht ungefähr, in Kilometern pro Sekunde?",
-              "answer": "Rund 300.000 km/s"
+              "answer": "Rund 300.000 km/s",
+              "note": "In einer Sekunde siebenmal um die Erde. Vom Mond braucht das Licht gut eine Sekunde, von der Sonne acht Minuten."
             }
           ]
         },
@@ -204,19 +238,23 @@
           "questions": [
             {
               "text": "Dieser deutsche Dichter schrieb „Faust“.",
-              "answer": "Wer ist Johann Wolfgang von Goethe?"
+              "answer": "Wer ist Johann Wolfgang von Goethe?",
+              "note": "Er arbeitete rund sechzig Jahre daran; der zweite Teil erschien erst nach seinem Tod."
             },
             {
               "text": "Auf diesem Kontinent lebt niemand dauerhaft.",
-              "answer": "Was ist die Antarktis?"
+              "answer": "Was ist die Antarktis?",
+              "note": "Stationen sind besetzt, aber niemand hat dort einen Wohnsitz – und der Kontinent gehört keinem Staat."
             },
             {
               "text": "Diese Währung wird in Japan benutzt.",
-              "answer": "Was ist der Yen?"
+              "answer": "Was ist der Yen?",
+              "note": "Der Name bedeutet schlicht „runde Münze“."
             },
             {
               "text": "Dieses Ereignis beschreibt die Explosion eines Sterns am Ende seines Lebenszyklus.",
-              "answer": "Was ist eine Supernova?"
+              "answer": "Was ist eine Supernova?",
+              "note": "Alles Eisen in unserem Blut stammt aus solchen Explosionen."
             }
           ]
         },
@@ -225,19 +263,23 @@
           "questions": [
             {
               "text": "Welche Automarke hat vier ineinandergreifende Ringe im Logo?",
-              "answer": "Audi"
+              "answer": "Audi",
+              "note": "Die vier Ringe stehen für vier Firmen, die 1932 fusionierten: Audi, DKW, Horch und Wanderer."
             },
             {
               "text": "Welches Unternehmen wirbt mit dem Slogan „Just Do It“?",
-              "answer": "Nike"
+              "answer": "Nike",
+              "note": "Der Spruch ist von 1988. Die Firma selbst heißt nach der griechischen Siegesgöttin."
             },
             {
               "text": "Aus welchem Land kommt der Möbelhersteller IKEA?",
-              "answer": "Schweden"
+              "answer": "Schweden",
+              "note": "Die Buchstaben stehen für den Gründer und seinen Hof: Ingvar Kamprad, Elmtaryd, Agunnaryd."
             },
             {
               "text": "Welche Farbe hat der Hintergrund im Logo von Nivea?",
-              "answer": "Dunkelblau"
+              "answer": "Dunkelblau",
+              "note": "Der Name kommt aus dem Lateinischen und heißt „schneeweiß“. Die blaue Dose gibt es seit 1925."
             }
           ]
         },
@@ -246,19 +288,23 @@
           "questions": [
             {
               "text": "Wie heißt der Gründer von Facebook?",
-              "answer": "Mark Zuckerberg"
+              "answer": "Mark Zuckerberg",
+              "note": "Gegründet 2004 im Studentenwohnheim in Harvard – anfangs nur für Studierende dort."
             },
             {
               "text": "Wofür steht das „S“ in HTTPS?",
-              "answer": "Secure"
+              "answer": "Secure",
+              "note": "Das S steht für die Verschlüsselung. Ohne sie liest jeder im selben WLAN mit."
             },
             {
               "text": "In welchem Jahr wurde YouTube gegründet?",
-              "answer": "2005"
+              "answer": "2005",
+              "note": "Das allererste Video zeigt einen der Gründer im Zoo: 19 Sekunden vor dem Elefantengehege."
             },
             {
               "text": "Welches Unternehmen kaufte 2012 die Kurzvideo-App Vine und stellte sie 2017 ein?",
-              "answer": "Twitter"
+              "answer": "Twitter",
+              "note": "Sechs Sekunden pro Video, in Endlosschleife. 2016 stellte Twitter den Dienst ein – kurz bevor kurze Videos überall Standard wurden."
             }
           ]
         }
