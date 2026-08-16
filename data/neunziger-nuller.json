@@ -9,20 +9,23 @@
           "questions": [
             {
               "text": "Welche Samstagabendshow moderierte Thomas Gottschalk jahrzehntelang?",
-              "answer": "Wetten, dass..?"
+              "answer": "Wetten, dass..?",
+              "note": "Von 1987 bis 2011 stand Gottschalk dort. Bis zu 23 Millionen Menschen sahen zu – solche Zahlen erreicht heute keine Sendung mehr."
             },
             {
               "text": "Welche gelbe Zeichentrickfamilie aus Springfield startete 1989 als eigene Serie?",
-              "answer": "Die Simpsons"
+              "answer": "Die Simpsons",
+              "note": "Vorher liefen sie drei Jahre als kurze Einspieler in einer anderen Show. Heute ist es die langlebigste Zeichentrickserie des US-Fernsehens."
             },
             {
-              "text": "Welche deutsche Vorabendserie läuft seit 1992 bei RTL und wird meist mit vier Buchstaben abgekürzt?",
+              "text": "Welche Vorabendserie läuft seit 1992 bei RTL und wird mit vier Buchstaben abgekürzt?",
               "answer": "Gute Zeiten, schlechte Zeiten",
               "note": "„GZSZ“ genügt völlig."
             },
             {
               "text": "Welche Quizshow mit Günther Jauch startete 1999 in Deutschland?",
-              "answer": "Wer wird Millionär?"
+              "answer": "Wer wird Millionär?",
+              "note": "Das Format kommt aus Großbritannien und läuft in über hundert Ländern. Der Telefonjoker wurde im Handyzeitalter immer schwerer zu schützen."
             }
           ]
         },
@@ -31,7 +34,8 @@
           "questions": [
             {
               "text": "Welche britische Girlgroup landete 1996 mit „Wannabe“ ihren Durchbruch?",
-              "answer": "Spice Girls"
+              "answer": "Spice Girls",
+              "note": "Fünf Sängerinnen, fünf Spitznamen: Scary, Baby, Ginger, Posh und Sporty. „Wannabe“ stand in über 30 Ländern auf Platz eins."
             },
             {
               "text": "Wer sang 1998 „Believe“ – mit dem berühmt verzerrten Stimmeffekt?",
@@ -40,11 +44,13 @@
             },
             {
               "text": "Welche Band aus Hannover sang „Wind Of Change“?",
-              "answer": "Scorpions"
+              "answer": "Scorpions",
+              "note": "Das Lied entstand nach Auftritten in Moskau 1989 und wurde zur Hymne von Mauerfall und Wendezeit."
             },
             {
               "text": "Welcher Song eröffnet das Nirvana-Album „Nevermind“ von 1991?",
-              "answer": "Smells Like Teen Spirit"
+              "answer": "Smells Like Teen Spirit",
+              "note": "Der Titel stammt von einem Deo, dessen Namen jemand als Spruch an eine Wand geschrieben hatte."
             }
           ]
         },
@@ -53,11 +59,13 @@
           "questions": [
             {
               "text": "„Geiz ist geil!“ – Welche Elektronikkette warb damit?",
-              "answer": "Saturn"
+              "answer": "Saturn",
+              "note": "Der Spruch lief ab 2002 und wurde so bekannt, dass er bis in Debatten über Sparpolitik zitiert wurde."
             },
             {
               "text": "„Ich bin doch nicht blöd!“ – Welcher Elektronikmarkt?",
-              "answer": "Media Markt"
+              "answer": "Media Markt",
+              "note": "Beide Ketten gehören zum selben Konzern – und warben trotzdem jahrelang gegeneinander."
             },
             {
               "text": "„Da werden Sie geholfen!“ – Wer rief das in der Werbung für die Telefonauskunft?",
@@ -81,11 +89,13 @@
             },
             {
               "text": "Auf welchem runden, silbernen Datenträger kaufte man in den Neunzigern Musik?",
-              "answer": "Auf CD"
+              "answer": "Auf CD",
+              "note": "Eine CD fasst rund 74 Minuten. Der Legende nach genau so viel, weil eine bestimmte Sinfonie daraufpassen sollte."
             },
             {
               "text": "Wie hieß das tragbare Kassettenabspielgerät von Sony?",
-              "answer": "Walkman"
+              "answer": "Walkman",
+              "note": "1979 gebaut, weil ein Sony-Chef auf langen Flügen Musik hören wollte. Ein Gerät ohne Aufnahmefunktion hielten viele erst für unverkäuflich."
             },
             {
               "text": "Wie viel Speicher fasste eine normale 3,5-Zoll-Diskette?",
@@ -99,19 +109,23 @@
           "questions": [
             {
               "text": "Welcher Film von 1997 spielt auf einem sinkenden Ozeandampfer?",
-              "answer": "Titanic"
+              "answer": "Titanic",
+              "note": "Elf Oscars – so viele bekamen nur zwei andere Filme. Das echte Wrack liegt in rund 3.800 Metern Tiefe."
             },
             {
               "text": "In welchem Film von 1993 werden Dinosaurier in einem Park zum Leben erweckt?",
-              "answer": "Jurassic Park"
+              "answer": "Jurassic Park",
+              "note": "Dinosaurier sind nur etwa 15 Minuten lang zu sehen, und die meiste Zeit davon sind es gebaute Modelle statt Computerbilder."
             },
             {
               "text": "In welchem Film von 1999 hat man die Wahl zwischen der roten und der blauen Pille?",
-              "answer": "Matrix"
+              "answer": "Matrix",
+              "note": "Rot heißt: die Wahrheit. Der Ausdruck „rote Pille“ wird bis heute in ganz anderen Zusammenhängen benutzt."
             },
             {
               "text": "In welchem Film von 1994 hört die Hauptfigur als Kind „Lauf, Forrest, lauf!“?",
-              "answer": "Forrest Gump"
+              "answer": "Forrest Gump",
+              "note": "Die Feder am Anfang und am Ende ist am Computer entstanden – für 1994 eine kleine Sensation."
             }
           ]
         },
@@ -125,11 +139,13 @@
             },
             {
               "text": "Welche Sammelkarten mit Taschenmonstern eroberten Ende der Neunziger die Schulhöfe?",
-              "answer": "Pokémon"
+              "answer": "Pokémon",
+              "note": "Der Name kommt von „Pocket Monsters“. Zuerst gab es die Spielmodule, die Karten kamen danach."
             },
             {
               "text": "Wie hieß das eiförmige Gerät mit Bildschirm, dessen Küken man füttern musste?",
-              "answer": "Tamagotchi"
+              "answer": "Tamagotchi",
+              "note": "„Tamago“ heißt Ei auf Japanisch. Wer nicht rechtzeitig fütterte, fand am Morgen ein kleines Grab auf dem Display."
             },
             {
               "text": "Welche runden Papp-Scheiben stapelte man und schlug sie mit einem schweren Slammer um?",
@@ -147,7 +163,8 @@
           "questions": [
             {
               "text": "Diese Währung löste 2002 als Bargeld die D-Mark ab.",
-              "answer": "Was ist der Euro?"
+              "answer": "Was ist der Euro?",
+              "note": "Als Buchgeld gab es ihn schon seit 1999. 2002 kamen Scheine und Münzen – die D-Mark galt noch zwei Monate parallel."
             },
             {
               "text": "Diese Suchmaschine wurde 1998 gegründet und ist nach einer sehr großen Zahl benannt.",
@@ -156,11 +173,13 @@
             },
             {
               "text": "Diese graue Handheld-Konsole von Nintendo kam 1989 heraus und hatte ein grünliches Display.",
-              "answer": "Was ist der Game Boy?"
+              "answer": "Was ist der Game Boy?",
+              "note": "Vier Graustufen, vier Batterien, über 30 Stunden Laufzeit. Verkauft wurde er mehr als 100 Millionen Mal."
             },
             {
               "text": "Diese Spielkonsole von Sony kam 1995 nach Europa und spielte Spiele von CD.",
-              "answer": "Was ist die PlayStation?"
+              "answer": "Was ist die PlayStation?",
+              "note": "Geplant war sie als CD-Laufwerk für Nintendo. Aus dem geplatzten Vertrag wurde die erfolgreichste Konsole ihrer Zeit."
             }
           ]
         },
@@ -169,7 +188,8 @@
           "questions": [
             {
               "text": "In welcher Serie treffen sich sechs Freunde ständig im Café „Central Perk“?",
-              "answer": "Friends"
+              "answer": "Friends",
+              "note": "Zehn Staffeln, 236 Folgen. Das Titellied „I'll Be There for You“ wurde eigens für die Serie geschrieben."
             },
             {
               "text": "Welche Krankenhausserie startete 1994 und machte George Clooney weltbekannt?",
@@ -178,11 +198,13 @@
             },
             {
               "text": "In welcher Serie lebt die Familie Bundy in Chicago?",
-              "answer": "Eine schrecklich nette Familie"
+              "answer": "Eine schrecklich nette Familie",
+              "note": "Im Original heißt sie „Married… with Children“. Al Bundy verkauft Damenschuhe und erzählt ständig von seinen vier Touchdowns."
             },
             {
               "text": "Welche Mysteryserie folgte den FBI-Agenten Mulder und Scully?",
-              "answer": "Akte X"
+              "answer": "Akte X",
+              "note": "„Die Wahrheit ist irgendwo da draußen.“ Neun Staffeln liefen am Stück, viel später kamen noch zwei dazu."
             }
           ]
         },
@@ -191,19 +213,23 @@
           "questions": [
             {
               "text": "Welche Boygroup sang „I Want It That Way“?",
-              "answer": "Backstreet Boys"
+              "answer": "Backstreet Boys",
+              "note": "Gegründet in Florida, groß geworden zuerst in Europa. In den USA kam der Erfolg erst mit Verspätung."
             },
             {
               "text": "Welche Sängerin startete 1998 mit „…Baby One More Time“?",
-              "answer": "Britney Spears"
+              "answer": "Britney Spears",
+              "note": "Sie war 16 bei der Aufnahme. Das Video im Schulmädchen-Aufzug lief auf MTV im Dauerbetrieb."
             },
             {
               "text": "In welcher Band wurde Robbie Williams berühmt?",
-              "answer": "Take That"
+              "answer": "Take That",
+              "note": "Nach seinem Ausstieg 1995 richteten Hilfsorganisationen in Großbritannien Kummertelefone für Fans ein."
             },
             {
               "text": "Welches deutsche Projekt hatte 1992 mit „Rhythm Is a Dancer“ einen Welthit?",
-              "answer": "Snap!"
+              "answer": "Snap!",
+              "note": "Das Projekt kam aus Frankfurt. Der Song stand 1992 in halb Europa auf Platz eins."
             }
           ]
         },
@@ -212,11 +238,13 @@
           "questions": [
             {
               "text": "Wofür steht die Abkürzung SMS?",
-              "answer": "Short Message Service"
+              "answer": "Short Message Service",
+              "note": "Gedacht war er nur als Nebenkanal für Technikmeldungen. 160 Zeichen, weil genau so viel Platz übrig war."
             },
             {
               "text": "Welches Spiel war auf den alten Nokia-Handys vorinstalliert und wurde immer länger?",
-              "answer": "Snake"
+              "answer": "Snake",
+              "note": "1997 auf dem Nokia 6110. Die Idee stammt aus einem Automatenspiel von 1976."
             },
             {
               "text": "Welche Funktechnik für kurze Strecken ist nach einem dänischen Wikingerkönig benannt?",
@@ -225,7 +253,8 @@
             },
             {
               "text": "Welches Tier sang Mitte der Nuller den deutschen Klingelton-Hit „Ich bin Schnappi“?",
-              "answer": "Ein Krokodil"
+              "answer": "Ein Krokodil",
+              "note": "„Schnappi“ war ursprünglich ein Kinderlied aus einer WDR-Sendung und stand 2005 wochenlang auf Platz eins."
             }
           ]
         },
@@ -234,19 +263,23 @@
           "questions": [
             {
               "text": "Welche Katze jagt die Maus Jerry?",
-              "answer": "Tom"
+              "answer": "Tom",
+              "note": "Die beiden sprechen in ihren Kurzfilmen fast nie – gerade das machte sie weltweit verständlich."
             },
             {
               "text": "Wie heißt die kleine Biene, die mit Willi und Flip unterwegs ist?",
-              "answer": "Biene Maja"
+              "answer": "Biene Maja",
+              "note": "Die Vorlage ist ein deutsches Buch von 1912. Die bekannte Serie entstand als deutsch-japanische Zusammenarbeit."
             },
             {
               "text": "Welcher Zeichentrickheld wohnt in einer Ananas auf dem Meeresgrund?",
-              "answer": "SpongeBob Schwammkopf"
+              "answer": "SpongeBob Schwammkopf",
+              "note": "Erfunden hat ihn ein Meeresbiologe, der später zum Zeichentrickfilmer wurde."
             },
             {
               "text": "Wie heißen die drei Neffen von Donald Duck?",
-              "answer": "Tick, Trick und Track"
+              "answer": "Tick, Trick und Track",
+              "note": "Im Original heißen sie Huey, Dewey und Louie. Übersetzt hat sie Erika Fuchs, von der auch das „grübel, grübel“ stammt."
             }
           ]
         },
@@ -255,15 +288,18 @@
           "questions": [
             {
               "text": "In welchem Jahr wurde Deutschland wiedervereinigt?",
-              "answer": "1990"
+              "answer": "1990",
+              "note": "Am 3. Oktober. Die Mauer fiel schon knapp elf Monate früher, am 9. November 1989."
             },
             {
               "text": "In welchem Jahr fand die Fußball-WM in Deutschland statt, das „Sommermärchen“?",
-              "answer": "2006"
+              "answer": "2006",
+              "note": "Weltmeister wurde Italien, Deutschland holte den dritten Platz. In Erinnerung blieben eher die Fanmeilen."
             },
             {
               "text": "In welchem Jahr lief die erste deutsche Staffel von „Big Brother“?",
-              "answer": "2000"
+              "answer": "2000",
+              "note": "Die erste Staffel lief 106 Tage. Ob so ein Format mit der Menschenwürde vereinbar ist, wurde damals ernsthaft gestritten."
             },
             {
               "text": "In welchem Jahr wurde Deutschland zuletzt Fußball-Europameister?",

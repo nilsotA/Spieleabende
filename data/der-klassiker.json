@@ -9,7 +9,8 @@
           "questions": [
             {
               "text": "Wie heißt die Hauptstadt von Irland?",
-              "answer": "Dublin"
+              "answer": "Dublin",
+              "note": "Der Name kommt aus dem Irischen und bedeutet „schwarzer Teich“."
             },
             {
               "text": "Wie heißt die Hauptstadt der Slowakei?",
@@ -18,7 +19,8 @@
             },
             {
               "text": "Wie heißt die Hauptstadt von Bulgarien?",
-              "answer": "Sofia"
+              "answer": "Sofia",
+              "note": "Benannt nach der Sophienkirche. Die Stadt gehört zu den ältesten Europas."
             },
             {
               "text": "Wie heißt die Hauptstadt von Brasilien?",
@@ -57,11 +59,13 @@
           "questions": [
             {
               "text": "Welches Organ filtert das Blut?",
-              "answer": "Die Nieren"
+              "answer": "Die Nieren",
+              "note": "Zwei Stück, zusammen rund 300 Gramm. Sie filtern am Tag etwa 180 Liter, von denen fast alles wieder zurückgeholt wird."
             },
             {
               "text": "Welches Vitamin bildet die Haut im Sonnenlicht selbst?",
-              "answer": "Vitamin D"
+              "answer": "Vitamin D",
+              "note": "Im Winter steht die Sonne in Deutschland zu tief dafür – der Körper zehrt dann von seinen Vorräten."
             },
             {
               "text": "Wie viel Blut hat ein erwachsener Mensch ungefähr im Körper?",
@@ -80,7 +84,8 @@
           "questions": [
             {
               "text": "Wer war der erste Präsident der Vereinigten Staaten?",
-              "answer": "George Washington"
+              "answer": "George Washington",
+              "note": "Er lehnte eine dritte Amtszeit ab. Daraus wurde erst eine Tradition und 1951 eine Regel in der Verfassung."
             },
             {
               "text": "Wer rückte in seinem Hauptwerk die Sonne statt der Erde in den Mittelpunkt?",
@@ -89,11 +94,13 @@
             },
             {
               "text": "Wer schrieb den Roman „Die unendliche Geschichte“?",
-              "answer": "Michael Ende"
+              "answer": "Michael Ende",
+              "note": "Der Roman erschien 1979. Mit der Verfilmung war Ende so unzufrieden, dass er seinen Namen aus dem Vorspann nehmen ließ."
             },
             {
               "text": "Wer schrieb die Novelle „Der Schimmelreiter“?",
-              "answer": "Theodor Storm"
+              "answer": "Theodor Storm",
+              "note": "Storm stammte aus Husum und war von Beruf Jurist. Die Novelle erschien 1888, im Jahr seines Todes."
             }
           ]
         },
@@ -102,7 +109,8 @@
           "questions": [
             {
               "text": "Wofür stehen die drei W am Anfang einer Internetadresse?",
-              "answer": "World Wide Web"
+              "answer": "World Wide Web",
+              "note": "Erfunden 1989 am Kernforschungszentrum CERN von Tim Berners-Lee – als Werkzeug, damit Forscher Texte austauschen konnten."
             },
             {
               "text": "Wofür steht die Abkürzung RTL?",
@@ -111,7 +119,8 @@
             },
             {
               "text": "Wofür stand in der DDR die Abkürzung Stasi?",
-              "answer": "Ministerium für Staatssicherheit"
+              "answer": "Ministerium für Staatssicherheit",
+              "note": "Zuletzt arbeiteten dort rund 90.000 Hauptamtliche, dazu kamen weit mehr inoffizielle Mitarbeiter."
             },
             {
               "text": "Wofür steht das LCD in „LCD-Bildschirm“?",
@@ -125,7 +134,8 @@
           "questions": [
             {
               "text": "Wie viele Beine hat eine Spinne?",
-              "answer": "Acht"
+              "answer": "Acht",
+              "note": "Sechs Beine hätte ein Insekt. Spinnen sind keine Insekten, sondern Spinnentiere."
             },
             {
               "text": "Welches Tier ist im Sturzflug das schnellste der Welt?",
@@ -153,7 +163,8 @@
           "questions": [
             {
               "text": "Wie nennt man die gasförmige Hülle, die einen Himmelskörper umgibt?",
-              "answer": "Die Atmosphäre"
+              "answer": "Die Atmosphäre",
+              "note": "Von griechisch „atmos“ für Dampf und „sphaira“ für Kugel."
             },
             {
               "text": "Welcher Planet unseres Sonnensystems ist der heißeste?",
@@ -162,7 +173,8 @@
             },
             {
               "text": "Wie alt ist die Erde nach heutigem Stand ungefähr?",
-              "answer": "Rund 4,5 Milliarden Jahre"
+              "answer": "Rund 4,5 Milliarden Jahre",
+              "note": "Bestimmt wird das Alter über den Zerfall radioaktiver Elemente – gemessen an sehr alten Gesteinen und an Meteoriten."
             },
             {
               "text": "Aus welchem Element besteht die Sonne überwiegend?",
@@ -176,11 +188,13 @@
           "questions": [
             {
               "text": "In welchem Jahr endete der Zweite Weltkrieg?",
-              "answer": "1945"
+              "answer": "1945",
+              "note": "In Europa am 8. Mai, in Asien erst im September."
             },
             {
               "text": "An welchem Tag fiel die Berliner Mauer?",
-              "answer": "Am 9. November 1989"
+              "answer": "Am 9. November 1989",
+              "note": "Ausgelöst durch eine missverständliche Antwort auf einer Pressekonferenz. Wenige Stunden später öffneten die Übergänge."
             },
             {
               "text": "Seit wann bezahlt man in Deutschland mit Euro-Scheinen und -Münzen?",
@@ -199,7 +213,8 @@
           "questions": [
             {
               "text": "Wie beginnt Artikel 1 des Grundgesetzes?",
-              "answer": "„Die Würde des Menschen ist unantastbar.“"
+              "answer": "„Die Würde des Menschen ist unantastbar.“",
+              "note": "Dieser Artikel darf auch mit Zweidrittelmehrheit nicht geändert werden – dafür sorgt die Ewigkeitsklausel."
             },
             {
               "text": "Welche drei Gewalten teilen sich in Deutschland die Staatsmacht?",
@@ -213,7 +228,8 @@
             },
             {
               "text": "Welches Amt steht in Deutschland protokollarisch an erster Stelle?",
-              "answer": "Das des Bundespräsidenten"
+              "answer": "Das des Bundespräsidenten",
+              "note": "Danach folgen der Bundestagspräsident, der Bundeskanzler und der Bundesratspräsident."
             }
           ]
         },
@@ -232,7 +248,8 @@
             },
             {
               "text": "Welches ist die größte spanischsprachige Stadt der Welt?",
-              "answer": "Mexiko-Stadt"
+              "answer": "Mexiko-Stadt",
+              "note": "Mit dem Umland über 20 Millionen Menschen. Die Stadt steht auf dem Grund eines trockengelegten Sees und sinkt jedes Jahr weiter ab."
             },
             {
               "text": "Welches Land zählt die meisten Inseln?",
@@ -256,7 +273,8 @@
             },
             {
               "text": "Von wem stammt der Satz „Religion ist das Opium des Volkes“?",
-              "answer": "Von Karl Marx"
+              "answer": "Von Karl Marx",
+              "note": "Der Satz steht in einer Schrift von 1844 und wird meist verkürzt zitiert – gemeint war auch der Trost, den Religion spendet."
             },
             {
               "text": "Was ist ein Oxymoron?",
@@ -285,7 +303,8 @@
             },
             {
               "text": "In welcher Einheit misst man den elektrischen Widerstand?",
-              "answer": "In Ohm"
+              "answer": "In Ohm",
+              "note": "Benannt nach Georg Simon Ohm. Sein Zeichen ist das griechische Omega."
             }
           ]
         }

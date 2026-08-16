@@ -9,11 +9,13 @@
           "questions": [
             {
               "text": "Wie viele Spieler einer Mannschaft stehen beim Fußball gleichzeitig auf dem Feld?",
-              "answer": "11"
+              "answer": "11",
+              "note": "Der Torwart zählt mit. Unter zehn Feldspielern muss ein Spiel abgebrochen werden."
             },
             {
               "text": "Welche Karte zeigt der Schiedsrichter beim Platzverweis?",
-              "answer": "Die rote"
+              "answer": "Die rote",
+              "note": "Gelb und Rot kamen zur WM 1970. Erdacht hat sie ein englischer Schiedsrichter – nach dem Vorbild der Ampel."
             },
             {
               "text": "Wie viele Sätze muss man beim Tennis bei den Damen gewinnen, um ein Match zu holen?",
@@ -22,7 +24,8 @@
             },
             {
               "text": "Wie nennt man es beim Basketball, wenn ein Spieler mit dem Ball läuft, ohne zu dribbeln?",
-              "answer": "Schrittfehler"
+              "answer": "Schrittfehler",
+              "note": "Erlaubt sind zwei Schritte, nachdem man den Ball aufgenommen hat. Danach muss gepasst oder geworfen werden."
             }
           ]
         },
@@ -31,11 +34,13 @@
           "questions": [
             {
               "text": "Wie viele Löcher hat ein normaler Golfplatz?",
-              "answer": "18"
+              "answer": "18",
+              "note": "Neun Löcher sind die halbe Runde. Die 18 setzte sich durch, weil der Platz von St Andrews so eingeteilt wurde."
             },
             {
               "text": "Wie lang ist eine Bahn im olympischen Schwimmbecken – in Metern?",
-              "answer": "50"
+              "answer": "50",
+              "note": "Deshalb heißt es Langbahn. Im Winter wird oft auf 25 Metern geschwommen – dort sind die Zeiten wegen der vielen Wenden schneller."
             },
             {
               "text": "Wie hoch hängt ein Basketballkorb über dem Boden – in Metern?",
@@ -54,11 +59,13 @@
           "questions": [
             {
               "text": "Welche Farbe hat die Medaille für den zweiten Platz?",
-              "answer": "Silber"
+              "answer": "Silber",
+              "note": "Gold, Silber und Bronze gibt es erst seit 1904. Bei den ersten Spielen bekam der Sieger Silber und der Zweite Bronze."
             },
             {
               "text": "Alle wie viele Jahre finden die Sommerspiele statt?",
-              "answer": "Alle 4 Jahre"
+              "answer": "Alle 4 Jahre",
+              "note": "Die Winterspiele auch – seit 1994 aber im Wechsel dazu. Deshalb gibt es alle zwei Jahre Olympia."
             },
             {
               "text": "In welchem Land fanden die ersten Olympischen Spiele der Neuzeit statt?",
@@ -77,19 +84,23 @@
           "questions": [
             {
               "text": "In welcher Sportart gibt es einen Schmetterball, einen Aufschlag und einen Block über dem Netz?",
-              "answer": "Volleyball"
+              "answer": "Volleyball",
+              "note": "Eine Mannschaft darf den Ball dreimal berühren, bevor er über das Netz muss. Der Block zählt dabei nicht mit."
             },
             {
               "text": "Welche Sportart verbindet Langlauf mit Schießen?",
-              "answer": "Biathlon"
+              "answer": "Biathlon",
+              "note": "Fünf Scheiben pro Schießen. Jeder Fehler kostet je nach Rennen eine Strafrunde von 150 Metern oder eine Strafminute."
             },
             {
               "text": "In welcher Sportart kämpft man um den Stanley Cup?",
-              "answer": "Eishockey"
+              "answer": "Eishockey",
+              "note": "Der Pokal wird seit 1893 vergeben und ist damit die älteste Trophäe im nordamerikanischen Profisport."
             },
             {
               "text": "Welche Sportart wird auf einem Pferd mit langen Schlägern gespielt?",
-              "answer": "Polo"
+              "answer": "Polo",
+              "note": "Gespielt wird in Abschnitten, die „Chukker“ heißen. Dazwischen werden die Pferde gewechselt."
             }
           ]
         },
@@ -98,11 +109,13 @@
           "questions": [
             {
               "text": "Welcher Bundesligist spielt in Schwarz und Gelb und trägt „Borussia“ im Namen?",
-              "answer": "Borussia Dortmund"
+              "answer": "Borussia Dortmund",
+              "note": "„Borussia“ ist das lateinische Wort für Preußen. Gegründet wurde der Verein 1909 in einer Dortmunder Gaststätte."
             },
             {
               "text": "Wie heißt das Stadion des FC Barcelona?",
-              "answer": "Camp Nou"
+              "answer": "Camp Nou",
+              "note": "Auf Katalanisch heißt das schlicht „neuer Platz“. Es ist das größte Stadion Europas."
             },
             {
               "text": "Welcher deutsche Verein wird „die Werkself“ genannt?",
@@ -111,7 +124,8 @@
             },
             {
               "text": "In welcher Stadt spielt der Verein mit dem Spitznamen „die Fohlen“?",
-              "answer": "In Mönchengladbach"
+              "answer": "In Mönchengladbach",
+              "note": "Der Spitzname stammt aus den Siebzigern, als die Mannschaft auffällig jung war und schnell nach vorn spielte."
             }
           ]
         },
@@ -120,7 +134,8 @@
           "questions": [
             {
               "text": "Wie nennt man beim Fußball drei Tore eines Spielers in einem Spiel?",
-              "answer": "Hattrick"
+              "answer": "Hattrick",
+              "note": "Das Wort kommt aus dem Cricket: Wer drei Gegner nacheinander ausschied, bekam einen Hut geschenkt."
             },
             {
               "text": "Wie heißt im Handball der Strafwurf, den es nach einer klaren Torchancen-Verhinderung gibt?",
@@ -129,11 +144,13 @@
             },
             {
               "text": "Wie heißt der Sprung mit gegrätschten Beinen über den Bock im Turnunterricht?",
-              "answer": "Die Grätsche"
+              "answer": "Die Grätsche",
+              "note": "Bock und Kasten gehen auf Friedrich Ludwig Jahn zurück, den „Turnvater“ des frühen 19. Jahrhunderts."
             },
             {
               "text": "Wie heißt der Ausdruck für den Punkt, an dem ein Läufer plötzlich kaum noch kann?",
-              "answer": "Der Mann mit dem Hammer"
+              "answer": "Der Mann mit dem Hammer",
+              "note": "Dann sind die Kohlenhydrate im Muskel aufgebraucht. Beim Marathon passiert das oft um Kilometer 30."
             }
           ]
         }
@@ -146,11 +163,13 @@
           "questions": [
             {
               "text": "Welches Gerät braucht man beim Curling, um das Eis vor dem Stein zu bearbeiten?",
-              "answer": "Einen Besen"
+              "answer": "Einen Besen",
+              "note": "Durch das Wischen entsteht ein dünner Wasserfilm. Der Stein rutscht weiter und läuft gerader."
             },
             {
               "text": "Wie heißt die Abfahrt, bei der die Tore eng nebeneinander stehen?",
-              "answer": "Slalom"
+              "answer": "Slalom",
+              "note": "Beim Riesenslalom stehen die Tore weiter auseinander, bei der Abfahrt noch weiter – dort zählt vor allem das Tempo."
             },
             {
               "text": "Wie viele der vier Schanzen der Vierschanzentournee stehen in Deutschland?",
@@ -159,7 +178,8 @@
             },
             {
               "text": "Welche Sportart fährt kopfüber und mit den Armen voran einen Eiskanal hinunter?",
-              "answer": "Skeleton"
+              "answer": "Skeleton",
+              "note": "Bis zu 130 Stundenkilometer, und das Gesicht nur wenige Zentimeter über dem Eis."
             }
           ]
         },
@@ -168,7 +188,8 @@
           "questions": [
             {
               "text": "Über welche Strecke geht der klassische Marathon?",
-              "answer": "42,195 Kilometer"
+              "answer": "42,195 Kilometer",
+              "note": "Die krumme Zahl stammt von den Spielen 1908 in London: Gestartet wurde vor Schloss Windsor, damit die Kinder zusehen konnten."
             },
             {
               "text": "Welcher Jamaikaner hält den Weltrekord über 100 Meter?",
@@ -182,7 +203,8 @@
             },
             {
               "text": "Wie heißt die Technik, mit der Hochspringer heute rücklings über die Latte gehen?",
-              "answer": "Fosbury-Flop"
+              "answer": "Fosbury-Flop",
+              "note": "Dick Fosbury gewann damit 1968 Olympiagold. Vorher rollte man bäuchlings über die Latte."
             }
           ]
         },
@@ -191,7 +213,8 @@
           "questions": [
             {
               "text": "Welcher deutsche Rennfahrer holte sieben Weltmeistertitel in der Formel 1?",
-              "answer": "Michael Schumacher"
+              "answer": "Michael Schumacher",
+              "note": "Fünf Titel davon in Folge mit Ferrari. Erst Lewis Hamilton zog später mit sieben gleich."
             },
             {
               "text": "Wer schoss im WM-Finale 2014 das Tor zum deutschen Titel?",
@@ -200,10 +223,11 @@
             },
             {
               "text": "Wie heißt das Fußballspiel von 1954, das als „Wunder von Bern“ in die Geschichte einging?",
-              "answer": "Das WM-Finale gegen Ungarn"
+              "answer": "Das WM-Finale gegen Ungarn",
+              "note": "Deutschland lag 0:2 zurück und gewann 3:2. Ungarn war zuvor vier Jahre lang ungeschlagen."
             },
             {
-              "text": "Welche deutsche Tennisspielerin gewann 1988 alle vier Grand-Slam-Turniere und Olympia-Gold?",
+              "text": "Welche deutsche Tennisspielerin gewann 1988 alle vier Grand Slams und Olympia-Gold?",
               "answer": "Steffi Graf",
               "note": "Der Golden Slam – bis heute einmalig."
             }
@@ -219,7 +243,8 @@
             },
             {
               "text": "In welcher Sportart spielt man mit einem Ball, der nicht rund, sondern eiförmig ist?",
-              "answer": "Rugby"
+              "answer": "Rugby",
+              "note": "Die ersten Bälle wurden über aufgeblasene Schweinsblasen genäht – die hatten von Natur aus diese Form."
             },
             {
               "text": "Welcher Ball ist im Spiel der leichteste: Tischtennis, Tennis oder Handball?",
@@ -228,7 +253,8 @@
             },
             {
               "text": "Wie viele Nähte hat ein klassischer Baseball – 108 oder 216?",
-              "answer": "108"
+              "answer": "108",
+              "note": "Genäht wird bis heute von Hand, mit rotem Faden und immer derselben Anzahl Stiche."
             }
           ]
         },
@@ -237,19 +263,23 @@
           "questions": [
             {
               "text": "Wie geht der berühmteste Fußballsatz weiter: „Der Ball ist rund und ein Spiel dauert …“?",
-              "answer": "… 90 Minuten"
+              "answer": "… 90 Minuten",
+              "note": "Der Satz wird Sepp Herberger zugeschrieben – ebenso wie „Nach dem Spiel ist vor dem Spiel“."
             },
             {
               "text": "Welcher Bundestrainer führte Deutschland 1954 zum ersten WM-Titel?",
-              "answer": "Sepp Herberger"
+              "answer": "Sepp Herberger",
+              "note": "Er war insgesamt 28 Jahre für die Nationalmannschaft verantwortlich, unterbrochen vom Krieg."
             },
             {
               "text": "Welcher Trainerposten wird in England „the hot seat“ genannt?",
-              "answer": "Der Trainerstuhl"
+              "answer": "Der Trainerstuhl",
+              "note": "„Hot seat“ heißt wörtlich heißer Stuhl. Im Profifußball hält sich ein Trainer im Schnitt gut ein Jahr."
             },
             {
               "text": "Wie heißt der Trainer, der eine Mannschaft nur für kurze Zeit übernimmt?",
-              "answer": "Interimstrainer"
+              "answer": "Interimstrainer",
+              "note": "„Interim“ ist Latein für „unterdessen“. Meist rückt für ein paar Wochen jemand aus dem eigenen Verein nach."
             }
           ]
         },
@@ -258,15 +288,18 @@
           "questions": [
             {
               "text": "Wie heißt das Aufwärmen vor dem Sport auf Englisch?",
-              "answer": "Warm-up"
+              "answer": "Warm-up",
+              "note": "Warme Muskeln sind dehnbarer und arbeiten schneller. Zehn Minuten lockeres Laufen reichen dafür meist."
             },
             {
               "text": "Welches Organ pumpt bei Ausdauersport pro Minute deutlich mehr Blut als in Ruhe?",
-              "answer": "Das Herz"
+              "answer": "Das Herz",
+              "note": "In Ruhe pumpt es rund fünf Liter pro Minute, unter voller Belastung ein Vielfaches davon."
             },
             {
               "text": "Welche Sehne reißt Sportlern am Sprunggelenk besonders oft?",
-              "answer": "Die Achillessehne"
+              "answer": "Die Achillessehne",
+              "note": "Sie ist die kräftigste Sehne des Körpers. Der Name kommt vom Helden Achill, der nur an der Ferse verwundbar war."
             },
             {
               "text": "Welcher Stoff galt lange als Ursache von Muskelkater, ist es aber nicht?",

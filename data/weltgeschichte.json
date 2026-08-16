@@ -19,7 +19,8 @@
             },
             {
               "text": "Welchen Honigwein tranken die Wikinger gern?",
-              "answer": "Met"
+              "answer": "Met",
+              "note": "Honig, Wasser und Hefe. Met war lange verbreitet, weil Honig jahrhundertelang das einzige Süßungsmittel zum Vergären war."
             },
             {
               "text": "Wie viele Jahre dauerte der Hundertjährige Krieg?",
@@ -33,7 +34,8 @@
           "questions": [
             {
               "text": "In welchen Jahren fand der Erste Weltkrieg statt?",
-              "answer": "Von 1914 bis 1918"
+              "answer": "Von 1914 bis 1918",
+              "note": "Auslöser war das Attentat von Sarajevo. Beendet wurde er am 11. November 1918 mit einem Waffenstillstand."
             },
             {
               "text": "In welchem Land begann die Februarrevolution von 1917?",
@@ -57,7 +59,8 @@
           "questions": [
             {
               "text": "Wer war der letzte Zar von Russland?",
-              "answer": "Nikolaus II."
+              "answer": "Nikolaus II.",
+              "note": "Er dankte im Frühjahr 1917 ab. Ein Jahr später wurde die Familie in Jekaterinburg erschossen."
             },
             {
               "text": "Welcher französische König regierte 72 Jahre – länger als jeder andere Monarch Europas?",
@@ -91,7 +94,8 @@
             },
             {
               "text": "Von welchem Kontinent aus breitete sich der Homo sapiens über die Welt aus?",
-              "answer": "Von Afrika"
+              "answer": "Von Afrika",
+              "note": "Vor rund 70.000 Jahren begann die große Ausbreitung. Alle Menschen außerhalb Afrikas gehen darauf zurück."
             },
             {
               "text": "Wessen Expedition umrundete als erste die Erde?",
@@ -110,11 +114,13 @@
             },
             {
               "text": "In welcher Stadt wurde John F. Kennedy erschossen?",
-              "answer": "In Dallas"
+              "answer": "In Dallas",
+              "note": "Am 22. November 1963, in einem offenen Wagen. Kaum ein Ereignis hat so viele Verschwörungstheorien hervorgebracht."
             },
             {
               "text": "In welchem Jahr wurden die Vereinten Nationen gegründet?",
-              "answer": "1945"
+              "answer": "1945",
+              "note": "51 Staaten unterzeichneten die Charta in San Francisco. Heute sind 193 Länder Mitglied."
             },
             {
               "text": "Wie viele bemannte Mondlandungen gab es insgesamt?",
@@ -128,7 +134,8 @@
           "questions": [
             {
               "text": "Wer sagte bei der ersten Mondlandung „Ein kleiner Schritt für einen Menschen …“?",
-              "answer": "Neil Armstrong"
+              "answer": "Neil Armstrong",
+              "note": "Er beharrte darauf, „a man“ gesagt zu haben. Auf der Aufnahme ist das kleine „a“ nicht zu hören."
             },
             {
               "text": "Wer soll gesagt haben „Ich weiß, dass ich nichts weiß“?",
@@ -156,7 +163,8 @@
           "questions": [
             {
               "text": "In welchem Jahr löste sich die Sowjetunion auf?",
-              "answer": "1991"
+              "answer": "1991",
+              "note": "Am 26. Dezember. Aus der Sowjetunion wurden 15 eigenständige Staaten."
             },
             {
               "text": "In welchem Jahr stürmte die Menge die Bastille?",
@@ -180,7 +188,8 @@
           "questions": [
             {
               "text": "In welchem Land begann die Industrielle Revolution?",
-              "answer": "In Großbritannien"
+              "answer": "In Großbritannien",
+              "note": "Ab etwa 1760, zuerst in der Textilherstellung. Möglich machte sie vor allem die Dampfmaschine."
             },
             {
               "text": "Wer führte Indien mit gewaltlosem Widerstand in die Unabhängigkeit?",
@@ -189,7 +198,8 @@
             },
             {
               "text": "Wer schrieb den Hauptteil der amerikanischen Unabhängigkeitserklärung?",
-              "answer": "Thomas Jefferson"
+              "answer": "Thomas Jefferson",
+              "note": "Er war damals 33 Jahre alt. Später wurde er der dritte Präsident der USA."
             },
             {
               "text": "Wer führte den Sklavenaufstand an, aus dem der Staat Haiti hervorging?",
@@ -203,7 +213,8 @@
           "questions": [
             {
               "text": "Welches Volk baute Machu Picchu?",
-              "answer": "Die Inka"
+              "answer": "Die Inka",
+              "note": "Ihr Reich zog sich über 4.000 Kilometer die Anden entlang, verbunden durch ein Straßennetz – und das ohne Rad und ohne Schrift."
             },
             {
               "text": "Welches Reich beherrschte Mexiko, bevor die Spanier kamen?",
@@ -212,7 +223,8 @@
             },
             {
               "text": "Wer begründete im 13. Jahrhundert das größte zusammenhängende Reich der Geschichte?",
-              "answer": "Dschingis Khan"
+              "answer": "Dschingis Khan",
+              "note": "Auf seinem Höhepunkt reichte das Reich von Osteuropa bis zum Pazifik."
             },
             {
               "text": "In welchem Jahr endete das Weströmische Reich nach gängiger Zählung?",
@@ -231,7 +243,8 @@
             },
             {
               "text": "Wer hielt 1963 die Rede „I have a dream“?",
-              "answer": "Martin Luther King"
+              "answer": "Martin Luther King",
+              "note": "Vor dem Lincoln Memorial in Washington, vor rund 250.000 Menschen. Den berühmtesten Teil sprach er frei, ohne Manuskript."
             },
             {
               "text": "Wer war der erste Mensch im Weltall?",
@@ -250,7 +263,8 @@
           "questions": [
             {
               "text": "Wie hieß die Handelsroute, die China mit dem Mittelmeer verband?",
-              "answer": "Die Seidenstraße"
+              "answer": "Die Seidenstraße",
+              "note": "Kein einzelner Weg, sondern ein Netz aus Routen. Den Namen prägte erst im 19. Jahrhundert ein deutscher Geograf."
             },
             {
               "text": "Welches Land verkaufte 1867 Alaska an die USA?",
@@ -274,11 +288,13 @@
           "questions": [
             {
               "text": "Welche zwei Supermächte standen sich im Kalten Krieg gegenüber?",
-              "answer": "Die USA und die Sowjetunion"
+              "answer": "Die USA und die Sowjetunion",
+              "note": "„Kalt“ heißt: Beide Seiten rüsteten auf und kämpften überall auf der Welt mit – nur nie direkt gegeneinander."
             },
             {
               "text": "Wie hieß das Militärbündnis des Ostblocks?",
-              "answer": "Der Warschauer Pakt"
+              "answer": "Der Warschauer Pakt",
+              "note": "Gegründet 1955 als Antwort auf den NATO-Beitritt der Bundesrepublik, aufgelöst 1991."
             },
             {
               "text": "Womit versorgten die Westalliierten das abgeriegelte West-Berlin 1948/49?",

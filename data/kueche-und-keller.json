@@ -133,9 +133,9 @@
           "name": "Was ist die Frage?",
           "questions": [
             {
-              "text": "Dieses Küchenwerkzeug hat einen Stiel, einen runden Kopf voller Löcher und trennt Nudeln vom Wasser.",
+              "text": "Dieses Werkzeug hat einen Stiel, einen Kopf voller Löcher und trennt Nudeln vom Wasser.",
               "answer": "Was ist ein Sieb?",
-              "note": "Vom Schöpflöffel unterscheidet es nur die Lochung – und die entscheidet über alles."
+              "note": "Vom Schöpflöffel unterscheidet es nur die Lochung."
             },
             {
               "text": "Dieses weiße Pulver aus Mais bindet Soßen und macht Pudding fest.",
@@ -143,14 +143,14 @@
               "note": "Klar und glänzend bindet dagegen Kartoffelstärke – Maisstärke trübt ein."
             },
             {
-              "text": "Dieses Verfahren macht Milch länger haltbar und ist nach einem französischen Chemiker benannt.",
+              "text": "Dieses Verfahren macht Milch haltbar und ist nach einem französischen Chemiker benannt.",
               "answer": "Was ist das Pasteurisieren?",
-              "note": "Nach Louis Pasteur. Kurz erhitzen tötet die meisten Keime, ohne den Geschmack zu zerstören."
+              "note": "Nach Louis Pasteur. Kurz erhitzen tötet die meisten Keime."
             },
             {
-              "text": "Diese Reaktion sorgt dafür, dass Braten, Brotkruste und Röstzwiebeln braun werden und gut riechen.",
+              "text": "Diese Reaktion lässt Braten, Brotkruste und Röstzwiebeln braun werden und gut riechen.",
               "answer": "Was ist die Maillard-Reaktion?",
-              "note": "Zucker und Eiweiß reagieren ab etwa 140 Grad. Genau deshalb schmeckt Gebratenes anders als Gekochtes."
+              "note": "Zucker und Eiweiß reagieren ab etwa 140 Grad."
             }
           ]
         }
@@ -242,7 +242,7 @@
               "note": "Weiße Bohnen in Tomatensoße, meist gezuckert. Zum „Full English“ gehören außerdem Würstchen, Pilze und Toast."
             },
             {
-              "text": "Wie heißt das halbmondförmige Blätterteiggebäck, das in Frankreich zum Frühstück gehört?",
+              "text": "Wie heißt das halbmondförmige Blätterteiggebäck aus Frankreich?",
               "answer": "Croissant",
               "note": "Es stammt eigentlich aus Wien: Das Kipferl kam mit einem Wiener Bäcker nach Paris."
             },
@@ -302,9 +302,9 @@
               "note": "Bei exakt eingestellter Temperatur – ein Steak kann darin nicht übergaren, nur trockener werden."
             },
             {
-              "text": "Wozu dient der Aufsatz, der bei einer Küchenmaschine „Flexirührer“ heißt?",
+              "text": "Wozu dient der Aufsatz, der an der Küchenmaschine „Flexirührer“ heißt?",
               "answer": "Zum Rühren dickerer Massen, dabei streift er die Schüsselwand ab",
-              "note": "„Flexi“ heißt er wegen der weichen Kante: Sie schabt die Schüssel mit ab, während sie rührt."
+              "note": "Die weiche Kante schabt die Schüssel mit ab, während sie rührt."
             }
           ]
         }

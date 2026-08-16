@@ -19,11 +19,13 @@
             },
             {
               "text": "Welche Zahl nennt man den „Goldenen Schnitt“ – rund 1,618?",
-              "answer": "Phi (φ)"
+              "answer": "Phi (φ)",
+              "note": "Das Verhältnis steckt in der Fibonacci-Folge: Teilt man eine Zahl durch die vorherige, nähert man sich 1,618 an."
             },
             {
               "text": "Welche Zahl ist die Basis des natürlichen Logarithmus, rund 2,718?",
-              "answer": "Die eulersche Zahl e"
+              "answer": "Die eulersche Zahl e",
+              "note": "Benannt nach Leonhard Euler, gefunden hat sie aber Jakob Bernoulli beim Rechnen mit Zinseszins."
             }
           ]
         },
@@ -32,15 +34,18 @@
           "questions": [
             {
               "text": "Welcher geometrische Körper hat genau eine Fläche, keine Ecke und keine Kante?",
-              "answer": "Die Kugel"
+              "answer": "Die Kugel",
+              "note": "Von allen Körpern mit gleichem Volumen hat sie die kleinste Oberfläche. Deshalb sind Seifenblasen rund."
             },
             {
               "text": "Wie viele Ecken hat ein Würfel?",
-              "answer": "8"
+              "answer": "8",
+              "note": "Dazu kommen 6 Flächen und 12 Kanten. 8 minus 12 plus 6 ergibt 2 – das gilt bei jedem solchen Körper."
             },
             {
               "text": "Wie heißt ein Dreieck, bei dem alle drei Seiten gleich lang sind?",
-              "answer": "Gleichseitig"
+              "answer": "Gleichseitig",
+              "note": "Dann sind auch alle drei Winkel gleich groß, nämlich je 60 Grad."
             },
             {
               "text": "Wie viele Flächen hat ein klassischer Fußball aus Fünf- und Sechsecken?",
@@ -54,19 +59,23 @@
           "questions": [
             {
               "text": "Was ergibt 25 mal 4?",
-              "answer": "100"
+              "answer": "100",
+              "note": "Der Trick mit der 25: durch 4 teilen und zwei Nullen anhängen. 4 durch 4 ist 1, macht 100."
             },
             {
               "text": "Wie viel sind 15 Prozent von 200?",
-              "answer": "30"
+              "answer": "30",
+              "note": "Zehn Prozent sind 20, fünf Prozent die Hälfte davon, also 10. Zusammen 30 – so rechnet man Prozente im Kopf."
             },
             {
               "text": "Ein Pullover kostet 80 Euro und wird um 25 Prozent reduziert. Was zahlt man?",
-              "answer": "60 Euro"
+              "answer": "60 Euro",
+              "note": "Ein Viertel weg heißt: drei Viertel bleiben. Drei Viertel von 80 sind 60."
             },
             {
               "text": "Was ist die Hälfte von drei Vierteln?",
-              "answer": "Drei Achtel"
+              "answer": "Drei Achtel",
+              "note": "Halbieren heißt beim Bruch: den Nenner verdoppeln. Aus drei Vierteln werden drei Achtel."
             }
           ]
         },
@@ -75,7 +84,8 @@
           "questions": [
             {
               "text": "Nach wem ist der Satz benannt, mit dem man im rechtwinkligen Dreieck die Seiten berechnet?",
-              "answer": "Pythagoras"
+              "answer": "Pythagoras",
+              "note": "Den Zusammenhang kannten Babylonier und Ägypter schon tausend Jahre früher. Bewiesen haben ihn wohl erst Pythagoras und seine Schüler."
             },
             {
               "text": "Welcher Deutsche addierte als Schulkind blitzschnell die Zahlen von 1 bis 100?",
@@ -83,12 +93,14 @@
               "note": "Die Geschichte ist überliefert, aber nicht sicher belegt – der Trick funktioniert trotzdem."
             },
             {
-              "text": "Welcher Grieche schrieb „Die Elemente“, das jahrhundertelang das Geometriebuch schlechthin war?",
-              "answer": "Euklid"
+              "text": "Welcher Grieche schrieb „Die Elemente“, das Geometriebuch schlechthin?",
+              "answer": "Euklid",
+              "note": "Nach der Bibel eines der meistgedruckten Bücher überhaupt."
             },
             {
               "text": "Welche Mathematikerin aus Erlangen gilt als Begründerin der modernen Algebra?",
-              "answer": "Emmy Noether"
+              "answer": "Emmy Noether",
+              "note": "In Göttingen durfte sie jahrelang nur unter fremdem Namen ankündigen, weil Frauen damals keine Professur bekamen."
             }
           ]
         },
@@ -102,7 +114,8 @@
             },
             {
               "text": "Wie groß ist die Chance, mit einem Würfel eine Sechs zu werfen?",
-              "answer": "1 zu 6"
+              "answer": "1 zu 6",
+              "note": "Also rund 17 Prozent. Bei sechs Würfen kommt die Sechs trotzdem nur mit etwa 67 Prozent mindestens einmal."
             },
             {
               "text": "Man wirft zwei Würfel. Welche Augensumme kommt am häufigsten vor?",
@@ -121,19 +134,23 @@
           "questions": [
             {
               "text": "Wie viele Minuten sind drei Viertel einer Stunde?",
-              "answer": "45"
+              "answer": "45",
+              "note": "Deshalb heißt es „Viertel vor“ und „Viertel nach“ – die Stunde wird in vier Teile zu 15 Minuten geteilt."
             },
             {
               "text": "Wie viele Quadratmeter hat ein Zimmer von 4 mal 5 Metern?",
-              "answer": "20"
+              "answer": "20",
+              "note": "Länge mal Breite. Eine durchschnittliche deutsche Wohnung hat rund 90 Quadratmeter."
             },
             {
               "text": "Ein Rezept für 4 Personen braucht 300 Gramm Mehl. Wie viel braucht man für 6?",
-              "answer": "450 Gramm"
+              "answer": "450 Gramm",
+              "note": "Der Dreisatz: 300 durch 4 sind 75 pro Person, mal 6 macht 450."
             },
             {
               "text": "Wie viel Prozent Trinkgeld gibt man, wenn man auf 42 Euro glatt 46 Euro zahlt?",
-              "answer": "Knapp 10 Prozent"
+              "answer": "Knapp 10 Prozent",
+              "note": "4 Euro auf 42 sind 9,5 Prozent. In Deutschland sind fünf bis zehn Prozent üblich, in den USA deutlich mehr."
             }
           ]
         }
@@ -151,15 +168,18 @@
             },
             {
               "text": "Wie viele Nullen hat eine Milliarde?",
-              "answer": "9"
+              "answer": "9",
+              "note": "Im Englischen heißt sie „billion“ – bei Übersetzungen geht deshalb gern der Faktor tausend verloren."
             },
             {
               "text": "Wie viele Sekunden hat ein Tag?",
-              "answer": "86.400"
+              "answer": "86.400",
+              "note": "60 mal 60 mal 24. Ab und zu kommt eine Schaltsekunde dazu, damit die Uhren zur Erddrehung passen."
             },
             {
               "text": "Wie heißt die Zahl mit hundert Nullen, nach der eine Suchmaschine benannt wurde?",
-              "answer": "Googol"
+              "answer": "Googol",
+              "note": "Den Namen erfand ein neunjähriger Junge. Die Suchmaschine heißt nur deshalb Google, weil man sich verschrieben hat."
             }
           ]
         },
@@ -168,19 +188,23 @@
           "questions": [
             {
               "text": "Wie viel Grad ergeben die drei Winkel eines Dreiecks zusammen?",
-              "answer": "180"
+              "answer": "180",
+              "note": "Das gilt nur in der Ebene. Auf einer Kugel kann ein Dreieck sogar drei rechte Winkel haben."
             },
             {
               "text": "Wie nennt man den längsten Abstand quer durch einen Kreis?",
-              "answer": "Durchmesser"
+              "answer": "Durchmesser",
+              "note": "Er ist doppelt so lang wie der Radius. Teilt man den Umfang durch ihn, kommt immer Pi heraus."
             },
             {
               "text": "Wie heißt ein Winkel, der größer als ein rechter, aber kleiner als ein gestreckter ist?",
-              "answer": "Stumpf"
+              "answer": "Stumpf",
+              "note": "Also zwischen 90 und 180 Grad. Alles unter 90 Grad heißt spitz."
             },
             {
               "text": "Wie viele Symmetrieachsen hat ein Quadrat?",
-              "answer": "4"
+              "answer": "4",
+              "note": "Zwei durch die Seitenmitten, zwei durch die Ecken. Ein Rechteck hat nur noch zwei."
             }
           ]
         },
@@ -189,15 +213,18 @@
           "questions": [
             {
               "text": "Wie viele Milliliter passen in einen Liter?",
-              "answer": "1000"
+              "answer": "1000",
+              "note": "Ein Liter ist genau ein Kubikdezimeter – ein Würfel mit 10 Zentimetern Kantenlänge."
             },
             {
               "text": "Wie viele Zentimeter sind ein Zoll?",
-              "answer": "2,54"
+              "answer": "2,54",
+              "note": "Das Zoll war ursprünglich die Breite eines Daumens. Bildschirme werden bis heute so gemessen."
             },
             {
               "text": "In welcher Einheit misst man Kraft?",
-              "answer": "Newton"
+              "answer": "Newton",
+              "note": "Ein Newton ist ungefähr die Kraft, mit der eine Tafel Schokolade nach unten zieht."
             },
             {
               "text": "Wie viele Quadratmeter hat ein Hektar?",
@@ -211,19 +238,23 @@
           "questions": [
             {
               "text": "Aus welcher Sprache stammt das Wort „Algebra“?",
-              "answer": "Aus dem Arabischen"
+              "answer": "Aus dem Arabischen",
+              "note": "Von „al-dschabr“, dem Zusammensetzen. Es steht im Titel eines Buches von al-Chwarizmi – aus dessen Namen wurde der Algorithmus."
             },
             {
               "text": "Was bedeutet „Geometrie“ wörtlich übersetzt?",
-              "answer": "Erdmessung"
+              "answer": "Erdmessung",
+              "note": "Von „geo“ für Erde und „metron“ für Maß. Gemessen wurden zuerst Felder am Nil, die nach jedem Hochwasser neu abgesteckt werden mussten."
             },
             {
               "text": "Welches Wort beschreibt eine Zahl, die sich nicht als Bruch schreiben lässt?",
-              "answer": "Irrational"
+              "answer": "Irrational",
+              "note": "Von lateinisch „ratio“, dem Verhältnis. Mit Unvernunft hat das Wort hier nichts zu tun."
             },
             {
               "text": "Wie nennt man in der Mathematik eine Aussage, die noch bewiesen werden muss?",
-              "answer": "Vermutung"
+              "answer": "Vermutung",
+              "note": "Manche halten sich lange: Die Vermutung von Fermat wartete 358 Jahre auf ihren Beweis."
             }
           ]
         },
@@ -237,11 +268,13 @@
             },
             {
               "text": "Welche Ziffer fehlte den Römern in ihrem Zahlensystem?",
-              "answer": "Die Null"
+              "answer": "Die Null",
+              "note": "Ohne Null gibt es keine Stellenwerte – genau deshalb ist Rechnen mit römischen Zahlen so mühsam."
             },
             {
               "text": "Welche römische Zahl steht für 50?",
-              "answer": "L"
+              "answer": "L",
+              "note": "Die Reihe lautet I, V, X, L, C, D, M – also 1, 5, 10, 50, 100, 500 und 1000."
             },
             {
               "text": "Aus welchem Land kamen die Ziffern, die wir heute benutzen, nach Europa?",
@@ -255,19 +288,23 @@
           "questions": [
             {
               "text": "Ein Zug fährt um 14 Uhr los und braucht 90 Minuten. Wann kommt er an?",
-              "answer": "Um 15:30 Uhr"
+              "answer": "Um 15:30 Uhr",
+              "note": "90 Minuten sind eineinhalb Stunden. Der häufigste Fehler ist, die 90 wie eine Dezimalzahl zu addieren."
             },
             {
-              "text": "Ein Buch und ein Stift kosten zusammen 11 Euro. Das Buch kostet 10 Euro mehr. Was kostet der Stift?",
-              "answer": "50 Cent"
+              "text": "Buch und Stift kosten zusammen 11 Euro. Das Buch kostet 10 Euro mehr. Was kostet der Stift?",
+              "answer": "50 Cent",
+              "note": "Nicht 1 Euro – dann wären es zusammen 12 Euro."
             },
             {
-              "text": "Auf einem Bauernhof gibt es Hühner und Kühe, zusammen 10 Köpfe und 28 Beine. Wie viele Kühe sind es?",
-              "answer": "4"
+              "text": "Auf einem Hof gibt es Hühner und Kühe, zusammen 10 Köpfe und 28 Beine. Wie viele Kühe?",
+              "answer": "4",
+              "note": "10 Köpfe mit je 2 Beinen wären 20. Die 8 fehlenden gehören 4 Kühen."
             },
             {
               "text": "Was ist größer: die Hälfte von 60 oder ein Drittel von 90?",
-              "answer": "Beide sind 30 – gleich groß"
+              "answer": "Beide sind 30 – gleich groß",
+              "note": "Die Frage lädt zum Vergleichen ein, obwohl es nichts zu vergleichen gibt. Genau darin liegt der Trick."
             }
           ]
         }

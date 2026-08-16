@@ -23,9 +23,9 @@
               "note": "Die „Königin der Instrumente“ – die größten haben über zehntausend Pfeifen."
             },
             {
-              "text": "Wie heißt das Schlaginstrument mit Holzstäben und Resonanzröhren, das tiefer klingt als ein Xylophon?",
+              "text": "Wie heißt das Schlaginstrument mit Holzstäben, das tiefer klingt als ein Xylophon?",
               "answer": "Die Marimba",
-              "note": "Die Röhren unter den Stäben sind unterschiedlich lang – jede ist auf ihren Ton gestimmt."
+              "note": "Unter jedem Stab hängt eine Röhre, gestimmt auf seinen Ton."
             }
           ]
         },
@@ -48,7 +48,7 @@
               "note": "„Schwanensee“ fiel bei der Uraufführung durch – berühmt wurde es erst nach seinem Tod."
             },
             {
-              "text": "Wie heißt die Form, in der ein Thema nacheinander von mehreren Stimmen versetzt aufgegriffen wird – Bachs Spezialität?",
+              "text": "Wie heißt die Form, in der ein Thema von mehreren Stimmen versetzt aufgegriffen wird?",
               "answer": "Die Fuge",
               "note": "Bachs „Kunst der Fuge“ blieb unvollendet – das letzte Stück bricht mitten im Takt ab."
             }
@@ -88,7 +88,7 @@
               "note": "Der Name ist ein Wortspiel aus „beat“ und „beetles“ – Käfer."
             },
             {
-              "text": "Welche Popgruppe aus Stockholm setzte ihren Namen aus den Anfangsbuchstaben der vier Vornamen zusammen?",
+              "text": "Welche Popgruppe aus Stockholm trägt die Anfangsbuchstaben von vier Vornamen im Namen?",
               "answer": "ABBA",
               "note": "Agnetha, Björn, Benny und Anni-Frid."
             },
@@ -167,7 +167,7 @@
               "note": "Die Vorlage ist ein Gedichtband von T. S. Eliot – eigentlich für seine Patenkinder geschrieben."
             },
             {
-              "text": "Welches Musical spielt in der Pariser Oper und handelt von einem maskierten Mann im Keller?",
+              "text": "Welches Musical spielt in der Pariser Oper, mit einem maskierten Mann im Keller?",
               "answer": "Das Phantom der Oper",
               "note": "Unter der Pariser Oper liegt tatsächlich ein Wasserbecken – daher die Legende vom See."
             },
@@ -252,9 +252,9 @@
               "note": "Erst 2002 setzte sich auch bei uns der englische Name durch."
             },
             {
-              "text": "Welche Sängerin gewann 1988 für die Schweiz und wurde später mit Filmballaden weltberühmt?",
+              "text": "Welche Sängerin gewann 1988 für die Schweiz und wurde später mit Filmballaden berühmt?",
               "answer": "Céline Dion",
-              "note": "Sie gewann mit einem französischen Lied für ein Land, in dem sie nicht lebte – erlaubt ist das bis heute."
+              "note": "Sie sang französisch für ein Land, in dem sie nicht lebte – erlaubt ist das bis heute."
             }
           ]
         },
@@ -262,7 +262,7 @@
           "name": "Wer steckt dahinter?",
           "questions": [
             {
-              "text": "Welcher Sänger tanzte den Moonwalk und veröffentlichte das meistverkaufte Album aller Zeiten?",
+              "text": "Welcher Sänger tanzte den Moonwalk und nahm das meistverkaufte Album aller Zeiten auf?",
               "answer": "Michael Jackson",
               "note": "„Thriller“ von 1982 – bis heute unerreicht."
             },

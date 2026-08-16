@@ -88,14 +88,14 @@
               "note": "Ein Weitwinkel – deshalb sieht der Besucher draußen so gekrümmt aus."
             },
             {
-              "text": "Wie heißt das gebogene Rohrstück unter dem Waschbecken, das den Geruch aus dem Abfluss fernhält?",
+              "text": "Wie heißt das gebogene Rohr unter dem Waschbecken, das den Geruch fernhält?",
               "answer": "Siphon (Geruchsverschluss)",
               "note": "Im Bogen steht immer etwas Wasser – genau das ist der Verschluss."
             },
             {
-              "text": "Wie heißt der Stab, mit dem man an der Supermarktkasse seine Waren von denen des Nächsten trennt?",
+              "text": "Wie heißt der Stab, mit dem man an der Kasse seine Waren von den nächsten trennt?",
               "answer": "Warentrenner (Warentrennstab)",
-              "note": "Manche Läden nennen ihn auch Kundentrenner – ein Wort, das jeder kennt und keiner sagt."
+              "note": "Manche Läden sagen Kundentrenner – ein Wort, das keiner benutzt."
             },
             {
               "text": "Wie heißt die kleine Rinne zwischen Nase und Oberlippe?",
@@ -148,9 +148,9 @@
               "note": "Deshalb wandert Ostern zwischen dem 22. März und dem 25. April."
             },
             {
-              "text": "Alle vier Jahre ist Schaltjahr – aber volle Hundertjahre fallen aus. Welche sind trotzdem Schaltjahre?",
+              "text": "Alle vier Jahre ist Schaltjahr, volle Hundertjahre nicht. Welche sind trotzdem eins?",
               "answer": "Die durch 400 teilbaren",
-              "note": "1900 war keins, 2000 schon – die meisten Lebenden haben also die Ausnahme erlebt, nicht die Regel."
+              "note": "1900 war keins, 2000 schon – die meisten kennen nur die Ausnahme."
             }
           ]
         }
@@ -177,7 +177,7 @@
               "note": "Das Weibchen legt die Eier in seine Bruttasche – nach Wochen presst er die Jungen heraus."
             },
             {
-              "text": "Wie heißt der größte Fisch der Welt, der sich trotzdem nur von winzigem Plankton ernährt?",
+              "text": "Wie heißt der größte Fisch der Welt, der sich nur von Plankton ernährt?",
               "answer": "Der Walhai",
               "note": "Bis zu zwölf Meter lang. Sein Muster ist so einzigartig wie ein Fingerabdruck."
             }

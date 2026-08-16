@@ -14,7 +14,8 @@
             },
             {
               "text": "Welches Raubtier verliert lebenslang Zähne und schiebt ständig neue Reihen nach?",
-              "answer": "Der Hai"
+              "answer": "Der Hai",
+              "note": "Die Zähne stehen in mehreren Reihen hintereinander und rücken nach wie auf einem Fließband. Über ein Leben werden es zehntausende."
             },
             {
               "text": "Welches Meeressäugetier schläft mit einer wachen Gehirnhälfte und einem offenen Auge?",
@@ -38,7 +39,8 @@
             },
             {
               "text": "Welches Organ kann große Teile von sich selbst nachwachsen lassen?",
-              "answer": "Die Leber"
+              "answer": "Die Leber",
+              "note": "Sie wächst selbst nach großen Eingriffen wieder auf ihre alte Größe. Nur deshalb ist eine Lebendspende überhaupt möglich."
             },
             {
               "text": "Welcher Muskel ist der größte im menschlichen Körper?",
@@ -62,7 +64,8 @@
             },
             {
               "text": "Wahr oder falsch: Den meisten Fischen fehlen Augenlider.",
-              "answer": "Wahr"
+              "answer": "Wahr",
+              "note": "Im Wasser trocknen die Augen nicht aus, deshalb braucht es keine Lider. Haie haben stattdessen eine Nickhaut."
             },
             {
               "text": "Wahr oder falsch: Bananen wachsen an Bäumen.",
@@ -80,17 +83,19 @@
           "name": "Aus Versehen erfunden",
           "questions": [
             {
-              "text": "Welches heute weltbekannte Getränk wurde 1886 von einem Apotheker als Stärkungsmittel gemischt?",
+              "text": "Welches Getränk mischte 1886 ein Apotheker als Stärkungsmittel zusammen?",
               "answer": "Coca-Cola",
               "note": "Der Apotheker hieß John Pemberton."
             },
             {
-              "text": "Welches Medikament entdeckte Alexander Fleming durch einen Schimmelpilz auf einer vergessenen Bakterienkultur?",
-              "answer": "Penicillin"
+              "text": "Welches Medikament entdeckte Alexander Fleming durch einen Schimmelpilz?",
+              "answer": "Penicillin",
+              "note": "1928 in London. In Mengen herstellbar war es erst zehn Jahre später."
             },
             {
-              "text": "Welches Küchengerät entstand, weil einem Forscher an einem Gerät der Schokoriegel in der Tasche schmolz?",
-              "answer": "Die Mikrowelle"
+              "text": "Welches Küchengerät entstand, weil einem Forscher vor einem Gerät der Schokoriegel schmolz?",
+              "answer": "Die Mikrowelle",
+              "note": "Das erste Gerät von 1947 wog über 300 Kilo."
             },
             {
               "text": "Welches Büroprodukt entstand aus einem Kleber, der eigentlich zu schwach geraten war?",
@@ -103,20 +108,24 @@
           "name": "Deutsche Wörter",
           "questions": [
             {
-              "text": "Welches deutsche Wort für Einrichtungen mit kleinen Kindern hat es unverändert ins Englische geschafft?",
-              "answer": "Kindergarten"
+              "text": "Welches deutsche Wort für eine Einrichtung mit kleinen Kindern benutzt man auch im Englischen?",
+              "answer": "Kindergarten",
+              "note": "Der Begriff stammt von Friedrich Fröbel, der 1840 den ersten eröffnete."
             },
             {
               "text": "Welches deutsche Wort beschreibt die Sehnsucht nach der Ferne?",
-              "answer": "Fernweh"
+              "answer": "Fernweh",
+              "note": "Das Wort wurde im 19. Jahrhundert als Gegenstück zum Heimweh gebildet."
             },
             {
               "text": "Welches deutsche Wort für die Freude an fremdem Missgeschick benutzen auch Englischsprachige?",
-              "answer": "Schadenfreude"
+              "answer": "Schadenfreude",
+              "note": "Im Englischen gibt es kein eigenes Wort dafür – deshalb wurde das deutsche einfach übernommen."
             },
             {
               "text": "Welches deutsche Wort für einen lärmenden Hausgeist ist im Englischen ebenfalls üblich?",
-              "answer": "Poltergeist"
+              "answer": "Poltergeist",
+              "note": "Von „poltern“ und „Geist“. International bekannt machte das Wort ein Kinofilm von 1982."
             }
           ]
         },
@@ -154,15 +163,18 @@
           "questions": [
             {
               "text": "Dieses Element trägt das chemische Symbol O.",
-              "answer": "Was ist Sauerstoff?"
+              "answer": "Was ist Sauerstoff?",
+              "note": "Rund 21 Prozent der Luft. Den größten Teil macht Stickstoff aus."
             },
             {
               "text": "Dieses Gas atmen Menschen aus, und Pflanzen nehmen es auf.",
-              "answer": "Was ist Kohlendioxid?"
+              "answer": "Was ist Kohlendioxid?",
+              "note": "Ein Mensch atmet am Tag ungefähr ein Kilogramm davon aus."
             },
             {
               "text": "Dieser Stoff ist das härteste natürlich vorkommende Material.",
-              "answer": "Was ist Diamant?"
+              "answer": "Was ist Diamant?",
+              "note": "Reiner Kohlenstoff – dasselbe Element wie das Graphit in der Bleistiftmine, nur anders angeordnet."
             },
             {
               "text": "Diese Forscherin erhielt als erster Mensch zwei Nobelpreise – in zwei verschiedenen Fächern.",
@@ -181,7 +193,8 @@
             },
             {
               "text": "Wie heißt die tiefste bekannte Stelle der Weltmeere?",
-              "answer": "Der Marianengraben"
+              "answer": "Der Marianengraben",
+              "note": "Fast 11.000 Meter tief. Der Mount Everest hätte darin Platz – und läge immer noch zwei Kilometer unter Wasser."
             },
             {
               "text": "Welcher See ist der tiefste der Erde?",
@@ -200,11 +213,13 @@
           "questions": [
             {
               "text": "Aus welcher Bohne wird Schokolade gemacht?",
-              "answer": "Aus der Kakaobohne"
+              "answer": "Aus der Kakaobohne",
+              "note": "Bei Maya und Azteken galten die Bohnen auch als Zahlungsmittel – man konnte damit tatsächlich einkaufen."
             },
             {
               "text": "Welche Frucht besteht zu über 90 Prozent aus Wasser und trägt das im Namen?",
-              "answer": "Die Wassermelone"
+              "answer": "Die Wassermelone",
+              "note": "Sie stammt aus Afrika und gehört botanisch zu den Kürbisgewächsen."
             },
             {
               "text": "Was ist botanisch gesehen eine Beere – die Banane oder die Erdbeere?",
@@ -223,19 +238,23 @@
           "questions": [
             {
               "text": "In welchem schottischen See wird seit Langem ein Ungeheuer vermutet?",
-              "answer": "Im Loch Ness"
+              "answer": "Im Loch Ness",
+              "note": "Der See ist so tief, dass er mehr Wasser fasst als alle Seen Englands und Wales zusammen. Das berühmteste Foto von 1934 war eine Fälschung."
             },
             {
               "text": "Welche Zahl gilt in Deutschland als Unglückszahl, besonders an einem Freitag?",
-              "answer": "Die 13"
+              "answer": "Die 13",
+              "note": "In Italien gilt dafür die 17 als Unglückszahl, in Japan und China die 4 – dort klingt sie wie das Wort für Tod."
             },
             {
               "text": "Welches Tier soll Unglück bringen, wenn es von links den Weg kreuzt?",
-              "answer": "Die schwarze Katze"
+              "answer": "Die schwarze Katze",
+              "note": "In Großbritannien ist es umgekehrt: Dort bringt eine schwarze Katze Glück."
             },
             {
               "text": "Was soll man tun, wenn man Salz verschüttet hat?",
-              "answer": "Eine Prise über die linke Schulter werfen"
+              "answer": "Eine Prise über die linke Schulter werfen",
+              "note": "Salz war jahrhundertelang teuer. Es zu verschütten war deshalb ein echtes Missgeschick, nicht nur ein Aberglaube."
             }
           ]
         },
@@ -269,15 +288,18 @@
           "questions": [
             {
               "text": "Welcher Planet wird „der rote Planet“ genannt?",
-              "answer": "Der Mars"
+              "answer": "Der Mars",
+              "note": "Die Farbe kommt vom Eisenoxid im Boden – im Grunde ist der ganze Planet verrostet."
             },
             {
               "text": "Welcher Planet ist der größte unseres Sonnensystems?",
-              "answer": "Der Jupiter"
+              "answer": "Der Jupiter",
+              "note": "Er ist schwerer als alle anderen Planeten zusammen. Der Große Rote Fleck ist ein Sturm, der seit Jahrhunderten tobt."
             },
             {
               "text": "Welcher Planet hat das auffälligste Ringsystem?",
-              "answer": "Der Saturn"
+              "answer": "Der Saturn",
+              "note": "Die Ringe bestehen aus Eis- und Gesteinsbrocken und sind stellenweise nur wenige Meter dick."
             },
             {
               "text": "Wie lange braucht das Licht der Sonne ungefähr bis zur Erde?",

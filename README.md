@@ -524,7 +524,12 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
 - **Kurz halten.** Passt eine Frage nicht auf die Bühne, rechnet der Host-Screen
   die Schrift herunter, bis sie passt – bei einem ganzen Absatz landet sie dabei
   bei einem Bruchteil ihrer Größe und ist aus vier Metern nicht mehr zu lesen.
-  Bis etwa 180 Zeichen bleibt sie in voller Größe; darüber sagt es der Editor.
+  Maßgeblich ist dabei nicht die Frage allein, sondern Frage plus Lösung plus
+  Zusatz zusammen: Beim Auflösen steht alles drei gleichzeitig im Kasten.
+  Nachgemessen über alle 816 mitgelieferten Fragen wird auf 1920×1080 und auf
+  1440×900 keine einzige verkleinert; auf einem 1280×720-Beamer sind es fünf,
+  und die nur um eine Stufe. Als Faustzahl: Frage bis 100, Lösung bis 70,
+  Zusatz bis 140 Zeichen. Darüber sagt es der Editor.
   Reicht auch die kleinste Stufe nicht, rückt beim Auflösen wenigstens die
   Lösung ins Bild – die Frage hat der Host ohnehin vorgelesen.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.
@@ -559,7 +564,9 @@ ausgenommen – dort gehört die Lösung in die Frage.
 
 ### Mitgeliefert
 
-Siebzehn fertige Sätze mit je 48 Fragen – zusammen 816, keine doppelt:
+Siebzehn fertige Sätze mit je 48 Fragen – zusammen 816, keine doppelt. Jede einzelne
+davon hat einen Zusatz unter der Lösung: den Satz, aus dem am Tisch die Anschlussfrage
+wird. Nicht „richtig, weiter“, sondern „Moment mal, warum eigentlich?“:
 
 | Satz | Kategorien |
 |---|---|

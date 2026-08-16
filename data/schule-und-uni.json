@@ -133,9 +133,9 @@
           "name": "Berühmte Lehrmeister",
           "questions": [
             {
-              "text": "Welcher Grieche unterrichtete Platon und musste den Schierlingsbecher trinken?",
+              "text": "Welcher Grieche unterrichtete Platon und trank den Schierlingsbecher?",
               "answer": "Sokrates",
-              "note": "Geschrieben hat er nichts. Alles, was wir von ihm wissen, stammt von seinen Schülern."
+              "note": "Geschrieben hat er nichts. Alles stammt von seinen Schülern."
             },
             {
               "text": "Wer war der Lehrer Alexanders des Großen?",
@@ -187,9 +187,9 @@
           "name": "Was liest die Klasse?",
           "questions": [
             {
-              "text": "Welches Drama von Friedrich Schiller handelt von einem Schweizer Freiheitskämpfer mit Armbrust?",
+              "text": "Welches Drama Schillers handelt vom Schweizer Freiheitskämpfer mit Armbrust?",
               "answer": "Wilhelm Tell",
-              "note": "Schiller war nie in der Schweiz. Die Landschaft kannte er nur aus Berichten."
+              "note": "Schiller war nie in der Schweiz."
             },
             {
               "text": "In welchem Werk von Goethe schließt ein Gelehrter einen Pakt mit dem Teufel?",

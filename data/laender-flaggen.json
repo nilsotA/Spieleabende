@@ -38,19 +38,23 @@
           "questions": [
             {
               "text": "Wie heißt die Hauptstadt von Italien?",
-              "answer": "Rom"
+              "answer": "Rom",
+              "note": "Mitten in der Stadt liegt der Vatikan – ein eigener Staat innerhalb einer Hauptstadt."
             },
             {
               "text": "Wie heißt die Hauptstadt von Portugal?",
-              "answer": "Lissabon"
+              "answer": "Lissabon",
+              "note": "1755 zerstörte ein Erdbeben die Stadt fast vollständig. Danach wurde die Unterstadt mit geraden Straßen neu gebaut."
             },
             {
               "text": "Wie heißt die Hauptstadt von Kroatien?",
-              "answer": "Zagreb"
+              "answer": "Zagreb",
+              "note": "Sie liegt an der Save. Kroatien zahlt seit 2023 mit dem Euro."
             },
             {
               "text": "Wie heißt die Hauptstadt von Slowenien?",
-              "answer": "Ljubljana"
+              "answer": "Ljubljana",
+              "note": "Der Name klingt an „ljubljena“ an, die Geliebte. Im Stadtwappen steht ein Drache."
             }
           ]
         },
@@ -59,19 +63,23 @@
           "questions": [
             {
               "text": "In welcher Stadt steht der Eiffelturm?",
-              "answer": "In Paris"
+              "answer": "In Paris",
+              "note": "Gebaut zur Weltausstellung 1889 und eigentlich nur für zwanzig Jahre gedacht. Gerettet hat ihn die Funkantenne auf der Spitze."
             },
             {
               "text": "In welchem Land liegt Machu Picchu?",
-              "answer": "In Peru"
+              "answer": "In Peru",
+              "note": "Die Stadt liegt auf rund 2.400 Metern und wurde von den Spaniern nie gefunden. 1911 machte sie ein US-Forscher weltbekannt."
             },
             {
               "text": "In welcher Stadt steht die Christusstatue auf dem Berg Corcovado?",
-              "answer": "In Rio de Janeiro"
+              "answer": "In Rio de Janeiro",
+              "note": "38 Meter hoch, aus Beton und Speckstein. Der Blitz schlägt dort mehrmals im Jahr ein."
             },
             {
               "text": "In welchem Land steht die Tempelanlage Angkor Wat?",
-              "answer": "In Kambodscha"
+              "answer": "In Kambodscha",
+              "note": "Die größte religiöse Anlage der Welt – und so wichtig für das Land, dass sie auf seiner Flagge abgebildet ist."
             }
           ]
         },
@@ -80,19 +88,23 @@
           "questions": [
             {
               "text": "Womit bezahlt man in Japan?",
-              "answer": "Mit Yen"
+              "answer": "Mit Yen",
+              "note": "Das Zeichen ¥ steht auch für den chinesischen Yuan. Beide Namen bedeuten ursprünglich schlicht „rund“."
             },
             {
               "text": "Womit bezahlt man in Großbritannien?",
-              "answer": "Mit Pfund Sterling"
+              "answer": "Mit Pfund Sterling",
+              "note": "Die älteste noch benutzte Währung der Welt. Ein Pfund hatte früher 240 Pence, seit 1971 sind es 100."
             },
             {
               "text": "Womit bezahlt man in Indien?",
-              "answer": "Mit Rupien"
+              "answer": "Mit Rupien",
+              "note": "So heißt das Geld auch in Indonesien, Pakistan, Nepal und auf Sri Lanka. Der Name kommt aus dem Sanskrit."
             },
             {
               "text": "Womit bezahlt man in Polen?",
-              "answer": "Mit Złoty"
+              "answer": "Mit Złoty",
+              "note": "Das Wort heißt einfach „golden“. Polen gehört zur EU, hat den Euro aber nicht eingeführt."
             }
           ]
         },
@@ -101,15 +113,18 @@
           "questions": [
             {
               "text": "Welches Land ist Portugals einziger Nachbar zu Lande?",
-              "answer": "Spanien"
+              "answer": "Spanien",
+              "note": "Die Grenze ist rund 1.200 Kilometer lang und eine der ältesten unveränderten Grenzen Europas."
             },
             {
               "text": "Welches Land umschließt San Marino vollständig?",
-              "answer": "Italien"
+              "answer": "Italien",
+              "note": "San Marino gilt als älteste noch bestehende Republik der Welt – der Überlieferung nach gegründet im Jahr 301."
             },
             {
               "text": "Welches Land umschließt Lesotho vollständig?",
-              "answer": "Südafrika"
+              "answer": "Südafrika",
+              "note": "Lesotho ist eines von nur drei Ländern der Welt, die vollständig von einem einzigen Staat umschlossen sind."
             },
             {
               "text": "Wie viele Nachbarländer hat Deutschland?",
@@ -123,11 +138,13 @@
           "questions": [
             {
               "text": "Zu welchem Land gehört Mallorca?",
-              "answer": "Zu Spanien"
+              "answer": "Zu Spanien",
+              "note": "Mallorca gehört zu den Balearen, zusammen mit Menorca, Ibiza und Formentera. Die Hauptstadt heißt Palma."
             },
             {
               "text": "Wie heißt die größte Insel der Erde?",
-              "answer": "Grönland"
+              "answer": "Grönland",
+              "note": "Über zwei Millionen Quadratkilometer, aber nur rund 56.000 Einwohner. Es gehört zu Dänemark und regiert sich weitgehend selbst."
             },
             {
               "text": "In welchem Meer liegt Kreta?",
@@ -136,7 +153,8 @@
             },
             {
               "text": "Zu welchem Land gehört die Osterinsel?",
-              "answer": "Zu Chile"
+              "answer": "Zu Chile",
+              "note": "Sie liegt rund 3.500 Kilometer vom Festland entfernt. Auf Rapa Nui stehen fast 900 Steinfiguren."
             }
           ]
         }
@@ -150,7 +168,8 @@
             {
               "text": "Welches Land hat diese Flagge?",
               "answer": "Trinidad und Tobago",
-              "image": "/bilder/flagge-08.svg"
+              "image": "/bilder/flagge-08.svg",
+              "note": "Zwei Inseln, ein Staat. Von dort kommt die Steeldrum, gebaut aus alten Ölfässern."
             },
             {
               "text": "Welches Land hat diese Flagge?",
@@ -202,19 +221,23 @@
           "questions": [
             {
               "text": "Dieser Staat ist der kleinste der Welt.",
-              "answer": "Was ist der Vatikan?"
+              "answer": "Was ist der Vatikan?",
+              "note": "0,44 Quadratkilometer und rund 800 Einwohner. Ein eigener Staat ist er erst seit 1929."
             },
             {
               "text": "Dieser Fluss ist der längste Afrikas.",
-              "answer": "Was ist der Nil?"
+              "answer": "Was ist der Nil?",
+              "note": "Rund 6.650 Kilometer. Ob er oder der Amazonas der längste Fluss der Welt ist, wird bis heute gestritten."
             },
             {
               "text": "Diese Meerenge trennt Europa von Afrika.",
-              "answer": "Was ist die Straße von Gibraltar?"
+              "answer": "Was ist die Straße von Gibraltar?",
+              "note": "An der engsten Stelle nur 14 Kilometer breit. Bei klarer Sicht sieht man von einer Seite die andere."
             },
             {
               "text": "Dieses Land besteht aus mehr als 17.000 Inseln.",
-              "answer": "Was ist Indonesien?"
+              "answer": "Was ist Indonesien?",
+              "note": "Bewohnt ist nur ein kleiner Teil der Inseln. Das Land hat mehr Einwohner als Russland und Deutschland zusammen."
             }
           ]
         },
@@ -223,19 +246,23 @@
           "questions": [
             {
               "text": "Welche Sprache spricht man in Brasilien?",
-              "answer": "Portugiesisch"
+              "answer": "Portugiesisch",
+              "note": "Brasilien ist das mit Abstand größte portugiesischsprachige Land – dort leben mehr als zwanzigmal so viele Menschen wie in Portugal."
             },
             {
               "text": "In welchem Land ist Hindi eine der Amtssprachen?",
-              "answer": "In Indien"
+              "answer": "In Indien",
+              "note": "Neben Hindi ist auch Englisch Amtssprache. Dazu kommen 22 weitere in der Verfassung anerkannte Sprachen."
             },
             {
               "text": "Welche zwei Amtssprachen hat Kanada?",
-              "answer": "Englisch und Französisch"
+              "answer": "Englisch und Französisch",
+              "note": "Französisch spricht vor allem Québec. Alle Bundesgesetze erscheinen in beiden Sprachen."
             },
             {
               "text": "In welchem südamerikanischen Land ist Niederländisch Amtssprache?",
-              "answer": "In Suriname"
+              "answer": "In Suriname",
+              "note": "Das Land war bis 1975 niederländische Kolonie und ist der kleinste Staat Südamerikas."
             }
           ]
         },
@@ -244,15 +271,18 @@
           "questions": [
             {
               "text": "Welche Millionenstadt teilt der Bosporus in einen europäischen und einen asiatischen Teil?",
-              "answer": "Istanbul"
+              "answer": "Istanbul",
+              "note": "Sie hieß früher Konstantinopel und davor Byzanz. Als einzige Millionenstadt liegt sie auf zwei Kontinenten."
             },
             {
               "text": "In welchem Land liegt die Stadt Kyoto?",
-              "answer": "In Japan"
+              "answer": "In Japan",
+              "note": "Kyoto war über tausend Jahre Sitz des Kaisers. Der Name bedeutet schlicht „Hauptstadt“ – Tokio heißt „östliche Hauptstadt“."
             },
             {
               "text": "Wie hieß New York, bevor es New York hieß?",
-              "answer": "Neu-Amsterdam"
+              "answer": "Neu-Amsterdam",
+              "note": "1664 übernahmen die Engländer die Siedlung und benannten sie nach dem Herzog von York."
             },
             {
               "text": "Welche Hauptstadt eines souveränen Staates liegt am weitesten nördlich?",
@@ -266,19 +296,23 @@
           "questions": [
             {
               "text": "Wie heißt der höchste Berg der Erde?",
-              "answer": "Der Mount Everest"
+              "answer": "Der Mount Everest",
+              "note": "8.849 Meter über dem Meer. Vom Fuß aus gemessen wäre der Mauna Kea auf Hawaii höher."
             },
             {
               "text": "Welcher Fluss fließt durch Paris?",
-              "answer": "Die Seine"
+              "answer": "Die Seine",
+              "note": "Sie mündet bei Le Havre in den Ärmelkanal. Allein in Paris überspannen sie 37 Brücken."
             },
             {
               "text": "Wie heißt der längste Fluss Südamerikas?",
-              "answer": "Der Amazonas"
+              "answer": "Der Amazonas",
+              "note": "Er führt mehr Wasser als die nächsten sieben Flüsse der Welt zusammen."
             },
             {
               "text": "Wie heißt der längste Fluss Europas?",
-              "answer": "Die Wolga"
+              "answer": "Die Wolga",
+              "note": "Rund 3.530 Kilometer, komplett in Russland. Sie mündet ins Kaspische Meer, das eigentlich ein See ist."
             }
           ]
         }

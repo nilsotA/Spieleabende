@@ -635,3 +635,36 @@ test('keine Frage verrät ihre eigene Lösung', async () => {
   }
   assert.deepEqual(verraeter, []);
 });
+
+test('kein Text sprengt den Kasten auf der Leinwand', async () => {
+  /*
+   * Gemessen mit einem echten Browser über alle 816 Fragen: Wird der Kasten zu
+   * hoch, rechnet passeFrageEin ihn kleiner – und der Zusatz landet bei 12 bis
+   * 14 Pixeln. Genau dagegen steht die Begründung im host.css: 14 Pixel sind
+   * aus vier Metern zu wenig. Auf 1920×1080 wird nach den Kürzungen keine
+   * einzige Frage mehr verkleinert, auf einem 1280×720-Beamer noch fünf, und
+   * die auf der mildesten Stufe.
+   *
+   * Der Test kann diese Rechnung nicht nachstellen – hier läuft kein Browser,
+   * und maßgeblich ist ohnehin nicht die Zeichenzahl, sondern wo die Zeilen
+   * umbrechen. Die Schranken sind deshalb eine Stolperschnur, kein Beweis: Sie
+   * liegen knapp über dem längsten Text, der die Messung bestanden hat. Wer
+   * sie reißt, soll nachmessen, statt die Zahl hochzusetzen.
+   */
+  const GRENZEN = { text: 105, answer: 70, note: 145 };
+  const zulang = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    const alle = [...set.rounds.flatMap((r) => r.categories.flatMap((c) => c.questions)),
+      ...(set.stechen || [])];
+    for (const frage of alle) {
+      for (const [feld, grenze] of Object.entries(GRENZEN)) {
+        const wert = String(frage[feld] || '');
+        if (wert.length > grenze) {
+          zulang.push(`${datei}: ${feld} hat ${wert.length} Zeichen (erlaubt ${grenze}): ${wert}`);
+        }
+      }
+    }
+  }
+  assert.deepEqual(zulang, []);
+});
