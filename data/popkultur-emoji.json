@@ -8,6 +8,11 @@
           "name": "Emoji-Rätsel",
           "questions": [
             {
+              "text": "Welcher Film?\n❄️ 👸 ⛄",
+              "answer": "Die Eiskönigin",
+              "note": "Im Original: Frozen"
+            },
+            {
               "text": "Welcher Film?\n🦁 👑",
               "answer": "Der König der Löwen"
             },
@@ -18,11 +23,6 @@
             {
               "text": "Welche Filmreihe?\n🧙‍♂️ 💍 🌋",
               "answer": "Der Herr der Ringe"
-            },
-            {
-              "text": "Welcher Film?\n❄️ 👸 ⛄",
-              "answer": "Die Eiskönigin",
-              "note": "Im Original: Frozen"
             }
           ]
         },
@@ -116,16 +116,16 @@
           "name": "Gaming",
           "questions": [
             {
+              "text": "In welchem Spiel löst man Reihen aus fallenden Klötzchen auf?",
+              "answer": "Tetris"
+            },
+            {
               "text": "Wie heißt Nintendos Klempner mit der roten Mütze?",
               "answer": "Mario"
             },
             {
               "text": "Welches Tier ist Segas Maskottchen Sonic?",
               "answer": "Ein Igel"
-            },
-            {
-              "text": "In welchem Spiel löst man Reihen aus fallenden Klötzchen auf?",
-              "answer": "Tetris"
             },
             {
               "text": "Womit verdiente Nintendo sein Geld, bevor es Videospiele machte?",
@@ -142,26 +142,30 @@
           "name": "Was ist die Frage?",
           "questions": [
             {
-              "text": "Dieses Getränk entsteht aus Wasser, Hopfen, Malz und Hefe.",
-              "answer": "Was ist Bier?"
-            },
-            {
-              "text": "Dieser Planet ist der Sonne am nächsten.",
-              "answer": "Was ist Merkur?"
+              "text": "Dieser Physiker formulierte die Relativitätstheorie.",
+              "answer": "Wer ist Albert Einstein?"
             },
             {
               "text": "Dieses Land schenkte den USA die Freiheitsstatue.",
               "answer": "Was ist Frankreich?"
             },
             {
-              "text": "Dieser Physiker formulierte die Relativitätstheorie.",
-              "answer": "Wer ist Albert Einstein?"
+              "text": "Dieses Getränk entsteht aus Wasser, Hopfen, Malz und Hefe.",
+              "answer": "Was ist Bier?"
+            },
+            {
+              "text": "Dieser Planet ist der Sonne am nächsten.",
+              "answer": "Was ist Merkur?"
             }
           ]
         },
         {
           "name": "Abkürzungen",
           "questions": [
+            {
+              "text": "Wofür steht „PDF“?",
+              "answer": "Portable Document Format"
+            },
             {
               "text": "Wofür steht „DIY“?",
               "answer": "Do it yourself"
@@ -173,10 +177,6 @@
             {
               "text": "Wofür steht die Bilddatei-Endung „GIF“?",
               "answer": "Graphics Interchange Format"
-            },
-            {
-              "text": "Wofür steht „PDF“?",
-              "answer": "Portable Document Format"
             }
           ]
         },

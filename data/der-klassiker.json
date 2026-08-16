@@ -110,13 +110,13 @@
               "note": "Der Sender startete tatsächlich in Luxemburg."
             },
             {
+              "text": "Wofür stand in der DDR die Abkürzung Stasi?",
+              "answer": "Ministerium für Staatssicherheit"
+            },
+            {
               "text": "Wofür steht das LCD in „LCD-Bildschirm“?",
               "answer": "Liquid Crystal Display",
               "note": "Auf Deutsch: Flüssigkristallanzeige."
-            },
-            {
-              "text": "Wofür stand in der DDR die Abkürzung Stasi?",
-              "answer": "Ministerium für Staatssicherheit"
             }
           ]
         },
@@ -207,13 +207,13 @@
               "note": "Gesetzgebung, Verwaltung und Rechtsprechung."
             },
             {
-              "text": "Welches Amt steht in Deutschland protokollarisch an erster Stelle?",
-              "answer": "Das des Bundespräsidenten"
-            },
-            {
               "text": "Welche Mehrheit braucht eine Änderung des Grundgesetzes?",
               "answer": "Eine Zweidrittelmehrheit",
               "note": "Und zwar in Bundestag und Bundesrat."
+            },
+            {
+              "text": "Welches Amt steht in Deutschland protokollarisch an erster Stelle?",
+              "answer": "Das des Bundespräsidenten"
             }
           ]
         },
@@ -255,13 +255,13 @@
               "note": "Von William Shakespeare."
             },
             {
+              "text": "Von wem stammt der Satz „Religion ist das Opium des Volkes“?",
+              "answer": "Von Karl Marx"
+            },
+            {
               "text": "Was ist ein Oxymoron?",
               "answer": "Eine Formulierung, die sich selbst widerspricht",
               "note": "„Alter Knabe“, „bittersüß“, „Eile mit Weile“."
-            },
-            {
-              "text": "Von wem stammt der Satz „Religion ist das Opium des Volkes“?",
-              "answer": "Von Karl Marx"
             }
           ]
         },

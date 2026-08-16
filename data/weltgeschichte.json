@@ -8,6 +8,11 @@
           "name": "Von Rittern und Römern",
           "questions": [
             {
+              "text": "Mit welchen Tieren überquerte Hannibal die Alpen?",
+              "answer": "Mit Elefanten",
+              "note": "37 sollen es gewesen sein – in Italien ankam fast keiner."
+            },
+            {
               "text": "Wer musste im Mittelalter Frondienste leisten?",
               "answer": "Die Bauern",
               "note": "Unbezahlte Arbeit für den Grundherrn – Felder, Wege, Burgmauern."
@@ -15,11 +20,6 @@
             {
               "text": "Welchen Honigwein tranken die Wikinger gern?",
               "answer": "Met"
-            },
-            {
-              "text": "Mit welchen Tieren überquerte Hannibal die Alpen?",
-              "answer": "Mit Elefanten",
-              "note": "37 sollen es gewesen sein – in Italien ankam fast keiner."
             },
             {
               "text": "Wie viele Jahre dauerte der Hundertjährige Krieg?",
@@ -36,11 +36,6 @@
               "answer": "Von 1914 bis 1918"
             },
             {
-              "text": "Wie viele Tage dauerte die Kubakrise?",
-              "answer": "13 Tage",
-              "note": "Im Oktober 1962 – näher war die Welt einem Atomkrieg nie."
-            },
-            {
               "text": "In welchem Land begann die Februarrevolution von 1917?",
               "answer": "In Russland",
               "note": "Sie stürzte den Zaren; im Oktober folgte die zweite Revolution."
@@ -49,6 +44,11 @@
               "text": "Welches Ereignis gilt als Auslöser des Dreißigjährigen Krieges?",
               "answer": "Der Prager Fenstersturz",
               "note": "1618 warfen protestantische Adlige zwei kaiserliche Statthalter und deren Sekretär aus dem Fenster der Prager Burg. Alle drei überlebten."
+            },
+            {
+              "text": "Wie viele Tage dauerte die Kubakrise?",
+              "answer": "13 Tage",
+              "note": "Im Oktober 1962 – näher war die Welt einem Atomkrieg nie."
             }
           ]
         },
@@ -60,14 +60,14 @@
               "answer": "Nikolaus II."
             },
             {
-              "text": "Wer war der Vater von Königin Elisabeth II.?",
-              "answer": "Georg VI.",
-              "note": "Er wurde König, weil sein Bruder Eduard VIII. abdankte."
-            },
-            {
               "text": "Welcher französische König regierte 72 Jahre – länger als jeder andere Monarch Europas?",
               "answer": "Ludwig XIV.",
               "note": "Der Sonnenkönig, 1643 bis 1715."
+            },
+            {
+              "text": "Wer war der Vater von Königin Elisabeth II.?",
+              "answer": "Georg VI.",
+              "note": "Er wurde König, weil sein Bruder Eduard VIII. abdankte."
             },
             {
               "text": "Wer war der letzte Kaiser von China?",
@@ -104,6 +104,11 @@
           "name": "Das 20. Jahrhundert",
           "questions": [
             {
+              "text": "Welcher Gangsterboss beherrschte in den 1920er-Jahren die Unterwelt von Chicago?",
+              "answer": "Al Capone",
+              "note": "Verurteilt wurde er am Ende wegen Steuerhinterziehung."
+            },
+            {
               "text": "In welcher Stadt wurde John F. Kennedy erschossen?",
               "answer": "In Dallas"
             },
@@ -115,11 +120,6 @@
               "text": "Wie viele bemannte Mondlandungen gab es insgesamt?",
               "answer": "Sechs",
               "note": "Apollo 11 bis 17 – nur Apollo 13 musste nach einer Explosion umkehren."
-            },
-            {
-              "text": "Welcher Gangsterboss beherrschte in den 1920er-Jahren die Unterwelt von Chicago?",
-              "answer": "Al Capone",
-              "note": "Verurteilt wurde er am Ende wegen Steuerhinterziehung."
             }
           ]
         },
@@ -155,14 +155,8 @@
           "name": "Weltgeschichte in Jahren",
           "questions": [
             {
-              "text": "In welchem Jahr fiel Konstantinopel an die Osmanen?",
-              "answer": "1453",
-              "note": "Für viele das Ende des Mittelalters."
-            },
-            {
-              "text": "In welchem Jahr unterzeichneten die USA ihre Unabhängigkeitserklärung?",
-              "answer": "1776",
-              "note": "Am 4. Juli – daher der Feiertag."
+              "text": "In welchem Jahr löste sich die Sowjetunion auf?",
+              "answer": "1991"
             },
             {
               "text": "In welchem Jahr stürmte die Menge die Bastille?",
@@ -170,8 +164,14 @@
               "note": "Am 14. Juli, dem heutigen französischen Nationalfeiertag."
             },
             {
-              "text": "In welchem Jahr löste sich die Sowjetunion auf?",
-              "answer": "1991"
+              "text": "In welchem Jahr unterzeichneten die USA ihre Unabhängigkeitserklärung?",
+              "answer": "1776",
+              "note": "Am 4. Juli – daher der Feiertag."
+            },
+            {
+              "text": "In welchem Jahr fiel Konstantinopel an die Osmanen?",
+              "answer": "1453",
+              "note": "Für viele das Ende des Mittelalters."
             }
           ]
         },
@@ -183,13 +183,13 @@
               "answer": "In Großbritannien"
             },
             {
-              "text": "Wer schrieb den Hauptteil der amerikanischen Unabhängigkeitserklärung?",
-              "answer": "Thomas Jefferson"
-            },
-            {
               "text": "Wer führte Indien mit gewaltlosem Widerstand in die Unabhängigkeit?",
               "answer": "Mahatma Gandhi",
               "note": "1947 wurde Indien unabhängig, ein Jahr später wurde Gandhi ermordet."
+            },
+            {
+              "text": "Wer schrieb den Hauptteil der amerikanischen Unabhängigkeitserklärung?",
+              "answer": "Thomas Jefferson"
             },
             {
               "text": "Wer führte den Sklavenaufstand an, aus dem der Staat Haiti hervorging?",
@@ -225,6 +225,11 @@
           "name": "Sie schrieben Geschichte",
           "questions": [
             {
+              "text": "Wer wurde 1994 zum ersten schwarzen Präsidenten Südafrikas gewählt?",
+              "answer": "Nelson Mandela",
+              "note": "Zuvor saß er 27 Jahre im Gefängnis."
+            },
+            {
               "text": "Wer hielt 1963 die Rede „I have a dream“?",
               "answer": "Martin Luther King"
             },
@@ -237,11 +242,6 @@
               "text": "Wer war die erste Frau im Weltall?",
               "answer": "Walentina Tereschkowa",
               "note": "1963 – die nächste Frau flog erst 19 Jahre später."
-            },
-            {
-              "text": "Wer wurde 1994 zum ersten schwarzen Präsidenten Südafrikas gewählt?",
-              "answer": "Nelson Mandela",
-              "note": "Zuvor saß er 27 Jahre im Gefängnis."
             }
           ]
         },

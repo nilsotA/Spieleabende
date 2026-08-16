@@ -87,12 +87,12 @@
               "answer": "Mit Pfund Sterling"
             },
             {
-              "text": "Womit bezahlt man in Polen?",
-              "answer": "Mit Złoty"
-            },
-            {
               "text": "Womit bezahlt man in Indien?",
               "answer": "Mit Rupien"
+            },
+            {
+              "text": "Womit bezahlt man in Polen?",
+              "answer": "Mit Złoty"
             }
           ]
         },
@@ -100,12 +100,12 @@
           "name": "Nachbarländer",
           "questions": [
             {
-              "text": "Welches Land umschließt San Marino vollständig?",
-              "answer": "Italien"
-            },
-            {
               "text": "Welches Land ist Portugals einziger Nachbar zu Lande?",
               "answer": "Spanien"
+            },
+            {
+              "text": "Welches Land umschließt San Marino vollständig?",
+              "answer": "Italien"
             },
             {
               "text": "Welches Land umschließt Lesotho vollständig?",
@@ -126,13 +126,13 @@
               "answer": "Zu Spanien"
             },
             {
+              "text": "Wie heißt die größte Insel der Erde?",
+              "answer": "Grönland"
+            },
+            {
               "text": "In welchem Meer liegt Kreta?",
               "answer": "Im Mittelmeer",
               "note": "„Ägäis“ oder „Kretisches Meer“ zählt auch – beides gehört zum Mittelmeer"
-            },
-            {
-              "text": "Wie heißt die größte Insel der Erde?",
-              "answer": "Grönland"
             },
             {
               "text": "Zu welchem Land gehört die Osterinsel?",
@@ -176,14 +176,14 @@
           "name": "Hauptstädte für Fortgeschrittene",
           "questions": [
             {
-              "text": "Wie heißt die Hauptstadt von Australien?",
-              "answer": "Canberra",
-              "note": "Nicht Sydney"
-            },
-            {
               "text": "Wie heißt die Hauptstadt von Kanada?",
               "answer": "Ottawa",
               "note": "Nicht Toronto"
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Australien?",
+              "answer": "Canberra",
+              "note": "Nicht Sydney"
             },
             {
               "text": "Wie heißt die Hauptstadt von Neuseeland?",
@@ -201,16 +201,16 @@
           "name": "Was ist die Frage?",
           "questions": [
             {
+              "text": "Dieser Staat ist der kleinste der Welt.",
+              "answer": "Was ist der Vatikan?"
+            },
+            {
               "text": "Dieser Fluss ist der längste Afrikas.",
               "answer": "Was ist der Nil?"
             },
             {
               "text": "Diese Meerenge trennt Europa von Afrika.",
               "answer": "Was ist die Straße von Gibraltar?"
-            },
-            {
-              "text": "Dieser Staat ist der kleinste der Welt.",
-              "answer": "Was ist der Vatikan?"
             },
             {
               "text": "Dieses Land besteht aus mehr als 17.000 Inseln.",
@@ -222,12 +222,12 @@
           "name": "Sprachen der Welt",
           "questions": [
             {
-              "text": "In welchem Land ist Hindi eine der Amtssprachen?",
-              "answer": "In Indien"
-            },
-            {
               "text": "Welche Sprache spricht man in Brasilien?",
               "answer": "Portugiesisch"
+            },
+            {
+              "text": "In welchem Land ist Hindi eine der Amtssprachen?",
+              "answer": "In Indien"
             },
             {
               "text": "Welche zwei Amtssprachen hat Kanada?",

@@ -30,21 +30,21 @@
           "name": "Schule von damals",
           "questions": [
             {
-              "text": "Womit schrieben Grundschüler früher, bevor es Hefte für alle gab?",
-              "answer": "Mit Griffel auf Schiefertafel"
+              "text": "Wie nennt man das Zeugnis am Ende der Schulzeit am Gymnasium?",
+              "answer": "Das Abitur"
             },
             {
-              "text": "Wie hieß das Gerät, mit dem Lehrer Arbeitsblätter in blauer Schrift vervielfältigten?",
-              "answer": "Der Matrizendrucker",
-              "note": "Die frisch abgezogenen Blätter rochen scharf nach Spiritus."
+              "text": "Womit schrieben Grundschüler früher, bevor es Hefte für alle gab?",
+              "answer": "Mit Griffel auf Schiefertafel"
             },
             {
               "text": "Was benutzte man im Matheunterricht, bevor der Taschenrechner erlaubt war?",
               "answer": "Den Rechenschieber"
             },
             {
-              "text": "Wie nennt man das Zeugnis am Ende der Schulzeit am Gymnasium?",
-              "answer": "Das Abitur"
+              "text": "Wie hieß das Gerät, mit dem Lehrer Arbeitsblätter in blauer Schrift vervielfältigten?",
+              "answer": "Der Matrizendrucker",
+              "note": "Die frisch abgezogenen Blätter rochen scharf nach Spiritus."
             }
           ]
         },
@@ -60,12 +60,12 @@
               "answer": "Der Pfennig"
             },
             {
-              "text": "Welche Münze war der „Groschen“, von dem in Redewendungen noch die Rede ist?",
-              "answer": "Das Zehnpfennigstück"
-            },
-            {
               "text": "Wie viel Pfand kostet heute eine Einweg-Plastikflasche?",
               "answer": "25 Cent"
+            },
+            {
+              "text": "Welche Münze war der „Groschen“, von dem in Redewendungen noch die Rede ist?",
+              "answer": "Das Zehnpfennigstück"
             }
           ]
         },
@@ -73,16 +73,16 @@
           "name": "Erfindungen im Haushalt",
           "questions": [
             {
+              "text": "Wie nennt man die Maschine, die Wäsche trocknet, ohne dass man sie aufhängt?",
+              "answer": "Der Trockner"
+            },
+            {
               "text": "Welches Küchengerät erwärmt Essen mit Strahlung statt mit Hitze von außen?",
               "answer": "Die Mikrowelle"
             },
             {
               "text": "Welches Gerät ersetzte den Teppichklopfer?",
               "answer": "Der Staubsauger"
-            },
-            {
-              "text": "Wie nennt man die Maschine, die Wäsche trocknet, ohne dass man sie aufhängt?",
-              "answer": "Der Trockner"
             },
             {
               "text": "Welche Kanne hält Kaffee stundenlang warm, ganz ohne Strom?",
@@ -116,20 +116,20 @@
           "name": "Sagt man das noch?",
           "questions": [
             {
-              "text": "Was meint jemand, der sagt, etwas sei „cringe“?",
-              "answer": "Peinlich"
-            },
-            {
-              "text": "Was bedeutet es, wenn jemand „ghosted“ wurde?",
-              "answer": "Der Kontakt brach ohne Erklärung ab"
-            },
-            {
               "text": "Wofür steht die Abkürzung „lol“?",
               "answer": "Laughing out loud"
             },
             {
+              "text": "Was meint jemand, der sagt, etwas sei „cringe“?",
+              "answer": "Peinlich"
+            },
+            {
               "text": "Was ist gemeint, wenn etwas „gehypt“ wird?",
               "answer": "Es wird stark angepriesen"
+            },
+            {
+              "text": "Was bedeutet es, wenn jemand „ghosted“ wurde?",
+              "answer": "Der Kontakt brach ohne Erklärung ab"
             }
           ]
         }
@@ -145,7 +145,7 @@
               "answer": "3"
             },
             {
-              "text": "Welche Sendung mit der Maus erklärt seit 1971 sonntags die Welt?",
+              "text": "Welche Sendung erklärt seit 1971 sonntags mit Lach- und Sachgeschichten die Welt?",
               "answer": "Die Sendung mit der Maus"
             },
             {
@@ -162,16 +162,16 @@
           "name": "Telefon & Post",
           "questions": [
             {
+              "text": "Welches Gerät nahm Anrufe entgegen, wenn niemand zu Hause war?",
+              "answer": "Der Anrufbeantworter"
+            },
+            {
               "text": "Was musste man bei einem alten Telefon drehen, um zu wählen?",
               "answer": "Die Wählscheibe"
             },
             {
               "text": "Wie hieß das dicke Buch, in dem alle Telefonnummern eines Ortes standen?",
               "answer": "Das Telefonbuch"
-            },
-            {
-              "text": "Welches Gerät nahm Anrufe entgegen, wenn niemand zu Hause war?",
-              "answer": "Der Anrufbeantworter"
             },
             {
               "text": "Wie viel kostet heute eine Standardpostkarte innerhalb Deutschlands – über oder unter einem Euro?",
@@ -226,8 +226,8 @@
           "name": "Marken & Slogans",
           "questions": [
             {
-              "text": "Welche Zahnpasta kommt seit den 1970ern dreifarbig gestreift aus der Tube?",
-              "answer": "Aquafresh"
+              "text": "Welche Brause wirbt damit, Flügel zu verleihen?",
+              "answer": "Red Bull"
             },
             {
               "text": "Welcher Süßwarenhersteller aus Bonn verspricht, Kinder und Erwachsene froh zu machen?",
@@ -238,8 +238,8 @@
               "answer": "Audi"
             },
             {
-              "text": "Welche Brause wirbt damit, Flügel zu verleihen?",
-              "answer": "Red Bull"
+              "text": "Welche Zahnpasta kommt seit den 1970ern dreifarbig gestreift aus der Tube?",
+              "answer": "Aquafresh"
             }
           ]
         },
@@ -255,12 +255,12 @@
               "answer": "Man leiht nichts aus, sondern schaut sofort online"
             },
             {
-              "text": "Wofür steht das Wort „Podcast“ im Kern – Radio zum Abrufen oder Musik zum Kaufen?",
-              "answer": "Radio zum Abrufen"
-            },
-            {
               "text": "Was macht eine Smartwatch, was eine normale Armbanduhr nicht kann?",
               "answer": "Sie misst zum Beispiel Schritte und Puls"
+            },
+            {
+              "text": "Wofür steht das Wort „Podcast“ im Kern – Radio zum Abrufen oder Musik zum Kaufen?",
+              "answer": "Radio zum Abrufen"
             }
           ]
         }

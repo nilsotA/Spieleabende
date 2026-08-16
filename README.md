@@ -546,7 +546,16 @@ Als Maßstab für die mitgelieferten Sätze gilt:
 | **500** | Wer sich auskennt – oder gut kombiniert |
 
 Der Editor zeigt den Punktwert an jeder Frage mit an, damit die Leiter beim
-Schreiben sichtbar bleibt.
+Schreiben sichtbar bleibt. Nachgemessen wurde die Regel einmal über alle Sätze:
+84 Kategorien standen in der falschen Reihenfolge und sind gerichtet – meist
+saß die leichteste Frage auf 500 („Wofür steht GmbH?", „Welche Farbe hat die
+Silbermedaille?", „Welche Band sang Bohemian Rhapsody?").
+
+Prüfen kann das keine Maschine. Was sie prüft, ist der Nachbarfall: ob eine
+Frage ihre eigene Lösung im Text stehen hat („Wie nennt man den Wurf von der
+Sieben-Meter-Linie?“). Der Editor warnt beim Tippen, der Testlauf hält es für
+die mitgelieferten Sätze fest. Auswahlfragen („Kölsch oder Pils?“) sind
+ausgenommen – dort gehört die Lösung in die Frage.
 
 ### Mitgeliefert
 

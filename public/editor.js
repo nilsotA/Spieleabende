@@ -2,7 +2,7 @@ import { $, el, toast, setzeText, verbergeSchluessel } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
-import { verraeteneLoesungen } from '/fragenpruefung.js';
+import { verraeteneLoesungen, selbstverraeter } from '/fragenpruefung.js';
 
 const BASE_VALUES = [100, 200, 300, 500];
 const STORAGE_KEY = 'quizduell.editor';
@@ -526,6 +526,20 @@ function verraeterMarkieren() {
           const andere = (cat.questions[j].text || '').slice(0, 60);
           feld.title = 'Diese Lösung steht schon in einer anderen Frage dieser Kategorie '
             + `– auf der Leinwand ist sie damit verschenkt:\n„${andere}…“`;
+        }
+        gefunden += 1;
+        if (!ersteZeile) ersteZeile = zeile;
+      }
+      // Und der Fall, den die Prüfung darüber ausdrücklich auslässt: Die Frage
+      // verrät ihre eigene Lösung („Wie viele Disziplinen hat der Zehnkampf?").
+      for (const { i } of selbstverraeter(cat.questions)) {
+        const zeile = zeilen[index + i];
+        if (!zeile || zeile.classList.contains('verraet')) continue;
+        zeile.classList.add('verraet');
+        const feld = zeile.querySelector('.antwort > textarea');
+        if (feld) {
+          feld.title = 'Diese Lösung steht wörtlich in der Frage selbst – damit ist sie '
+            + 'keine Frage mehr, sondern Vorlesen.';
         }
         gefunden += 1;
         if (!ersteZeile) ersteZeile = zeile;

@@ -8,16 +8,6 @@
           "name": "Tierische Superkräfte",
           "questions": [
             {
-              "text": "Welches Tier hat den größten Augapfel aller lebenden Tiere?",
-              "answer": "Der Riesenkalmar",
-              "note": "Sein Auge misst rund 25 Zentimeter – wie ein Fußball."
-            },
-            {
-              "text": "Welches Meeressäugetier schläft mit einer wachen Gehirnhälfte und einem offenen Auge?",
-              "answer": "Der Delfin",
-              "note": "Anders ginge es nicht – es muss zum Atmen auftauchen."
-            },
-            {
               "text": "Welches Säugetier kann als einziges aus eigener Kraft fliegen?",
               "answer": "Die Fledermaus",
               "note": "Flughörnchen gleiten nur – das zählt nicht."
@@ -25,6 +15,16 @@
             {
               "text": "Welches Raubtier verliert lebenslang Zähne und schiebt ständig neue Reihen nach?",
               "answer": "Der Hai"
+            },
+            {
+              "text": "Welches Meeressäugetier schläft mit einer wachen Gehirnhälfte und einem offenen Auge?",
+              "answer": "Der Delfin",
+              "note": "Anders ginge es nicht – es muss zum Atmen auftauchen."
+            },
+            {
+              "text": "Welches Tier hat den größten Augapfel aller lebenden Tiere?",
+              "answer": "Der Riesenkalmar",
+              "note": "Sein Auge misst rund 25 Zentimeter – wie ein Fußball."
             }
           ]
         },
@@ -41,14 +41,14 @@
               "answer": "Die Leber"
             },
             {
-              "text": "Wie heißt der kleinste Knochen im menschlichen Körper?",
-              "answer": "Der Steigbügel",
-              "note": "Er sitzt im Mittelohr."
-            },
-            {
               "text": "Welcher Muskel ist der größte im menschlichen Körper?",
               "answer": "Der große Gesäßmuskel",
               "note": "Auch „Gluteus maximus“ – oder schlicht „der Po“."
+            },
+            {
+              "text": "Wie heißt der kleinste Knochen im menschlichen Körper?",
+              "answer": "Der Steigbügel",
+              "note": "Er sitzt im Mittelohr."
             }
           ]
         },
@@ -80,22 +80,22 @@
           "name": "Aus Versehen erfunden",
           "questions": [
             {
-              "text": "Welches Büroprodukt entstand aus einem Kleber, der eigentlich zu schwach geraten war?",
-              "answer": "Der Haftnotizzettel",
-              "note": "Bekannt als Post-it."
-            },
-            {
-              "text": "Welches Küchengerät entstand, weil einem Forscher an einem Gerät der Schokoriegel in der Tasche schmolz?",
-              "answer": "Die Mikrowelle"
+              "text": "Welches heute weltbekannte Getränk wurde 1886 von einem Apotheker als Stärkungsmittel gemischt?",
+              "answer": "Coca-Cola",
+              "note": "Der Apotheker hieß John Pemberton."
             },
             {
               "text": "Welches Medikament entdeckte Alexander Fleming durch einen Schimmelpilz auf einer vergessenen Bakterienkultur?",
               "answer": "Penicillin"
             },
             {
-              "text": "Welches heute weltbekannte Getränk wurde 1886 von einem Apotheker als Stärkungsmittel gemischt?",
-              "answer": "Coca-Cola",
-              "note": "Der Apotheker hieß John Pemberton."
+              "text": "Welches Küchengerät entstand, weil einem Forscher an einem Gerät der Schokoriegel in der Tasche schmolz?",
+              "answer": "Die Mikrowelle"
+            },
+            {
+              "text": "Welches Büroprodukt entstand aus einem Kleber, der eigentlich zu schwach geraten war?",
+              "answer": "Der Haftnotizzettel",
+              "note": "Bekannt als Post-it."
             }
           ]
         },
@@ -129,9 +129,9 @@
               "note": "Näher dran gewinnt – hier lohnt sich Rechnen statt Raten."
             },
             {
-              "text": "Wie viele Halswirbel hat eine Giraffe?",
-              "answer": "Sieben",
-              "note": "Genauso viele wie der Mensch – nur deutlich länger."
+              "text": "Wie viele Sekunden hat ein Jahr mit 365 Tagen?",
+              "answer": "31 536 000",
+              "note": "Wer auf die Million genau danebenliegt, hat es trotzdem verdient."
             },
             {
               "text": "Wie viele Liter Blut pumpt ein menschliches Herz ungefähr an einem Tag?",
@@ -139,9 +139,9 @@
               "note": "Alles zwischen 5000 und 9000 gelten lassen."
             },
             {
-              "text": "Wie viele Sekunden hat ein Jahr mit 365 Tagen?",
-              "answer": "31 536 000",
-              "note": "Wer auf die Million genau danebenliegt, hat es trotzdem verdient."
+              "text": "Wie viele Halswirbel hat eine Giraffe?",
+              "answer": "Sieben",
+              "note": "Genauso viele wie der Mensch – nur deutlich länger."
             }
           ]
         }
@@ -175,9 +175,13 @@
           "name": "Rekorde der Natur",
           "questions": [
             {
-              "text": "Wie heißt der höchste Wasserfall der Erde?",
-              "answer": "Der Salto Ángel",
-              "note": "In Venezuela, auch „Angel Falls“."
+              "text": "Welche Wüste ist die größte Trockenwüste der Erde?",
+              "answer": "Die Sahara",
+              "note": "Die Antarktis ist als Kältewüste größer – gefragt ist die heiße."
+            },
+            {
+              "text": "Wie heißt die tiefste bekannte Stelle der Weltmeere?",
+              "answer": "Der Marianengraben"
             },
             {
               "text": "Welcher See ist der tiefste der Erde?",
@@ -185,13 +189,9 @@
               "note": "In Sibirien, über 1600 Meter tief."
             },
             {
-              "text": "Wie heißt die tiefste bekannte Stelle der Weltmeere?",
-              "answer": "Der Marianengraben"
-            },
-            {
-              "text": "Welche Wüste ist die größte Trockenwüste der Erde?",
-              "answer": "Die Sahara",
-              "note": "Die Antarktis ist als Kältewüste größer – gefragt ist die heiße."
+              "text": "Wie heißt der höchste Wasserfall der Erde?",
+              "answer": "Der Salto Ángel",
+              "note": "In Venezuela, auch „Angel Falls“."
             }
           ]
         },
@@ -222,6 +222,10 @@
           "name": "Aberglaube",
           "questions": [
             {
+              "text": "In welchem schottischen See wird seit Langem ein Ungeheuer vermutet?",
+              "answer": "Im Loch Ness"
+            },
+            {
               "text": "Welche Zahl gilt in Deutschland als Unglückszahl, besonders an einem Freitag?",
               "answer": "Die 13"
             },
@@ -232,10 +236,6 @@
             {
               "text": "Was soll man tun, wenn man Salz verschüttet hat?",
               "answer": "Eine Prise über die linke Schulter werfen"
-            },
-            {
-              "text": "In welchem schottischen See wird seit Langem ein Ungeheuer vermutet?",
-              "answer": "Im Loch Ness"
             }
           ]
         },
@@ -272,6 +272,10 @@
               "answer": "Der Mars"
             },
             {
+              "text": "Welcher Planet ist der größte unseres Sonnensystems?",
+              "answer": "Der Jupiter"
+            },
+            {
               "text": "Welcher Planet hat das auffälligste Ringsystem?",
               "answer": "Der Saturn"
             },
@@ -279,10 +283,6 @@
               "text": "Wie lange braucht das Licht der Sonne ungefähr bis zur Erde?",
               "answer": "Rund acht Minuten",
               "note": "Genauer: etwa 8 Minuten und 20 Sekunden."
-            },
-            {
-              "text": "Welcher Planet ist der größte unseres Sonnensystems?",
-              "answer": "Der Jupiter"
             }
           ]
         }

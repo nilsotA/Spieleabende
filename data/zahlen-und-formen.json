@@ -31,6 +31,10 @@
           "name": "Formen & Körper",
           "questions": [
             {
+              "text": "Welcher geometrische Körper hat genau eine Fläche, keine Ecke und keine Kante?",
+              "answer": "Die Kugel"
+            },
+            {
               "text": "Wie viele Ecken hat ein Würfel?",
               "answer": "8"
             },
@@ -42,10 +46,6 @@
               "text": "Wie viele Flächen hat ein klassischer Fußball aus Fünf- und Sechsecken?",
               "answer": "32",
               "note": "12 Fünfecke und 20 Sechsecke."
-            },
-            {
-              "text": "Welcher geometrische Körper hat genau eine Fläche, keine Ecke und keine Kante?",
-              "answer": "Die Kugel"
             }
           ]
         },
@@ -83,18 +83,23 @@
               "note": "Die Geschichte ist überliefert, aber nicht sicher belegt – der Trick funktioniert trotzdem."
             },
             {
-              "text": "Welche Mathematikerin aus Erlangen gilt als Begründerin der modernen Algebra?",
-              "answer": "Emmy Noether"
-            },
-            {
               "text": "Welcher Grieche schrieb „Die Elemente“, das jahrhundertelang das Geometriebuch schlechthin war?",
               "answer": "Euklid"
+            },
+            {
+              "text": "Welche Mathematikerin aus Erlangen gilt als Begründerin der modernen Algebra?",
+              "answer": "Emmy Noether"
             }
           ]
         },
         {
           "name": "Wie wahrscheinlich?",
           "questions": [
+            {
+              "text": "Wie viele Zahlen kreuzt man beim deutschen Lotto auf einem Tippfeld an?",
+              "answer": "6",
+              "note": "6 aus 49 – knapp 14 Millionen mögliche Tipps."
+            },
             {
               "text": "Wie groß ist die Chance, mit einem Würfel eine Sechs zu werfen?",
               "answer": "1 zu 6"
@@ -103,11 +108,6 @@
               "text": "Man wirft zwei Würfel. Welche Augensumme kommt am häufigsten vor?",
               "answer": "7",
               "note": "Für die 7 gibt es sechs Kombinationen – mehr als für jede andere Summe."
-            },
-            {
-              "text": "Wie viele Zahlen kreuzt man beim deutschen Lotto auf einem Tippfeld an?",
-              "answer": "6",
-              "note": "6 aus 49 – knapp 14 Millionen mögliche Tipps."
             },
             {
               "text": "Eine Münze fiel fünfmal auf Kopf. Wie wahrscheinlich ist beim sechsten Wurf Kopf?",
@@ -120,6 +120,10 @@
           "name": "Mathe im Alltag",
           "questions": [
             {
+              "text": "Wie viele Minuten sind drei Viertel einer Stunde?",
+              "answer": "45"
+            },
+            {
               "text": "Wie viele Quadratmeter hat ein Zimmer von 4 mal 5 Metern?",
               "answer": "20"
             },
@@ -130,10 +134,6 @@
             {
               "text": "Wie viel Prozent Trinkgeld gibt man, wenn man auf 42 Euro glatt 46 Euro zahlt?",
               "answer": "Knapp 10 Prozent"
-            },
-            {
-              "text": "Wie viele Minuten sind drei Viertel einer Stunde?",
-              "answer": "45"
             }
           ]
         }
@@ -145,21 +145,21 @@
           "name": "Sehr große Zahlen",
           "questions": [
             {
-              "text": "Wie viele Nullen hat eine Milliarde?",
-              "answer": "9"
-            },
-            {
-              "text": "Wie heißt die Zahl mit hundert Nullen, nach der eine Suchmaschine benannt wurde?",
-              "answer": "Googol"
-            },
-            {
               "text": "Welche ist die kleinste Primzahl?",
               "answer": "2",
               "note": "Und die einzige gerade."
             },
             {
+              "text": "Wie viele Nullen hat eine Milliarde?",
+              "answer": "9"
+            },
+            {
               "text": "Wie viele Sekunden hat ein Tag?",
               "answer": "86.400"
+            },
+            {
+              "text": "Wie heißt die Zahl mit hundert Nullen, nach der eine Suchmaschine benannt wurde?",
+              "answer": "Googol"
             }
           ]
         },
@@ -231,17 +231,17 @@
           "name": "Zahlen mit Geschichte",
           "questions": [
             {
+              "text": "In welchem Zahlensystem rechnen Computer?",
+              "answer": "Im Zweiersystem",
+              "note": "Auch Binärsystem – nur Nullen und Einsen."
+            },
+            {
               "text": "Welche Ziffer fehlte den Römern in ihrem Zahlensystem?",
               "answer": "Die Null"
             },
             {
               "text": "Welche römische Zahl steht für 50?",
               "answer": "L"
-            },
-            {
-              "text": "In welchem Zahlensystem rechnen Computer?",
-              "answer": "Im Zweiersystem",
-              "note": "Auch Binärsystem – nur Nullen und Einsen."
             },
             {
               "text": "Aus welchem Land kamen die Ziffern, die wir heute benutzen, nach Europa?",
@@ -254,12 +254,12 @@
           "name": "Zum Knobeln",
           "questions": [
             {
-              "text": "Ein Buch und ein Stift kosten zusammen 11 Euro. Das Buch kostet 10 Euro mehr. Was kostet der Stift?",
-              "answer": "50 Cent"
-            },
-            {
               "text": "Ein Zug fährt um 14 Uhr los und braucht 90 Minuten. Wann kommt er an?",
               "answer": "Um 15:30 Uhr"
+            },
+            {
+              "text": "Ein Buch und ein Stift kosten zusammen 11 Euro. Das Buch kostet 10 Euro mehr. Was kostet der Stift?",
+              "answer": "50 Cent"
             },
             {
               "text": "Auf einem Bauernhof gibt es Hühner und Kühe, zusammen 10 Köpfe und 28 Beine. Wie viele Kühe sind es?",

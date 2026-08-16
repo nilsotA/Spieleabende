@@ -612,3 +612,26 @@ test('kein Bilddateiname verrät die Lösung seiner Frage', async () => {
     }
   }
 });
+
+test('keine Frage verrät ihre eigene Lösung', async () => {
+  /*
+   * Der Test darüber vergleicht die Fragen einer Kategorie miteinander und
+   * lässt die Frage selbst ausdrücklich aus. Dort schlüpfte „Wie nennt man den
+   * Wurf von der Sieben-Meter-Linie?" (Der Siebenmeter) durch – am Tisch kein
+   * Rätsel, sondern Vorlesen. Kurze Lösungen fängt die Prüfung bewusst nicht
+   * ab (siehe fragenpruefung.js); dagegen hilft nur Lesen.
+   */
+  const { selbstverraeter } = await import('../public/fragenpruefung.js');
+  const verraeter = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    set.rounds.forEach((round, ri) => {
+      for (const cat of round.categories) {
+        for (const { i, answer } of selbstverraeter(cat.questions)) {
+          verraeter.push(`${datei} R${ri + 1} „${cat.name}“ Frage ${i + 1} („${answer}“): ${cat.questions[i].text}`);
+        }
+      }
+    });
+  }
+  assert.deepEqual(verraeter, []);
+});

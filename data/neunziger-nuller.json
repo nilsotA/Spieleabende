@@ -30,6 +30,10 @@
           "name": "Musik der Neunziger",
           "questions": [
             {
+              "text": "Welche britische Girlgroup landete 1996 mit „Wannabe“ ihren Durchbruch?",
+              "answer": "Spice Girls"
+            },
+            {
               "text": "Wer sang 1998 „Believe“ – mit dem berühmt verzerrten Stimmeffekt?",
               "answer": "Cher",
               "note": "Der Effekt machte Autotune populär."
@@ -37,10 +41,6 @@
             {
               "text": "Welche Band aus Hannover sang „Wind Of Change“?",
               "answer": "Scorpions"
-            },
-            {
-              "text": "Welche britische Girlgroup landete 1996 mit „Wannabe“ ihren Durchbruch?",
-              "answer": "Spice Girls"
             },
             {
               "text": "Welcher Song eröffnet das Nirvana-Album „Nevermind“ von 1991?",
@@ -75,17 +75,17 @@
           "name": "Technik-Museum",
           "questions": [
             {
+              "text": "Was musste man vor dem Zurückbringen in die Videothek zurückspulen?",
+              "answer": "Die Videokassette",
+              "note": "„VHS“ gilt auch."
+            },
+            {
               "text": "Auf welchem runden, silbernen Datenträger kaufte man in den Neunzigern Musik?",
               "answer": "Auf CD"
             },
             {
               "text": "Wie hieß das tragbare Kassettenabspielgerät von Sony?",
               "answer": "Walkman"
-            },
-            {
-              "text": "Was musste man vor dem Zurückbringen in die Videothek zurückspulen?",
-              "answer": "Die Videokassette",
-              "note": "„VHS“ gilt auch."
             },
             {
               "text": "Wie viel Speicher fasste eine normale 3,5-Zoll-Diskette?",
@@ -146,14 +146,6 @@
           "name": "Was ist die Frage?",
           "questions": [
             {
-              "text": "Diese graue Handheld-Konsole von Nintendo kam 1989 heraus und hatte ein grünliches Display.",
-              "answer": "Was ist der Game Boy?"
-            },
-            {
-              "text": "Diese Spielkonsole von Sony kam 1995 nach Europa und spielte Spiele von CD.",
-              "answer": "Was ist die PlayStation?"
-            },
-            {
               "text": "Diese Währung löste 2002 als Bargeld die D-Mark ab.",
               "answer": "Was ist der Euro?"
             },
@@ -161,6 +153,14 @@
               "text": "Diese Suchmaschine wurde 1998 gegründet und ist nach einer sehr großen Zahl benannt.",
               "answer": "Was ist Google?",
               "note": "Die Zahl heißt „Googol“: eine Eins mit hundert Nullen."
+            },
+            {
+              "text": "Diese graue Handheld-Konsole von Nintendo kam 1989 heraus und hatte ein grünliches Display.",
+              "answer": "Was ist der Game Boy?"
+            },
+            {
+              "text": "Diese Spielkonsole von Sony kam 1995 nach Europa und spielte Spiele von CD.",
+              "answer": "Was ist die PlayStation?"
             }
           ]
         },
@@ -211,17 +211,17 @@
           "name": "Handy-Zeitalter",
           "questions": [
             {
-              "text": "Welche Funktechnik für kurze Strecken ist nach einem dänischen Wikingerkönig benannt?",
-              "answer": "Bluetooth",
-              "note": "Harald Blauzahn – das Zeichen sind seine verbundenen Initialen in Runen."
+              "text": "Wofür steht die Abkürzung SMS?",
+              "answer": "Short Message Service"
             },
             {
               "text": "Welches Spiel war auf den alten Nokia-Handys vorinstalliert und wurde immer länger?",
               "answer": "Snake"
             },
             {
-              "text": "Wofür steht die Abkürzung SMS?",
-              "answer": "Short Message Service"
+              "text": "Welche Funktechnik für kurze Strecken ist nach einem dänischen Wikingerkönig benannt?",
+              "answer": "Bluetooth",
+              "note": "Harald Blauzahn – das Zeichen sind seine verbundenen Initialen in Runen."
             },
             {
               "text": "Welches Tier sang Mitte der Nuller den deutschen Klingelton-Hit „Ich bin Schnappi“?",
@@ -258,12 +258,12 @@
               "answer": "1990"
             },
             {
-              "text": "In welchem Jahr lief die erste deutsche Staffel von „Big Brother“?",
-              "answer": "2000"
-            },
-            {
               "text": "In welchem Jahr fand die Fußball-WM in Deutschland statt, das „Sommermärchen“?",
               "answer": "2006"
+            },
+            {
+              "text": "In welchem Jahr lief die erste deutsche Staffel von „Big Brother“?",
+              "answer": "2000"
             },
             {
               "text": "In welchem Jahr wurde Deutschland zuletzt Fußball-Europameister?",

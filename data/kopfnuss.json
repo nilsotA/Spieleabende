@@ -29,16 +29,16 @@
           "name": "Schätzfragen",
           "questions": [
             {
+              "text": "Wie viele Sekunden hat eine Stunde?",
+              "answer": "3600"
+            },
+            {
               "text": "Wie viele Felder hat ein Schachbrett?",
               "answer": "64"
             },
             {
               "text": "Wie viele Tasten hat ein Klavier?",
               "answer": "88"
-            },
-            {
-              "text": "Wie viele Sekunden hat eine Stunde?",
-              "answer": "3600"
             },
             {
               "text": "Wie viele Knochen hat ein erwachsener Mensch?",
@@ -54,17 +54,17 @@
               "answer": "Falsch – sie sehen, orientieren sich aber vor allem per Echo"
             },
             {
-              "text": "Ein Tag auf der Venus dauert länger als ein Jahr auf der Venus.",
-              "answer": "Wahr",
-              "note": "Die Venus dreht sich langsamer, als sie die Sonne umrundet"
-            },
-            {
               "text": "Karotten verbessern die Nachtsicht deutlich.",
               "answer": "Falsch – das ist ein Mythos aus dem Zweiten Weltkrieg"
             },
             {
               "text": "Die Chinesische Mauer ist mit bloßem Auge vom Mond aus zu sehen.",
               "answer": "Falsch"
+            },
+            {
+              "text": "Ein Tag auf der Venus dauert länger als ein Jahr auf der Venus.",
+              "answer": "Wahr",
+              "note": "Die Venus dreht sich langsamer, als sie die Sonne umrundet"
             }
           ]
         },
@@ -93,12 +93,12 @@
           "name": "Wer bin ich?",
           "questions": [
             {
-              "text": "Ich schrieb über ein Mädchen mit roten Zöpfen, das das stärkste der Welt ist.",
-              "answer": "Astrid Lindgren"
-            },
-            {
               "text": "Ich malte die Mona Lisa.",
               "answer": "Leonardo da Vinci"
+            },
+            {
+              "text": "Ich schrieb über ein Mädchen mit roten Zöpfen, das das stärkste der Welt ist.",
+              "answer": "Astrid Lindgren"
             },
             {
               "text": "Ich komponierte meine 9. Sinfonie, als ich fast nichts mehr hörte.",
@@ -145,16 +145,16 @@
               "answer": "Was ist der rechte Winkel?"
             },
             {
-              "text": "Diese Zahl ist weder eine Primzahl noch aus Primzahlen zusammengesetzt.",
-              "answer": "Was ist die Eins?"
+              "text": "Dieser Ozean ist der größte der Erde.",
+              "answer": "Was ist der Pazifik?"
             },
             {
               "text": "Diese Zahl ist die einzige gerade Primzahl.",
               "answer": "Was ist die Zwei?"
             },
             {
-              "text": "Dieser Ozean ist der größte der Erde.",
-              "answer": "Was ist der Pazifik?"
+              "text": "Diese Zahl ist weder eine Primzahl noch aus Primzahlen zusammengesetzt.",
+              "answer": "Was ist die Eins?"
             }
           ]
         },
@@ -260,12 +260,12 @@
               "note": "Zwei Vorhöfe und zwei Kammern."
             },
             {
-              "text": "Welches Organ stellt Insulin her?",
-              "answer": "Die Bauchspeicheldrüse"
-            },
-            {
               "text": "Wie heißt der längste Knochen im menschlichen Körper?",
               "answer": "Der Oberschenkelknochen"
+            },
+            {
+              "text": "Welches Organ stellt Insulin her?",
+              "answer": "Die Bauchspeicheldrüse"
             }
           ]
         }

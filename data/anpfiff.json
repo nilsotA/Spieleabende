@@ -30,17 +30,17 @@
           "name": "Maße & Zahlen",
           "questions": [
             {
-              "text": "Wie hoch hängt ein Basketballkorb über dem Boden – in Metern?",
-              "answer": "3,05",
-              "note": "Genau zehn Fuß – die Höhe stammt aus der Turnhalle von 1891."
+              "text": "Wie viele Löcher hat ein normaler Golfplatz?",
+              "answer": "18"
             },
             {
               "text": "Wie lang ist eine Bahn im olympischen Schwimmbecken – in Metern?",
               "answer": "50"
             },
             {
-              "text": "Wie viele Löcher hat ein normaler Golfplatz?",
-              "answer": "18"
+              "text": "Wie hoch hängt ein Basketballkorb über dem Boden – in Metern?",
+              "answer": "3,05",
+              "note": "Genau zehn Fuß – die Höhe stammt aus der Turnhalle von 1891."
             },
             {
               "text": "Wie breit ist ein Fußballtor zwischen den Pfosten – in Metern?",
@@ -53,8 +53,12 @@
           "name": "Olympia",
           "questions": [
             {
-              "text": "Wie viele Ringe zeigt das olympische Symbol?",
-              "answer": "5"
+              "text": "Welche Farbe hat die Medaille für den zweiten Platz?",
+              "answer": "Silber"
+            },
+            {
+              "text": "Alle wie viele Jahre finden die Sommerspiele statt?",
+              "answer": "Alle 4 Jahre"
             },
             {
               "text": "In welchem Land fanden die ersten Olympischen Spiele der Neuzeit statt?",
@@ -62,12 +66,9 @@
               "note": "1896 in Athen."
             },
             {
-              "text": "Alle wie viele Jahre finden die Sommerspiele statt?",
-              "answer": "Alle 4 Jahre"
-            },
-            {
-              "text": "Welche Farbe hat die Medaille für den zweiten Platz?",
-              "answer": "Silber"
+              "text": "Wie lautet das olympische Motto auf Lateinisch?",
+              "answer": "Citius, Altius, Fortius",
+              "note": "„Schneller, höher, stärker“ – seit 2021 ergänzt um „communiter“: gemeinsam."
             }
           ]
         },
@@ -118,20 +119,21 @@
           "name": "Sportdeutsch",
           "questions": [
             {
-              "text": "Wie heißt der Sprung mit gegrätschten Beinen über den Bock im Turnunterricht?",
-              "answer": "Die Grätsche"
-            },
-            {
               "text": "Wie nennt man beim Fußball drei Tore eines Spielers in einem Spiel?",
               "answer": "Hattrick"
             },
             {
-              "text": "Wie heißt der Ausdruck für den Punkt, an dem ein Läufer plötzlich kaum noch kann?",
-              "answer": "Der Mann mit dem Hammer"
+              "text": "Wie heißt im Handball der Strafwurf, den es nach einer klaren Torchancen-Verhinderung gibt?",
+              "answer": "Der Siebenmeter",
+              "note": "Der Torwart darf ihm bis auf vier Meter entgegenkommen – näher nicht."
             },
             {
-              "text": "Wie nennt man im Handball den Wurf von der Sieben-Meter-Linie?",
-              "answer": "Siebenmeter"
+              "text": "Wie heißt der Sprung mit gegrätschten Beinen über den Bock im Turnunterricht?",
+              "answer": "Die Grätsche"
+            },
+            {
+              "text": "Wie heißt der Ausdruck für den Punkt, an dem ein Läufer plötzlich kaum noch kann?",
+              "answer": "Der Mann mit dem Hammer"
             }
           ]
         }
@@ -143,17 +145,17 @@
           "name": "Wintersport",
           "questions": [
             {
-              "text": "Wie viele der vier Schanzen der Vierschanzentournee stehen in Deutschland?",
-              "answer": "2",
-              "note": "Oberstdorf und Garmisch-Partenkirchen; Innsbruck und Bischofshofen liegen in Österreich."
-            },
-            {
               "text": "Welches Gerät braucht man beim Curling, um das Eis vor dem Stein zu bearbeiten?",
               "answer": "Einen Besen"
             },
             {
               "text": "Wie heißt die Abfahrt, bei der die Tore eng nebeneinander stehen?",
               "answer": "Slalom"
+            },
+            {
+              "text": "Wie viele der vier Schanzen der Vierschanzentournee stehen in Deutschland?",
+              "answer": "2",
+              "note": "Oberstdorf und Garmisch-Partenkirchen; Innsbruck und Bischofshofen liegen in Österreich."
             },
             {
               "text": "Welche Sportart fährt kopfüber und mit den Armen voran einen Eiskanal hinunter?",
@@ -165,10 +167,6 @@
           "name": "Leichtathletik",
           "questions": [
             {
-              "text": "Wie viele Disziplinen umfasst der Zehnkampf der Männer?",
-              "answer": "10"
-            },
-            {
               "text": "Über welche Strecke geht der klassische Marathon?",
               "answer": "42,195 Kilometer"
             },
@@ -176,6 +174,11 @@
               "text": "Welcher Jamaikaner hält den Weltrekord über 100 Meter?",
               "answer": "Usain Bolt",
               "note": "9,58 Sekunden, aufgestellt 2009 in Berlin."
+            },
+            {
+              "text": "Wie viele Hürden stehen im 110-Meter-Hürdenlauf der Männer?",
+              "answer": "Zehn",
+              "note": "Jede ist 1,067 Meter hoch – ein Maß, das aus der Umrechnung englischer Fuß stammt."
             },
             {
               "text": "Wie heißt die Technik, mit der Hochspringer heute rücklings über die Latte gehen?",
@@ -186,6 +189,10 @@
         {
           "name": "Sportgeschichte",
           "questions": [
+            {
+              "text": "Welcher deutsche Rennfahrer holte sieben Weltmeistertitel in der Formel 1?",
+              "answer": "Michael Schumacher"
+            },
             {
               "text": "Wer schoss im WM-Finale 2014 das Tor zum deutschen Titel?",
               "answer": "Mario Götze",
@@ -199,10 +206,6 @@
               "text": "Welche deutsche Tennisspielerin gewann 1988 alle vier Grand-Slam-Turniere und Olympia-Gold?",
               "answer": "Steffi Graf",
               "note": "Der Golden Slam – bis heute einmalig."
-            },
-            {
-              "text": "Welcher deutsche Rennfahrer holte sieben Weltmeistertitel in der Formel 1?",
-              "answer": "Michael Schumacher"
             }
           ]
         },
@@ -233,12 +236,12 @@
           "name": "Von der Bank",
           "questions": [
             {
-              "text": "Welcher Bundestrainer führte Deutschland 1954 zum ersten WM-Titel?",
-              "answer": "Sepp Herberger"
-            },
-            {
               "text": "Wie geht der berühmteste Fußballsatz weiter: „Der Ball ist rund und ein Spiel dauert …“?",
               "answer": "… 90 Minuten"
+            },
+            {
+              "text": "Welcher Bundestrainer führte Deutschland 1954 zum ersten WM-Titel?",
+              "answer": "Sepp Herberger"
             },
             {
               "text": "Welcher Trainerposten wird in England „the hot seat“ genannt?",
@@ -254,6 +257,14 @@
           "name": "Sport & Körper",
           "questions": [
             {
+              "text": "Wie heißt das Aufwärmen vor dem Sport auf Englisch?",
+              "answer": "Warm-up"
+            },
+            {
+              "text": "Welches Organ pumpt bei Ausdauersport pro Minute deutlich mehr Blut als in Ruhe?",
+              "answer": "Das Herz"
+            },
+            {
               "text": "Welche Sehne reißt Sportlern am Sprunggelenk besonders oft?",
               "answer": "Die Achillessehne"
             },
@@ -261,14 +272,6 @@
               "text": "Welcher Stoff galt lange als Ursache von Muskelkater, ist es aber nicht?",
               "answer": "Milchsäure",
               "note": "Heute weiß man: Es sind winzige Risse in den Muskelfasern."
-            },
-            {
-              "text": "Welches Organ pumpt bei Ausdauersport pro Minute deutlich mehr Blut als in Ruhe?",
-              "answer": "Das Herz"
-            },
-            {
-              "text": "Wie heißt das Aufwärmen vor dem Sport auf Englisch?",
-              "answer": "Warm-up"
             }
           ]
         }

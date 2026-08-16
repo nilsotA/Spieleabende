@@ -76,3 +76,51 @@ export function verraeteneLoesungen(fragen) {
   });
   return treffer;
 }
+
+/**
+ * Welche Frage verrät ihre eigene Lösung?
+ *
+ * `verraeteneLoesungen` vergleicht die Fragen einer Kategorie miteinander und
+ * überspringt dabei ausdrücklich die Frage selbst. Genau dort schlüpften zwei
+ * Fälle durch, die am Tisch geschenkte Punkte bedeuten:
+ *
+ *   „Wie nennt man den Wurf von der Sieben-Meter-Linie?"  → Der Siebenmeter
+ *   „Welche Sendung mit der Maus erklärt sonntags die Welt?" → Die Sendung mit der Maus
+ *
+ * Das ist keine Frage mehr, sondern Vorlesen.
+ *
+ * Was diese Prüfung NICHT sieht: kurze Lösungen. „Wie viele Disziplinen
+ * umfasst der Zehnkampf?" mit der Lösung „10" oder „Zehn" bleibt unentdeckt –
+ * dort steckt die Antwort im Wortsinn, nicht im Buchstabenstand, und jede
+ * Regel, die das fassen wollte, meldete reihenweise gesunde Fragen. Gegen
+ * dieses Muster hilft nur Lesen; die Prüfung nimmt einem den anderen Teil ab.
+ *
+ * Verglichen wird bewusst hart: Die Lösung muss – ohne Artikel davor und ohne
+ * Leerzeichen und Bindestriche – am Stück im Fragetext stehen. Ein
+ * Wortmengen-Vergleich wie oben ging hier nicht: Bei „60 Euro" oder „13 Tage"
+ * bleibt nach dem Aussortieren kurzer Wörter nur die Einheit übrig, und die
+ * steht in der Frage natürlich auch. Gemessen an allen mitgelieferten Sätzen
+ * meldete diese Fassung 20 Fälle, von denen 19 keine waren.
+ *
+ * Auswahlfragen sind ausgenommen: Wer „Kölsch oder Pils?" fragt, muss die
+ * Lösung nennen – das ist die Bauart der Frage, kein Fehler.
+ */
+export function selbstverraeter(fragen) {
+  const glatt = (t) => String(t ?? '').toLowerCase().replace(/[^0-9a-zäöüß]/g, '');
+  const ohneArtikel = (a) => String(a ?? '').trim()
+    .replace(/^(der|die|das|den|dem|ein|eine|einen|einem|mit|aus|zu|zum|zur|in|im|bei|beim|von|auf)\s+/i, '');
+  const treffer = [];
+  fragen.forEach((q, i) => {
+    const antwort = String(q?.answer ?? '').trim();
+    const frage = String(q?.text ?? '').trim();
+    if (!antwort || !frage) return;
+    if (FORMATANTWORTEN.test(antwort)) return;
+    if (/\boder\b/i.test(frage)) return; // Auswahlfrage – siehe oben
+    const kern = glatt(ohneArtikel(antwort));
+    // Unter fünf Zeichen ist ein Fund kein Beweis: „acht" steckt auch in
+    // „beachten".
+    if (kern.length < 5) return;
+    if (glatt(frage).includes(kern)) treffer.push({ i, answer: antwort });
+  });
+  return treffer;
+}
