@@ -9,15 +9,18 @@
           "questions": [
             {
               "text": "Aus welchem Land stammt das Gulasch?",
-              "answer": "Aus Ungarn"
+              "answer": "Aus Ungarn",
+              "note": "„Gulyás“ heißt Rinderhirt. Im Ursprung war es eine Suppe, kein Eintopf mit Soße."
             },
             {
               "text": "Welches Land hat den Nachtisch Tiramisu hervorgebracht?",
-              "answer": "Italien"
+              "answer": "Italien",
+              "note": "„Tira mi su“ heißt „zieh mich hoch“ – gemeint ist der Espresso darin."
             },
             {
               "text": "In welchem Land gehört die Sauce Chimichurri zu jedem Grillabend?",
-              "answer": "In Argentinien"
+              "answer": "In Argentinien",
+              "note": "Petersilie, Knoblauch, Öl, Essig. Sie kommt zum Fleisch dazu, nicht daran."
             },
             {
               "text": "In welcher Stadt wurde die Sachertorte erfunden?",
@@ -31,15 +34,18 @@
           "questions": [
             {
               "text": "Welcher Teil vom Ei wird steif geschlagen, damit Baiser gelingt?",
-              "answer": "Das Eiweiß"
+              "answer": "Das Eiweiß",
+              "note": "Es lässt sich auf das Achtfache aufschlagen – die Eiweißmoleküle bilden dabei ein Gerüst um die Luftbläschen."
             },
             {
               "text": "Welche Nuss steckt im klassischen Nuss-Nougat-Aufstrich?",
-              "answer": "Die Haselnuss"
+              "answer": "Die Haselnuss",
+              "note": "Rund 50 Nüsse stecken in einem Glas – daneben vor allem Zucker und Palmöl."
             },
             {
               "text": "Wie heißt das französische Gebäck aus zwei Baiserhälften mit Creme dazwischen?",
-              "answer": "Macaron"
+              "answer": "Macaron",
+              "note": "Nicht zu verwechseln mit dem Makronen aus Kokos: Der französische besteht aus Mandelmehl."
             },
             {
               "text": "Welche Frucht gehört in einen klassischen französischen Clafoutis?",
@@ -53,19 +59,23 @@
           "questions": [
             {
               "text": "Woraus wird eine Apfelschorle gemischt?",
-              "answer": "Aus Apfelsaft und Mineralwasser"
+              "answer": "Aus Apfelsaft und Mineralwasser",
+              "note": "Halb und halb ist die Regel. In Hessen heißt das Ganze mit gesäuertem Most „Äppelwoi“ – und schmeckt völlig anders."
             },
             {
               "text": "Aus welchem Land kommt der Matcha?",
-              "answer": "Aus Japan"
+              "answer": "Aus Japan",
+              "note": "Der ganze Blatt wird zu Pulver vermahlen und mitgetrunken – deshalb steckt viel mehr Koffein darin als in normalem Grüntee."
             },
             {
               "text": "Welches Getränk entsteht, wenn man gesüßten Tee mit einer Pilzkultur vergären lässt?",
-              "answer": "Kombucha"
+              "answer": "Kombucha",
+              "note": "Die Kultur heißt „Teepilz“, ist aber keiner: ein Verbund aus Bakterien und Hefen."
             },
             {
               "text": "Welche zwei Kaffeearten machen zusammen fast den gesamten Welthandel aus?",
-              "answer": "Arabica und Robusta"
+              "answer": "Arabica und Robusta",
+              "note": "Arabica gilt als feiner, Robusta hat mehr Koffein und macht die Crema im Espresso."
             }
           ]
         },
@@ -74,15 +84,18 @@
           "questions": [
             {
               "text": "Woraus besteht Guacamole hauptsächlich?",
-              "answer": "Aus Avocado"
+              "answer": "Aus Avocado",
+              "note": "Der Kern in der Schüssel hält sie angeblich frisch – wirklich hilft nur Limettensaft und wenig Luft."
             },
             {
               "text": "Welches Kraut gibt dem Pesto alla genovese seine grüne Farbe?",
-              "answer": "Basilikum"
+              "answer": "Basilikum",
+              "note": "Dazu Pinienkerne, Parmesan, Pecorino, Knoblauch und Olivenöl. Gemörsert, nicht gemixt – daher der Name von „pestare“, zerstoßen."
             },
             {
               "text": "Welche Hülsenfrucht ist die Grundlage von Hummus?",
-              "answer": "Die Kichererbse"
+              "answer": "Die Kichererbse",
+              "note": "Dazu Sesampaste, Zitrone, Knoblauch. „Hummus“ heißt auf Arabisch schlicht Kichererbse."
             },
             {
               "text": "Welcher Fisch steckt klassischerweise im Caesar-Dressing?",
@@ -96,7 +109,8 @@
           "questions": [
             {
               "text": "Welcher Käse gehört klassisch auf eine Pizza Margherita?",
-              "answer": "Mozzarella"
+              "answer": "Mozzarella",
+              "note": "Echter Büffelmozzarella kommt aus Kampanien und wird binnen Tagen gegessen – der feste aus Kuhmilch ist etwas anderes."
             },
             {
               "text": "Aus welcher Milch wird echter Feta gemacht?",
@@ -105,11 +119,13 @@
             },
             {
               "text": "Welcher Schweizer Käse ist für seine großen Löcher bekannt?",
-              "answer": "Emmentaler"
+              "answer": "Emmentaler",
+              "note": "Die Löcher entstehen durch Bakterien, die Kohlendioxid abgeben. Zu große Löcher gelten als Fehler."
             },
             {
               "text": "Welcher blau geäderte Käse reift in französischen Kalkhöhlen?",
-              "answer": "Roquefort"
+              "answer": "Roquefort",
+              "note": "Er reift in Höhlen bei Roquefort-sur-Soulzon – nur dort gereifter Käse darf so heißen."
             }
           ]
         },
@@ -118,7 +134,8 @@
           "questions": [
             {
               "text": "Dieses Küchenwerkzeug hat einen Stiel, einen runden Kopf voller Löcher und trennt Nudeln vom Wasser.",
-              "answer": "Was ist ein Sieb?"
+              "answer": "Was ist ein Sieb?",
+              "note": "Vom Schöpflöffel unterscheidet es nur die Lochung – und die entscheidet über alles."
             },
             {
               "text": "Dieses weiße Pulver aus Mais bindet Soßen und macht Pudding fest.",
@@ -127,11 +144,13 @@
             },
             {
               "text": "Dieses Verfahren macht Milch länger haltbar und ist nach einem französischen Chemiker benannt.",
-              "answer": "Was ist das Pasteurisieren?"
+              "answer": "Was ist das Pasteurisieren?",
+              "note": "Nach Louis Pasteur. Kurz erhitzen tötet die meisten Keime, ohne den Geschmack zu zerstören."
             },
             {
               "text": "Diese Reaktion sorgt dafür, dass Braten, Brotkruste und Röstzwiebeln braun werden und gut riechen.",
-              "answer": "Was ist die Maillard-Reaktion?"
+              "answer": "Was ist die Maillard-Reaktion?",
+              "note": "Zucker und Eiweiß reagieren ab etwa 140 Grad. Genau deshalb schmeckt Gebratenes anders als Gekochtes."
             }
           ]
         }
@@ -144,19 +163,23 @@
           "questions": [
             {
               "text": "Was bedeutet „al dente“?",
-              "answer": "Bissfest"
+              "answer": "Bissfest",
+              "note": "Wörtlich „auf dem Zahn“. Die Nudel soll innen einen hellen Kern behalten."
             },
             {
               "text": "Was passiert beim Blanchieren?",
-              "answer": "Kurz in kochendes Wasser tauchen und sofort kalt abschrecken"
+              "answer": "Kurz in kochendes Wasser tauchen und sofort kalt abschrecken",
+              "note": "Danach ins Eiswasser – das stoppt den Garvorgang und hält die Farbe."
             },
             {
               "text": "Was tut man, wenn man einen Bratensatz ablöscht?",
-              "answer": "Man gießt Flüssigkeit in die heiße Pfanne und löst damit den Ansatz"
+              "answer": "Man gießt Flüssigkeit in die heiße Pfanne und löst damit den Ansatz",
+              "note": "Der Bratensatz ist das Angebackene am Boden – dort sitzt der Geschmack, nicht im Fett."
             },
             {
               "text": "Wie sieht Gemüse aus, das julienne geschnitten ist?",
-              "answer": "In feine, gleich lange Streifen"
+              "answer": "In feine, gleich lange Streifen",
+              "note": "Rund fünf Zentimeter lang, so dick wie ein Streichholz. Der Name kommt aus der französischen Küche."
             }
           ]
         },
@@ -165,15 +188,18 @@
           "questions": [
             {
               "text": "Welches Gewürz gibt Currypulver seine gelbe Farbe?",
-              "answer": "Kurkuma"
+              "answer": "Kurkuma",
+              "note": "Der Farbstoff heißt Curcumin und färbt alles mit – Finger, Bretter und Kunststoffschüsseln."
             },
             {
               "text": "Von welchem Teil des Zimtbaums stammt Zimt?",
-              "answer": "Von der Rinde"
+              "answer": "Von der Rinde",
+              "note": "Sie wird geschält und rollt sich beim Trocknen von selbst zu den bekannten Stangen."
             },
             {
               "text": "Welches Kraut gehört zwingend in eine Sauce béarnaise?",
-              "answer": "Estragon"
+              "answer": "Estragon",
+              "note": "Ohne ihn ist es eine Sauce hollandaise mit Essigreduktion – aber keine béarnaise."
             },
             {
               "text": "Zu welcher Pflanzenfamilie gehört die Vanille?",
@@ -187,15 +213,18 @@
           "questions": [
             {
               "text": "Aus welcher Frucht wird Cidre gemacht?",
-              "answer": "Aus Äpfeln"
+              "answer": "Aus Äpfeln",
+              "note": "In Spanien heißt er Sidra, in England Cider – und in Hessen ist der Apfelwein ein naher Verwandter."
             },
             {
               "text": "Wie heißt der italienische Schaumwein aus der Glera-Traube?",
-              "answer": "Prosecco"
+              "answer": "Prosecco",
+              "note": "Er gärt im Tank, nicht in der Flasche – deshalb ist er günstiger als Champagner."
             },
             {
               "text": "Welches der beiden ist obergärig: Kölsch oder Pils?",
-              "answer": "Kölsch"
+              "answer": "Kölsch",
+              "note": "Obergärige Hefe arbeitet bei Zimmertemperatur oben im Sud, untergärige kühl am Boden."
             },
             {
               "text": "Was sagt die Angabe „Spätlese“ über einen deutschen Wein aus?",
@@ -209,15 +238,18 @@
           "questions": [
             {
               "text": "Welche Bohnen gehören neben Ei und Speck in ein englisches Full Breakfast?",
-              "answer": "Baked Beans"
+              "answer": "Baked Beans",
+              "note": "Weiße Bohnen in Tomatensoße, meist gezuckert. Zum „Full English“ gehören außerdem Würstchen, Pilze und Toast."
             },
             {
               "text": "Wie heißt das halbmondförmige Blätterteiggebäck, das in Frankreich zum Frühstück gehört?",
-              "answer": "Croissant"
+              "answer": "Croissant",
+              "note": "Es stammt eigentlich aus Wien: Das Kipferl kam mit einem Wiener Bäcker nach Paris."
             },
             {
               "text": "Was ist Congee, das in China morgens auf den Tisch kommt?",
-              "answer": "Ein Reisbrei"
+              "answer": "Ein Reisbrei",
+              "note": "Reis wird in viel Wasser weich gekocht. Dazu kommen Ei, Ingwer oder eingelegtes Gemüse."
             },
             {
               "text": "Welches fermentierte Sojagericht steht in Japan oft zum Frühstück bereit?",
@@ -231,7 +263,8 @@
           "questions": [
             {
               "text": "Welches Gemüse treibt beim Schneiden fast jedem die Tränen in die Augen?",
-              "answer": "Die Zwiebel"
+              "answer": "Die Zwiebel",
+              "note": "Beim Schneiden entsteht ein flüchtiger Schwefelstoff. Kalt und scharf geschnitten tränt es weniger."
             },
             {
               "text": "Welche Frucht erklärte ein US-Gericht 1893 kurzerhand zum Gemüse?",
@@ -240,11 +273,13 @@
             },
             {
               "text": "Warum soll man grüne Stellen an Kartoffeln großzügig wegschneiden?",
-              "answer": "Dort steckt Solanin, und das ist giftig"
+              "answer": "Dort steckt Solanin, und das ist giftig",
+              "note": "Solanin bildet sich im Licht. Deshalb gehören Kartoffeln in den dunklen, kühlen Keller."
             },
             {
               "text": "Aus der Kreuzung welcher zwei Zitrusfrüchte entstand die Clementine?",
-              "answer": "Aus Mandarine und Bitterorange"
+              "answer": "Aus Mandarine und Bitterorange",
+              "note": "Sie ist deutlich jünger als beide Eltern – erst um 1900 in Algerien beschrieben."
             }
           ]
         },
@@ -253,19 +288,23 @@
           "questions": [
             {
               "text": "Welches Gerät gart Essen unter Druck deutlich schneller als ein normaler Topf?",
-              "answer": "Der Schnellkochtopf"
+              "answer": "Der Schnellkochtopf",
+              "note": "Unter Druck kocht Wasser erst bei rund 120 Grad – das verkürzt die Garzeit um zwei Drittel."
             },
             {
               "text": "Wofür benutzt man in der Küche eine Mandoline?",
-              "answer": "Zum Schneiden gleichmäßig dünner Scheiben"
+              "answer": "Zum Schneiden gleichmäßig dünner Scheiben",
+              "note": "Das gefährlichste Gerät in jeder Küche. Der Handschutz liegt meistens ungenutzt in der Schublade."
             },
             {
               "text": "Was macht ein Sous-vide-Garer mit dem Essen?",
-              "answer": "Er gart es vakuumverpackt im Wasserbad bei genauer Temperatur"
+              "answer": "Er gart es vakuumverpackt im Wasserbad bei genauer Temperatur",
+              "note": "Bei exakt eingestellter Temperatur – ein Steak kann darin nicht übergaren, nur trockener werden."
             },
             {
               "text": "Wozu dient der Aufsatz, der bei einer Küchenmaschine „Flexirührer“ heißt?",
-              "answer": "Zum Rühren dickerer Massen, dabei streift er die Schüsselwand ab"
+              "answer": "Zum Rühren dickerer Massen, dabei streift er die Schüsselwand ab",
+              "note": "„Flexi“ heißt er wegen der weichen Kante: Sie schabt die Schüssel mit ab, während sie rührt."
             }
           ]
         }

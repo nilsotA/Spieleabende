@@ -14,15 +14,18 @@
             },
             {
               "text": "Wie nannte man die Möbel, in denen Fernseher, Platten und Gläser gemeinsam standen?",
-              "answer": "Die Schrankwand"
+              "answer": "Die Schrankwand",
+              "note": "Eiche rustikal, drei Meter breit, mit Bar hinter der Klapptür. In fast jedem Wohnzimmer der Siebziger stand eine."
             },
             {
               "text": "Was musste man bei einer Schallplatte tun, damit die zweite Hälfte lief?",
-              "answer": "Sie umdrehen"
+              "answer": "Sie umdrehen",
+              "note": "Eine Seite fasste rund 20 Minuten – deshalb sind Alben so oft in zwei Hälften gedacht."
             },
             {
               "text": "Welches Gerät stand früher auf dem Fernseher und empfing das Bild?",
-              "answer": "Die Antenne"
+              "answer": "Die Antenne",
+              "note": "Zwei ausziehbare Stäbe, an denen man rückte, bis das Bild stand. Wer eine Weile hielt, wurde selbst zur Antenne."
             }
           ]
         },
@@ -31,15 +34,18 @@
           "questions": [
             {
               "text": "Wie nennt man das Zeugnis am Ende der Schulzeit am Gymnasium?",
-              "answer": "Das Abitur"
+              "answer": "Das Abitur",
+              "note": "Von lateinisch „abire“, weggehen. In Österreich heißt es Matura, in der Schweiz auch."
             },
             {
               "text": "Womit schrieben Grundschüler früher, bevor es Hefte für alle gab?",
-              "answer": "Mit Griffel auf Schiefertafel"
+              "answer": "Mit Griffel auf Schiefertafel",
+              "note": "Geschrieben wurde mit Griffel auf Schiefer, gewischt mit einem nassen Schwämmchen am Band."
             },
             {
               "text": "Was benutzte man im Matheunterricht, bevor der Taschenrechner erlaubt war?",
-              "answer": "Den Rechenschieber"
+              "answer": "Den Rechenschieber",
+              "note": "Damit wurde die Mondlandung gerechnet. Multiplizieren hieß: zwei Skalen gegeneinander verschieben."
             },
             {
               "text": "Wie hieß das Gerät, mit dem Lehrer Arbeitsblätter in blauer Schrift vervielfältigten?",
@@ -53,19 +59,23 @@
           "questions": [
             {
               "text": "Welche Währung gab es in Deutschland vor dem Euro?",
-              "answer": "Die Deutsche Mark"
+              "answer": "Die Deutsche Mark",
+              "note": "Eingeführt 1948, abgelöst 2002. Umgerechnet wird bis heute – meist ungenau: 1 Euro sind 1,95583 Mark."
             },
             {
               "text": "Wie hieß die kleine Münze, von der hundert Stück eine Mark ergaben?",
-              "answer": "Der Pfennig"
+              "answer": "Der Pfennig",
+              "note": "Das Wort ist über tausend Jahre alt und steckt noch im englischen „penny“."
             },
             {
               "text": "Wie viel Pfand kostet heute eine Einweg-Plastikflasche?",
-              "answer": "25 Cent"
+              "answer": "25 Cent",
+              "note": "Auf Mehrwegflaschen sind es 8 oder 15 Cent – ausgerechnet die Einweg-Flasche ist teurer, damit sie zurückkommt."
             },
             {
               "text": "Welche Münze war der „Groschen“, von dem in Redewendungen noch die Rede ist?",
-              "answer": "Das Zehnpfennigstück"
+              "answer": "Das Zehnpfennigstück",
+              "note": "„Der Groschen ist gefallen“ kommt vom Münzautomaten: Erst wenn er unten ankam, ging es los."
             }
           ]
         },
@@ -74,19 +84,23 @@
           "questions": [
             {
               "text": "Wie nennt man die Maschine, die Wäsche trocknet, ohne dass man sie aufhängt?",
-              "answer": "Der Trockner"
+              "answer": "Der Trockner",
+              "note": "Er kostet mehr Strom als Waschmaschine und Spülmaschine zusammen – deshalb hängt in vielen Kellern noch die Leine."
             },
             {
               "text": "Welches Küchengerät erwärmt Essen mit Strahlung statt mit Hitze von außen?",
-              "answer": "Die Mikrowelle"
+              "answer": "Die Mikrowelle",
+              "note": "Erfunden aus Versehen: Einem Forscher schmolz vor einem Radargerät der Schokoriegel in der Tasche."
             },
             {
               "text": "Welches Gerät ersetzte den Teppichklopfer?",
-              "answer": "Der Staubsauger"
+              "answer": "Der Staubsauger",
+              "note": "Das erste Modell von 1901 war so groß, dass es vor dem Haus stand – der Schlauch ging durchs Fenster."
             },
             {
               "text": "Welche Kanne hält Kaffee stundenlang warm, ganz ohne Strom?",
-              "answer": "Die Thermoskanne"
+              "answer": "Die Thermoskanne",
+              "note": "Zwei Glaswände mit Vakuum dazwischen. Erfunden für ein Labor, nicht für den Kaffee."
             }
           ]
         },
@@ -95,11 +109,13 @@
           "questions": [
             {
               "text": "Welche britische Band aus Liverpool bestand aus John, Paul, George und Ringo?",
-              "answer": "Die Beatles"
+              "answer": "Die Beatles",
+              "note": "Sie spielten früh in Hamburg auf der Reeperbahn – dort wurden sie zur Band, die sie später waren."
             },
             {
               "text": "Welcher Sänger wird bis heute „der King“ genannt?",
-              "answer": "Elvis Presley"
+              "answer": "Elvis Presley",
+              "note": "Er stand zwei Jahre als Soldat in Hessen. Von dort kam er 1960 zurück, und die Karriere ging weiter."
             },
             {
               "text": "Welche schwedische Popgruppe der 1970er bestand aus zwei Paaren?",
@@ -108,7 +124,8 @@
             },
             {
               "text": "Welche deutsche Sängerin sang 1982 „Ein bisschen Frieden“ und gewann damit?",
-              "answer": "Nicole"
+              "answer": "Nicole",
+              "note": "Siebzehn Jahre alt, weiße Gitarre – der erste deutsche Sieg beim Grand Prix überhaupt."
             }
           ]
         },
@@ -117,19 +134,23 @@
           "questions": [
             {
               "text": "Wofür steht die Abkürzung „lol“?",
-              "answer": "Laughing out loud"
+              "answer": "Laughing out loud",
+              "note": "Aus den Chats der Neunziger. Gemeint ist längst nicht mehr echtes Lachen, sondern ein freundliches Nicken."
             },
             {
               "text": "Was meint jemand, der sagt, etwas sei „cringe“?",
-              "answer": "Peinlich"
+              "answer": "Peinlich",
+              "note": "Wörtlich „zusammenzucken“ – gemeint ist das Fremdschämen für jemand anderen."
             },
             {
               "text": "Was ist gemeint, wenn etwas „gehypt“ wird?",
-              "answer": "Es wird stark angepriesen"
+              "answer": "Es wird stark angepriesen",
+              "note": "Von „hype“, dem Rummel. Wer etwas „gehypt“ nennt, hält den Rummel meist für größer als die Sache."
             },
             {
               "text": "Was bedeutet es, wenn jemand „ghosted“ wurde?",
-              "answer": "Der Kontakt brach ohne Erklärung ab"
+              "answer": "Der Kontakt brach ohne Erklärung ab",
+              "note": "Von „ghost“, dem Geist: Jemand verschwindet, ohne sich abzumelden."
             }
           ]
         }
@@ -142,19 +163,23 @@
           "questions": [
             {
               "text": "Wie viele Programme konnte man in Westdeutschland in den 1970ern meist empfangen?",
-              "answer": "3"
+              "answer": "3",
+              "note": "ARD, ZDF und das Dritte des eigenen Bundeslands. Wer mehr wollte, brauchte eine Antenne Richtung Nachbarland."
             },
             {
               "text": "Welche Sendung erklärt seit 1971 sonntags mit Lach- und Sachgeschichten die Welt?",
-              "answer": "Die Sendung mit der Maus"
+              "answer": "Die Sendung mit der Maus",
+              "note": "Sie hieß anfangs „Lach- und Sachgeschichten“ – die Maus stand nur dazwischen."
             },
             {
               "text": "In welcher Quizshow von Wim Thoelke traten Loriots Zeichenfiguren Wum und Wendelin auf?",
-              "answer": "Der Große Preis"
+              "answer": "Der Große Preis",
+              "note": "Wum, Wendelin und Blauer Klaus stammten von Loriot – und wurden berühmter als die Show."
             },
             {
               "text": "Was zeigte der Bildschirm nach Sendeschluss die ganze Nacht?",
-              "answer": "Das Testbild"
+              "answer": "Das Testbild",
+              "note": "Ein Kreis mit Gitter und Farbbalken, dazu ein Dauerton. Damit stellten Techniker den Fernseher ein."
             }
           ]
         },
@@ -163,19 +188,23 @@
           "questions": [
             {
               "text": "Welches Gerät nahm Anrufe entgegen, wenn niemand zu Hause war?",
-              "answer": "Der Anrufbeantworter"
+              "answer": "Der Anrufbeantworter",
+              "note": "Erst Kassette, später Chip. Das Abhören ging nur zu Hause – wer unterwegs war, blieb ahnungslos."
             },
             {
               "text": "Was musste man bei einem alten Telefon drehen, um zu wählen?",
-              "answer": "Die Wählscheibe"
+              "answer": "Die Wählscheibe",
+              "note": "Die 0 dauerte am längsten: Die Scheibe musste zehn Impulse zurücklaufen."
             },
             {
               "text": "Wie hieß das dicke Buch, in dem alle Telefonnummern eines Ortes standen?",
-              "answer": "Das Telefonbuch"
+              "answer": "Das Telefonbuch",
+              "note": "Wer nicht drinstehen wollte, musste dafür bezahlen. Zerreißen konnten es nur Kraftsportler."
             },
             {
               "text": "Wie viel kostet heute eine Standardpostkarte innerhalb Deutschlands – über oder unter einem Euro?",
-              "answer": "Unter einem Euro"
+              "answer": "Unter einem Euro",
+              "note": "Und der Briefkasten wird oft nur noch einmal am Tag geleert – früher waren es mehrere."
             }
           ]
         },
@@ -184,19 +213,23 @@
           "questions": [
             {
               "text": "Welches deutsche Auto heißt auf Englisch „Beetle“?",
-              "answer": "Der VW Käfer"
+              "answer": "Der VW Käfer",
+              "note": "Über 21 Millionen Stück. Die letzten liefen 2003 in Mexiko vom Band."
             },
             {
               "text": "Was musste man früher an der Tankstelle bei jedem Halt kontrollieren lassen?",
-              "answer": "Den Ölstand"
+              "answer": "Den Ölstand",
+              "note": "Getankt wurde damals auch nicht selbst: Ein Tankwart füllte auf und putzte die Scheibe."
             },
             {
               "text": "Wie heißt die Plakette an der Windschutzscheibe, die die Abgasklasse zeigt?",
-              "answer": "Die Umweltplakette"
+              "answer": "Die Umweltplakette",
+              "note": "Grün, gelb, rot – heute ist praktisch nur noch die grüne im Umlauf."
             },
             {
               "text": "Ab welchem Alter darf man in Deutschland begleitet Auto fahren?",
-              "answer": "Ab 17"
+              "answer": "Ab 17",
+              "note": "„Begleitetes Fahren“: Auf dem Beifahrersitz sitzt eine eingetragene Begleitperson, ab 30 mit langer Fahrpraxis."
             }
           ]
         },
@@ -210,15 +243,18 @@
             },
             {
               "text": "Wie viele Türchen hat ein klassischer Adventskalender?",
-              "answer": "24"
+              "answer": "24",
+              "note": "Der erste gedruckte kam um 1900. Vorher malten Familien Kreidestriche an die Tür und wischten täglich einen weg."
             },
             {
               "text": "Welches Fest feiert man in Bayern im September und Oktober auf der Theresienwiese?",
-              "answer": "Das Oktoberfest"
+              "answer": "Das Oktoberfest",
+              "note": "Es geht auf eine Hochzeit von 1810 zurück – gefeiert wurde auf der Wiese vor der Stadt, daher „Wiesn“."
             },
             {
               "text": "Was wird an Silvester um Mitternacht traditionell gesungen oder gerufen?",
-              "answer": "Prosit Neujahr"
+              "answer": "Prosit Neujahr",
+              "note": "Von lateinisch „prosit“ – „es möge nützen“."
             }
           ]
         },
@@ -227,19 +263,23 @@
           "questions": [
             {
               "text": "Welche Brause wirbt damit, Flügel zu verleihen?",
-              "answer": "Red Bull"
+              "answer": "Red Bull",
+              "note": "Das Vorbild stand in Thailand: ein Getränk für Lastwagenfahrer, das ein Österreicher mitbrachte."
             },
             {
               "text": "Welcher Süßwarenhersteller aus Bonn verspricht, Kinder und Erwachsene froh zu machen?",
-              "answer": "Haribo"
+              "answer": "Haribo",
+              "note": "„Haribo macht Kinder froh – und Erwachsene ebenso“ läuft seit 1935."
             },
             {
               "text": "Welche Automarke warb mit „Vorsprung durch Technik“?",
-              "answer": "Audi"
+              "answer": "Audi",
+              "note": "Der Spruch steht seit 1971 unter dem Logo und blieb sogar im Ausland auf Deutsch stehen."
             },
             {
               "text": "Welche Zahnpasta kommt seit den 1970ern dreifarbig gestreift aus der Tube?",
-              "answer": "Aquafresh"
+              "answer": "Aquafresh",
+              "note": "Die drei Streifen sollen für drei Wirkungen stehen. Herausgedrückt werden sie durch eine geteilte Düse."
             }
           ]
         },
@@ -248,19 +288,23 @@
           "questions": [
             {
               "text": "Wie nennt man kurze Hochkant-Videos, die man endlos weiterwischen kann?",
-              "answer": "Reels oder Shorts"
+              "answer": "Reels oder Shorts",
+              "note": "Hochkant, weil das Handy so in der Hand liegt. Beim Fernsehen wäre das Bild um 90 Grad gedreht."
             },
             {
               "text": "Was ist ein Streamingdienst im Unterschied zur Videothek?",
-              "answer": "Man leiht nichts aus, sondern schaut sofort online"
+              "answer": "Man leiht nichts aus, sondern schaut sofort online",
+              "note": "Dafür ist auch nichts davon einem selbst geblieben: Was aus dem Angebot fliegt, ist weg."
             },
             {
               "text": "Was macht eine Smartwatch, was eine normale Armbanduhr nicht kann?",
-              "answer": "Sie misst zum Beispiel Schritte und Puls"
+              "answer": "Sie misst zum Beispiel Schritte und Puls",
+              "note": "Und sie meldet sich, wenn der Puls aus dem Rahmen fällt – manchen hat das schon ins Krankenhaus geschickt."
             },
             {
               "text": "Wofür steht das Wort „Podcast“ im Kern – Radio zum Abrufen oder Musik zum Kaufen?",
-              "answer": "Radio zum Abrufen"
+              "answer": "Radio zum Abrufen",
+              "note": "Das Wort mischt „iPod“ und „Broadcast“ – der iPod ist längst weg, das Wort geblieben."
             }
           ]
         }
