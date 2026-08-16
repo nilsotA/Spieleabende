@@ -782,13 +782,21 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 }
 /* Buzzer frei – das ganze Panel bekommt einen goldenen Rand. Vorgemalt und nur
    in der Deckkraft geschaltet, damit nie ein box-shadow animiert wird. Den
-   Zustand schaltete host.js schon um; es gab dazu bloß keine einzige Regel. */
+   Zustand schaltete host.js schon um; es gab dazu bloß keine einzige Regel.
+
+   Der Ring liegt genau auf der Kante, nicht daneben: Vorher war das Kästchen um
+   3px nach außen gesetzt UND bekam einen 3px breiten Schatten dazu – der Rand
+   saß damit erst 3px hinter der Kante, mit einem dunklen Spalt davor. Am
+   Bildschirm standen dann drei Linien nebeneinander: die blaue Innenkante, ein
+   dunkler Streifen, das Gold. Gemessen und nachgesehen; jetzt schließt der Ring
+   bündig an. */
 .q-panel::after {
   content: '';
   position: absolute;
-  inset: -3px;
-  border-radius: 23px;
+  inset: 0;
+  border-radius: 20px;
   pointer-events: none;
+  z-index: 1;
   box-shadow: 0 0 0 3px var(--gold), 0 0 50px -6px rgba(255, 197, 49, 0.7);
   opacity: 0;
   transition: opacity var(--t-ui) linear;
@@ -824,6 +832,11 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   top: 0;
   left: 50%;
   transform: translate(-50%, -50%);
+  /* Über dem Rand, nicht darunter: Das Schild sitzt auf der oberen Kante, und
+     ein Pseudo-Element wird nach den Kindern gemalt. Bei freiem Buzzer lief der
+     goldene Ring deshalb quer durch das Schild und mitten durch die Schrift –
+     „UNI-LATEIN 500" mit einem gelben Strich auf halber Höhe der Buchstaben. */
+  z-index: 2;
   padding: 0.4rem 1.7rem;
   border-radius: 999px;
   background: linear-gradient(180deg, #132c46, #08172a);

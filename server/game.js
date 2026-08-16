@@ -388,6 +388,31 @@ export function startRound(state, round) {
   return state;
 }
 
+/**
+ * Legt eine andere Frage auf ein Feld – für „Frage austauschen".
+ *
+ * Das Feld selbst bleibt, was es war: dieselbe Kategorie, derselbe Wert, dieselbe
+ * Stelle im Brett. Nur der Inhalt wird getauscht. Kommt die Ersatzfrage aus einer
+ * anders benannten Kategorie, merkt sich das Feld die Herkunft – auf der Leinwand
+ * steht dann „Uni-Latein 500 · Ersatz aus Küchengeräte" statt einer Überschrift,
+ * die zur Frage nicht mehr passt.
+ */
+export function ersetzeFrage(state, catIdx, rowIdx, frage) {
+  const cat = state.board?.categories?.[catIdx];
+  const cell = cat && cat.cells[rowIdx];
+  if (!cell) throw new GameError('Dieses Feld gibt es nicht.');
+  if (!frage?.text) throw new GameError('Es ist keine Ersatzfrage übrig.');
+  cell.text = frage.text;
+  cell.answer = frage.answer || '';
+  cell.note = frage.note || null;
+  // Ersatzfragen kommen ohne Bild (siehe stechenVorrat) – ein altes Bild darf
+  // auf keinen Fall stehen bleiben, es gehörte zur verworfenen Frage.
+  cell.image = null;
+  cell.ersatzAus = frage.category && frage.category !== cat.name ? frage.category : null;
+  cell.ersatz = true;
+  return cell;
+}
+
 export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
   if (state.pause) throw new GameError('Ihr seid gerade in der Pause.');
   if (state.phase !== 'board') throw new GameError('Gerade ist keine Feldauswahl möglich.');
@@ -412,6 +437,11 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
     catIdx,
     rowIdx,
     category: cat.name,
+    // Woher eine Ersatzfrage stammt, steht getrennt daneben: Der Punktwert
+    // gehört hinter den Kategorienamen, die Herkunft dahinter. Zusammengebaut
+    // ergab das sonst „Uni-Latein · Ersatz aus Gaming 500" – die 500 sah aus,
+    // als gehörte sie zu Gaming.
+    ersatzAus: cell.ersatzAus || null,
     value: cell.value,
     text: cell.text,
     image: cell.image,
@@ -979,6 +1009,9 @@ export function viewFor(state, { isHost, clientId }) {
       catIdx: q.catIdx,
       rowIdx: q.rowIdx,
       category: q.category,
+      // Auch die Handys zeigen die Herkunft: Auf dem kleinen Schirm steht sonst
+      // eine Kategorie, zu der die Frage nicht passt.
+      ersatzAus: q.ersatzAus || null,
       value: q.value,
       text: q.text,
       image: q.image,

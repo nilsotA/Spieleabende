@@ -80,9 +80,9 @@ $('#r-pause').addEventListener('click', () => act('pause', { an: !state?.pause }
 $('#r-discard').addEventListener('click', () => {
   const q = state?.current;
   if (!q) return;
-  if (!confirm(`„${q.category} · ${q.value} Punkte" streichen?\n\n`
-    + 'Die Frage zählt nicht, das Feld bleibt offen, und alles, was an ihr hing,'
-    + ' wird zurückgerechnet.')) return;
+  if (!confirm(`„${q.category} · ${q.value} Punkte" austauschen?\n\n`
+    + 'Die Frage zählt nicht, alles was an ihr hing wird zurückgerechnet, und'
+    + ' auf dem Feld liegt danach eine andere Frage.')) return;
   act('discard');
 });
 
@@ -159,7 +159,7 @@ function render() {
   if (q) {
     $('#r-cat').textContent = q.stechen
       ? `Stechen · ${q.category}`
-      : `${q.category} · ${q.value} Punkte`;
+      : `${q.category} · ${q.value} Punkte${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
     setFrageText($('#r-text'), q.text);
     // Ohne Bild müsste der Host sich zur Leinwand umdrehen – genau das soll
     // die Fernbedienung ja ersparen.

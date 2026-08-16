@@ -7,7 +7,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
-import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, DATA_DIR } from './questions.js';
+import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, ersatzFrage, DATA_DIR } from './questions.js';
 import { oeffne as oeffneImBrowser } from './browser.js';
 import { starteTunnel, stoppeTunnel } from './tunnel.js';
 import { neuerZugang, pruefeZugang, cookieKoepfe, TUER_ZU } from './zugang.js';
@@ -638,6 +638,30 @@ async function handleAction(clientId, body) {
       const q = state.current;
       if (!q) throw new G.GameError('Gerade läuft keine Frage.');
       if (q.stechen) throw new G.GameError('Eine Stechfrage hat kein Feld – lös sie auf und stell die nächste.');
+
+      /*
+       * Erst den Ersatz holen, dann den Zustand anfassen.
+       *
+       * Vorher war „Frage verwerfen" eine Falle: Das Feld ging wieder auf, und
+       * wer es erneut anwählte, bekam Wort für Wort dieselbe Frage. Am Tisch
+       * ist das die schlechteste aller Antworten – man hat die Frage ja gerade
+       * gestrichen, weil sie nichts taugte.
+       *
+       * Ausgeschlossen wird alles, was heute schon auf dem Brett steht, dazu
+       * die Stechfragen: Die Ersatzfrage darf nicht die sein, die in Runde 2
+       * ohnehin noch kommt. Das `await` steht bewusst vor jedem Zugriff auf
+       * `state` – dieselbe Regel wie beim Stechen weiter unten, denn `undo`
+       * und „Neues Spiel" weisen den Modulwert in der Zwischenzeit neu zu.
+       */
+      const aufDemBrett = [];
+      for (const runde of state.questionSet?.rounds || []) {
+        for (const cat of runde.categories) for (const f of cat.questions) aufDemBrett.push(f.text);
+      }
+      const ersatz = await ersatzFrage(q.category, [...aufDemBrett, ...(state.stechenTexte || [])]);
+      if (!state.current || state.current.catIdx !== q.catIdx || state.current.rowIdx !== q.rowIdx) {
+        throw new G.GameError('Die Frage ist inzwischen eine andere – bitte noch einmal ansehen.');
+      }
+
       // Der Schnappschuss vor der Feldwahl ist der erste, in dem keine Frage
       // offen steht. Alles darüber gehört zu dieser Frage und fällt mit ihr.
       const bis = rueckWeg.findLastIndex((e) => !e.state.current);
@@ -659,7 +683,15 @@ async function handleAction(clientId, body) {
       const ziel = structuredClone(rueckWeg[bis].state);
       rueckWeg.length = bis + 1;
       state = uebernimm(ziel, state);
-      state.message = 'Frage gestrichen – das Feld ist wieder offen.';
+      if (ersatz) {
+        G.ersetzeFrage(state, q.catIdx, q.rowIdx, ersatz);
+        state.message = 'Frage ausgetauscht – auf dem Feld liegt jetzt eine andere.';
+      } else {
+        // Kann passieren, wenn nur ein einziger Fragensatz installiert ist:
+        // Dann steht jede Frage daraus schon auf dem Brett. Lieber ehrlich
+        // sagen als so tun, als wäre etwas passiert.
+        state.message = 'Frage gestrichen – es war keine Ersatzfrage übrig, das Feld bleibt wie es war.';
+      }
       rueckWeg.push(vorher);
       // Auch hier den Deckel halten: Der Anker bleibt liegen, und ohne diese
       // Zeile stünde nach dem Streichen ein Schritt mehr im Stapel als erlaubt.

@@ -920,7 +920,7 @@ function renderQuestion(prev) {
   // Beim Stechen steht kein Punktwert am Kopf – es gibt keinen.
   $('#q-head').textContent = q.stechen
     ? `Stechen · ${q.category}`
-    : `${q.category} ${q.value}`;
+    : `${q.category} ${q.value}${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
   $('#q-head').classList.toggle('stechen', !!q.stechen);
   panel.classList.toggle('stechpanel', !!q.stechen);
   setFrageText($('#q-text'), q.text);
@@ -2464,9 +2464,9 @@ $('#btn-pause').addEventListener('click', () => {
 $('#btn-discard').addEventListener('click', () => {
   const q = state.current;
   if (!q) return;
-  if (!confirm(`„${q.category} · ${q.value} Punkte" streichen?\n\n`
-    + 'Die Frage zählt nicht, das Feld bleibt offen, und alles, was an ihr hing,'
-    + ' wird zurückgerechnet.')) return;
+  if (!confirm(`„${q.category} · ${q.value} Punkte" austauschen?\n\n`
+    + 'Die Frage zählt nicht, alles was an ihr hing wird zurückgerechnet, und'
+    + ' auf dem Feld liegt danach eine andere Frage.')) return;
   act('discard');
   closeMenu();
 });

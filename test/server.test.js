@@ -2766,3 +2766,83 @@ test('wer wartend auflegt, ist sofort weg', async (t) => {
   }
   assert.fail('das Handy gilt immer noch als anwesend');
 });
+
+test('eine ausgetauschte Frage kommt nicht Wort für Wort zurück', async (t) => {
+  /*
+   * Aus dem Spiel gemeldet: „Frage auswechseln" nahm die Frage zwar zurück,
+   * aber beim erneuten Anklicken desselben Feldes stand 1:1 dieselbe Frage da.
+   * Am Tisch ist das die schlechteste aller Antworten – gestrichen wurde sie ja,
+   * weil sie nichts taugte.
+   */
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-austausch-'));
+  const { proc, base } = await starteServer(9340 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'tausch_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  await tu({ type: 'addTeam', name: 'Blau' });
+  await tu({ type: 'startGame', file: 'der-klassiker.json' });
+
+  await tu({ type: 'pick', catIdx: 2, rowIdx: 1 });
+  const vorher = (await zustand(base)).current;
+  assert.ok(vorher?.text, 'ohne Frage kein Test');
+
+  const weg = await tu({ type: 'discard' });
+  assert.equal(weg.ok, true, weg.error || '');
+
+  const board = await zustand(base);
+  assert.equal(board.phase, 'board', 'das Feld muss wieder offen sein');
+
+  await tu({ type: 'pick', catIdx: 2, rowIdx: 1 });
+  const nachher = (await zustand(base)).current;
+  assert.ok(nachher?.text, 'auf dem Feld muss wieder etwas liegen');
+  assert.notEqual(nachher.text, vorher.text, 'genau das war der Fehler: dieselbe Frage noch einmal');
+  assert.notEqual(nachher.answer, vorher.answer);
+  assert.equal(nachher.value, vorher.value, 'Wert und Feld bleiben, nur der Inhalt wechselt');
+});
+
+test('die Ersatzfrage stand heute noch nicht auf dem Brett', async (t) => {
+  // Sonst käme als Ersatz ausgerechnet die Frage, die in Runde 2 ohnehin
+  // noch kommt – oder eine, die vorhin schon jemand gehört hat.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-austausch2-'));
+  const { proc, base } = await starteServer(9380 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'tausch2_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  await tu({ type: 'addTeam', name: 'Blau' });
+  await tu({ type: 'startGame', file: 'kopfnuss.json' });
+
+  // Alle Fragen des laufenden Satzes einsammeln – aus beiden Runden.
+  const satz = JSON.parse(await readFile(new URL('kopfnuss.json', new URL('../data/', import.meta.url)), 'utf8'));
+  const eigene = new Set(satz.rounds.flatMap((r) => r.categories.flatMap((c) => c.questions.map((q) => q.text))));
+
+  await tu({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await tu({ type: 'discard' });
+  await tu({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  const ersatz = (await zustand(base)).current;
+  assert.ok(!eigene.has(ersatz.text), `die Ersatzfrage steht selbst auf dem Brett: „${ersatz.text}"`);
+  assert.ok(ersatz.answer, 'ohne Lösung wäre sie unbrauchbar');
+});
+
+test('ein Austausch lässt sich zurücknehmen', async (t) => {
+  // Wer danebentippt, muss die alte Frage zurückbekommen – samt allem, was an
+  // ihr hing.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-austausch3-'));
+  const { proc, base } = await starteServer(9280 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'tausch3_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  await tu({ type: 'addTeam', name: 'Blau' });
+  await tu({ type: 'startGame', file: 'der-klassiker.json' });
+  await tu({ type: 'pick', catIdx: 1, rowIdx: 2 });
+  const original = (await zustand(base)).current.text;
+
+  await tu({ type: 'discard' });
+  const zurueck = await tu({ type: 'undo' });
+  assert.equal(zurueck.ok, true, zurueck.error || '');
+
+  const jetzt = (await zustand(base)).current;
+  assert.equal(jetzt?.text, original, 'nach dem Zurücknehmen steht wieder die alte Frage da');
+});

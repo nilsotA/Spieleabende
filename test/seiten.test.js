@@ -220,3 +220,52 @@ test('das Handy lässt seine Anfrage liegen, statt im Takt zu fragen', () => {
   assert.match(quelle, /haeltNichts = warten && letzteNummer != null && letzteNummer === vorher/);
   assert.match(quelle, /letzteNummer == null \|\| haeltNichts\) await schlaf/);
 });
+
+/*
+ * Der goldene Rand bei freigegebenem Buzzer.
+ *
+ * Gemeldet als „sieht unclean aus", und beim Nachmessen waren es zwei Fehler:
+ * Der Ring saß 3px neben der Kante (Kästchen um 3px nach außen UND 3px breiter
+ * Schatten), sodass am Rand drei Linien nebeneinander standen – und er wurde
+ * über das Kategorieschild gemalt, weil ein Pseudo-Element nach den Kindern an
+ * die Reihe kommt. Der gelbe Strich lief quer durch „UNI-LATEIN 500".
+ */
+
+test('der goldene Rand liegt bündig auf der Kante', () => {
+  const css = fs.readFileSync(path.join(PUBLIC, 'host.css'), 'utf8');
+  const block = (wahl) => new RegExp(`\\${wahl} \\{[^}]*\\}`).exec(css)?.[0] || '';
+  const wert = (b, eigenschaft) => new RegExp(`${eigenschaft}:\\s*([^;]+);`).exec(b)?.[1]?.trim();
+
+  const panel = block('.q-panel');
+  const ring = block('.q-panel::after');
+  assert.ok(panel && ring, 'Panel und Ring müssen beide in host.css stehen');
+  assert.equal(wert(ring, 'inset'), '0', 'der Ring darf nicht neben der Kante schweben');
+  assert.equal(
+    wert(ring, 'border-radius'),
+    wert(panel, 'border-radius'),
+    'gleicher Radius wie das Panel – sonst laufen die Ecken auseinander',
+  );
+});
+
+test('das Kategorieschild liegt über dem Rand, nicht darunter', () => {
+  const css = fs.readFileSync(path.join(PUBLIC, 'host.css'), 'utf8');
+  const zIndex = (wahl) => {
+    const b = new RegExp(`\\${wahl} \\{[^}]*\\}`).exec(css)?.[0] || '';
+    return Number(/z-index:\s*(-?\d+)/.exec(b)?.[1] ?? 'NaN');
+  };
+  const schild = zIndex('.q-head');
+  const ring = zIndex('.q-panel::after');
+  assert.ok(Number.isFinite(schild), '.q-head braucht einen z-index');
+  assert.ok(Number.isFinite(ring), '.q-panel::after braucht einen z-index');
+  assert.ok(schild > ring, `das Schild (${schild}) muss über dem Ring (${ring}) liegen`);
+});
+
+test('der Knopf verspricht einen Austausch – und der Server hält ihn', () => {
+  for (const seite of ['host.html', 'remote.html']) {
+    assert.match(
+      lies(seite),
+      /Frage austauschen/,
+      `${seite}: „Feld bleibt offen" war die halbe Wahrheit – dieselbe Frage kam Wort für Wort zurück`,
+    );
+  }
+});

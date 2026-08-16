@@ -170,10 +170,18 @@ Spielzug, nicht der Raum.
 ### Die Frage taugt nichts
 
 Doppeldeutig gestellt, die Lösung war vorhin schon gefallen, im Satz steht ein
-Fehler – das merkt man erst beim Vorlesen. **„Frage verwerfen“** auf der
-Fernbedienung (am Fragenkasten) oder im Host-Menü streicht sie: Das Feld ist
-wieder offen, und alles, was an dieser Frage hing, ist zurückgerechnet – Punkte,
-Bilanz, Serie, wer als Nächstes dran ist. Dasselbe Team wählt noch einmal.
+Fehler – das merkt man erst beim Vorlesen. **„Frage austauschen“** auf der
+Fernbedienung (am Fragenkasten) oder im Host-Menü nimmt sie zurück: Alles, was
+an ihr hing, ist zurückgerechnet – Punkte, Bilanz, Serie, wer als Nächstes dran
+ist –, und auf dem Feld liegt danach eine **andere Frage**. Dasselbe Team wählt
+noch einmal und bekommt diesmal etwas Neues.
+
+Der Ersatz kommt aus den übrigen Fragensätzen, bevorzugt aus einer Kategorie
+desselben Namens. Passt keine, nimmt der Server irgendeine ungespielte – dann
+steht die Herkunft mit auf dem Schild: „Uni-Latein 500 · Ersatz aus »Deutsche
+Töne«“. Was heute schon auf dem Brett stand, ist ausgeschlossen; die Frage aus
+Runde 2 kommt also nicht vorzeitig. Ist wirklich nichts mehr übrig – etwa wenn
+nur ein einziger Satz installiert ist –, sagt der Screen das, statt so zu tun.
 
 Gestrichen wird nicht durch Zurückrechnen, sondern indem der Server bis zu dem
 Zustand zurückgeht, in dem das Feld noch offen war. Deshalb stimmt danach alles,

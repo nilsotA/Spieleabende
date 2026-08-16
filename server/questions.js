@@ -208,19 +208,43 @@ export function stechenVorrat(saetze, schonGestellt = []) {
   return topf;
 }
 
-/** Lädt alle Sätze und zieht eine Frage fürs Stechen. */
-export async function stechenFrage(schonGestellt = []) {
+/** Alle lesbaren Sätze auf einmal – ein kaputter darf den Abend nicht aufhalten. */
+async function alleSaetze() {
   const saetze = [];
   for (const eintrag of (await listSets()).filter((s) => !s.error)) {
     try {
       saetze.push(await loadSet(eintrag.file));
     } catch {
-      /* Ein kaputter Satz darf das Stechen nicht verhindern. */
+      /* übersprungen */
     }
   }
-  const topf = stechenVorrat(saetze, schonGestellt);
+  return saetze;
+}
+
+/** Lädt alle Sätze und zieht eine Frage fürs Stechen. */
+export async function stechenFrage(schonGestellt = []) {
+  const topf = stechenVorrat(await alleSaetze(), schonGestellt);
   if (!topf.length) return null;
   return topf[Math.floor(Math.random() * topf.length)];
+}
+
+/**
+ * Ersatz für eine Frage, die nichts taugt.
+ *
+ * Gesucht wird zuerst in einer Kategorie desselben Namens – „Was ist die
+ * Frage?" gibt es in fast jedem Satz, und dann passt auch das Schild über dem
+ * Kasten weiter. Findet sich dort nichts, tut es jede andere ungespielte
+ * Frage; wo sie herkommt, sagt der Screen dann dazu.
+ *
+ * Ohne diese Funktion war „Frage verwerfen" eine Falle: Das Feld ging wieder
+ * auf, und wer es erneut anwählte, bekam Wort für Wort dieselbe Frage.
+ */
+export async function ersatzFrage(kategorie, schonGestellt = []) {
+  const topf = stechenVorrat(await alleSaetze(), schonGestellt);
+  if (!topf.length) return null;
+  const passend = topf.filter((q) => q.category === kategorie);
+  const auswahl = passend.length ? passend : topf;
+  return auswahl[Math.floor(Math.random() * auswahl.length)];
 }
 
 export async function setExists(file) {
