@@ -529,9 +529,28 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   Lösung ins Bild – die Frage hat der Host ohnehin vorgelesen.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.
 
+### 100 ist leicht, 500 ist schwer
+
+Die vier Fragen einer Kategorie stehen nicht in beliebiger Reihenfolge: Der
+Punktwert ist das Versprechen an den Tisch. Wer 500 aufruft, will eine Frage,
+die etwas kostet – und wer 100 nimmt, will hineinkommen. Steht es andersherum,
+merkt es jeder sofort, und das Aufrufen wird zum Glücksspiel.
+
+Als Maßstab für die mitgelieferten Sätze gilt:
+
+| Wert | Wer weiß es? |
+|---|---|
+| **100** | Fast jeder am Tisch – Alltag, Schulwissen, das Naheliegende |
+| **200** | Die meisten Erwachsenen, oder man kommt mit Nachdenken drauf |
+| **300** | Wer sich für das Thema interessiert |
+| **500** | Wer sich auskennt – oder gut kombiniert |
+
+Der Editor zeigt den Punktwert an jeder Frage mit an, damit die Leiter beim
+Schreiben sichtbar bleibt.
+
 ### Mitgeliefert
 
-Sechzehn fertige Sätze mit je 48 Fragen – zusammen 768, keine doppelt:
+Siebzehn fertige Sätze mit je 48 Fragen – zusammen 816, keine doppelt:
 
 | Satz | Kategorien |
 |---|---|
@@ -551,6 +570,7 @@ Sechzehn fertige Sätze mit je 48 Fragen – zusammen 768, keine doppelt:
 | **Weltgeschichte** | Ritter & Römer, Kriege & Krisen, Herrscher, Entdecker, Weltreiche, Kalter Krieg |
 | **Groß und Klein** | Tierkinder, Märchen, Wald & Wiese, „Wie heißt das Ding?“, Trickfilm-Helden, Berufe & Werkzeug |
 | **Zugabe** | Instrumente, Klassik, Bandnamen, Filmmusik, Oper & Musical, Rock-Legenden, Eurovision |
+| **Wildnis** | Tierrekorde, Vögel, Unter der Erde, Lebensräume, Spuren im Revier, Bedroht & geschützt |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit
@@ -562,6 +582,10 @@ Für den **Familienabend** ist „Drei Generationen“ gebaut: In jeder Kategori
 jemand anders Bescheid – die Eltern beim Wohnzimmer von früher und beim Telefon mit
 Wählscheibe, die Jüngeren bei „cringe“ und „geghostet“. Niemand sitzt eine ganze
 Runde lang nur daneben.
+
+„Wildnis“ geht vom Maulwurfshügel im Vorgarten bis zur Taiga: Tiere, Pflanzen
+und Lebensräume, dazu die Jägersprache und ein paar Zahlen, die man nicht
+erwartet – ein Pferd läuft je Bein auf genau einer Zehe.
 
 „Zugabe“ ist der Satz für Musik – und der, bei dem am meisten mitgesummt wird:
 von Beethovens Neunter über den Namen hinter ABBA bis zum Didgeridoo. Gespielt

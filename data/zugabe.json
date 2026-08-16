@@ -38,19 +38,19 @@
               "note": "Der Titel stammt nicht von ihm – er notierte nur „Eine kleine Nachtmusik“ in sein Werkverzeichnis."
             },
             {
-              "text": "Wer schrieb die Ballette „Schwanensee“ und „Der Nussknacker“?",
-              "answer": "Pjotr Tschaikowsky",
-              "note": "„Schwanensee“ fiel bei der Uraufführung durch – berühmt wurde es erst nach seinem Tod."
-            },
-            {
               "text": "Wie heißt Vivaldis berühmtester Zyklus aus vier Violinkonzerten?",
               "answer": "Die vier Jahreszeiten",
               "note": "Zu jedem Konzert gehört ein Gedicht – die Musik erzählt es Zeile für Zeile nach."
             },
             {
-              "text": "Welche Sinfonie Beethovens endet mit einem Chor auf Schillers „Ode an die Freude“?",
-              "answer": "Die Neunte",
-              "note": "Ihr Thema ist heute die Europahymne. Beethoven war bei der Uraufführung längst taub."
+              "text": "Wer schrieb die Ballette „Schwanensee“ und „Der Nussknacker“?",
+              "answer": "Pjotr Tschaikowsky",
+              "note": "„Schwanensee“ fiel bei der Uraufführung durch – berühmt wurde es erst nach seinem Tod."
+            },
+            {
+              "text": "Wie heißt die Form, in der ein Thema nacheinander von mehreren Stimmen versetzt aufgegriffen wird – Bachs Spezialität?",
+              "answer": "Die Fuge",
+              "note": "Bachs „Kunst der Fuge“ blieb unvollendet – das letzte Stück bricht mitten im Takt ab."
             }
           ]
         },
@@ -63,14 +63,14 @@
               "note": "Gestimmt in Quinten: g – d – a – e."
             },
             {
-              "text": "Welche Instrumente spielen in einem Streichquartett?",
-              "answer": "Zwei Geigen, eine Bratsche und ein Cello",
-              "note": "Die Besetzung geht auf Haydn zurück – er schrieb über 60 Quartette dafür."
-            },
-            {
               "text": "Wie viele Linien hat ein Notensystem?",
               "answer": "Fünf",
               "note": "Wird es höher oder tiefer, behilft man sich mit kurzen Hilfslinien darüber und darunter."
+            },
+            {
+              "text": "Welche Instrumente spielen in einem Streichquartett?",
+              "answer": "Zwei Geigen, eine Bratsche und ein Cello",
+              "note": "Die Besetzung geht auf Haydn zurück – er schrieb über 60 Quartette dafür."
             },
             {
               "text": "In wie viele Halbtonschritte ist eine Oktave geteilt?",
@@ -192,14 +192,14 @@
               "note": "Aus dem Lied wurde später ein Musical – mit über zwanzig seiner Titel."
             },
             {
-              "text": "Welcher Liedermacher wurde mit „Über den Wolken“ bekannt?",
-              "answer": "Reinhard Mey",
-              "note": "Er ist selbst Pilot – das Lied entstand nach einer Wartezeit am Flugplatz."
-            },
-            {
               "text": "Wofür steht die Abkürzung NDW?",
               "answer": "Neue Deutsche Welle",
               "note": "Anfang der Achtziger – erst Untergrund, dann drei Jahre lang überall."
+            },
+            {
+              "text": "Welcher Liedermacher wurde mit „Über den Wolken“ bekannt?",
+              "answer": "Reinhard Mey",
+              "note": "Er ist selbst Pilot – das Lied entstand nach einer Wartezeit am Flugplatz."
             },
             {
               "text": "Welche Band der Neuen Deutschen Welle hatte einen Welthit mit „Da Da Da“?",
@@ -242,9 +242,9 @@
               "note": "Sie trat im Jahr darauf gleich noch einmal an – als Titelverteidigerin im eigenen Land."
             },
             {
-              "text": "Welche Sängerin gewann 1988 für die Schweiz und wurde später mit Filmballaden weltberühmt?",
-              "answer": "Céline Dion",
-              "note": "Sie gewann mit einem französischen Lied für ein Land, in dem sie nicht lebte – erlaubt ist das bis heute."
+              "text": "Wie viele Punkte vergibt eine Jury an ihren Favoriten – die Höchstwertung?",
+              "answer": "Zwölf",
+              "note": "„Douze points“ – der einzige französische Satz, den halb Europa auswendig kann."
             },
             {
               "text": "Wie hieß der Eurovision Song Contest im Deutschen jahrzehntelang?",
@@ -252,9 +252,9 @@
               "note": "Erst 2002 setzte sich auch bei uns der englische Name durch."
             },
             {
-              "text": "Wie viele Punkte vergibt eine Jury an ihren Favoriten – die Höchstwertung?",
-              "answer": "Zwölf",
-              "note": "„Douze points“ – der einzige französische Satz, den halb Europa auswendig kann."
+              "text": "Welche Sängerin gewann 1988 für die Schweiz und wurde später mit Filmballaden weltberühmt?",
+              "answer": "Céline Dion",
+              "note": "Sie gewann mit einem französischen Lied für ein Land, in dem sie nicht lebte – erlaubt ist das bis heute."
             }
           ]
         },
@@ -262,9 +262,9 @@
           "name": "Wer steckt dahinter?",
           "questions": [
             {
-              "text": "Unter welchem Namen wurde Reginald Dwight weltberühmt?",
-              "answer": "Elton John",
-              "note": "Den Nachnamen borgte er sich von einem Bandkollegen, den Vornamen vom Saxophonisten."
+              "text": "Welcher Sänger tanzte den Moonwalk und veröffentlichte das meistverkaufte Album aller Zeiten?",
+              "answer": "Michael Jackson",
+              "note": "„Thriller“ von 1982 – bis heute unerreicht."
             },
             {
               "text": "Unter welchem Künstlernamen wurde Stefani Germanotta bekannt?",
@@ -297,14 +297,14 @@
               "note": "Der Dauerton gelingt durch Zirkularatmung: durch die Nase ein, durch den Mund weiter aus."
             },
             {
-              "text": "Aus welchem Land stammt die dreisaitige Shamisen?",
-              "answer": "Aus Japan",
-              "note": "Gespielt wird sie mit einem großen Plektrum, das an einen Spachtel erinnert."
-            },
-            {
               "text": "Wie heißt die indische Langhalslaute, die George Harrison in der Popmusik bekannt machte?",
               "answer": "Sitar",
               "note": "Unter den Spielsaiten liegen Resonanzsaiten – die klingen von selbst mit."
+            },
+            {
+              "text": "Aus welchem Land stammt die dreisaitige Shamisen?",
+              "answer": "Aus Japan",
+              "note": "Gespielt wird sie mit einem großen Plektrum, das an einen Spachtel erinnert."
             }
           ]
         }

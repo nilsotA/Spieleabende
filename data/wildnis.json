@@ -1,0 +1,314 @@
+{
+  "name": "Wildnis",
+  "description": "Tiere, Pflanzen und Lebensräume – vom Maulwurfshügel im Vorgarten bis zur Taiga. Die 100er kennt jeder vom Spaziergang, die 500er kennt, wer schon mal genauer hingesehen hat.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Wer frisst was?",
+          "questions": [
+            {
+              "text": "Welches Tier ernährt sich fast ausschließlich von Eukalyptusblättern?",
+              "answer": "Der Koala",
+              "note": "Die Blätter sind so nährstoffarm, dass er bis zu 20 Stunden am Tag schläft."
+            },
+            {
+              "text": "Womit füttert sich ein Kolibri, wenn er vor einer Blüte in der Luft steht?",
+              "answer": "Mit Nektar",
+              "note": "Er schlägt dabei bis zu 80-mal pro Sekunde mit den Flügeln – Schweben kostet mehr Kraft als Fliegen."
+            },
+            {
+              "text": "Welches Tier gilt als das gefährlichste der Welt, weil es Krankheiten überträgt?",
+              "answer": "Die Stechmücke",
+              "note": "Über Malaria und Dengue sterben jährlich mehr Menschen als durch alle Raubtiere zusammen."
+            },
+            {
+              "text": "Blattschneiderameisen tragen Blattstücke in ihren Bau – gefressen werden die aber nicht. Wozu dienen sie?",
+              "answer": "Als Nährboden für einen Pilz, den sie züchten",
+              "note": "Ackerbau, rund 50 Millionen Jahre vor dem Menschen. Gefressen wird nur der Pilz."
+            }
+          ]
+        },
+        {
+          "name": "Vögel",
+          "questions": [
+            {
+              "text": "Welcher Vogel ist der größte der Welt und kann nicht fliegen?",
+              "answer": "Der Strauß",
+              "note": "Dafür rennt er 70 km/h – und sein Auge ist größer als sein Gehirn."
+            },
+            {
+              "text": "Welcher heimische Vogel legt seine Eier in fremde Nester?",
+              "answer": "Der Kuckuck",
+              "note": "Das geschlüpfte Junge wirft die anderen Eier aus dem Nest – die Zieheltern füttern es trotzdem."
+            },
+            {
+              "text": "Welcher Vogel stürzt sich im Sturzflug mit über 300 km/h auf seine Beute?",
+              "answer": "Der Wanderfalke",
+              "note": "Das schnellste Tier der Erde. Knöcherne Höcker in den Nasenlöchern bremsen dabei den Luftstrom."
+            },
+            {
+              "text": "Welcher Vogel zieht jedes Jahr von der Arktis in die Antarktis und zurück?",
+              "answer": "Die Küstenseeschwalbe",
+              "note": "Rund 90.000 Kilometer im Jahr – sie erlebt zwei Sommer und kaum je eine Nacht."
+            }
+          ]
+        },
+        {
+          "name": "Unter der Erde",
+          "questions": [
+            {
+              "text": "Welches Tier wirft die Hügel auf, die im Frühjahr auf Wiesen stehen?",
+              "answer": "Der Maulwurf",
+              "note": "Er ist fast blind, hört und riecht dafür hervorragend – und muss alle paar Stunden fressen."
+            },
+            {
+              "text": "Welches Tier lockert den Gartenboden, indem es sich durch ihn hindurchfrisst?",
+              "answer": "Der Regenwurm",
+              "note": "Auf einem Quadratmeter guter Wiese leben mehrere Hundert – zusammen bewegen sie Tonnen von Erde im Jahr."
+            },
+            {
+              "text": "Wie heißen die kleinen Knoten an den Wurzeln von Erbsen und Bohnen, in denen Bakterien Stickstoff sammeln?",
+              "answer": "Wurzelknöllchen",
+              "note": "Deshalb düngen Hülsenfrüchte den Boden, statt ihn auszulaugen."
+            },
+            {
+              "text": "Wie heißt das Zusammenleben von Pilzen und Baumwurzeln, von dem beide Seiten profitieren?",
+              "answer": "Mykorrhiza",
+              "note": "Der Pilz liefert Wasser und Nährsalze, der Baum Zucker – über neunzig Prozent aller Landpflanzen machen das."
+            }
+          ]
+        },
+        {
+          "name": "Tierrekorde",
+          "questions": [
+            {
+              "text": "Welches Tier ist das höchste der Welt?",
+              "answer": "Die Giraffe",
+              "note": "Bis zu sechs Meter – allein der Hals misst über zwei."
+            },
+            {
+              "text": "Welches ist das größte an Land lebende Tier?",
+              "answer": "Der Afrikanische Elefant",
+              "note": "Bis zu sechs Tonnen. Seine Ohren dienen als Kühlfläche, nicht nur zum Hören."
+            },
+            {
+              "text": "Welches Tier hat das größte Gehirn der Erde?",
+              "answer": "Der Pottwal",
+              "note": "Rund acht Kilo – etwa das Fünffache eines Menschengehirns."
+            },
+            {
+              "text": "Welches Landtier wird am ältesten?",
+              "answer": "Die Riesenschildkröte",
+              "note": "Über 150 Jahre sind belegt – manche Exemplare haben mehrere Weltkriege überdauert."
+            }
+          ]
+        },
+        {
+          "name": "Insekten & Spinnen",
+          "questions": [
+            {
+              "text": "Welcher Käfer mit roten Flügeldecken und schwarzen Punkten gilt als Glücksbringer?",
+              "answer": "Der Marienkäfer",
+              "note": "Die Zahl der Punkte sagt nichts über sein Alter – sie gehört zur Art."
+            },
+            {
+              "text": "Wie heißt die Larve eines Schmetterlings?",
+              "answer": "Die Raupe",
+              "note": "Manche fressen in zwei Wochen das Dreitausendfache ihres Geburtsgewichts."
+            },
+            {
+              "text": "Wie nennt man die Ruhephase, in der sich der Körper zum Schmetterling umbaut?",
+              "answer": "Die Puppe",
+              "note": "Darin wird der Körper fast vollständig aufgelöst und neu zusammengesetzt."
+            },
+            {
+              "text": "Wie zeigt eine Biene ihrem Volk, in welcher Richtung eine Futterquelle liegt?",
+              "answer": "Mit dem Schwänzeltanz",
+              "note": "Der Winkel zur Senkrechten entspricht dem Winkel zur Sonne – entschlüsselt von Karl von Frisch."
+            }
+          ]
+        },
+        {
+          "name": "Durch die Jahreszeiten",
+          "questions": [
+            {
+              "text": "Wie heißt der monatelange Schlaf, in den Igel und Murmeltier fallen?",
+              "answer": "Der Winterschlaf",
+              "note": "Der Herzschlag des Igels sinkt von 200 auf unter 10 Schläge pro Minute."
+            },
+            {
+              "text": "Wie nennt man Vögel, die im Herbst nach Süden fliegen?",
+              "answer": "Zugvögel",
+              "note": "Manche orientieren sich am Magnetfeld der Erde, andere an den Sternen."
+            },
+            {
+              "text": "Eichhörnchen schlafen im Winter nicht durch, sondern wachen immer wieder auf. Wie heißt dieser Zustand?",
+              "answer": "Winterruhe",
+              "note": "Sie wachen regelmäßig auf und suchen ihre Verstecke – die sie oft nicht wiederfinden. Daraus werden Bäume."
+            },
+            {
+              "text": "Wie nennt man die Starre, in die Tiere bei großer Hitze und Trockenheit fallen?",
+              "answer": "Sommerruhe (Ästivation)",
+              "note": "Lungenfische überstehen so in einem Schleimkokon die ausgetrocknete Jahreszeit."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Lebensräume",
+          "questions": [
+            {
+              "text": "In welchem Lebensraum ist das Kamel zu Hause?",
+              "answer": "In der Wüste",
+              "note": "Im Höcker steckt kein Wasser, sondern Fett – daraus gewinnt es beides: Energie und Feuchtigkeit."
+            },
+            {
+              "text": "Wie heißt der größte Regenwald der Erde?",
+              "answer": "Der Amazonas-Regenwald",
+              "note": "Er erzeugt seinen eigenen Regen: Die Bäume verdunsten so viel Wasser, dass daraus Wolken entstehen."
+            },
+            {
+              "text": "Wie heißt die baumlose Kältesteppe im hohen Norden, in der der Boden dauerhaft gefroren bleibt?",
+              "answer": "Die Tundra",
+              "note": "Unter der Oberfläche liegt Permafrost – auftauend gibt er Treibhausgase frei."
+            },
+            {
+              "text": "Wie heißt der breite Nadelwaldgürtel, der sich rund um die Nordhalbkugel zieht?",
+              "answer": "Die Taiga (borealer Wald)",
+              "note": "Der größte zusammenhängende Wald der Erde – größer als der Amazonas."
+            }
+          ]
+        },
+        {
+          "name": "Kaltblütig",
+          "questions": [
+            {
+              "text": "Aus welchem Tier wird eine Kaulquappe?",
+              "answer": "Aus einem Frosch",
+              "note": "Beine wachsen, der Schwanz verschwindet – und die Kiemen werden durch Lungen ersetzt."
+            },
+            {
+              "text": "Welches Reptil kann seine Farbe wechseln?",
+              "answer": "Das Chamäleon",
+              "note": "Nicht zur Tarnung, sondern vor allem zur Stimmung und zur Temperaturregelung."
+            },
+            {
+              "text": "Welche heimische Echse wirft bei Gefahr ihren Schwanz ab?",
+              "answer": "Die Eidechse",
+              "note": "Der abgeworfene Schwanz zuckt weiter und bindet den Angreifer – nachwachsen tut er nur unvollständig."
+            },
+            {
+              "text": "Wovon hängt bei vielen Schildkröten und Krokodilen ab, ob Männchen oder Weibchen schlüpfen?",
+              "answer": "Von der Temperatur im Gelege",
+              "note": "Wenige Grad entscheiden – deshalb bringt die Erderwärmung ganze Populationen aus dem Gleichgewicht."
+            }
+          ]
+        },
+        {
+          "name": "Bäume & Blätter",
+          "questions": [
+            {
+              "text": "Woran erkennt man das Alter eines gefällten Baumes?",
+              "answer": "An den Jahresringen",
+              "note": "Breite Ringe stehen für gute Jahre – Forscher lesen daraus ganze Klimageschichten."
+            },
+            {
+              "text": "Warum färben sich die Blätter im Herbst, bevor sie fallen?",
+              "answer": "Weil der Baum das grüne Blattgrün zurückholt",
+              "note": "Übrig bleiben die gelben und roten Farbstoffe, die vorher vom Chlorophyll überdeckt waren."
+            },
+            {
+              "text": "Welche Baumart wird über hundert Meter hoch und stellt damit den Höhenrekord?",
+              "answer": "Der Küstenmammutbaum",
+              "note": "Ganz oben kommt kein Wasser mehr aus den Wurzeln an – die obersten Nadeln trinken aus dem Nebel."
+            },
+            {
+              "text": "Welche Kiefernart gilt mit über 4000 Jahren als ältester lebender Einzelbaum der Erde?",
+              "answer": "Die Grannenkiefer",
+              "note": "Sie wächst in den Weißen Bergen Kaliforniens – wo es so karg ist, dass nichts anderes gedeiht."
+            }
+          ]
+        },
+        {
+          "name": "Spuren im Revier",
+          "questions": [
+            {
+              "text": "Wie heißt das Bauwerk, das Biber mitten im Wasser errichten?",
+              "answer": "Die Biberburg",
+              "note": "Der Eingang liegt unter Wasser – deshalb stauen sie den Bach erst auf die passende Höhe."
+            },
+            {
+              "text": "Wie nennt man das unterirdische Gangsystem von Fuchs und Dachs?",
+              "answer": "Der Bau",
+              "note": "Dachsbaue werden über Generationen weitergenutzt – manche sind Jahrhunderte alt."
+            },
+            {
+              "text": "Wie heißt in der Jägersprache der Kot, an dem man das Wild erkennt?",
+              "answer": "Die Losung",
+              "note": "Die Jägersprache hat für fast alles ein eigenes Wort – Augen heißen Lichter, Ohren Lauscher."
+            },
+            {
+              "text": "Wie heißt die Paarungszeit im Herbst, in der die Hirsche röhren?",
+              "answer": "Die Brunft",
+              "note": "Das Röhren ist eine Kraftprobe: Wer tiefer und länger ruft, hat meist den stärkeren Körper."
+            }
+          ]
+        },
+        {
+          "name": "Bedroht & geschützt",
+          "questions": [
+            {
+              "text": "Welches Tier ist das Zeichen der Naturschutzorganisation WWF?",
+              "answer": "Der Große Panda",
+              "note": "Gewählt auch aus praktischen Gründen: Schwarz-Weiß druckte sich 1961 am günstigsten."
+            },
+            {
+              "text": "Wie heißt die Liste, auf der bedrohte Tier- und Pflanzenarten geführt werden?",
+              "answer": "Die Rote Liste",
+              "note": "Sie kennt Abstufungen von „Vorwarnliste“ bis „ausgestorben“ – nicht nur bedroht oder nicht."
+            },
+            {
+              "text": "Welcher flugunfähige Vogel wurde auf Mauritius ausgerottet und gilt seither als Sinnbild dafür?",
+              "answer": "Der Dodo",
+              "note": "Keine hundert Jahre nach der Ankunft der Seefahrer war er verschwunden."
+            },
+            {
+              "text": "Wie nennt man Arten, die weltweit nur in einem einzigen, eng begrenzten Gebiet vorkommen?",
+              "answer": "Endemiten",
+              "note": "Inseln bringen besonders viele hervor – und verlieren sie besonders schnell wieder."
+            }
+          ]
+        },
+        {
+          "name": "Tiere in Zahlen",
+          "questions": [
+            {
+              "text": "Wie viele Beine hat ein Insekt?",
+              "answer": "Sechs",
+              "note": "Dazu kommen immer drei Körperabschnitte: Kopf, Brust, Hinterleib."
+            },
+            {
+              "text": "Wie viele Höcker hat ein Dromedar?",
+              "answer": "Einen",
+              "note": "Das Trampeltier hat zwei – eine Merkhilfe: das D liegt auf der Seite mit einem Bogen, das T des Trampeltiers mit zweien."
+            },
+            {
+              "text": "In wie viele Abteilungen ist der Magen einer Kuh geteilt?",
+              "answer": "In vier",
+              "note": "Pansen, Netzmagen, Blättermagen, Labmagen – nur der letzte verdaut wie unser eigener."
+            },
+            {
+              "text": "Auf wie vielen Zehen läuft ein Pferd je Bein?",
+              "answer": "Auf einer",
+              "note": "Der Huf ist der Nagel des Mittelzehs – die übrigen Zehen sind im Lauf der Evolution verschwunden."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

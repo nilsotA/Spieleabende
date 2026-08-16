@@ -93,14 +93,14 @@
               "note": "Im Bogen steht immer etwas Wasser – genau das ist der Verschluss."
             },
             {
-              "text": "Wie heißt die kleine Rinne zwischen Nase und Oberlippe?",
-              "answer": "Philtrum",
-              "note": "Griechisch für „Liebestrank“ – sie entsteht, wenn im Mutterleib die Gesichtshälften zusammenwachsen."
-            },
-            {
               "text": "Wie heißt der Stab, mit dem man an der Supermarktkasse seine Waren von denen des Nächsten trennt?",
               "answer": "Warentrenner (Warentrennstab)",
               "note": "Manche Läden nennen ihn auch Kundentrenner – ein Wort, das jeder kennt und keiner sagt."
+            },
+            {
+              "text": "Wie heißt die kleine Rinne zwischen Nase und Oberlippe?",
+              "answer": "Philtrum",
+              "note": "Griechisch für „Liebestrank“ – sie entsteht, wenn im Mutterleib die Gesichtshälften zusammenwachsen."
             }
           ]
         },
@@ -162,24 +162,24 @@
           "name": "Unter Wasser",
           "questions": [
             {
-              "text": "Wie viele Arme hat ein Seestern üblicherweise?",
-              "answer": "Fünf",
-              "note": "Verliert er einen, wächst er nach – aus manchen Armen wird sogar ein ganzer neuer Seestern."
-            },
-            {
-              "text": "Welches Meerestier besteht fast ganz aus Wasser und nesselt bei Berührung?",
-              "answer": "Die Qualle",
-              "note": "Ohne Herz, ohne Gehirn, ohne Knochen – und trotzdem gab es sie schon lange vor den Dinosauriern."
-            },
-            {
               "text": "Welcher Fisch bläst sich bei Gefahr zu einer stacheligen Kugel auf?",
               "answer": "Der Kugelfisch",
               "note": "Er saugt dafür Wasser in einen dehnbaren Magensack – der Fisch verdreifacht sein Volumen."
             },
             {
+              "text": "Wie viele Arme hat ein Seestern üblicherweise?",
+              "answer": "Fünf",
+              "note": "Verliert er einen, wächst er nach – aus manchen Armen wird sogar ein ganzer neuer Seestern."
+            },
+            {
               "text": "Bei welchen Meerestieren trägt das Männchen die Jungen aus und bringt sie zur Welt?",
               "answer": "Bei den Seepferdchen",
               "note": "Das Weibchen legt die Eier in seine Bruttasche – nach Wochen presst er die Jungen heraus."
+            },
+            {
+              "text": "Wie heißt der größte Fisch der Welt, der sich trotzdem nur von winzigem Plankton ernährt?",
+              "answer": "Der Walhai",
+              "note": "Bis zu zwölf Meter lang. Sein Muster ist so einzigartig wie ein Fingerabdruck."
             }
           ]
         },
@@ -222,14 +222,14 @@
               "note": "Nur die jungen drehen mit. Ausgewachsene stehen fest nach Osten – da wärmen sie sich morgens schneller auf."
             },
             {
-              "text": "Welches Insekt bestäubt die meisten Obstbäume und lebt in einem Volk mit einer Königin?",
-              "answer": "Die Honigbiene",
-              "note": "Für ein Glas Honig fliegt ein Volk ungefähr dreimal um die Erde."
-            },
-            {
               "text": "Wie nennt man es, wenn ein Gärtner den Trieb einer Sorte auf eine andere Pflanze setzt?",
               "answer": "Veredeln (Pfropfen)",
               "note": "Fast jeder Apfelbaum im Garten ist so entstanden – aus einem Kern wächst nie dieselbe Sorte nach."
+            },
+            {
+              "text": "Wie nennt man Pflanzen, die man nur aussät, um sie später unterzugraben und den Boden zu verbessern?",
+              "answer": "Gründüngung",
+              "note": "Lupinen, Senf oder Phacelia – sie lockern den Boden und holen Stickstoff aus der Luft."
             }
           ]
         },
