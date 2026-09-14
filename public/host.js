@@ -2772,6 +2772,17 @@ $('#btn-vollbild').addEventListener('click', schalteVollbild);
 // sobald das Vollbild schon läuft.
 const vollbildTipp = () => { $('#vollbild-tipp').hidden = !vollbildGeht() || imVollbild(); };
 vollbildTipp();
+/* Dasselbe für die Bildschirmsperre – und aus demselben Grund: Der Hinweis
+   steht nur da, wo er stimmt.
+
+   keepScreenAwake() hält den Screen offen, aber `navigator.wakeLock` gibt es
+   nur im sicheren Kontext. Auf localhost ist das gegeben; ein iPad als
+   Host-Screen erreicht die Seite jedoch nur über die WLAN-Adresse, und dort
+   ist es nicht gegeben – der Aufruf läuft per `?.` ins Leere, lautlos. Das
+   Handbuch verspricht an dieser Stelle „Der Bildschirm bleibt an", vier Zeilen
+   nachdem es zum iPad einlädt. Das Handy sagt es in genau dieser Lage schon
+   lange (schlafHinweis in player.js); der große Screen schwieg. */
+$('#schlaf-tipp').hidden = !!navigator.wakeLock;
 // Auch das Verlassen per Escape oder Systemtaste soll den Knopf umstellen.
 const vollbildWechsel = () => { zeigeVollbildKnopf(); vollbildTipp(); };
 document.addEventListener('fullscreenchange', vollbildWechsel);

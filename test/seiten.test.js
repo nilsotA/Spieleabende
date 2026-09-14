@@ -401,3 +401,33 @@ test('der Endstand gibt in Stufen nach, nicht auf einen Schlag', () => {
   assert.doesNotMatch(drei, /font-size/,
     'die dritte Stufe stellt nur enger – die Schrift gibt erst die vierte nach');
 });
+
+/*
+ * Auch die Leinwand sagt, wenn ihr Bildschirm dunkel werden kann.
+ *
+ * keepScreenAwake() hält den Screen offen – aber `navigator.wakeLock` gibt es
+ * nur im sicheren Kontext. Auf localhost ist er gegeben; ein iPad als
+ * Host-Screen erreicht die Seite jedoch nur über die WLAN-Adresse, und dort
+ * nicht. Der Aufruf läuft dann per `?.` ins Leere, lautlos. Gemessen:
+ * localhost → wakeLock object, WLAN-Adresse → undefined.
+ *
+ * Das Handy sagt das in genau dieser Lage seit jeher (schlafHinweis in
+ * player.js), der große Screen schwieg – während das Handbuch vier Zeilen nach
+ * der Einladung zum iPad „Der Bildschirm bleibt an" verspricht.
+ */
+test('der Host-Screen warnt vor der fehlenden Bildschirmsperre', () => {
+  assert.match(lies('host.html'), /id="schlaf-tipp"/,
+    'host.html: der Hinweis fehlt – auf dem iPad geht die Leinwand sonst unangekündigt aus');
+
+  const js = ohneKommentare(lies('host.js'));
+  assert.match(js, /schlaf-tipp'\)\.hidden\s*=\s*!!navigator\.wakeLock/,
+    'der Hinweis muss an der Verfügbarkeit der Sperre hängen, nicht fest stehen');
+
+  // Und das Handbuch darf das Versprechen nicht ohne Vorbehalt geben.
+  // Es liegt im Wurzelverzeichnis, nicht in public/ – lies() hilft hier nicht.
+  const readme = fs.readFileSync(path.join(PUBLIC, '..', 'README.md'), 'utf8');
+  const stelle = readme.indexOf('Der Bildschirm bleibt an.');
+  assert.ok(stelle > 0, 'die Stelle im Handbuch sollte es weiterhin geben');
+  assert.match(readme.slice(stelle, stelle + 600), /localhost|sicheren Kontext/,
+    'das Handbuch verspricht die Sperre auch dort, wo der Browser sie nicht gibt');
+});

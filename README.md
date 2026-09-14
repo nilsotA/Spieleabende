@@ -148,7 +148,11 @@ Der Host-Screen muss kein Beamer sein – ein MacBook oder ein iPad tut es genau
 - **Vollbild** mit `F` oder dem `⛶` in der Steuerleiste: Ohne Tableiste, Adresszeile
   und Dock bleibt spürbar mehr Bühne übrig. Gerade auf einem 13-Zöller lohnt sich das.
 - **Der Bildschirm bleibt an.** Während einer Frage fasst den Host-Screen minutenlang
-  niemand an – ohne Sperre ginge er mitten im Spiel aus.
+  niemand an – ohne Sperre ginge er mitten im Spiel aus. Das setzt allerdings einen
+  *sicheren Kontext* voraus, und den gibt es nur auf `localhost`: Wer den Host-Screen
+  über die WLAN-Adresse öffnet – auf einem iPad geht es gar nicht anders –, bekommt die
+  Sperre vom Browser nicht. Der Screen sagt das dann unter „Tipps für den Host"; stell
+  in dem Fall den automatischen Ruhezustand für den Abend aus.
 - **Mit dem Finger bedienbar:** Auf Touchgeräten wachsen alle Knöpfe auf Fingergröße.
   Am MacBook bleibt die Leiste kompakt, damit sie keine Bühnenhöhe frisst.
 
