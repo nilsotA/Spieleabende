@@ -956,6 +956,15 @@ export function anschlussStand(state) {
     return { text: gesamt ? `${handys(gesamt)} schon verbunden – leg jetzt die Teams an.` : '', bereit: false };
   }
 
+  // Ein Quizduell braucht zwei Seiten: Mit einem einzigen Team bleibt „Spiel
+  // starten" gesperrt. Ohne diesen Zweig stand ausgerechnet die grüne Zeile
+  // „alle 1 Teams sind dabei." über dem toten Knopf – alles sah bereit aus, und
+  // der Host suchte den Fehler bei den Handys statt beim fehlenden zweiten Team.
+  if (teams.length < 2) {
+    const vorn = gesamt ? `${handys(gesamt)} verbunden` : 'Noch kein Handy verbunden';
+    return { text: `${vorn} · es fehlt noch ein zweites Team.`, bereit: false };
+  }
+
   const ohne = teams.filter((t) => !t.members.some((m) => m.online));
   if (!ohne.length && !wartende) {
     return { text: `${handys(gesamt)} verbunden – alle ${teams.length} Teams sind dabei.`, bereit: true };

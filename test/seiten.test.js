@@ -269,3 +269,40 @@ test('der Knopf verspricht einen Austausch – und der Server hält ihn', () => 
     );
   }
 });
+
+/*
+ * Ein einzelnes Team ist noch kein Duell.
+ *
+ * „Spiel starten" bleibt gesperrt, solange nur ein Team dasteht (host.js:
+ * `teams.length < 2`). Die Zeile darüber meldete in genau dieser Lage aber
+ * „1 Handy verbunden – alle 1 Teams sind dabei." – grün gesetzt, weil `bereit`
+ * galt. Der Host las also „alles da", drückte auf einen toten Knopf und suchte
+ * den Fehler bei den Handys, statt den zweiten Namen eintippen zu lassen.
+ * Nebenbei stand da deutsch falsch „alle 1 Teams".
+ *
+ * Die Zeile steht auf Leinwand UND Fernbedienung – beide holen sie hier.
+ */
+test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
+  const { anschlussStand } = await import('../public/common.js');
+  const team = (name, amHandy) => ({
+    id: name, name, members: amHandy ? [{ name, online: true }] : [],
+  });
+
+  for (const teams of [[team('Nils', true)], [team('Nils', false)]]) {
+    const { text, bereit } = anschlussStand({ teams });
+    assert.equal(bereit, false,
+      `ein Team darf nie „bereit" sein – der Startknopf ist dann gesperrt: „${text}"`);
+    assert.match(text, /zweites Team/,
+      `die Zeile muss den wahren Grund nennen, nicht die Handys: „${text}"`);
+  }
+
+  // Ab zwei Teams bleibt es beim alten Satz – und der zählt richtig.
+  const zwei = anschlussStand({ teams: [team('Nils', true), team('Mira', true)] });
+  assert.equal(zwei.bereit, true);
+  assert.match(zwei.text, /alle 2 Teams sind dabei/);
+
+  // „alle 1 Teams" darf in keiner Lage mehr herauskommen.
+  for (const teams of [[], [team('A', true)], [team('A', true), team('B', false)]]) {
+    assert.doesNotMatch(anschlussStand({ teams }).text, /alle 1 Teams/);
+  }
+});
