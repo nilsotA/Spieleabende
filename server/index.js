@@ -1349,6 +1349,12 @@ server.listen(PORT, async () => {
   for (const u of localUrls()) {
     console.log(`  Handys der Mitspieler:    ${u}`);
   }
+  // Die Fernbedienung gehört auf das Handy des Hosts, nicht auf localhost: Dort
+  // stehen Frage, Bild und Lösung, während die Leinwand die Lösung verdeckt
+  // hält. Sie stand im Handbuch, aber nicht in dieser Liste – wer nur das
+  // Terminal liest, hat sie schlicht nie gefunden und den Abend über die
+  // unscharfe Lösung auf dem großen Screen aufgedeckt, die dann alle sahen.
+  console.log(`  Fernbedienung für dich:   ${hostAdresse(localUrls()[0], '/remote')}`);
   console.log(`  Fragen-Editor:            ${hostAdresse(`http://localhost:${PORT}`, '/editor')}\n`);
   if (!PORT_GESETZT && portVersuche > 0) {
     console.log(`  (Port ${PORT - portVersuche} war belegt – daher ${PORT}.)\n`);

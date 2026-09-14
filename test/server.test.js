@@ -2846,3 +2846,39 @@ test('ein Austausch lässt sich zurücknehmen', async (t) => {
   const jetzt = (await zustand(base)).current;
   assert.equal(jetzt?.text, original, 'nach dem Zurücknehmen steht wieder die alte Frage da');
 });
+
+/*
+ * Die Fernbedienung stand im Handbuch, aber nicht in der Startmeldung.
+ *
+ * Sie ist der einzige Weg, Frage UND Lösung zu sehen, während die Leinwand die
+ * Lösung verdeckt hält. Wer den Server doppelklickt, liest genau diese vier
+ * Zeilen – fehlt sie dort, deckt der Host den Abend über die unscharfe Lösung
+ * auf dem großen Screen auf, und alle im Raum lesen mit.
+ *
+ * Geprüft wird auch die Adresse: Die Fernbedienung läuft auf dem Handy des
+ * Hosts, und `localhost` führt dort ins Leere.
+ */
+test('die Startmeldung nennt die Fernbedienung – auf einer Adresse fürs Handy', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 3960 + Math.floor(Math.random() * 200);
+
+  const { proc, ausgabe } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const zeile = ausgabe().split('\n').find((z) => /Fernbedienung/.test(z));
+  assert.ok(zeile, `keine Zeile zur Fernbedienung in der Startmeldung:\n${ausgabe()}`);
+  assert.match(zeile, /\/remote\b/, 'die Zeile muss den Weg /remote nennen');
+
+  // Dieselbe Adresse, die auch die Handys bekommen – nicht localhost, das auf
+  // dem Telefon des Hosts nirgendwohin führt. Ausnahme: ein Rechner ganz ohne
+  // Netzwerkkarte, der gar keine andere anzubieten hat.
+  const handyZeile = ausgabe().split('\n').find((z) => /Handys der Mitspieler/.test(z));
+  const handyBasis = /(https?:\/\/[^\s/]+)/.exec(handyZeile)?.[1];
+  const remoteBasis = /(https?:\/\/[^\s/]+)/.exec(zeile)?.[1];
+  assert.equal(remoteBasis, handyBasis,
+    'Fernbedienung und Handys müssen über dieselbe Adresse erreichbar sein');
+});
