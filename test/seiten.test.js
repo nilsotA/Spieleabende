@@ -357,3 +357,47 @@ test('der Buzzer weist weder das Zugteam noch die Pause zurecht', () => {
   assert.ok(amZug > 0 && amZug < zuFrueh,
     'wer selbst am Zug ist, darf „erst muss das Zugteam antworten" nie lesen');
 });
+
+/*
+ * Die Knopfreihe des Endstands muss erreichbar bleiben.
+ *
+ * Gemessen auf 1280×720 mit acht Teams und Gleichstand an der Spitze: Der
+ * Endstand war 94 px zu hoch, die ganze Knopfreihe lag unterhalb des Kastens,
+ * und die Punkteleiste (z-index 2) lag darüber – „📋 Zusammenfassung", „Neues
+ * Spiel" und „⚡ Stechen" waren weder zu sehen noch zu treffen. Unten stand
+ * dabei „Gleichstand – ‚Stechen' holt die Entscheidungsfrage." für einen Knopf,
+ * den niemand drücken konnte. Acht Teams entstehen von selbst, seit jedes Handy
+ * sich sein eigenes Team anlegen darf.
+ *
+ * Zwei Dinge halten das jetzt: die klebende Reihe als Rettungsanker und zwei
+ * weitere Verkleinerungsstufen, damit es gar nicht erst dazu kommt.
+ */
+test('die Knopfreihe des Endstands klebt am unteren Rand', () => {
+  assert.match(lies('host.html'), /class="row endstand-aktionen"/,
+    'host.html: die Knopfreihe braucht ihre Klasse, sonst greift die Regel nicht');
+
+  const css = lies('host.css');
+  const block = /\.scores-panel \.endstand-aktionen \{([^}]*)\}/.exec(css)?.[1] || '';
+  assert.match(block, /position:\s*sticky/,
+    'ohne sticky rutscht die Reihe bei vielen Teams aus dem Kasten');
+  assert.match(block, /bottom:\s*0/, 'sticky ohne bottom klebt nirgends');
+  assert.match(block, /background:/,
+    'ohne eigenen Grund laufen die Teamnamen durch die Knöpfe hindurch');
+});
+
+test('der Endstand gibt in Stufen nach, nicht auf einen Schlag', () => {
+  const css = lies('host.css');
+  const js = ohneKommentare(lies('host.js'));
+  for (const stufe of ['voll', 'sehr-voll', 'extrem-voll']) {
+    assert.ok(css.includes(`.scores-panel.${stufe} `),
+      `host.css: die Stufe „${stufe}" fehlt`);
+    assert.ok(js.includes(`'${stufe}'`),
+      `host.js: die Stufe „${stufe}" wird nie gesetzt`);
+  }
+  // Erst enger stellen, dann die Schrift: Eine einzige große Stufe ließ bei
+  // sechs Teams ein Drittel des Kastens leer, während die Schrift ohne Not
+  // geschrumpft war. Deshalb darf nur die letzte Stufe an die Schriftgröße.
+  const drei = /\.scores-panel\.sehr-voll \.score-list li \{([^}]*)\}/.exec(css)?.[1] || '';
+  assert.doesNotMatch(drei, /font-size/,
+    'die dritte Stufe stellt nur enger – die Schrift gibt erst die vierte nach');
+});

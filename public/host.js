@@ -1915,7 +1915,7 @@ function passeStandEin() {
     const zeilen = rekorde ? [...rekorde.children].filter((z) => !z.classList.contains('rekord-rest')) : [];
     for (const z of zeilen) z.hidden = false;
     restZeile(rekorde).hidden = true;
-    panel.classList.remove('voll');
+    panel.classList.remove('voll', 'sehr-voll', 'extrem-voll');
     if (passt()) return;
 
     panel.classList.add('voll');
@@ -1932,6 +1932,11 @@ function passeStandEin() {
         ? '1 weitere Auszeichnung steht in der Zusammenfassung'
         : `${weg} weitere Auszeichnungen stehen in der Zusammenfassung`;
     }
+    // Zuletzt noch zweimal nachgeben – erst enger stellen, dann die Schrift der
+    // Rangliste. Getrennt, weil eine einzige große Stufe bei sechs Teams ein
+    // Drittel des Kastens leer ließ und die Schrift ohne Not schrumpfte.
+    if (!passt()) panel.classList.add('sehr-voll');
+    if (!passt()) panel.classList.add('extrem-voll');
   });
 }
 
