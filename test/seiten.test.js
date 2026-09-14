@@ -306,3 +306,22 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
     assert.doesNotMatch(anschlussStand({ teams }).text, /alle 1 Teams/);
   }
 });
+
+/*
+ * Die Herkunft einer Ersatzfrage steht auf allen drei Schirmen.
+ *
+ * `viewFor` schickt `ersatzAus` ausdrücklich an alle mit – der Kommentar dort
+ * sagt „Auch die Handys zeigen die Herkunft: Auf dem kleinen Schirm steht sonst
+ * eine Kategorie, zu der die Frage nicht passt." Leinwand und Fernbedienung
+ * taten es, das Handy nicht: Dort stand nach einem Austausch „Uni-Latein · 500
+ * Punkte" über einer Frage aus einem ganz anderen Fach.
+ */
+test('nach einem Austausch nennt jeder Schirm die Herkunft der Frage', () => {
+  for (const datei of ['host.js', 'player.js', 'remote.js']) {
+    assert.match(
+      ohneKommentare(lies(datei)),
+      /ersatzAus/,
+      `${datei}: die Kategorie über der Frage verschweigt, dass sie ausgetauscht wurde`,
+    );
+  }
+});

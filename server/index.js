@@ -542,6 +542,16 @@ function uebernimm(alt, jetztStand) {
   // ohne dass jemand Pause gedrückt hätte.
   alt.pause = jetztStand.pause;
   alt.pauseSeit = jetztStand.pauseSeit;
+  // Was einmal auf dem Tisch lag, ist verbraucht – auch wenn der Zug
+  // zurückgenommen wird.
+  //
+  // Beide Listen merken sich Fragetexte, die es heute schon gab: eingewechselte
+  // Ersatzfragen und Stechfragen. Führen sie mit dem Schnappschuss zurück, wird
+  // eine gerade gezogene Frage wieder ziehbar – und ausgerechnet das Streichen,
+  // das eine schlechte Frage loswerden soll, könnte sie zurückholen. Der Preis
+  // ist eine Frage weniger im Vorrat, und davon gibt es reichlich.
+  alt.ersatzTexte = jetztStand.ersatzTexte;
+  alt.stechenTexte = jetztStand.stechenTexte;
   return alt;
 }
 
@@ -607,7 +617,14 @@ async function handleAction(clientId, body) {
   // Kommentar an dieser Stelle beschrieb schon immer das gewünschte Verhalten;
   // der Code tat es nur nicht.
   const schnappschuss = RUECKNEHMBAR.has(type)
-    ? { state: structuredClone(state), was: benenne(type, state) }
+    ? {
+      state: structuredClone(state),
+      was: benenne(type, state),
+      // Die Nutzlast einer Punktekorrektur wandert mit in den Stapel: `discard`
+      // braucht sie, um sie nach dem Rücksprung erneut aufzuschlagen. Alle
+      // anderen Züge sind aus dem Schnappschuss allein wiederherstellbar.
+      korrektur: type === 'adjustScore' ? { teamId: body.teamId, delta: body.delta } : null,
+    }
     : null;
 
   switch (type) {
@@ -657,7 +674,8 @@ async function handleAction(clientId, body) {
       for (const runde of state.questionSet?.rounds || []) {
         for (const cat of runde.categories) for (const f of cat.questions) aufDemBrett.push(f.text);
       }
-      const ersatz = await ersatzFrage(q.category, [...aufDemBrett, ...(state.stechenTexte || [])]);
+      const ersatz = await ersatzFrage(q.category,
+        [...aufDemBrett, ...(state.stechenTexte || []), ...(state.ersatzTexte || [])]);
       if (!state.current || state.current.catIdx !== q.catIdx || state.current.rowIdx !== q.rowIdx) {
         throw new G.GameError('Die Frage ist inzwischen eine andere – bitte noch einmal ansehen.');
       }
@@ -668,6 +686,20 @@ async function handleAction(clientId, body) {
       if (bis < 0) {
         throw new G.GameError('Der Weg zurück reicht nicht mehr bis zum Anfang dieser Frage.');
       }
+      /*
+       * Was der Host von Hand korrigiert hat, gehört nicht dieser Frage.
+       *
+       * `discard` springt zum Anker zurück und nimmt damit alles mit, was
+       * darüber liegt. Für Punkte, Bilanz und Serie der Frage ist das genau
+       * richtig – für eine Punktekorrektur nicht: Sie ist der einzige Zug, den
+       * der Host während einer offenen Frage machen darf, der mit der Frage
+       * nichts zu tun hat. Beide Knöpfe liegen sogar im selben Menü, und der
+       * übliche Ablauf ist ein einziger Besuch darin: erst „ihr habt uns vorhin
+       * 100 zu wenig gegeben" richtigstellen, dann die Frage austauschen.
+       * Vorher war die Korrektur danach stillschweigend wieder weg, und gemerkt
+       * hätte es am Ende niemand mehr.
+       */
+      const korrekturen = rueckWeg.slice(bis + 1).map((e) => e.korrektur).filter(Boolean);
       const vorher = { state: structuredClone(state), was: 'Frage verworfen' };
       // Der Ankerpunkt bleibt im Stapel stehen, und übernommen wird eine Kopie.
       //
@@ -683,6 +715,12 @@ async function handleAction(clientId, body) {
       const ziel = structuredClone(rueckWeg[bis].state);
       rueckWeg.length = bis + 1;
       state = uebernimm(ziel, state);
+      // Teams kommen und gehen nur in der Lobby, hier also nie – geprüft wird
+      // trotzdem, damit eine Korrektur für ein fehlendes Team das Streichen
+      // nicht mit einem Fehler abbrechen lässt.
+      for (const k of korrekturen) {
+        if (state.teams.some((t) => t.id === k.teamId)) G.adjustScore(state, k.teamId, k.delta);
+      }
       if (ersatz) {
         G.ersetzeFrage(state, q.catIdx, q.rowIdx, ersatz);
         state.message = 'Frage ausgetauscht – auf dem Feld liegt jetzt eine andere.';
@@ -834,7 +872,8 @@ async function handleAction(clientId, body) {
       // den „Neues Spiel" gerade geleert hatte. Ein `undo` darauf holte das
       // beendete Spiel zurück. Nachgestellt, dreimal von dreimal.
       // `startGame` macht es an derselben Stelle schon richtig.
-      const frage = await stechenFrage([...gespielt, ...(state.stechenTexte || [])]);
+      const frage = await stechenFrage(
+        [...gespielt, ...(state.stechenTexte || []), ...(state.ersatzTexte || [])]);
       G.startStechen(state, frage);
       break;
     }

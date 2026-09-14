@@ -529,9 +529,15 @@ function renderQuestion() {
   }
   box.hidden = false;
   // Die Stechfrage hat keinen Punktwert – „· 0 Punkte" wäre schlicht falsch.
+  //
+  // Die Herkunft einer Ersatzfrage gehört dazu, wie auf Leinwand und
+  // Fernbedienung: Der Server schickt `ersatzAus` ausdrücklich für alle drei
+  // mit (game.js, viewFor). Ohne sie stand auf dem Handy nach einem Austausch
+  // eine Kategorie über der Frage, zu der die Frage nicht passt – und gerade
+  // auf dem kleinen Schirm ist die Zeile die einzige Einordnung, die es gibt.
   $('#p-q-head').textContent = q.stechen
     ? `Stechen · ${q.category}`
-    : `${q.category} · ${q.value} Punkte`;
+    : `${q.category} · ${q.value} Punkte${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
   setFrageText($('#p-q-text'), q.text);
   const img = $('#p-q-image');
   if (q.image) {

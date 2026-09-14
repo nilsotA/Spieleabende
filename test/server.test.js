@@ -2882,3 +2882,124 @@ test('die Startmeldung nennt die Fernbedienung – auf einer Adresse fürs Handy
   assert.equal(remoteBasis, handyBasis,
     'Fernbedienung und Handys müssen über dieselbe Adresse erreichbar sein');
 });
+
+/*
+ * „Frage austauschen" darf die Punktekorrektur nicht mitnehmen.
+ *
+ * `discard` rechnet nicht zurück, sondern springt auf den Schnappschuss vor der
+ * Feldwahl – für alles, was an der Frage hing, ist das genau richtig. Eine
+ * Korrektur von Hand hängt aber nicht an der Frage: Sie ist der einzige Zug,
+ * den der Host während einer offenen Frage machen darf, der mit ihr nichts zu
+ * tun hat. Beide Knöpfe liegen im selben Menü, und der übliche Ablauf ist ein
+ * einziger Besuch darin.
+ *
+ * Vorher verschwanden die Punkte kommentarlos – die Meldung sprach nur von der
+ * ausgetauschten Frage –, und am Endstand wusste niemand mehr, wo sie geblieben
+ * sind.
+ */
+test('eine Punktekorrektur überlebt das Austauschen der Frage', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 4610 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'test-host');
+  for (const name of ['Rot', 'Blau', 'Grün']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+
+  // Rot spielt ein Feld und trifft – ganz gewöhnliche Punkte.
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });
+  await host({ type: 'close' });
+  const nachRunde = await zustand(base);
+  const rotVorher = nachRunde.teams.find((t) => t.name === 'Rot').score;
+  assert.ok(rotVorher > 0, 'Rot sollte etwas geholt haben');
+
+  // Nächstes Feld steht offen. Währenddessen fällt auf, dass Grün vorhin zu
+  // wenig bekommen hat – der Host korrigiert das im selben Menü …
+  await host({ type: 'pick', catIdx: 1, rowIdx: 0 });
+  const gruen = (await zustand(base)).teams.find((t) => t.name === 'Grün');
+  await host({ type: 'adjustScore', teamId: gruen.id, delta: 200 });
+  assert.equal((await zustand(base)).teams.find((t) => t.name === 'Grün').score, 200);
+
+  // … und tauscht danach die Frage aus, weil sie nichts taugt.
+  const res = await host({ type: 'discard' });
+  assert.equal(res.ok, true, res.error);
+
+  const danach = await zustand(base);
+  assert.equal(danach.teams.find((t) => t.name === 'Grün').score, 200,
+    'die Korrektur hing nicht an der Frage und darf mit ihr nicht verschwinden');
+  assert.equal(danach.teams.find((t) => t.name === 'Rot').score, rotVorher,
+    'und die Punkte aus der abgeschlossenen Frage bleiben ohnehin');
+
+  // Der Rückschritt holt die gestrichene Frage zurück – ohne die Korrektur
+  // dabei ein zweites Mal aufzuschlagen.
+  await host({ type: 'undo' });
+  assert.equal((await zustand(base)).teams.find((t) => t.name === 'Grün').score, 200,
+    'ein Zurücknehmen darf die Korrektur nicht verdoppeln');
+});
+
+/*
+ * Zweimal streichen darf nicht zweimal dieselbe Frage bringen.
+ *
+ * Die Ausschlussliste für den Ersatz wird aus `state.questionSet` gebaut – dem
+ * Satz, mit dem der Abend gestartet ist. Eine eingewechselte Ersatzfrage steht
+ * dort nie: Sie kommt aus einem anderen Satz. Ohne eine eigene Liste des schon
+ * Verbrauchten konnte deshalb ausgerechnet das Streichen, das eine schlechte
+ * Frage loswerden soll, sie wortgleich zurückholen. Das Handbuch verspricht an
+ * dieser Stelle „Dasselbe Team wählt noch einmal und bekommt diesmal etwas
+ * Neues."
+ *
+ * Der Test macht das Würfeln unnötig: `ersatzFrage` bevorzugt Fragen aus einer
+ * Kategorie desselben Namens (questions.js), und „Regelkunde" gibt es in genau
+ * einem mitgelieferten Satz mit genau vier Fragen. Fünf Ziehungen aus einem
+ * Topf von vier müssen sich ohne diese Liste wiederholen – Schubfachprinzip,
+ * kein Glück. Mit ihr ist der Topf nach vieren leer, und die fünfte kommt aus
+ * dem allgemeinen Vorrat.
+ */
+test('eine ausgetauschte Frage kommt auch beim wiederholten Streichen nicht wieder', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 4820 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  // Eine Kategorie, die es unter den echten Sätzen genau einmal gibt.
+  const satz = {
+    name: 'Streichsatz',
+    rounds: [{
+      categories: ['Regelkunde', 'K1'].map((name) => ({
+        name,
+        questions: Array.from({ length: 4 }, (_, i) => ({
+          text: `Eigene Frage ${name}-${i}`,
+          answer: `Antwort ${name}-${i}`,
+        })),
+      })),
+    }],
+  };
+
+  const host = await alsHost(base, 'test-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: satz });
+
+  const texte = [];
+  for (let i = 0; i < 5; i++) {
+    await host({ type: 'pick', catIdx: 0, rowIdx: 1 });
+    const q = (await zustand(base)).current;
+    assert.ok(q, `Durchgang ${i}: es sollte eine Frage stehen`);
+    texte.push(q.text);
+    const res = await host({ type: 'discard' });
+    assert.equal(res.ok, true, res.error);
+  }
+
+  const doppelt = texte.filter((t, i) => texte.indexOf(t) !== i);
+  assert.deepEqual(doppelt, [],
+    `dieselbe Frage kam noch einmal aufs Feld: ${JSON.stringify(texte, null, 2)}`);
+});

@@ -136,6 +136,10 @@ export function createState() {
     stechenLauf: 0,
     stechenTexte: [],
     stechenSieger: null,
+    // Welche Ersatzfragen heute schon eingewechselt wurden (siehe ersetzeFrage).
+    // Sie stehen in keinem Fragensatz dieses Abends und wären sonst die
+    // einzigen, die ein zweites Mal gezogen werden können.
+    ersatzTexte: [],
   };
 }
 
@@ -359,6 +363,7 @@ export function startGame(state, questionSet) {
   state.stechenLauf = 0;
   state.stechenTexte = [];
   state.stechenSieger = null;
+  state.ersatzTexte = [];
   return startRound(state, 1);
 }
 
@@ -410,6 +415,14 @@ export function ersetzeFrage(state, catIdx, rowIdx, frage) {
   cell.image = null;
   cell.ersatzAus = frage.category && frage.category !== cat.name ? frage.category : null;
   cell.ersatz = true;
+  // Merken, was schon eingewechselt wurde.
+  //
+  // Die Ausschlussliste für den Ersatz wird aus `state.questionSet` gebaut – und
+  // genau darin steht eine bereits eingewechselte Frage nie. Ohne diese Zeile
+  // konnte dasselbe Feld beim zweiten Streichen wortgleich dieselbe Frage
+  // zurückgeben, und zwei Felder derselben Kategorie konnten dieselbe tragen.
+  // Das Handbuch verspricht „bekommt diesmal etwas Neues".
+  state.ersatzTexte = [...(state.ersatzTexte || []), frage.text];
   return cell;
 }
 
