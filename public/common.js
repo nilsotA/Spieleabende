@@ -961,8 +961,11 @@ export function anschlussStand(state) {
   // „alle 1 Teams sind dabei." über dem toten Knopf – alles sah bereit aus, und
   // der Host suchte den Fehler bei den Handys statt beim fehlenden zweiten Team.
   if (teams.length < 2) {
-    const vorn = gesamt ? `${handys(gesamt)} verbunden` : 'Noch kein Handy verbunden';
-    return { text: `${vorn} · es fehlt noch ein zweites Team.`, bereit: false };
+    // „noch" nur einmal im Satz: Ohne Handy steht es schon vorn, und
+    // „Noch kein Handy verbunden · es fehlt noch ein zweites Team." stolpert.
+    return gesamt
+      ? { text: `${handys(gesamt)} verbunden · es fehlt noch ein zweites Team.`, bereit: false }
+      : { text: 'Noch kein Handy verbunden · es fehlt ein zweites Team.', bereit: false };
   }
 
   const ohne = teams.filter((t) => !t.members.some((m) => m.online));
