@@ -325,3 +325,35 @@ test('nach einem Austausch nennt jeder Schirm die Herkunft der Frage', () => {
     );
   }
 });
+
+/*
+ * „Noch zu früh" darf nicht dem Zugteam und nicht in der Pause erscheinen.
+ *
+ * Der Zweig hing allein an `step === 'primary'` und nicht daran, WER tippt. Das
+ * Zugteam hat in dieser Phase `canBuzz: false` und `onTheHook: true`; auf
+ * seinem Knopf steht „DU BIST DRAN". Ein Tipp darauf ließ ihn rütteln und hielt
+ * ihm „erst muss das Zugteam antworten" vor – sie sind das Zugteam.
+ *
+ * Dieselbe Bedingung machte die Pausenzeile unerreichbar: `canBuzz` enthält
+ * `!pause` schon serverseitig (game.js, viewFor), also fiel jeder Tipp während
+ * der Pause in denselben Zweig – Rütteln inklusive, obwohl auf dem Knopf
+ * „PAUSE" steht und der Kommentar daneben ausdrücklich Stille verlangt.
+ *
+ * Geprüft wird die Reihenfolge im Quelltext: Ein Browser läuft hier nicht, und
+ * der Handler ist nicht ausgeführt zu bekommen.
+ */
+test('der Buzzer weist weder das Zugteam noch die Pause zurecht', () => {
+  const quelle = ohneKommentare(lies('player.js'));
+  const zuFrueh = quelle.indexOf('Noch zu früh');
+  assert.ok(zuFrueh > 0, 'die Meldung sollte es weiterhin geben – für alle anderen');
+
+  // Der Pausen-Ausstieg muss VOR der Meldung stehen, sonst ist er unerreichbar.
+  const pausenAusstieg = quelle.lastIndexOf('state?.pause) return', zuFrueh);
+  assert.ok(pausenAusstieg > 0 && pausenAusstieg < zuFrueh,
+    'in der Pause muss der Buzzer schweigen, bevor „Noch zu früh" drankommt');
+
+  // Und das Zugteam muss vorher abgefangen sein.
+  const amZug = quelle.lastIndexOf('onTheHook', zuFrueh);
+  assert.ok(amZug > 0 && amZug < zuFrueh,
+    'wer selbst am Zug ist, darf „erst muss das Zugteam antworten" nie lesen');
+});

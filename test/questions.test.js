@@ -668,3 +668,48 @@ test('kein Text sprengt den Kasten auf der Leinwand', async () => {
   }
   assert.deepEqual(zulang, []);
 });
+
+/**
+ * In einer Anagramm-Kategorie muss jedes genannte Wort auch eines sein.
+ *
+ * Der Zusatz zu „LAGER" nannte KLAGE als Umstellung – KLAGE hat ein K und kein
+ * R. Ausgerechnet in der Kategorie, deren erster Zusatz die Regel aufschreibt:
+ * „Ein Anagramm benutzt jeden Buchstaben genau einmal – nichts darf übrig
+ * bleiben." Am Tisch rechnet das jemand nach, und dann steht die Auflösung in
+ * Frage.
+ *
+ * Geprüft wird jedes Wort in Großbuchstaben, das in Frage, Lösung oder Zusatz
+ * einer solchen Kategorie steht: Es muss dieselbe Buchstabenmenge tragen wie
+ * das Wort, um das es geht. Großschreibung ist in diesen Sätzen die Auszeichnung
+ * für „das ist hier das Wort" – gewöhnliche deutsche Substantive schreiben sich
+ * nicht durchgehend groß.
+ */
+test('in Anagramm-Kategorien passen die Buchstaben aller genannten Wörter', async () => {
+  const buchstaben = (w) => [...w.toUpperCase()].sort().join('');
+  const fehler = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        if (!/anagramm/i.test(cat.name)) continue;
+        for (const q of cat.questions) {
+          // Das Wort, um das es geht, steht in Großbuchstaben in der Frage.
+          const inFrage = (q.text.match(/\p{Lu}{4,}/gu) || []);
+          if (!inFrage.length) continue;
+          const soll = buchstaben(inFrage[0]);
+          const genannt = [
+            ...inFrage.slice(1),
+            ...(q.answer.match(/\p{Lu}{4,}/gu) || []),
+            ...((q.note || '').match(/\p{Lu}{4,}/gu) || []),
+          ];
+          for (const wort of genannt) {
+            if (buchstaben(wort) !== soll) {
+              fehler.push(`${datei} · „${inFrage[0]}": ${wort} hat andere Buchstaben (${buchstaben(wort)} statt ${soll})`);
+            }
+          }
+        }
+      }
+    }
+  }
+  assert.deepEqual(fehler, [], `keine Umstellung: \n${fehler.join('\n')}`);
+});

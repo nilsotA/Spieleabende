@@ -125,6 +125,13 @@ function render() {
     bar.dataset.key = barKey;
     bar.innerHTML = '';
   }
+  // Der Bezugspunkt für die Anlaufsperre kennt weder Handys noch Punktestand:
+  // Nur was die Bedeutung der Wertungsknöpfe ausmacht, zählt hier.
+  const wertungsLage = [
+    state.phase, q?.step, q?.buzzedTeamId, q?.teamId,
+    (q?.lockedOut || []).join(','), state.stechenSieger,
+  ].join('#');
+  const seit = lageSeit('leiste', wertungsLage);
   const setz = (...knoepfe) => { if (neueLeiste) bar.append(...knoepfe); };
 
   renderFeldwahl();
@@ -140,13 +147,18 @@ function render() {
   // Host die Seite unter dem Daumen weg, während er die Punkte korrigiert.
   // Ohne `behavior: 'smooth'`: keine Bewegung, nichts, was jemand mit
   // „Bewegung reduzieren" abbestellt hätte.
+  //
+  // Sichtbar schalten MUSS vor dem Messen stehen: Kommt die Frage aus dem
+  // Nichts – genau der Fall, den dieser Absatz beschreibt –, war der Kasten
+  // beim Messen noch `hidden`. Dann liefert getBoundingClientRect() lauter
+  // Nullen, `top < 0` ist nie wahr, und gescrollt wurde kein einziges Mal.
+  box.hidden = !q;
   const frageKey = q ? `${q.catIdx}:${q.rowIdx}:${q.stechen ? 's' : ''}` : null;
   if (frageKey && frageKey !== letzteFrage && box.getBoundingClientRect().top < 0) {
     scrollTo({ top: 0 });
   }
   letzteFrage = frageKey;
 
-  box.hidden = !q;
   // Streichen geht nur bei einer laufenden Brettfrage – eine Stechfrage hat
   // kein Feld, auf das etwas zurückfallen könnte.
   $('#r-discard').hidden = !q || !!q.stechen;
@@ -209,11 +221,11 @@ function render() {
       setz(big('Zug überspringen', 'btn-ghost', () => {
         const next = state.teams[(state.turnIndex + 1) % state.teams.length];
         act('setTurn', { teamId: next.id });
-      }));
+      }, seit));
       break;
     case 'roundEnd':
       setzeText(phase, `Runde ${state.round} beendet.`);
-      setz(big('Nächste Runde', 'btn-primary', () => act('nextRound')));
+      setz(big('Nächste Runde', 'btn-primary', () => act('nextRound'), seit));
       break;
     case 'gameOver': {
       const best = Math.max(...state.teams.map((t) => t.score));
@@ -234,9 +246,9 @@ function render() {
       if (q.step === 'primary') {
         setzeText(phase, `${teamName(q.teamId)} antwortet.`);
         setz(
-          big('Richtig ✓', 'btn-good', () => act('judge', { correct: true })),
-          big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false })),
-          big('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass')),
+          big('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), seit),
+          big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), seit),
+          big('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), seit),
         );
       } else if (q.step === 'buzz' && !q.buzzedTeamId) {
         uhrText = q.stechen
@@ -247,7 +259,7 @@ function render() {
         // und bei acht Teams stand er vorher unter sieben Vertreterknöpfen –
         // also außerhalb des Bildschirms, obwohl der Tisch längst wartet.
         setz(big(q.stechen ? 'Keiner weiß es → nächste Frage' : 'Keiner weiß es → auflösen',
-          'btn-primary', () => act('endQuestion')));
+          'btn-primary', () => act('endQuestion'), seit));
         // Vertreten wird nur, wer keinen eigenen Buzzer in der Hand hat.
         for (const team of state.teams) {
           if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
@@ -259,18 +271,18 @@ function render() {
           ? `${teamName(q.buzzedTeamId)} hat gebuzzert – richtig gewinnt, falsch ist raus.`
           : `${teamName(q.buzzedTeamId)} hat gebuzzert (±${q.halfValue}).`);
         setz(
-          big('Richtig ✓', 'btn-good', () => act('judge', { correct: true })),
-          big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false })),
-          big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz')),
+          big('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), seit),
+          big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), seit),
+          big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz'), seit),
         );
       } else if (q.stechen) {
         setzeText(phase, state.stechenSieger
           ? `${teamName(state.stechenSieger)} gewinnt den Abend.`
           : 'Das wusste keiner – zurück zum Endstand.');
-        setz(big(state.stechenSieger ? 'Zum Endstand' : 'Weiter', 'btn-primary', () => act('close')));
+        setz(big(state.stechenSieger ? 'Zum Endstand' : 'Weiter', 'btn-primary', () => act('close'), seit));
       } else {
         setzeText(phase, 'Frage beendet.');
-        setz(big('Weiter', 'btn-primary', () => act('close')));
+        setz(big('Weiter', 'btn-primary', () => act('close'), seit));
       }
       break;
     default:
@@ -426,8 +438,10 @@ function renderFeldwahl() {
  * erschienener Knopf 400 ms lang taub. Wer bewusst tippt, merkt davon nichts;
  * wer nachtippt, richtet keinen Schaden mehr an.
  */
-function big(label, cls, onclick) {
-  const geboren = performance.now();
+function big(label, cls, onclick, seit) {
+  // Ohne Bezugspunkt gilt die Geburt des Knotens – richtig für Knöpfe, die es
+  // vorher wirklich nicht gab (Vertreterbuzzer), falsch für die Wertungsreihe.
+  const geboren = seit ?? performance.now();
   return el('button', {
     class: `btn ${cls} r-big`,
     type: 'button',
@@ -436,6 +450,27 @@ function big(label, cls, onclick) {
       onclick();
     },
   }, label);
+}
+
+/**
+ * Seit wann diese Lage gilt – der Bezugspunkt für die Anlaufsperre.
+ *
+ * Wörtlich dasselbe wie auf der Leinwand (host.js, lageSeit). Die Leiste baut
+ * sich auch neu, wenn nur ein Handy aus dem Standby kommt oder der Host Punkte
+ * korrigiert – beides steht im Schlüssel, weil die Vertreterknöpfe daran
+ * hängen. Die Wertungsknöpfe stehen dabei unverändert an derselben Stelle,
+ * wurden aber trotzdem 400 ms taub, weil sie frische Knoten waren. Auf dem
+ * Gerät, mit dem der Host den ganzen Abend wertet, ist das der Unterschied
+ * zwischen „Richtig" und gar nichts.
+ */
+const lagenSeit = new Map();
+function lageSeit(name, signatur) {
+  const alt = lagenSeit.get(name);
+  if (!alt || alt.signatur !== signatur) {
+    lagenSeit.set(name, { signatur, seit: performance.now() });
+    return performance.now();
+  }
+  return alt.seit;
 }
 
 // Lebenszeichen für die Startwache (start-wache.js): Ab hier steht die Seite.

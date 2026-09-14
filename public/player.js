@@ -166,7 +166,26 @@ async function pressBuzzer() {
   if (!state?.you?.canBuzz) {
     // Bewusst kein disabled-Attribut: deaktivierte Buttons feuern gar keine
     // Events, dann bliebe ein zu früher Druck völlig unkommentiert.
+    //
+    // Wer hier landet, darf gerade nicht drücken – aber aus drei sehr
+    // verschiedenen Gründen, und die brauchen drei verschiedene Antworten:
+    //
+    // 1. In der Pause bleibt es still. Auf dem Knopf steht „PAUSE", das ist
+    //    Antwort genug; ein Toast wäre nur Lärm. `canBuzz` enthält `!pause`
+    //    bereits (game.js, viewFor) – die Prüfung muss deshalb HIER stehen.
+    //    Weiter unten war sie unerreichbar, und wer in der Pause tippte, bekam
+    //    das Rütteln samt „Noch zu früh".
+    // 2. Das Zugteam ist dran und weiß es: Auf seinem Knopf steht „DU BIST
+    //    DRAN". Ihm ausgerechnet „erst muss das Zugteam antworten" vorzuhalten,
+    //    war schlicht falsch – sie SIND das Zugteam. Und das Rütteln meldet
+    //    einen Fehlgriff, wo gar keiner vorliegt.
+    // 3. Alle anderen sind wirklich zu früh – dafür war die Meldung gedacht.
+    if (state?.pause) return;
     if (state?.current?.step === 'primary') {
+      if (state.you.onTheHook) {
+        toast('Ihr seid dran – sagt eure Antwort einfach laut.');
+        return;
+      }
       buzzer.classList.remove('tooearly');
       void buzzer.offsetWidth;
       buzzer.classList.add('tooearly');
@@ -174,9 +193,6 @@ async function pressBuzzer() {
     }
     return;
   }
-  // In der Pause bleibt es still: Auf dem Knopf steht „PAUSE", das ist Antwort
-  // genug. Ein Toast wäre hier nur Lärm – und der Server lehnt ohnehin ab.
-  if (state?.pause) return;
   if (!isOnline()) return toast('Keine Verbindung – dein Buzz käme nicht an.', 'error');
 
   buzzLock = true;
