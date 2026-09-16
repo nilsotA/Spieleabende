@@ -474,6 +474,33 @@ test('der Einsatz steht im Schlüssel der Feldraster', () => {
 });
 
 /*
+ * Eine Ansage, die nicht mitgegangen ist, darf nicht stumm verschwinden.
+ *
+ * Der Einsatz liegt nur im Gerät, das ihn ansagt. Nachgestellt: Anna stellt auf
+ * ihrem Handy „✦ Einsatz steht", ruft ihr Feld aber laut in den Raum, und der
+ * Host klickt es auf der Leinwand an. Die Frage kam mit 500 statt 1000 herein,
+ * Annas Einsatz war noch offen – und auf ihrem Schirm stand kein Wort dazu.
+ * Gemessen: keine einzige Meldung, kein Stern in der Kopfzeile.
+ *
+ * Verloren ist dabei nichts, es ist nur nicht passiert. Ein Hinweis in dem
+ * Moment macht daraus zehn Sekunden: zurücknehmen, Feld selbst antippen.
+ */
+test('das Handy sagt Bescheid, wenn der Einsatz nicht mitgegangen ist', () => {
+  const js = ohneKommentare(lies('player.js'));
+  const stelle = /if \(einsatzScharf && !darf && q[\s\S]{0,400}?toast\([^)]*nicht mitgegangen[\s\S]{0,80}?\);/.exec(js)?.[0] || '';
+  assert.ok(stelle, 'der Hinweis sollte in renderEinsatz stehen');
+  assert.match(stelle, /!q\.einsatz/,
+    'nur wenn die Frage OHNE Einsatz hereinkam – sonst meldet es sich beim eigenen Tipp');
+  assert.match(stelle, /q\.teamId === state\?\.you\?\.teamId/,
+    'und nur beim eigenen Feld');
+  assert.match(stelle, /einsatzVerpufftBei !== /,
+    'einmal pro Frage, nicht bei jedem Broadcast');
+  // Und er muss VOR dem Entschärfen stehen, sonst ist einsatzScharf schon weg.
+  const reihenfolge = /if \(einsatzScharf && !darf[\s\S]*?if \(!darf\) einsatzScharf = false;/.test(js);
+  assert.ok(reihenfolge, 'der Hinweis muss vor dem Entschärfen stehen');
+});
+
+/*
  * „Zug überspringen" braucht einen eigenen Bezugspunkt für die Anlaufsperre.
  *
  * `seit` gehört den Wertungsknöpfen; sein Bezugspunkt kennt Phase, Schritt und

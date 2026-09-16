@@ -592,10 +592,35 @@ function renderQuestion() {
  */
 let einsatzScharf = false;
 
+/* Zuletzt gesehene Frage – damit der Hinweis unten nur einmal kommt. */
+let einsatzVerpufftBei = null;
+
 function renderEinsatz() {
   const box = $('#p-einsatz');
   if (!box) return;
   const darf = !!state?.you?.darfEinsatz;
+
+  /*
+   * Eine Ansage, die nicht mitgegangen ist, darf nicht stumm verschwinden.
+   *
+   * Nachgestellt: Anna stellt auf ihrem Handy „✦ Einsatz steht", ruft ihr Feld
+   * aber laut in den Raum, und der Host klickt es auf der Leinwand an. Der
+   * Einsatz liegt nur hier im Gerät – die Frage kam mit 500 statt 1000 herein,
+   * Annas Einsatz war noch offen, und auf ihrem Schirm stand kein Wort dazu.
+   * Gemerkt hätte sie es an den Punkten, drei Minuten später.
+   *
+   * Der Einsatz bleibt dabei erhalten: Es ist nichts verloren, nur nicht
+   * passiert. Ein Hinweis in dem Moment, in dem die Frage aufgeht, macht daraus
+   * eine Sache von zehn Sekunden – zurücknehmen, Feld selbst antippen.
+   */
+  const q = state?.current;
+  if (einsatzScharf && !darf && q && !q.einsatz && !q.stechen
+    && q.teamId === state?.you?.teamId
+    && einsatzVerpufftBei !== `${q.catIdx}:${q.rowIdx}`) {
+    einsatzVerpufftBei = `${q.catIdx}:${q.rowIdx}`;
+    toast('Der Einsatz ist nicht mitgegangen – das Feld kam vom Host. Er liegt noch bei euch.', 'error');
+  }
+
   // Außerhalb der eigenen Feldwahl entschärfen, sonst steht der Schalter beim
   // nächsten Zug noch an, ohne dass jemand ihn angefasst hat.
   if (!darf) einsatzScharf = false;
