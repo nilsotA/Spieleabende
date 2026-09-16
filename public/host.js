@@ -2202,12 +2202,36 @@ function renderControls() {
     return t ? `${t.wappen} ${t.name}` : '?';
   };
 
+  /*
+   * Eine scharfe Einsatz-Ansage gilt nur, solange das Brett steht.
+   *
+   * Nachgestellt: Der Host legt den Schalter um, das Team ruft sein Feld aber
+   * selbst auf dem Handy auf – ohne Einsatz, völlig richtig. Danach stand der
+   * Schalter hier weiter auf Gold, und der nächste Klick des Hosts auf ein Feld
+   * verdoppelte es und verbrauchte den Einsatz des Teams, ohne dass jemand das
+   * entschieden hätte. Gemessen: Wert 400 statt 200, Einsatz verbraucht.
+   *
+   * Deshalb vor dem Schlüssel und außerhalb jeder Phasenweiche – das Handy tut
+   * seit jeher dasselbe (renderEinsatz in player.js).
+   */
+  const zugteamJetzt = state.teams[state.turnIndex];
+  if (state.phase !== 'board'
+    || state.settings.einsatz !== 'runde'
+    || zugteamJetzt?.einsatzOffen === false) {
+    einsatzScharf = false;
+  }
+
   // Die Leiste war der einzige Renderer ohne Schlüssel und baute sich bei jedem
   // Broadcast neu auf – auch wenn nur ein Handy beigetreten ist. Fällt so ein
   // Update zwischen Finger-runter und Klick, ist der Knopf weg und die Wertung
   // verpufft. Der Hinweistext darf sich weiter jedes Mal ändern.
   const key = [
     state.phase, q?.step, q?.buzzedTeamId, q?.teamId,
+    // Der Einsatz-Schalter gehört in den Schlüssel: Ohne ihn baute sich die
+    // Leiste beim Umlegen nicht neu, der Knopf behielt seine Beschriftung, und
+    // der Host sah nicht, ob der Einsatz nun steht. Dazu, wovon sein Dasein
+    // abhängt – wer dran ist und ob der noch einen hat.
+    einsatzScharf ? 'e1' : 'e0', state.turnIndex, zugteamJetzt?.einsatzOffen !== false,
     (q?.lockedOut || []).join(','),
     // Ob ein Team ein Handy am Netz hat, entscheidet über seinen Vertreterknopf –
     // ohne das im Schlüssel bliebe die Leiste stehen, wenn jemand mitten in der
@@ -2257,16 +2281,13 @@ function renderControls() {
     // Host ruft Felder gelegentlich mit auf, und ein Schalter, der nur in einer
     // von zwei Betriebsarten existiert, ist schwerer zu erklären als einer, der
     // immer da ist, wo das Feld fällt.
-    const zugteam = state.teams[state.turnIndex];
-    if (state.settings.einsatz === 'runde' && zugteam?.einsatzOffen !== false) {
+    if (state.settings.einsatz === 'runde' && zugteamJetzt?.einsatzOffen !== false) {
       add(button(einsatzScharf ? '✦ Einsatz steht' : '✦ Einsatz',
         `btn-sm ${einsatzScharf ? 'btn-einsatz-an' : 'btn-ghost'}`,
         // `render(state)`: Der Schalter ändert nur diese Oberfläche, nicht den
         // Spielstand. Mit dem aktuellen Zustand als Vorzustand findet der
         // Renderer keinen Unterschied und spielt keine Übergänge noch einmal ab.
         () => { einsatzScharf = !einsatzScharf; render(state); }, null, seit));
-    } else {
-      einsatzScharf = false;
     }
     add(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];

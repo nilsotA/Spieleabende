@@ -470,3 +470,47 @@ test('die Abzugszeile der Steuerleiste kennt den Einsatz', () => {
   assert.match(zeile, /q\.einsatz/,
     'ohne diesen Zweig behauptet die Leinwand die Hälfte dessen, was der Server abzieht');
 });
+
+/*
+ * Eine scharfe Einsatz-Ansage darf die Feldwahl nicht überleben.
+ *
+ * Nachgestellt im Browser: Der Host legt den Schalter der Steuerleiste um, das
+ * Team ruft sein Feld aber selbst auf dem Handy auf – ohne Einsatz, völlig
+ * richtig. Danach stand der Schalter weiter auf Gold, und der nächste Klick des
+ * Hosts auf ein Feld verdoppelte es und verbrauchte den Einsatz des Teams:
+ * gemessen 400 statt 200 Punkte, ohne dass jemand das entschieden hätte.
+ * Dieselbe Lücke saß in der Feldliste der Fernbedienung, hinter ihrem frühen
+ * Ausstieg.
+ *
+ * Geprüft wird, dass das Entschärfen NICHT in einer Phasenweiche steckt,
+ * sondern an einer Stelle, die jeder Aufbau durchläuft.
+ */
+test('der Einsatz-Schalter entschärft sich, sobald das Brett weg ist', () => {
+  const host = ohneKommentare(lies('host.js'));
+  const leiste = /function renderControls\(\)[\s\S]*?\n  const key = \[/.exec(host)?.[0] || '';
+  assert.ok(leiste, 'renderControls und sein Schlüssel sollten auffindbar bleiben');
+  assert.match(leiste, /state\.phase !== 'board'[\s\S]*?einsatzScharf = false/,
+    'host.js: das Entschärfen muss vor dem Schlüssel stehen, nicht im Board-Zweig');
+
+  const fern = ohneKommentare(lies('remote.js'));
+  const vorAusstieg = /function renderFeldwahl\(\)[\s\S]*?if \(!zeigen\) \{/.exec(fern)?.[0] || '';
+  assert.ok(vorAusstieg, 'renderFeldwahl sollte auffindbar bleiben');
+  assert.match(vorAusstieg, /if \(!zeigen\) einsatzScharf = false;/,
+    'remote.js: das Entschärfen muss VOR dem frühen Ausstieg stehen');
+});
+
+/*
+ * Und der Schalter der Steuerleiste muss beim Umlegen auch anders aussehen.
+ *
+ * Dieselbe Falle wie bei den Feldrastern: Die Leiste baut sich nur neu, wenn
+ * sich ihr Schlüssel ändert. Gemessen stand nach dem Klick weiter „✦ Einsatz"
+ * auf dem Knopf, obwohl der Einsatz scharf war – der Host hätte es erst am
+ * verdoppelten Feld gemerkt.
+ */
+test('der Einsatz steht im Schlüssel der Steuerleiste', () => {
+  const host = ohneKommentare(lies('host.js'));
+  const key = /const key = \[\s*state\.phase, q\?\.step,[\s\S]*?\]\.join\('#'\);/.exec(host)?.[0] || '';
+  assert.ok(key, 'der Schlüssel der Steuerleiste sollte auffindbar bleiben');
+  assert.match(key, /einsatzScharf/,
+    'ohne den Schalter im Schlüssel behält der Knopf seine Beschriftung');
+});

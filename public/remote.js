@@ -403,6 +403,11 @@ function renderFeldwahl() {
   const karte = $('#r-board');
   const liste = $('#r-board-list');
   const zeigen = state.phase === 'board' && !!state.board;
+  // Vor dem Ausstieg: Eine scharfe Ansage gilt nur, solange das Brett steht.
+  // Stünde sie weiter, verdoppelte der nächste Feldaufruf des Hosts ein Feld,
+  // das niemand als Einsatz gemeint hat – nachgestellt auf der Leinwand, wo
+  // derselbe Fehler saß.
+  if (!zeigen) einsatzScharf = false;
   karte.hidden = !zeigen;
   if (!zeigen) {
     // Schlüssel löschen, damit die Wahl beim nächsten Auftauchen sicher neu
