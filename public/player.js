@@ -272,6 +272,7 @@ function render(prev) {
   $('#btn-leave').hidden = state.phase === 'question';
 
   renderQuestion();
+  renderEinsatz();
   renderPicker();
   renderBuzzer(prev);
   // Nach renderBuzzer: Der Renderer setzt den Grundtext der Statuszeile, die
@@ -553,7 +554,7 @@ function renderQuestion() {
   // auf dem kleinen Schirm ist die Zeile die einzige Einordnung, die es gibt.
   $('#p-q-head').textContent = q.stechen
     ? `Stechen · ${q.category}`
-    : `${q.category} · ${q.value} Punkte${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
+    : `${q.category} · ${q.value} Punkte${q.einsatz ? ' · ✦ Einsatz' : ''}${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
   setFrageText($('#p-q-text'), q.text);
   const img = $('#p-q-image');
   if (q.image) {
@@ -576,6 +577,45 @@ function renderQuestion() {
   const note = $('#p-q-note');
   note.hidden = !(q.revealed && q.note);
   note.textContent = q.note || '';
+}
+
+/*
+ * Der Einsatz – scharf gemacht, bevor das Feld fällt.
+ *
+ * Er liegt nur auf diesem Gerät, nicht auf dem Server: Gesetzt wird er erst
+ * mit dem Feldaufruf, als Nutzlast von `pick`. Damit gibt es keine Ansage, die
+ * irgendwo hängen bleibt, kein Wettrennen zwischen zwei Handys eines Teams und
+ * nichts, was ein „Zurücknehmen" wieder hochspülen könnte.
+ *
+ * In einem Zweierteam gilt, was das tippende Gerät gesehen hat – dieselbe
+ * Regel wie bei jeder anderen Wahl auf diesem Schirm.
+ */
+let einsatzScharf = false;
+
+function renderEinsatz() {
+  const box = $('#p-einsatz');
+  if (!box) return;
+  const darf = !!state?.you?.darfEinsatz;
+  // Außerhalb der eigenen Feldwahl entschärfen, sonst steht der Schalter beim
+  // nächsten Zug noch an, ohne dass jemand ihn angefasst hat.
+  if (!darf) einsatzScharf = false;
+  box.hidden = !darf;
+  if (!darf) { box.dataset.key = ''; return; }
+  const key = einsatzScharf ? 'an' : 'aus';
+  if (box.dataset.key === key) return;
+  box.dataset.key = key;
+  box.innerHTML = '';
+  box.append(
+    el('button', {
+      type: 'button',
+      class: `p-einsatz-knopf ${einsatzScharf ? 'an' : ''}`,
+      'aria-pressed': String(einsatzScharf),
+      onclick: () => { einsatzScharf = !einsatzScharf; renderEinsatz(); renderPicker(); },
+    }, einsatzScharf ? '✦ Einsatz steht – jetzt Feld wählen' : '✦ Einsatz setzen'),
+    el('div', { class: 'muted small' }, einsatzScharf
+      ? 'Doppelte Punkte – und falsch oder „weiß nicht" kostet genauso viel.'
+      : 'Einmal pro Runde: doppelter Gewinn, doppeltes Risiko.'),
+  );
 }
 
 function renderPicker() {
@@ -609,6 +649,10 @@ function renderPicker() {
   // Umschalten mitten im Spiel bliebe unbemerkt.
   const key = [
     state.setName, state.round, nurAnsehen ? 'ansehen' : 'waehlen',
+    // Der scharfe Einsatz gehört in den Schlüssel: Er ändert jede Zahl im
+    // Raster. Ohne ihn baut sich das Raster nicht neu, der Schalter ginge an
+    // und die Felder zeigten weiter die einfachen Werte.
+    einsatzScharf ? 'x2' : 'x1',
     state.board.categories.map((c) => `${c.name}:${c.cells.map((x) => (x.used ? 1 : 0)).join('')}`).join('|'),
   ].join('#');
   if (box.dataset.key === key) return;
@@ -625,20 +669,29 @@ function renderPicker() {
             ? el('span', { class: cell.used ? 'used' : '' }, String(cell.value))
             : el('button', {
               type: 'button',
-              class: cell.used ? 'used' : '',
+              class: `${cell.used ? 'used' : ''}${einsatzScharf ? ' doppelt' : ''}`,
               onclick: async (ev) => {
                 if (cell.used) return;
                 const knopf = ev.currentTarget;
                 knopf.classList.add('used');
                 sound('pick');
+                // Der Einsatz reist mit dem Feldaufruf – erst hier wird er
+                // wirklich gesetzt. Der Wert steht fest, sobald der Server
+                // antwortet; das Entschärfen danach ist nur Aufräumen für den
+                // nächsten Zug.
+                const mitEinsatz = einsatzScharf;
                 // Kommt der Zug nicht durch – Funkloch, Pause, jemand war
                 // schneller –, muss die vorgezogene Färbung zurück. Sonst
                 // steht ein offenes Feld als gespielt da und lässt sich nicht
                 // mehr antippen.
-                const antwort = await action('pick', { catIdx, rowIdx, quiet: true });
-                if (antwort && antwort.ok === false) knopf.classList.remove('used');
+                const antwort = await action('pick', { catIdx, rowIdx, einsatz: mitEinsatz, quiet: true });
+                if (antwort && antwort.ok === false) {
+                  knopf.classList.remove('used');
+                } else {
+                  einsatzScharf = false;
+                }
               },
-            }, String(cell.value)))),
+            }, String(einsatzScharf ? cell.value * 2 : cell.value)))),
         ),
       ),
     );

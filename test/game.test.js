@@ -982,3 +982,110 @@ test('ein Satz lässt sich nicht mitten im Spiel neu starten', () => {
   assert.equal(state.phase, 'board');
   assert.deepEqual(state.teams.map((t) => t.score), [0, 0, 0]);
 });
+
+/* --------------------------------------------------------------- Der Einsatz */
+
+/**
+ * Der Einsatz verdoppelt das Feld – und macht den Abzug zur echten Wette.
+ *
+ * Die naheliegende Fassung wäre gewesen, nur `q.value` zu verdoppeln und den
+ * Abzug weiter aus der Lobby-Einstellung zu nehmen. Nachgerechnet ist das keine
+ * Wette, sondern ein Bonus: Bei halbem Abzug steht normal +500 gegen −250,
+ * verdoppelt +1000 gegen −500. Das Verhältnis bleibt 2:1, die Schwelle, ab der
+ * sich ein Feld lohnt, bleibt bei einer Trefferquote von einem Drittel – es
+ * ändern sich nur die Nullen, und auf „sollen wir?" gäbe es nie eine
+ * interessante Antwort. Deshalb kostet ein Einsatz den vollen doppelten Wert.
+ */
+function mitEinsatz(teams = ['Rot', 'Blau', 'Grün']) {
+  const state = G.createState();
+  for (const name of teams) G.addTeam(state, name);
+  state.settings.einsatz = 'runde';
+  G.startGame(state, SET);
+  return state;
+}
+
+test('der Einsatz verdoppelt den Wert der Frage, nicht die Kachel', () => {
+  const state = mitEinsatz();
+  G.pickCell(state, 0, 3, null, true);
+  assert.equal(state.current.value, 1000, 'die Frage zählt doppelt');
+  assert.equal(state.current.einsatz, true);
+  assert.equal(state.board.categories[0].cells[3].value, 500,
+    'die Kachel bleibt, was sie war – sonst wäre ein gestrichenes und neu '
+    + 'aufgerufenes Feld vierfach');
+});
+
+test('ein Einsatz kostet den vollen doppelten Wert – egal was die Lobby sagt', () => {
+  for (const abzug of ['none', 'half', 'full']) {
+    const state = mitEinsatz();
+    state.settings.wrongPenalty = abzug;
+    G.pickCell(state, 0, 3, null, true);
+    G.judge(state, false);
+    assert.equal(score(state, 0), -1000,
+      `bei wrongPenalty '${abzug}' muss ein Einsatz voll kosten – sonst ist er keine Wette`);
+  }
+});
+
+test('ohne Einsatz bleibt der Abzug, wie er eingestellt ist', () => {
+  for (const [abzug, erwartet] of [['none', 0], ['half', -250], ['full', -500]]) {
+    const state = mitEinsatz();
+    state.settings.wrongPenalty = abzug;
+    G.pickCell(state, 0, 3, null, false);
+    G.judge(state, false);
+    assert.equal(score(state, 0), erwartet, `wrongPenalty '${abzug}'`);
+  }
+});
+
+test('wer sich in einen verpatzten Einsatz buzzert, holt den vollen Feldwert', () => {
+  const state = mitEinsatz();
+  // `buzzFor` ist der Weg des Hosts – er braucht keine Gerätekennung.
+  G.pickCell(state, 0, 3, null, true); // 500 → 1000
+  G.judge(state, false);               // Zugteam daneben, Buzzer frei
+  G.buzzFor(state, state.teams[1].id);
+  G.judge(state, true);
+  assert.equal(score(state, 1), 500,
+    'die Hälfte von 1000 – genau das, was das Feld ohne Einsatz wert gewesen wäre');
+});
+
+test('der Einsatz ist einmal pro Runde da und kommt zur nächsten wieder', () => {
+  const state = mitEinsatz();
+  assert.equal(state.teams[0].einsatzOffen, true);
+  G.pickCell(state, 0, 0, null, true);
+  assert.equal(state.teams[0].einsatzOffen, false, 'verbraucht');
+  G.judge(state, true);
+  G.closeQuestion(state);
+  // Wieder dasselbe Team dran setzen und es erneut versuchen.
+  G.setTurn(state, state.teams[0].id);
+  assert.throws(() => G.pickCell(state, 0, 1, null, true), /schon gesetzt/i);
+  G.startRound(state, 2);
+  assert.equal(state.teams[0].einsatzOffen, true, 'neue Runde, neuer Einsatz');
+});
+
+test('ohne die Einstellung lässt sich kein Einsatz setzen', () => {
+  const state = G.createState();
+  for (const name of ['Rot', 'Blau']) G.addTeam(state, name);
+  G.startGame(state, SET); // einsatz bleibt 'aus'
+  assert.throws(() => G.pickCell(state, 0, 0, null, true), /nicht eingeschaltet/i);
+  // Und ohne Einsatz geht alles wie immer.
+  G.pickCell(state, 0, 0, null, false);
+  assert.equal(state.current.value, 100);
+  assert.equal(state.current.einsatz, false);
+});
+
+test('die Spielersicht kennt den Einsatz – und weiß, wer ihn setzen darf', () => {
+  const state = mitEinsatz();
+  state.teams[0].members.push({ clientId: 'g1', name: 'Anna', online: true });
+  state.teams[1].members.push({ clientId: 'g2', name: 'Ben', online: true });
+  const sicht = (id) => G.viewFor(state, { isHost: false, clientId: id });
+  assert.equal(sicht('g1').you.darfEinsatz, true, 'das Zugteam darf');
+  assert.equal(sicht('g2').you.darfEinsatz, false, 'die anderen nicht');
+  assert.equal(sicht('g2').teams[0].einsatzOffen, true, 'sichtbar ist er für alle');
+
+  // In der Pause darf niemand – wie beim Buzzer.
+  G.setPause(state, true);
+  assert.equal(sicht('g1').you.darfEinsatz, false);
+  G.setPause(state, false);
+
+  // Und bei Feldwahl „nur Host" liegt der Schalter auf der Fernbedienung.
+  state.settings.feldwahl = 'host';
+  assert.equal(sicht('g1').you.darfEinsatz, false);
+});

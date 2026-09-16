@@ -12,6 +12,13 @@ let localSet = null;      // aktuell gewählter Satz aus einer Datei
 let dateiSatz = null;     // zuletzt geladene Datei, bleibt in der Auswahl verfügbar
 let lastScores = new Map();
 let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
+/* Der Einsatz, den der Host für das Zugteam ansagt – nur auf diesem Gerät.
+
+   Er reist als Nutzlast des Feldaufrufs mit, genau wie auf dem Handy; es gibt
+   also keine Ansage, die irgendwo hängen bleibt. Gebraucht wird er, wenn die
+   Feldwahl auf „nur Host" steht: Dann ruft kein Handy ein Feld auf, und ohne
+   diesen Schalter hätte das Zugteam keinen Weg, seinen Einsatz zu setzen. */
+let einsatzScharf = false;
 let standVorRunde = null; // Platzierung am Ende der vorletzten Runde, für den Endstand
 let letzteRunde = null;   // zuletzt gesehene Rundennummer, für die Rundenansage
 let fuehrend = null;      // wer zuletzt allein vorne lag, für den Führungswechsel
@@ -147,6 +154,7 @@ for (const [id, key, parse] of [
   ['#set-buzzcorrect', 'buzzAfterCorrect', (v) => v === 'true'],
   ['#set-feldwahl', 'feldwahl', (v) => v],
   ['#set-buzzuhr', 'buzzUhr', (v) => Number(v)],
+  ['#set-einsatz', 'einsatz', (v) => v],
 ]) {
   $(id).addEventListener('change', (ev) => act('settings', { settings: { [key]: parse(ev.target.value) } }));
 }
@@ -561,6 +569,9 @@ function renderLobby() {
   $('#set-buzzcorrect').value = String(state.settings.buzzAfterCorrect);
   $('#set-feldwahl').value = state.settings.feldwahl || 'team';
   $('#set-buzzuhr').value = String(state.settings.buzzUhr || 0);
+  // `|| 'aus'`: Ein Spielstand von vor dem Einsatz kennt das Feld nicht, und
+  // ein <select> mit undefined behält still seinen ersten Eintrag.
+  $('#set-einsatz').value = state.settings.einsatz || 'aus';
   $('#btn-start').disabled = state.teams.length < 2;
   renderAnschluss();
   // Das frisch angelegte Team ins Bild holen. Ab dem siebten Team reicht die
@@ -810,7 +821,11 @@ function renderBoard() {
             // Der Ton hängt am Zustandswechsel, nicht am Klick: Das Feld lässt
             // sich auch vom Handy des Hosts aus wählen, und dann klappte das
             // Panel auf der Leinwand stumm auf.
-            onclick: () => act('pick', { catIdx, rowIdx }),
+            onclick: () => {
+              const mitEinsatz = einsatzScharf;
+              einsatzScharf = false;
+              act('pick', { catIdx, rowIdx, einsatz: mitEinsatz });
+            },
           }, el('span', {}, String(cell.value))),
         );
       });
@@ -879,6 +894,9 @@ function renderQuestion(prev) {
     setBuzzIndicator('aus');
     return;
   }
+  // Goldener Rahmen, solange ein Einsatz auf der Frage liegt. Nach der
+  // `!q`-Weiche, damit hier wirklich eine Frage steht.
+  panel?.classList.toggle('einsatz', !!q.einsatz);
   // Stechfragen haben kein Feld: Ohne den Zähler sähe die zweite
   // Entscheidungsfrage wie die erste aus und das Panel bliebe stehen.
   const kennung = (z, lauf) => (z.stechen ? `s${lauf}` : `${z.catIdx}-${z.rowIdx}`);
@@ -920,7 +938,7 @@ function renderQuestion(prev) {
   // Beim Stechen steht kein Punktwert am Kopf – es gibt keinen.
   $('#q-head').textContent = q.stechen
     ? `Stechen · ${q.category}`
-    : `${q.category} ${q.value}${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
+    : `${q.category} ${q.value}${q.einsatz ? ' · ✦ EINSATZ' : ''}${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
   $('#q-head').classList.toggle('stechen', !!q.stechen);
   panel.classList.toggle('stechpanel', !!q.stechen);
   setFrageText($('#q-text'), q.text);
@@ -989,11 +1007,18 @@ function renderQuestion(prev) {
     // „Weiß nicht" kostet dasselbe wie eine falsche Antwort. Der Abzug gehört
     // deshalb auch dahinter – sonst sieht der Tisch die Punkte wandern und
     // findet im Protokoll keinen Grund dafür.
+    // Am fremden Feld gepunktet: Die Zeile nennt, wem. „richtig +250" stand
+    // sonst genauso da wie beim Zugteam – dabei ist das die Zahl, über die
+    // hinterher geredet wird. Beim Stechen gibt es keine Punkte und kein Feld,
+    // dem etwas gehört.
+    const geklaut = entry.result === 'correct' && entry.teamId !== q.teamId && !q.stechen;
     const label =
       entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${punkte(entry.delta)}` : 'wusste es nicht')
-        : entry.result === 'correct' ? `richtig +${entry.delta}`
+        : entry.result === 'correct'
+          ? (geklaut ? `schnappt sich +${entry.delta} von ${teamName(q.teamId)}` : `richtig +${entry.delta}`)
           : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
-    status.append(el('div', { class: `chip log ${entry.result}` }, `${teamName(entry.teamId)}: ${label}`));
+    status.append(el('div', { class: `chip log ${entry.result}${geklaut ? ' geklaut' : ''}` },
+      `${teamName(entry.teamId)}: ${label}`));
   }
 
   const answer = $('#q-answer');
@@ -1024,6 +1049,25 @@ function renderQuestion(prev) {
     const wehgetan = letzte.delta < 0;
     sound(letzte.result === 'correct' ? 'correct'
       : letzte.result === 'pass' && !wehgetan ? 'passt' : 'wrong');
+    /*
+     * Geklaut – der aufregendste Vorgang des Abends, bisher wortlos.
+     *
+     * Wer sich per Buzzer die halben Punkte vom fremden Feld holt, sah aus wie
+     * jede andere richtige Antwort: dieselbe Zahl flog hoch, derselbe Ton. Ein
+     * kurzer Blitz in der Farbe des Teams macht daraus den Moment, der er ist –
+     * und zwar in der Sekunde, in der ohnehin alle hinschauen.
+     *
+     * Bewusst keine Vollbildansage: Der Kommentar bei `ansagen()` budgetiert
+     * die auf zweimal pro Abend, und hier geht es um zwölf bis achtzehn Male.
+     * Kein eigener Ton, kein Punkt, keine Regel – reine Anzeige.
+     *
+     * Der Zweig hängt an `log.length` und feuert deshalb nur bei einem WIRKLICH
+     * neuen Eintrag: Ein Zurücknehmen verkürzt das Protokoll, ein Broadcast
+     * ohne Zug lässt es gleich – beides blitzt nicht.
+     */
+    if (letzte.result === 'correct' && letzte.teamId !== q.teamId && !q.stechen) {
+      stageFlash(state.teams.find((t) => t.id === letzte.teamId)?.color);
+    }
     if (wehgetan) {
       panel.classList.remove('wrong');
       void panel.offsetWidth;
@@ -1196,6 +1240,15 @@ function renderPlayers() {
     const buzzOffen = q?.step === 'buzz' && !q.buzzedTeamId;
     node.classList.toggle('scharf', !!buzzOffen && team.id !== q.teamId && !q.lockedOut.includes(team.id));
     node.classList.toggle('raus', !!q && q.step === 'buzz' && q.lockedOut.includes(team.id));
+
+    // Wer seinen Einsatz noch hat, trägt eine kleine Marke am Pult. Bewusst
+    // keine zweite Textzeile wie die Serie: Bei acht Teams klappt die Leiste
+    // ohnehin eng zusammen, und ein Zeichen überlebt das, ein Satz nicht.
+    // Die verlässliche Erinnerung steht im Spickzettel, wo der Host in Minute
+    // 90 ohnehin nachschaut.
+    node.classList.toggle('einsatz-offen',
+      state.settings.einsatz === 'runde' && team.einsatzOffen !== false
+      && (state.phase === 'board' || state.phase === 'question'));
 
     // Serie: erst ab drei richtigen in Folge, sonst klebt bei zwei Teams
     // dauernd ein Abzeichen an irgendeinem Pult.
@@ -2199,6 +2252,22 @@ function renderControls() {
     setzeText(hint, state.settings.feldwahl === 'host'
       ? `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – sie sagen an, du klickst das Feld.`
       : `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – Feld anklicken oder auf dem Handy antippen.`);
+    // Der Einsatz für das Zugteam – nur wenn er eingeschaltet ist und das Team
+    // ihn noch hat. Er steht auch dann hier, wenn die Teams selbst wählen: Der
+    // Host ruft Felder gelegentlich mit auf, und ein Schalter, der nur in einer
+    // von zwei Betriebsarten existiert, ist schwerer zu erklären als einer, der
+    // immer da ist, wo das Feld fällt.
+    const zugteam = state.teams[state.turnIndex];
+    if (state.settings.einsatz === 'runde' && zugteam?.einsatzOffen !== false) {
+      add(button(einsatzScharf ? '✦ Einsatz steht' : '✦ Einsatz',
+        `btn-sm ${einsatzScharf ? 'btn-einsatz-an' : 'btn-ghost'}`,
+        // `render(state)`: Der Schalter ändert nur diese Oberfläche, nicht den
+        // Spielstand. Mit dem aktuellen Zustand als Vorzustand findet der
+        // Renderer keinen Unterschied und spielt keine Übergänge noch einmal ab.
+        () => { einsatzScharf = !einsatzScharf; render(state); }, null, seit));
+    } else {
+      einsatzScharf = false;
+    }
     add(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];
       act('setTurn', { teamId: next.id });
@@ -2225,7 +2294,14 @@ function renderControls() {
     // Steht ein Abzug im Raum, gehört er in die Zeile: „Weiß nicht" kostet
     // dasselbe wie eine falsche Antwort, und beim Drücken will man wissen,
     // wie viel das gerade ist.
-    const abzug = { half: q.halfValue, full: q.value }[state.settings.wrongPenalty] || 0;
+    // Der Einsatz überstimmt die Einstellung – dieselbe Regel wie im Server
+    // (verrechneFalsch). Ohne diesen Zweig stand hier bei einem Einsatz auf ein
+    // 500er-Feld in Runde 1 „kostet 500", während der Server 1000 abzog: Die
+    // Zeile, an der der Host sich beim Drücken orientiert, hätte die Hälfte
+    // behauptet.
+    const abzug = q.einsatz
+      ? q.value
+      : { half: q.halfValue, full: q.value }[state.settings.wrongPenalty] || 0;
     setzeText(hint, abzug
       ? `${teamName(q.teamId)} antwortet. Falsch oder „weiß nicht“ kostet ${abzug}.`
       : `${teamName(q.teamId)} antwortet.`);
@@ -2613,16 +2689,23 @@ function fuelleSpickzettel() {
   if (q?.stechen) {
     zeilen.push(['Stechen', 'richtig gewinnt den Abend, falsch ist raus – keine Punkte', true]);
   } else if (q) {
-    zeilen.push(['Diese Frage', `${q.category} ${q.value} · gebuzzert ${q.halfValue}`, true]);
+    zeilen.push(['Diese Frage',
+      `${q.category} ${q.value} · gebuzzert ${q.halfValue}${q.einsatz ? ' · ✦ Einsatz' : ''}`, true]);
   }
   zeilen.push(['Zugteam richtig', 'volle Punkte']);
   // „Weiß nicht" zählt wie eine falsche Antwort – deshalb eine Zeile für beides
   // statt zwei, die man nebeneinanderhalten muss.
-  zeilen.push(['Zugteam falsch oder „weiß nicht“', {
-    none: 'kein Abzug',
-    half: 'halbe Punkte Abzug',
-    full: 'volle Punkte Abzug',
-  }[s.wrongPenalty] || 'kein Abzug']);
+  // Läuft gerade ein Einsatz, gilt für DIESE Frage etwas anderes als die
+  // Einstellung – und der Spickzettel ist genau der Zettel, auf den der Host
+  // schaut, wenn am Tisch jemand nachfragt. Er darf dann nicht die allgemeine
+  // Regel nennen.
+  zeilen.push(['Zugteam falsch oder „weiß nicht“', q && !q.stechen && q.einsatz
+    ? `✦ Einsatz: voller doppelter Wert – ${q.value} statt der Einstellung`
+    : {
+      none: 'kein Abzug',
+      half: 'halbe Punkte Abzug',
+      full: 'volle Punkte Abzug',
+    }[s.wrongPenalty] || 'kein Abzug', !!(q && q.einsatz)]);
   zeilen.push(['Danach buzzern', 'richtig gibt die Hälfte, falsch kostet die Hälfte']);
   zeilen.push(['Vor der Antwort', 'ist der Buzzer für alle anderen gesperrt']);
   zeilen.push(['Feld aufrufen', s.feldwahl === 'host'
@@ -2638,6 +2721,22 @@ function fuelleSpickzettel() {
     state.round >= 2]);
   if (s.buzzUhr) {
     zeilen.push(['Uhr beim Buzzer', `${s.buzzUhr} Sekunden – sie zeigt nur die Zeit, gewertet wird nichts`]);
+  }
+  if (s.einsatz === 'runde') {
+    zeilen.push(['Einsatz',
+      'das Feld zählt doppelt – falsch oder „weiß nicht“ kostet dann den vollen doppelten Wert']);
+    // Die Zeile, die den Einsatz aus der Vergessenheit holt.
+    //
+    // Eine Marke am Pult allein reicht nicht: In Minute 90 sieht sie niemand
+    // mehr, und bei acht Teams klappt die Leiste ohnehin eng zusammen. Hier
+    // schaut der Host sowieso hin, und er kann den Satz in den Raum sagen –
+    // das ist billiger als jede Animation.
+    const offen = state.teams.filter((t) => t.einsatzOffen !== false);
+    if (state.phase === 'board' || state.phase === 'question') {
+      zeilen.push(['Einsatz noch offen', offen.length
+        ? offen.map((t) => `${t.wappen} ${t.name}`).join(', ')
+        : 'niemand mehr – alle haben gesetzt']);
+    }
   }
   zeilen.push(['Gleichstand am Ende', 'ein Stechen entscheidet: Buzzer frei, richtig gewinnt']);
 

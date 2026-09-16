@@ -119,6 +119,17 @@ export function createState() {
       // sie nicht wegklicken müssen. Sie wertet auch nichts von selbst – sie
       // zeigt nur, dass die Zeit läuft, und dem Host, dass er auflösen kann.
       buzzUhr: 0,
+      // Der Einsatz: 'aus' | 'runde' (einer je Team und Runde).
+      //
+      // Voreingestellt aus. Er ist die einzige Regel des Spiels, die eine
+      // andere Einstellung überstimmt – ein Einsatz kostet den vollen
+      // doppelten Wert, auch wenn der Abzug sonst auf „halbe" oder „keiner"
+      // steht (siehe verrechneFalsch). Ohne das wäre er keine Wette, sondern
+      // ein Geschenk: Bei halbem Abzug lohnt sich Verdoppeln ab derselben
+      // Trefferquote wie normales Spielen (beide ab einem Drittel), es würden
+      // sich also nur die Nullen ändern. Mit vollem Abzug liegt die Schwelle
+      // bei 60 Prozent – und damit gibt es endlich etwas zu überlegen.
+      einsatz: 'aus',
     },
     message: null,
     // Pause: Zwei Stunden Spiel heißen mindestens einmal Küche. Solange sie
@@ -165,6 +176,9 @@ export function addTeam(state, name) {
     wappen: TEAM_WAPPEN.find((w) => !state.teams.some((t) => t.wappen === w))
       || TEAM_WAPPEN[state.teams.length % TEAM_WAPPEN.length],
     score: 0,
+    // Der Einsatz dieser Runde, noch ungenutzt. Aus demselben Grund wie unten
+    // von Anfang an gesetzt statt beim ersten Gebrauch.
+    einsatzOffen: true,
     // Von Anfang an vollständig. Serie und Bestserie entstanden früher erst bei
     // der ersten Wertung; bis dahin stand dort `undefined`. Gelesen wurde das
     // überall mit `|| 0` abgefangen, aber ein Zustand, der je nach Alter des
@@ -354,6 +368,7 @@ export function startGame(state, questionSet) {
     team.serie = 0;
     team.serieBest = 0;
     team.bilanz = leereBilanz();
+    team.einsatzOffen = true;
   }
   state.rekorde = leereRekorde();
   // Ein neues Spiel fängt nicht in der Pause an – auch wenn das alte darin
@@ -373,6 +388,13 @@ export function startRound(state, round) {
   if (!data) throw new GameError(`Runde ${round} existiert nicht.`);
   const mult = roundMultiplier(round);
   state.round = round;
+  // Jede Runde bringt jedem Team einen frischen Einsatz.
+  //
+  // „Einer pro Abend" wäre die vorsichtigere Zahl gewesen und ist in Wahrheit
+  // die riskantere: Dann heben ihn alle für die doppelt zählende Runde 2 auf,
+  // und der halbe Abend entscheidet sich in derselben Viertelstunde. Einer pro
+  // Runde wird auch benutzt, solange die Felder noch klein sind.
+  for (const team of state.teams) team.einsatzOffen = true;
   state.board = {
     multiplier: mult,
     categories: data.categories.map((cat) => ({
@@ -426,7 +448,7 @@ export function ersetzeFrage(state, catIdx, rowIdx, frage) {
   return cell;
 }
 
-export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
+export function pickCell(state, catIdx, rowIdx, byTeamId = null, einsatz = false) {
   if (state.pause) throw new GameError('Ihr seid gerade in der Pause.');
   if (state.phase !== 'board') throw new GameError('Gerade ist keine Feldauswahl möglich.');
   const cat = state.board.categories[catIdx];
@@ -445,6 +467,28 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
     throw new GameError('Nur das Team, das dran ist, darf ein Feld wählen.');
   }
 
+  /*
+   * Der Einsatz reist als Nutzlast des Feldaufrufs mit – und zwar bewusst.
+   *
+   * Eine eigene Aktion „ansagen" hätte einen eigenen Zustand gebraucht, dazu
+   * vier Stellen, die ihn wieder löschen (Frage zu, Runde zu Ende, Zug gesetzt,
+   * zurück in die Lobby), einen Eintrag in RUECKNEHMBAR und eine Entscheidung
+   * in uebernimm(): Rollt eine zurückgezogene Ansage beim Zurücknehmen wieder
+   * hoch, frisst der nächste Feldaufruf stumm einen Einsatz. Als Nutzlast gibt
+   * es nichts davon: Ansage und Feldaufruf sind ein einziger Zug. Und weil
+   * `pick` in RUECKNEHMBAR steht, geben „Zurücknehmen" und „Frage austauschen"
+   * den Einsatz von selbst zurück – er liegt im Schnappschuss.
+   */
+  if (einsatz) {
+    if (state.settings.einsatz !== 'runde') {
+      throw new GameError('Der Einsatz ist für dieses Spiel nicht eingeschaltet.');
+    }
+    if (!activeTeam.einsatzOffen) {
+      throw new GameError('Euren Einsatz habt ihr in dieser Runde schon gesetzt.');
+    }
+    activeTeam.einsatzOffen = false;
+  }
+
   cell.used = true;
   state.current = {
     catIdx,
@@ -455,7 +499,16 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null) {
     // ergab das sonst „Uni-Latein · Ersatz aus Gaming 500" – die 500 sah aus,
     // als gehörte sie zu Gaming.
     ersatzAus: cell.ersatzAus || null,
-    value: cell.value,
+    // Verdoppelt wird genau hier, an der einen Zahl.
+    //
+    // `q.value` ist die einzige Zahl des Spiels: Kopfzeile der Leinwand,
+    // Abzugszeile am Wertungsknopf, Spickzettel, Handy-Kopf, Fernbedienung und
+    // halfPoints() rechnen alle daraus. Ein Faktor in judge() hätte jeder
+    // dieser Stellen eine zweite Zahl beibringen müssen. Die Kachel auf dem
+    // Brett bleibt dabei, was sie war – verdoppelt ist die Frage, nicht das
+    // Feld; ein gestrichenes und neu aufgerufenes Feld wäre sonst vierfach.
+    value: einsatz ? cell.value * 2 : cell.value,
+    einsatz: !!einsatz,
     text: cell.text,
     image: cell.image,
     answer: cell.answer,
@@ -510,7 +563,26 @@ function verrechneFalsch(state, q, team, isPrimary, art) {
   const bilanz = bilanzVon(team);
   let delta = 0;
   if (isPrimary) {
-    if (state.settings.wrongPenalty === 'full') delta = -full;
+    /*
+     * Ein Einsatz kostet den vollen doppelten Wert – unabhängig davon, was in
+     * der Lobby steht. Das ist die einzige Stelle im Spiel, an der eine Regel
+     * eine Einstellung überstimmt, und sie muss es.
+     *
+     * Nachgerechnet mit dem voreingestellten halben Abzug: Ein Feld gibt +500
+     * und kostet −250, verdoppelt wären es +1000 und −500. Das Verhältnis
+     * bleibt 2:1, die Schwelle, ab der sich ein Feld lohnt, bleibt bei einer
+     * Trefferquote von einem Drittel – es ändern sich nur die Nullen. Auf die
+     * Frage „sollen wir?" gäbe es also nie eine interessante Antwort, und ein
+     * Joker, bei dem jeder immer dasselbe antwortet, ist keiner. Mit +1000
+     * gegen −1000 liegt die Schwelle bei 60 Prozent: Jetzt muss man die
+     * Kategorie wirklich können.
+     *
+     * Bei „kein Abzug" verdoppelte er sonst eine Null. Damit das keine
+     * versteckte Ausnahme ist, sagt es die Lobby beim Einschalten und der
+     * Spickzettel im Menü – nicht der Code allein.
+     */
+    if (q.einsatz) delta = -full;
+    else if (state.settings.wrongPenalty === 'full') delta = -full;
     else if (state.settings.wrongPenalty === 'half') delta = -half;
   } else {
     delta = -half;
@@ -895,6 +967,7 @@ export function backToLobby(state) {
     serie: 0,
     serieBest: 0,
     bilanz: leereBilanz(),
+    einsatzOffen: true,
     // Karteileichen von Geräten, die längst weg sind, nicht ins nächste Spiel
     // schleppen – aber nur die wirklich alten. Wer bloß gerade ein gesperrtes
     // Handy in der Tasche hat, bleibt in seinem Team und ist nach dem
@@ -980,6 +1053,9 @@ export function viewFor(state, { isHost, clientId }) {
       score: t.score,
       serie: t.serie || 0,
       serieBest: t.serieBest || 0,
+      // Ob der Einsatz dieser Runde noch daliegt. Auch Spielstände aus der Zeit
+      // davor sollen nicht mit `undefined` ankommen – wie beim Wappen.
+      einsatzOffen: t.einsatzOffen !== false,
       // Alte Spielstände kennen die Bilanz nicht oder nur teilweise – fehlende
       // Felder werden aufgefüllt, statt dass das Handy auf `undefined` läuft.
       bilanz: { ...leereBilanz(), ...(t.bilanz || {}) },
@@ -1026,6 +1102,8 @@ export function viewFor(state, { isHost, clientId }) {
       // eine Kategorie, zu der die Frage nicht passt.
       ersatzAus: q.ersatzAus || null,
       value: q.value,
+      // Schon verdoppelt in `value`; das Schild daneben sagt nur, warum.
+      einsatz: !!q.einsatz,
       text: q.text,
       image: q.image,
       step: q.step,
@@ -1069,6 +1147,20 @@ export function viewFor(state, { isHost, clientId }) {
       teamId: team ? team.id : null,
       teamName: team ? team.name : null,
       isMyTurn: !!team && state.teams[state.turnIndex]?.id === team.id,
+      // Darf dieses Handy gerade einen Einsatz setzen? Die Bedingungen stehen
+      // hier einmal, statt dass jede Oberfläche sie nachbaut und eine davon
+      // beim nächsten Handgriff vergisst.
+      darfEinsatz: state.settings.einsatz === 'runde'
+        && !state.pause
+        && state.phase === 'board'
+        // Steht die Feldwahl auf „nur Host", ruft das Handy kein Feld auf –
+        // dann läge hier ein Schalter, dessen Ansage nie jemand einlöst. Der
+        // Einsatz wandert in dem Fall auf die Fernbedienung, wo auch das Feld
+        // fällt.
+        && state.settings.feldwahl !== 'host'
+        && !!team
+        && state.teams[state.turnIndex]?.id === team.id
+        && team.einsatzOffen !== false,
       canBuzz:
         !!team &&
         // In der Pause darf niemand drücken – der Server lehnt es ohnehin ab.

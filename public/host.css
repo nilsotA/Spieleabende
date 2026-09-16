@@ -1427,6 +1427,29 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .player.raus::after { opacity: 0.22; box-shadow: none; }
 
 /* Serie: erst ab drei in Folge, dafür dann unübersehbar. */
+/* Wer seinen Einsatz noch hat, trägt einen kleinen goldenen Stern am Namen.
+
+   Bewusst ein Zeichen und keine zweite Textzeile: Die Serie beansprucht die
+   Fläche über dem Pult schon, und bei acht Teams (.players.eng) ist dort
+   nichts mehr frei. Ein Stern am Namen überlebt jede Enge – und er verschwindet
+   in dem Moment, in dem gesetzt wird, was genau die Auskunft ist, die der Tisch
+   gerade braucht. */
+.player.einsatz-offen .pname::before {
+  content: '✦';
+  color: var(--gold);
+  margin-right: 0.3em;
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+/* Die Frage mit Einsatz bekommt einen goldenen Rahmen – aus vier Metern das
+   Erste, was auffällt, ohne dass jemand die Kopfzeile lesen muss. */
+.q-panel.einsatz {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 210, 110, 0.75),
+    0 0 44px rgba(255, 190, 70, 0.28);
+}
+
 .pserie {
   position: absolute;
   top: 0.15rem;
@@ -2057,3 +2080,11 @@ body.host.flat .tile {
 .kein-handy ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
 .kein-handy li + li { margin-top: 0.35rem; }
 .kein-handy b { color: var(--gold-hell); }
+
+/* Der scharfe Einsatz in der Steuerleiste – dasselbe Gold wie überall sonst. */
+.btn-einsatz-an {
+  background: linear-gradient(180deg, #ffd873, #e8a62a);
+  border-color: #ffe9a8;
+  color: #2a1e05;
+  font-weight: 700;
+}

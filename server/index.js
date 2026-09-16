@@ -145,6 +145,11 @@ async function restore() {
         team.wappen = G.TEAM_WAPPEN.find((w) => !(wieder.teams || []).some((t) => t.wappen === w))
           || G.TEAM_WAPPEN[0];
       }
+      // Stände von vor dem Einsatz kennen das Feld nicht. Ohne diesen Auffüller
+      // wäre `einsatzOffen` undefined – und `!activeTeam.einsatzOffen` in
+      // pickCell hieße dann „schon verbraucht": Nach einem Neustart mitten im
+      // Abend wäre der Einsatz weg, ohne dass ihn jemand gesetzt hat.
+      if (team.einsatzOffen === undefined) team.einsatzOffen = true;
       for (const member of team.members || []) {
         member.online = false;
         member.wegSeit = member.wegSeit || roh.gespeichert || Date.now();
@@ -811,7 +816,11 @@ async function handleAction(clientId, body) {
       // Auch das Team, das dran ist, darf vom Handy aus wählen.
       const team = G.teamOfClient(state, clientId);
       if (!isHost && !team) throw new G.GameError('Du gehörst zu keinem Team.');
-      G.pickCell(state, Number(body.catIdx), Number(body.rowIdx), isHost ? null : team.id);
+      // Der Einsatz reist als Nutzlast mit, nicht als eigene Aktion – siehe den
+      // Kommentar in pickCell. `pick` steht in RUECKNEHMBAR, damit gibt ein
+      // Zurücknehmen den Einsatz von selbst wieder her.
+      G.pickCell(state, Number(body.catIdx), Number(body.rowIdx),
+        isHost ? null : team.id, body.einsatz === true);
       break;
     }
     case 'buzz': {
@@ -911,6 +920,7 @@ function pickSettings(s = {}) {
     || (typeof s.buzzUhr === 'string' && s.buzzUhr.trim() !== '')
     ? Number(s.buzzUhr) : NaN;
   if ([0, 10, 15, 20, 30].includes(uhr)) out.buzzUhr = uhr;
+  if (['aus', 'runde'].includes(s.einsatz)) out.einsatz = s.einsatz;
   return out;
 }
 

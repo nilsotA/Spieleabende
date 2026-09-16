@@ -3003,3 +3003,80 @@ test('eine ausgetauschte Frage kommt auch beim wiederholten Streichen nicht wied
   assert.deepEqual(doppelt, [],
     `dieselbe Frage kam noch einmal aufs Feld: ${JSON.stringify(texte, null, 2)}`);
 });
+
+/*
+ * Der Einsatz überlebt ein Zurücknehmen – und wird nicht stumm verbraucht.
+ *
+ * Er reist als Nutzlast des Feldaufrufs mit, statt als eigene Aktion mit
+ * eigenem Zustand. Genau deshalb gibt der Rückweg ihn von selbst wieder her:
+ * `pick` steht in RUECKNEHMBAR, und `team.einsatzOffen` liegt im Schnappschuss.
+ * Nimmt der Host eine Wertung zurück, der Einsatz bliebe aber verbraucht, wäre
+ * das der ärgerlichste Verlust des Abends – und von Hand nicht zu reparieren.
+ */
+test('ein Zurücknehmen gibt den Einsatz wieder her', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 'stand.json');
+  // Hoch über den übrigen Bereichen: Die Basen unten überlappen sich reichlich,
+  // und 10080 ist ein von fetch gesperrter Port.
+  const port = 10100 + Math.floor(Math.random() * 60);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'test-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'settings', settings: { einsatz: 'runde', wrongPenalty: 'half' } });
+  assert.equal((await zustand(base)).settings.einsatz, 'runde', 'die Einstellung kommt durch');
+  await host({ type: 'startGame', set: SATZ });
+
+  // Feld 0/3 mit Einsatz – und danebengelegen.
+  const res = await host({ type: 'pick', catIdx: 0, rowIdx: 3, einsatz: true });
+  assert.equal(res.ok, true, res.error);
+  const mitEinsatz = await zustand(base);
+  assert.equal(mitEinsatz.current.einsatz, true);
+  assert.equal(mitEinsatz.teams[0].einsatzOffen, false, 'verbraucht');
+  const wert = mitEinsatz.current.value;
+
+  await host({ type: 'judge', correct: false });
+  assert.equal((await zustand(base)).teams[0].score, -wert,
+    'ein Einsatz kostet den vollen doppelten Wert, auch bei halbem Abzug');
+
+  // Zwei Schritte zurück: erst die Wertung, dann der Feldaufruf.
+  await host({ type: 'undo' });
+  assert.equal((await zustand(base)).teams[0].score, 0, 'die Wertung ist weg');
+  await host({ type: 'undo' });
+  const zurueck = await zustand(base);
+  assert.equal(zurueck.phase, 'board', 'das Feld steht wieder offen');
+  assert.equal(zurueck.teams[0].einsatzOffen, true,
+    'und der Einsatz liegt wieder da – er hing am Feldaufruf, nicht an einer eigenen Ansage');
+});
+
+/*
+ * Ohne die Einstellung prallt ein Einsatz ab, statt still zu wirken.
+ *
+ * Ein Handy mit einer älteren Fassung der Seite – oder jemand, der die Adresse
+ * von Hand zusammensetzt – darf sich keinen doppelten Wert erschleichen.
+ */
+test('ein Einsatz ohne die Einstellung wird abgewiesen', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 10200 + Math.floor(Math.random() * 60);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'test-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ }); // einsatz bleibt 'aus'
+
+  const res = await host({ type: 'pick', catIdx: 0, rowIdx: 3, einsatz: true });
+  assert.equal(res.ok, false, 'der Zug muss abprallen');
+  assert.match(res.error, /nicht eingeschaltet/i);
+  const jetzt = await zustand(base);
+  assert.equal(jetzt.phase, 'board', 'und das Feld bleibt unangetastet');
+  assert.equal(jetzt.board.categories[0].cells[3].used, false);
+});

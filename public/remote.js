@@ -9,6 +9,10 @@ verbergeSchluessel();
 
 
 let state = null;
+/* Der Einsatz, den der Host für das Zugteam ansagt – nur auf diesem Gerät.
+   Er reist als Nutzlast des Feldaufrufs mit, wie auf dem Handy; es gibt also
+   keine Ansage, die irgendwo hängen bleiben könnte. */
+let einsatzScharf = false;
 /**
  * Die Uhr beim freien Buzzer – hier als Sekundenzahl in der Lagezeile.
  *
@@ -407,11 +411,30 @@ function renderFeldwahl() {
     return;
   }
 
-  const key = [state.setName, state.round, state.turnIndex, state.board.categories
-    .map((c) => `${c.name}:${c.cells.map((z) => (z.used ? '1' : '0')).join('')}`).join('|')].join('#');
+  const zugteam = state.teams[state.turnIndex];
+  const darfEinsatz = state.settings.einsatz === 'runde' && zugteam?.einsatzOffen !== false;
+  if (!darfEinsatz) einsatzScharf = false;
+
+  // Der Schalterzustand gehört in den Schlüssel: Er färbt die Liste um und
+  // verdoppelt jede Zahl darin. Ohne ihn bliebe die Liste stehen, und das
+  // Antippen des Schalters zeigte keine Wirkung.
+  const key = [state.setName, state.round, state.turnIndex,
+    darfEinsatz ? (einsatzScharf ? 'e1' : 'e0') : 'e-', state.board.categories
+      .map((c) => `${c.name}:${c.cells.map((z) => (z.used ? '1' : '0')).join('')}`).join('|')].join('#');
   if (liste.dataset.key === key) return;
   liste.dataset.key = key;
   liste.innerHTML = '';
+
+  if (darfEinsatz) {
+    liste.append(el('button', {
+      type: 'button',
+      class: `btn r-einsatz ${einsatzScharf ? 'an' : 'btn-ghost'}`,
+      'aria-pressed': String(einsatzScharf),
+      onclick: () => { einsatzScharf = !einsatzScharf; renderFeldwahl(); },
+    }, einsatzScharf
+      ? `✦ Einsatz steht für ${zugteam.wappen} ${zugteam.name} – jetzt Feld wählen`
+      : `✦ Einsatz für ${zugteam.wappen} ${zugteam.name}`));
+  }
 
   for (const [catIdx, cat] of state.board.categories.entries()) {
     liste.append(
@@ -423,8 +446,12 @@ function renderFeldwahl() {
         // Ohne Beschriftung liest ein Screenreader nur „300" – bei sechs
         // Kategorien untereinander sagt das nichts.
         'aria-label': `${cat.name}, ${cell.value} Punkte${cell.used ? ' – schon gespielt' : ''}`,
-        onclick: () => act('pick', { catIdx, rowIdx }),
-      }, String(cell.value)))),
+        onclick: () => {
+          const mitEinsatz = einsatzScharf;
+          einsatzScharf = false;
+          act('pick', { catIdx, rowIdx, einsatz: mitEinsatz });
+        },
+      }, String(einsatzScharf ? cell.value * 2 : cell.value)))),
     );
   }
 }

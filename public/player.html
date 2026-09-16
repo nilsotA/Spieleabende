@@ -78,6 +78,12 @@
 
     <div id="p-status" class="p-status" role="status" aria-live="polite">Warte auf den Host …</div>
 
+    <!-- Der Einsatz. Bewusst ÜBER dem Raster und nicht darin: renderPicker()
+         leert #p-picker bei jedem Schlüsselwechsel, der Schalter läge sonst
+         mitten im Neuaufbau und verlöre bei jeder fremden Feldwahl seinen
+         Zustand. -->
+    <div id="p-einsatz" class="p-einsatz" hidden></div>
+
     <!-- Feldauswahl, wenn man dran ist -->
     <div id="p-picker" class="picker" hidden></div>
 

@@ -312,3 +312,18 @@ body.remote #app {
 @media (prefers-reduced-motion: reduce) {
   .r-undo:active { transform: none; }
 }
+
+/* Der Einsatz auf der Fernbedienung – derselbe goldene Zustand wie auf dem
+   Handy des Teams, damit „scharf" überall dasselbe aussieht. */
+.r-einsatz {
+  width: 100%;
+  margin-bottom: 0.6rem;
+  font-weight: 700;
+  border-color: rgba(255, 210, 110, 0.45);
+  color: #ffd36b;
+}
+.r-einsatz.an {
+  background: linear-gradient(180deg, #ffd873, #e8a62a);
+  border-color: #ffe9a8;
+  color: #2a1e05;
+}

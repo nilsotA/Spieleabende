@@ -284,6 +284,40 @@ body {
    mit „Team wechseln" bleibt – sie ist der einzige Weg zurück. */
 .knopf-ruht.waehlt .buzz-zone { display: none; }
 
+/* Der Einsatz – der Schalter über dem Raster.
+
+   Er steht bewusst nicht im Raster: renderPicker() leert #p-picker bei jedem
+   Schlüsselwechsel, und ein Schalter mitten im Neuaufbau verlöre seinen
+   Zustand, sobald irgendwo ein fremdes Feld fällt. Scharf ist er in Gold –
+   dieselbe Farbe, in der auf der Leinwand der freigegebene Buzzer leuchtet:
+   „hier steht gerade mehr auf dem Spiel". */
+.p-einsatz { display: grid; gap: 0.3rem; margin-bottom: 0.6rem; text-align: center; }
+.p-einsatz-knopf {
+  appearance: none;
+  width: 100%;
+  border: 1px solid rgba(255, 210, 110, 0.45);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #2a2418, #1a1710);
+  color: var(--gold, #ffd36b);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.7rem 0.6rem;
+  cursor: pointer;
+}
+.p-einsatz-knopf.an {
+  background: linear-gradient(180deg, #ffd873, #e8a62a);
+  border-color: #ffe9a8;
+  color: #2a1e05;
+  box-shadow: 0 0 0 3px rgba(255, 206, 92, 0.22);
+}
+/* Angespannte Zahlen im Raster, solange der Einsatz steht – sonst sieht man
+   erst nach dem Antippen, dass es um das Doppelte ging. */
+.picker .pick-values button.doppelt {
+  border-color: rgba(255, 210, 110, 0.55);
+  background: linear-gradient(180deg, #7a5a18, #3a2a0c);
+  color: #ffe9a8;
+}
+
 .picker { display: grid; gap: 0.5rem; }
 .picker .pick-cat { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .picker .pick-cat > h3 {

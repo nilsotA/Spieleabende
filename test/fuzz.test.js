@@ -58,6 +58,7 @@ function pruefeZustand(state, spur) {
     assert.ok(Number.isFinite(t.score), `Punktestand ist keine Zahl ${wo()}`);
     assert.ok(t.serie >= 0 && Number.isFinite(t.serie), `Serie kaputt ${wo()}`);
     assert.ok(t.serieBest >= t.serie, `Bestserie kleiner als laufende Serie ${wo()}`);
+    assert.equal(typeof t.einsatzOffen, 'boolean', `einsatzOffen ist kein Wahrheitswert ${wo()}`);
     for (const [feld, wert] of Object.entries(t.bilanz || {})) {
       assert.ok(Number.isFinite(wert), `Bilanz „${feld}" ist ${wert} ${wo()}`);
       assert.ok(wert >= 0, `Bilanz „${feld}" ist negativ: ${wert} ${wo()}`);
@@ -109,6 +110,24 @@ function pruefeZustand(state, spur) {
       for (const c of cat.cells) {
         assert.ok(Number.isInteger(c.value) && c.value > 0, `Feldwert kaputt ${wo()}`);
       }
+    }
+  }
+
+  /*
+   * Der Wert der laufenden Frage ist der Kachelwert – einfach oder verdoppelt,
+   * nie etwas dazwischen und nie vervierfacht.
+   *
+   * Der Einsatz verdoppelt bewusst `q.value` und nicht `cell.value`: Sonst wäre
+   * ein gestrichenes und neu aufgerufenes Feld vierfach. Diese Zusicherung ist
+   * genau die Wache davor. Geprüft nur an einer belegten Kachel – ruft der
+   * Zufall mitten in einer offenen Frage eine neue Runde auf, steht an
+   * derselben Stelle ein frisches Brett mit anderen Zahlen.
+   */
+  if (q && !q.stechen && state.board) {
+    const zelle = state.board.categories[q.catIdx]?.cells?.[q.rowIdx];
+    if (zelle && zelle.used) {
+      assert.equal(q.value, q.einsatz ? zelle.value * 2 : zelle.value,
+        `Fragenwert ${q.value} passt nicht zur Kachel ${zelle.value} (Einsatz: ${!!q.einsatz}) ${wo()}`);
     }
   }
 
@@ -164,6 +183,11 @@ function zuege(state, r) {
     ['startGame', () => G.startGame(state, SATZ)],
     ['pickCell', () => G.pickCell(state, catIdx, rowIdx)],
     ['pickCellByTeam', () => team && G.pickCell(state, catIdx, rowIdx, team.id)],
+    // Der Einsatz reist als Nutzlast des Feldaufrufs mit – er hat keine eigene
+    // Aktion, also muss er hier an derselben Stelle mitgewürfelt werden.
+    ['pickCellMitEinsatz', () => G.pickCell(state, catIdx, rowIdx, null, true)],
+    ['einsatzAn', () => { state.settings.einsatz = 'runde'; }],
+    ['einsatzAus', () => { state.settings.einsatz = 'aus'; }],
     ['passQuestion', () => G.passQuestion(state)],
     ['openBuzz', () => G.openBuzz(state)],
     ['buzz', () => G.buzz(state, client)],

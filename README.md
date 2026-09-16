@@ -101,6 +101,14 @@ ein vorhandenes Team ein.
 Anderer Port: `PORT=8080 node server/index.js` – eine eigene Angabe gilt dann
 genau so und wird nicht verschoben.
 
+### Geklaut!
+
+Wer sich per Buzzer die Punkte vom fremden Feld holt, sah aus wie jede andere
+richtige Antwort: dieselbe Zahl, derselbe Ton. Jetzt blitzt die Leinwand kurz in
+der Farbe des Teams, und im Protokoll steht, wem er sie weggenommen hat –
+„🐻 Mira: schnappt sich +500 von 🦊 Nils“. Das ändert an den Punkten nichts, es
+sagt nur endlich, was gerade passiert ist.
+
 ### Wann kann ich starten?
 
 Über dem Startknopf steht, wie es um die Handys steht – und zwar das, was die
@@ -430,6 +438,28 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   Ohne Abzug ist ein Feldaufruf risikofrei, dann wird gern das teuerste Feld genommen
   und ins Blaue geraten.
 - **Buzzern nach richtiger Antwort:** normalerweise aus – die Frage ist dann durch.
+- **Einsatz:** normalerweise aus. Eingeschaltet hat jedes Team **einen pro Runde**:
+  Auf dem Handy den goldenen Schalter umlegen – das Raster zeigt sofort die
+  verdoppelten Zahlen –, dann das Feld antippen. Diese eine Frage zählt doppelt.
+
+  **Falsch oder „weiß nicht“ kostet dann den vollen doppelten Wert**, auch wenn der
+  Abzug oben auf „halbe Punkte“ oder „keiner“ steht. Das ist die einzige Regel, die
+  eine andere Einstellung überstimmt, und sie muss es: Bei halbem Abzug steht normal
+  +500 gegen −250, verdoppelt +1000 gegen −500 – dasselbe Verhältnis, dieselbe
+  Schwelle, nur mit einer Null mehr. Es gäbe nie einen Grund, ihn *nicht* zu setzen.
+  Mit vollem Abzug lohnt er sich erst, wenn ihr die Kategorie zu etwa 60 Prozent
+  könnt. Genau dann ist es eine Entscheidung.
+
+  Wer sich in einen verpatzten Einsatz hineinbuzzert, holt die Hälfte davon – also
+  genau das, was das Feld ohne Einsatz wert gewesen wäre. Bei einer Ansage hört
+  deshalb der ganze Tisch zu.
+
+  Wer seinen Einsatz noch hat, trägt einen goldenen ✦ am Pult; im Spickzettel
+  (`Esc`) stehen die Namen. Steht die Feldwahl auf „Nur der Host“, liegt der
+  Schalter auf der Fernbedienung und in der Steuerleiste des Host-Screens.
+
+  Für „Drei Generationen“ und „Groß und Klein“ würde ich ihn auslassen: −2000 ist
+  der Moment, an dem ein Zehnjähriger innerlich aussteigt.
 - **Uhr beim freien Buzzer:** normalerweise aus. Eingeschaltet (10 bis 30 Sekunden)
   zieht sich der goldene Lichtbalken über der Bühne zusammen, und auf Handy und
   Fernbedienung läuft die Sekundenzahl mit. Sie **wertet nichts**: Läuft die Zeit ab,

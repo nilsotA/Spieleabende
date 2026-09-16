@@ -431,3 +431,42 @@ test('der Host-Screen warnt vor der fehlenden Bildschirmsperre', () => {
   assert.match(readme.slice(stelle, stelle + 600), /localhost|sicheren Kontext/,
     'das Handbuch verspricht die Sperre auch dort, wo der Browser sie nicht gibt');
 });
+
+/*
+ * Der Einsatz-Schalter muss das Raster wirklich umbauen.
+ *
+ * renderPicker() baut #p-picker nur neu, wenn sich `box.dataset.key` ändert –
+ * eine bewusste Sperre, damit ein hereintrudelnder Spielstand kein Antippen
+ * verschluckt. Stünde der Schalterzustand nicht im Schlüssel, bliebe das Raster
+ * beim Umlegen stehen: Der Schalter leuchtete golden, die Felder zeigten weiter
+ * die einfachen Zahlen, und niemand wüsste, ob der Einsatz nun steht. Dasselbe
+ * gilt für die Feldliste der Fernbedienung.
+ */
+test('der Einsatz steht im Schlüssel der Feldraster', () => {
+  const spieler = ohneKommentare(lies('player.js'));
+  const pickerKey = /const key = \[\s*state\.setName,[\s\S]*?\]\.join\('#'\);/.exec(spieler)?.[0] || '';
+  assert.ok(pickerKey, 'der Schlüssel des Rasters sollte auffindbar bleiben');
+  assert.match(pickerKey, /einsatzScharf/,
+    'player.js: ohne den Schalter im Schlüssel baut sich das Raster nie neu');
+
+  const fern = ohneKommentare(lies('remote.js'));
+  const listenKey = /const key = \[state\.setName,[\s\S]*?\]\.join\('#'\);/.exec(fern)?.[0] || '';
+  assert.ok(listenKey, 'der Schlüssel der Feldliste sollte auffindbar bleiben');
+  assert.match(listenKey, /einsatzScharf/,
+    'remote.js: dasselbe für die Feldliste der Fernbedienung');
+});
+
+/*
+ * Der Einsatz überstimmt den eingestellten Abzug – und die Leinwand muss das
+ * an der Zeile zeigen, an der der Host sich beim Drücken orientiert.
+ *
+ * Gemessen, bevor es stand: Bei einem Einsatz auf ein 500er-Feld stand dort
+ * „kostet 500", während der Server 1000 abzog.
+ */
+test('die Abzugszeile der Steuerleiste kennt den Einsatz', () => {
+  const js = ohneKommentare(lies('host.js'));
+  const zeile = /const abzug = [\s\S]*?;/.exec(js)?.[0] || '';
+  assert.ok(zeile, 'die Abzugsrechnung sollte auffindbar bleiben');
+  assert.match(zeile, /q\.einsatz/,
+    'ohne diesen Zweig behauptet die Leinwand die Hälfte dessen, was der Server abzieht');
+});
