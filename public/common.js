@@ -991,3 +991,34 @@ export function anschlussStand(state) {
   if (wartende) teile.push(`${wartende} noch ohne Team`);
   return { text: teile.join(' · '), bereit: false };
 }
+
+/**
+ * Seit wann diese Lage gilt – der Bezugspunkt für die Anlaufsperre.
+ *
+ * Die Sperre schützt davor, dass ein Knopf unter dem Daumen ausgetauscht wird.
+ * Hinge sie an der Geburt des Knotens, wäre sie zu streng: Die Knopfleisten
+ * bauen sich auch neu, wenn sich nur eine Zahl geändert hat oder ein Handy aus
+ * dem Standby kommt. Im Menü hieß das, dass jede angekommene Punktekorrektur
+ * die Knöpfe erneuerte und damit 400 ms taub machte – gemessen kamen von drei
+ * zügigen Tipps auf „+100" genau einer an, von fünf zwei. Wer 300 Punkte
+ * nachtragen wollte, trug 100 nach. Auf der Fernbedienung traf es die
+ * Wertungsknöpfe: „Richtig" und gar nichts sind da dasselbe.
+ *
+ * Gezählt wird deshalb ab dem Moment, in dem sich die BEDEUTUNG geändert hat.
+ * Bleibt die Knopfreihe dieselbe, bleibt auch ihr Bezugspunkt stehen, und der
+ * ist längst abgelaufen.
+ *
+ * `name` ist der Eimer – die Leinwand hält „leiste", „menu" und „zug"
+ * auseinander. Leinwand und Fernbedienung laufen nie in derselben Seite, die
+ * Eimer können also gleich heißen.
+ */
+const lagenSeit = new Map();
+export function lageSeit(name, signatur) {
+  const alt = lagenSeit.get(name);
+  if (!alt || alt.signatur !== signatur) {
+    const jetzt = performance.now();
+    lagenSeit.set(name, { signatur, seit: jetzt });
+    return jetzt;
+  }
+  return alt.seit;
+}

@@ -1,7 +1,7 @@
 import {
   $, $$, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
   setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
-  punkte, delta as vorzeichen, starteUhr, verbergeSchluessel } from '/common.js';
+  punkte, delta as vorzeichen, starteUhr, verbergeSchluessel, lageSeit } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
@@ -2434,30 +2434,6 @@ function button(label, cls, onclick, key, seit = performance.now()) {
   }, label);
   if (key) node.append(el('kbd', {}, key));
   return node;
-}
-
-/**
- * Seit wann diese Lage gilt – der Bezugspunkt für die Anlaufsperre oben.
- *
- * Die Sperre schützt davor, dass ein Knopf unter dem Daumen ausgetauscht wird.
- * Sie hing bisher an der Geburt des Knotens, und das war zu streng: Die Leisten
- * bauen sich auch neu, wenn sich nur eine Zahl geändert hat. Im Menü hieß das,
- * dass jede angekommene Punktekorrektur die Knöpfe erneuerte und damit für
- * 400 ms taub machte – gemessen kamen von drei zügigen Tipps auf „+100" genau
- * einer an, von fünf zwei. Wer 300 Punkte nachtragen wollte, trug 100 nach.
- *
- * Gezählt wird deshalb ab dem Moment, in dem sich die Bedeutung geändert hat.
- * Bleibt die Knopfreihe dieselbe, bleibt auch ihr Bezugspunkt stehen, und der
- * ist längst abgelaufen.
- */
-const lagenSeit = new Map();
-function lageSeit(name, signatur) {
-  const alt = lagenSeit.get(name);
-  if (!alt || alt.signatur !== signatur) {
-    lagenSeit.set(name, { signatur, seit: performance.now() });
-    return performance.now();
-  }
-  return alt.seit;
 }
 
 /**

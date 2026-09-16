@@ -3,7 +3,7 @@
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
   installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand,
-  aufzaehlung, punkte, starteUhr, verbergeSchluessel } from '/common.js';
+  aufzaehlung, punkte, starteUhr, verbergeSchluessel, lageSeit } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
@@ -507,27 +507,6 @@ function big(label, cls, onclick, seit) {
       onclick();
     },
   }, label);
-}
-
-/**
- * Seit wann diese Lage gilt – der Bezugspunkt für die Anlaufsperre.
- *
- * Wörtlich dasselbe wie auf der Leinwand (host.js, lageSeit). Die Leiste baut
- * sich auch neu, wenn nur ein Handy aus dem Standby kommt oder der Host Punkte
- * korrigiert – beides steht im Schlüssel, weil die Vertreterknöpfe daran
- * hängen. Die Wertungsknöpfe stehen dabei unverändert an derselben Stelle,
- * wurden aber trotzdem 400 ms taub, weil sie frische Knoten waren. Auf dem
- * Gerät, mit dem der Host den ganzen Abend wertet, ist das der Unterschied
- * zwischen „Richtig" und gar nichts.
- */
-const lagenSeit = new Map();
-function lageSeit(name, signatur) {
-  const alt = lagenSeit.get(name);
-  if (!alt || alt.signatur !== signatur) {
-    lagenSeit.set(name, { signatur, seit: performance.now() });
-    return performance.now();
-  }
-  return alt.seit;
 }
 
 // Lebenszeichen für die Startwache (start-wache.js): Ab hier steht die Seite.
