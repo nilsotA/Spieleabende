@@ -250,8 +250,19 @@ function render() {
           : 'Spiel beendet.');
       // Bei Gleichstand steht die Entscheidungsfrage oben – erst danach der
       // Knopf, der den Abend wegräumt.
-      if (offen) setz(big('⚡ Stechen starten', 'btn-primary', () => act('stechen')));
-      setz(big('Neues Spiel', 'btn-ghost', () => act('backToLobby')));
+      //
+      // `seit` statt der Knotengeburt – nicht, weil die Sperre sonst fehlte:
+      // Beim Sprung in den Endstand sind das wirklich neue Knöpfe, und die
+      // Geburt greift genauso (gemessen: Tipp 52 ms nach dem Sprung, beide Male
+      // geschluckt). Aber die Leiste baut sich auch neu, wenn der Host im
+      // Endstand noch Punkte korrigiert – der Punktestand steht in ihrem
+      // Schlüssel. Dann waren beide Knöpfe 400 ms taub, obwohl sich an ihnen
+      // nichts geändert hatte: gemessen, Tipp 19 ms nach der Korrektur, nichts
+      // passiert. Ausgerechnet „Neues Spiel", die einzige Aktion des Abends,
+      // die sich nicht zurücknehmen lässt, sieht dann kaputt aus – und wer
+      // nachdrückt, hat die Sperre schon überstanden.
+      if (offen) setz(big('⚡ Stechen starten', 'btn-primary', () => act('stechen'), seit));
+      setz(big('Neues Spiel', 'btn-ghost', () => act('backToLobby'), seit));
       break;
     }
     case 'question':
