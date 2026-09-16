@@ -683,6 +683,13 @@ test('kein Text sprengt den Kasten auf der Leinwand', async () => {
  * das Wort, um das es geht. Großschreibung ist in diesen Sätzen die Auszeichnung
  * für „das ist hier das Wort" – gewöhnliche deutsche Substantive schreiben sich
  * nicht durchgehend groß.
+ *
+ * Der Maßstab ist die LÖSUNG, nicht das erste große Wort der Frage. Vorher war
+ * es das erste: Das stimmte für alle vier Fragen, die es gibt, hing aber an der
+ * Satzstellung. Ein „ACHTUNG: Umlaute zählen mit." vor dem eigentlichen Wort,
+ * und der Maßstab wäre ACHTUNG gewesen – die Prüfung hätte dann die richtigen
+ * Wörter angemahnt und das falsche durchgelassen. Die Lösung ist per Definition
+ * eine Umstellung des gesuchten Wortes; sie braucht keine Heuristik.
  */
 test('in Anagramm-Kategorien passen die Buchstaben aller genannten Wörter', async () => {
   const buchstaben = (w) => [...w.toUpperCase()].sort().join('');
@@ -693,18 +700,16 @@ test('in Anagramm-Kategorien passen die Buchstaben aller genannten Wörter', asy
       for (const cat of round.categories) {
         if (!/anagramm/i.test(cat.name)) continue;
         for (const q of cat.questions) {
-          // Das Wort, um das es geht, steht in Großbuchstaben in der Frage.
-          const inFrage = (q.text.match(/\p{Lu}{4,}/gu) || []);
-          if (!inFrage.length) continue;
-          const soll = buchstaben(inFrage[0]);
-          const genannt = [
-            ...inFrage.slice(1),
-            ...(q.answer.match(/\p{Lu}{4,}/gu) || []),
-            ...((q.note || '').match(/\p{Lu}{4,}/gu) || []),
-          ];
+          const grosse = (t) => (t || '').match(/\p{Lu}{4,}/gu) || [];
+          // Der Maßstab: die Lösung. Steht sie in Großbuchstaben da, nimm das
+          // Wort; sonst die Buchstaben der ganzen Lösung ohne Satzzeichen.
+          const anker = grosse(q.answer)[0] || (q.answer || '').replace(/[^\p{L}]/gu, '');
+          if (!anker) continue;
+          const soll = buchstaben(anker);
+          const genannt = [...grosse(q.text), ...grosse(q.answer), ...grosse(q.note)];
           for (const wort of genannt) {
             if (buchstaben(wort) !== soll) {
-              fehler.push(`${datei} · „${inFrage[0]}": ${wort} hat andere Buchstaben (${buchstaben(wort)} statt ${soll})`);
+              fehler.push(`${datei} · „${anker}": ${wort} hat andere Buchstaben (${buchstaben(wort)} statt ${soll})`);
             }
           }
         }

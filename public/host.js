@@ -1964,9 +1964,19 @@ function renderScoreboard() {
  * Spiel" endeten 22 Pixel hinter der Kante – lautlos, ohne Bildlaufbalken, ohne
  * Hinweis. Der Host sieht einen Endstand, unter dem es nicht weitergeht.
  *
- * Nachgegeben wird in Stufen, vom Entbehrlichsten her: erst enger stellen, dann
- * die Auszeichnungen von hinten wegnehmen. Kleiner wird dabei nichts – es geht
- * nur Polsterung weg und zuletzt eine Zeile, die ohnehin schon gekürzt wird.
+ * Nachgegeben wird in vier Stufen, vom Entbehrlichsten her: enger stellen
+ * (`voll`), die Auszeichnungen von hinten wegnehmen, noch enger (`sehr-voll`),
+ * und erst ganz zuletzt gibt die Schrift der Rangliste nach (`extrem-voll`).
+ * Die Schrift kommt deshalb als Letztes, weil sie aus vier Metern das Einzige
+ * ist, was wirklich zählt – und weil eine einzige große Stufe bei sechs Teams
+ * ein Drittel des Kastens leer ließ, während die Schrift ohne Not geschrumpft
+ * war.
+ *
+ * Reicht auch das nicht – acht Teams mit Gleichstand an der Spitze –, ist das
+ * nicht mehr diese Funktion: Die Knopfreihe des Endstands hängt per `sticky` an
+ * der Unterkante des Sichtfensters (host.css, „Die Knopfreihe des Endstands
+ * bleibt erreichbar"). Sie bleibt also erreichbar, egal wie viele Stufen es
+ * gibt.
  *
  * Gemessen wird in Layoutmaßen, nie über getBoundingClientRect: Die Liste fährt
  * beim Aufbau von unten herein, und während dieser Bewegung zeigt

@@ -1015,19 +1015,22 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 
 /* Die Knopfreihe des Endstands bleibt erreichbar – bei jeder Teamzahl.
 
-   passeStandEin() gibt in zwei Stufen nach (enger stellen, Auszeichnungen von
-   hinten wegnehmen). Bei acht Teams mit Gleichstand an der Spitze sind beide
-   erschöpft, und es fehlten immer noch rund 100 Pixel: Gemessen auf 1280×720
-   lag die ganze Reihe unterhalb des Kastens, die Punkteleiste darüber – und
-   unten stand „Gleichstand – ‚Stechen' holt die Entscheidungsfrage." für einen
-   Knopf, den niemand drücken konnte. Acht Teams entstehen von selbst, seit
-   jedes Handy sich sein eigenes Team anlegt.
+   passeStandEin() gibt in Stufen nach – enger stellen, Auszeichnungen von
+   hinten wegnehmen, noch enger, zuletzt die Schrift der Rangliste (siehe
+   „Zwei weitere Stufen für viele Teams" weiter unten). Bei acht Teams mit
+   Gleichstand an der Spitze waren sie erschöpft, und es fehlten immer noch rund
+   100 Pixel: Gemessen auf 1280×720 lag die ganze Reihe unterhalb des Kastens,
+   die Punkteleiste darüber – und unten stand „Gleichstand – ‚Stechen' holt die
+   Entscheidungsfrage." für einen Knopf, den niemand drücken konnte. Acht Teams
+   entstehen von selbst, seit jedes Handy sich sein eigenes Team anlegt.
 
-   Eine dritte Verkleinerungsstufe würde beim nächsten Extremfall wieder
-   brechen. `sticky` bindet die Reihe stattdessen an die Unterkante des
-   Sichtfensters: Passt alles, sieht man keinen Unterschied; passt es nicht,
-   steht die Reihe trotzdem da, und die Rangliste scrollt darunter durch.
-   Der eigene Grund muss sein – sonst laufen die Teamnamen hindurch. */
+   Noch eine Verkleinerungsstufe würde beim nächsten Extremfall wieder brechen –
+   und irgendwann ist die Rangliste nicht mehr zu lesen. `sticky` bindet die
+   Reihe stattdessen an die Unterkante des Sichtfensters: Passt alles, sieht man
+   keinen Unterschied; passt es nicht, steht die Reihe trotzdem da, und die
+   Rangliste scrollt darunter durch. Das gilt unabhängig davon, wie viele Stufen
+   es gibt – deshalb ist das hier das Sicherheitsnetz und nicht die nächste
+   Stufe. Der eigene Grund muss sein – sonst laufen die Teamnamen hindurch. */
 .scores-panel .endstand-aktionen {
   position: sticky;
   bottom: 0;

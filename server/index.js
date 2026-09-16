@@ -1413,7 +1413,10 @@ server.listen(PORT, async () => {
     console.log('  „Spiel beenden" im Host-Menü verwirft ihn.\n');
   }
   console.log(`  Host-Screen (Beamer/TV):  ${hostAdresse()}`);
-  for (const u of localUrls()) {
+  // Einmal fragen, zweimal verwenden: Die Liste steht unten noch einmal für die
+  // Fernbedienung, und beide Male soll dieselbe Adresse dort stehen.
+  const adressen = localUrls();
+  for (const u of adressen) {
     console.log(`  Handys der Mitspieler:    ${u}`);
   }
   // Die Fernbedienung gehört auf das Handy des Hosts, nicht auf localhost: Dort
@@ -1421,7 +1424,7 @@ server.listen(PORT, async () => {
   // hält. Sie stand im Handbuch, aber nicht in dieser Liste – wer nur das
   // Terminal liest, hat sie schlicht nie gefunden und den Abend über die
   // unscharfe Lösung auf dem großen Screen aufgedeckt, die dann alle sahen.
-  console.log(`  Fernbedienung für dich:   ${hostAdresse(localUrls()[0], '/remote')}`);
+  console.log(`  Fernbedienung für dich:   ${hostAdresse(adressen[0], '/remote')}`);
   console.log(`  Fragen-Editor:            ${hostAdresse(`http://localhost:${PORT}`, '/editor')}\n`);
   if (!PORT_GESETZT && portVersuche > 0) {
     console.log(`  (Port ${PORT - portVersuche} war belegt – daher ${PORT}.)\n`);
