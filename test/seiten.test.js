@@ -474,6 +474,25 @@ test('der Einsatz steht im Schlüssel der Feldraster', () => {
 });
 
 /*
+ * „Geklaut" ist nur, was dem Zugteam auch wirklich weggenommen wurde.
+ *
+ * Steht „Buzzer auch nach richtig" an, punktet das Zugteam voll und der Buzzer
+ * geht trotzdem auf. Gemessen auf der Leinwand: Anna richtig +500, Bea buzzert
+ * nach und bekommt +250 – und das Protokoll schrieb „🐻 Bea: schnappt sich
+ * +250 von 🦊 Anna", während Anna ihre 500 behielt. Dazu blitzte die Bühne in
+ * Beas Farbe, als wäre gerade etwas passiert.
+ */
+test('der Klau-Moment prüft, ob das Zugteam überhaupt verloren hat', () => {
+  const js = ohneKommentare(lies('host.js'));
+  assert.match(js, /const zugteamTraf = q\.log\.some\(\(e\) => e\.result === 'correct' && e\.teamId === q\.teamId\);/,
+    'die Protokollzeile braucht den Blick auf das Zugteam');
+  assert.match(js, /const geklaut = fremd && !zugteamTraf;/,
+    'ohne diesen Zusatz behauptet die Zeile einen Diebstahl, den es nicht gab');
+  assert.match(js, /const zugteamHatGetroffen = q\.log\.some\([\s\S]{0,120}?\);\s*if \(letzte\.result === 'correct'[\s\S]{0,160}?&& !zugteamHatGetroffen\) \{\s*stageFlash/,
+    'und der Blitz darf genauso wenig feuern');
+});
+
+/*
  * Der Einsatz überstimmt den eingestellten Abzug – und die Leinwand muss das
  * an der Zeile zeigen, an der der Host sich beim Drücken orientiert.
  *

@@ -1011,6 +1011,9 @@ function renderQuestion(prev) {
     setBuzzIndicator('idle');
   }
 
+  // Hat das Zugteam sein eigenes Feld getroffen? Dann ist danach nichts mehr
+  // zu klauen – siehe die Zeilen unten und den Blitz.
+  const zugteamTraf = q.log.some((e) => e.result === 'correct' && e.teamId === q.teamId);
   for (const entry of q.log) {
     // „Weiß nicht" kostet dasselbe wie eine falsche Antwort. Der Abzug gehört
     // deshalb auch dahinter – sonst sieht der Tisch die Punkte wandern und
@@ -1019,11 +1022,19 @@ function renderQuestion(prev) {
     // sonst genauso da wie beim Zugteam – dabei ist das die Zahl, über die
     // hinterher geredet wird. Beim Stechen gibt es keine Punkte und kein Feld,
     // dem etwas gehört.
-    const geklaut = entry.result === 'correct' && entry.teamId !== q.teamId && !q.stechen;
+    //
+    // Geklaut ist es aber nur, wenn das Zugteam sein Feld auch verloren hat.
+    // Steht „Buzzer auch nach richtig" an, punktet das Zugteam voll und der
+    // Buzzer geht trotzdem auf: Gemessen stand dann „🐻 Bea: schnappt sich
+    // +250 von 🦊 Anna" – während Anna ihre 500 behielt und nichts abgab.
+    const fremd = entry.result === 'correct' && entry.teamId !== q.teamId && !q.stechen;
+    const geklaut = fremd && !zugteamTraf;
     const label =
       entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${punkte(entry.delta)}` : 'wusste es nicht')
         : entry.result === 'correct'
-          ? (geklaut ? `schnappt sich +${entry.delta} von ${teamName(q.teamId)}` : `richtig +${entry.delta}`)
+          ? (geklaut ? `schnappt sich +${entry.delta} von ${teamName(q.teamId)}`
+            : fremd ? `auch richtig +${entry.delta}`
+              : `richtig +${entry.delta}`)
           : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
     status.append(el('div', { class: `chip log ${entry.result}${geklaut ? ' geklaut' : ''}` },
       `${teamName(entry.teamId)}: ${label}`));
@@ -1072,8 +1083,16 @@ function renderQuestion(prev) {
      * Der Zweig hängt an `log.length` und feuert deshalb nur bei einem WIRKLICH
      * neuen Eintrag: Ein Zurücknehmen verkürzt das Protokoll, ein Broadcast
      * ohne Zug lässt es gleich – beides blitzt nicht.
+     *
+     * Und nur, wenn das Zugteam sein Feld auch wirklich verloren hat: Bei
+     * „Buzzer auch nach richtig" punktet es voll und der Buzzer geht trotzdem
+     * auf. Die halben Punkte danach sind eine Zugabe, kein Diebstahl – ein
+     * Blitz dafür wäre eine Behauptung über einen Moment, den es nicht gab.
      */
-    if (letzte.result === 'correct' && letzte.teamId !== q.teamId && !q.stechen) {
+    const zugteamHatGetroffen = q.log.some(
+      (e) => e.result === 'correct' && e.teamId === q.teamId);
+    if (letzte.result === 'correct' && letzte.teamId !== q.teamId && !q.stechen
+      && !zugteamHatGetroffen) {
       stageFlash(state.teams.find((t) => t.id === letzte.teamId)?.color);
     }
     if (wehgetan) {
