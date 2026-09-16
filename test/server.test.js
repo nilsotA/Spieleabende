@@ -3080,3 +3080,46 @@ test('ein Einsatz ohne die Einstellung wird abgewiesen', async (t) => {
   assert.equal(jetzt.phase, 'board', 'und das Feld bleibt unangetastet');
   assert.equal(jetzt.board.categories[0].cells[3].used, false);
 });
+
+/*
+ * „Frage austauschen" gibt den Einsatz zurück – die Frage zählte ja nicht.
+ *
+ * Zwei Mechaniken, die beide am Rückweg hängen: `discard` springt auf den
+ * Schnappschuss vor der Feldwahl, und genau in dem lag `einsatzOffen` noch auf
+ * true. Der Einsatz muss also von selbst wiederkommen – sonst hätte ein Team
+ * ihn an eine Frage verloren, die gestrichen wurde, weil sie nichts taugte.
+ * Das wäre die ärgerlichste Art, ihn loszuwerden.
+ */
+test('eine gestrichene Frage gibt den Einsatz zurück', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 10300 + Math.floor(Math.random() * 60);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'test-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'settings', settings: { einsatz: 'runde' } });
+  await host({ type: 'startGame', set: SATZ });
+
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3, einsatz: true });
+  const offen = await zustand(base);
+  assert.equal(offen.current.value, 1000);
+  assert.equal(offen.teams[0].einsatzOffen, false, 'erst einmal verbraucht');
+
+  const res = await host({ type: 'discard' });
+  assert.equal(res.ok, true, res.error);
+
+  const danach = await zustand(base);
+  assert.equal(danach.phase, 'board', 'das Feld steht wieder offen');
+  assert.equal(danach.teams[0].einsatzOffen, true,
+    'und der Einsatz liegt wieder da – die gestrichene Frage zählte nicht');
+
+  // Und er lässt sich sofort wieder setzen.
+  const zweiter = await host({ type: 'pick', catIdx: 0, rowIdx: 3, einsatz: true });
+  assert.equal(zweiter.ok, true, zweiter.error);
+  assert.equal((await zustand(base)).current.value, 1000);
+});

@@ -175,7 +175,7 @@ function render() {
   if (q) {
     $('#r-cat').textContent = q.stechen
       ? `Stechen · ${q.category}`
-      : `${q.category} · ${q.value} Punkte${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
+      : `${q.category} · ${q.value} Punkte${q.einsatz ? ' · ✦ Einsatz' : ''}${q.ersatzAus ? ` · Ersatz aus \u201e${q.ersatzAus}\u201c` : ''}`;
     setFrageText($('#r-text'), q.text);
     // Ohne Bild müsste der Host sich zur Leinwand umdrehen – genau das soll
     // die Fernbedienung ja ersparen.

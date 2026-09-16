@@ -327,6 +327,23 @@ test('nach einem Austausch nennt jeder Schirm die Herkunft der Frage', () => {
 });
 
 /*
+ * Und dasselbe für den Einsatz: Auf welcher Frage einer liegt, gehört auf jeden
+ * Schirm. Gemessen fehlte es zuerst ausgerechnet auf der Fernbedienung – dem
+ * Gerät, mit dem der Host wertet: Dort stand „Schule von damals · 600 Punkte",
+ * während Leinwand und Handy „· ✦ Einsatz" trugen.
+ */
+test('auf welcher Frage ein Einsatz liegt, sagt jeder Schirm', () => {
+  for (const [datei, muster] of [
+    ['host.js', /q\.einsatz \? ' · ✦ EINSATZ'/],
+    ['player.js', /q\.einsatz \? ' · ✦ Einsatz'/],
+    ['remote.js', /q\.einsatz \? ' · ✦ Einsatz'/],
+  ]) {
+    assert.match(ohneKommentare(lies(datei)), muster,
+      `${datei}: die Kopfzeile der Frage verschweigt den Einsatz`);
+  }
+});
+
+/*
  * „Noch zu früh" darf nicht dem Zugteam und nicht in der Pause erscheinen.
  *
  * Der Zweig hing allein an `step === 'primary'` und nicht daran, WER tippt. Das

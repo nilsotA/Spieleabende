@@ -934,6 +934,10 @@ export function startStechen(state, frage) {
     category: frage.category || 'Stechen',
     // Ohne Punktwert: Das Stechen entscheidet, wer gewinnt, nicht wie hoch.
     value: 0,
+    // Auf einer Stechfrage gibt es keinen Einsatz – sie hat kein Feld und keine
+    // Punkte. Ausdrücklich `false` statt `undefined`: Ein Zustand, der je nach
+    // Herkunft der Frage anders aussieht, ist die nächste Falle.
+    einsatz: false,
     text: frage.text,
     image: null,
     answer: frage.answer || '',
