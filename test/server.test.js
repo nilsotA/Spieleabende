@@ -2979,6 +2979,21 @@ test('eine Punktekorrektur überlebt das Austauschen der Frage', async (t) => {
   await host({ type: 'undo' });
   assert.equal((await zustand(base)).teams.find((t) => t.name === 'Grün').score, 200,
     'ein Zurücknehmen darf die Korrektur nicht verdoppeln');
+
+  /*
+   * Und das Ganze noch einmal – der Fall, an dem der erste Anlauf scheiterte.
+   *
+   * Der sammelte die Korrekturen als Nutzlast der Rückweg-Einträge über dem
+   * Anker ein. Das hielt genau einen Austausch lang: Der erste kappt den Stapel
+   * über dem Anker, das „Zurücknehmen" holt die Frage zurück – aber der
+   * adjustScore-Eintrag ist weg, und der zweite Austausch fand nichts mehr.
+   * Gemessen: 200 Punkte, Austausch, Zurücknehmen, Austausch, und die 200 waren
+   * verschwunden. Seitdem wird aus dem Zustand gerechnet, nicht aus dem Stapel.
+   */
+  const nochmal = await host({ type: 'discard' });
+  assert.equal(nochmal.ok, true, nochmal.error);
+  assert.equal((await zustand(base)).teams.find((t) => t.name === 'Grün').score, 200,
+    'auch ein zweiter Austausch nach einem Zurücknehmen darf die Korrektur nicht fressen');
 });
 
 /*

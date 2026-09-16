@@ -622,14 +622,7 @@ async function handleAction(clientId, body) {
   // Kommentar an dieser Stelle beschrieb schon immer das gewünschte Verhalten;
   // der Code tat es nur nicht.
   const schnappschuss = RUECKNEHMBAR.has(type)
-    ? {
-      state: structuredClone(state),
-      was: benenne(type, state),
-      // Die Nutzlast einer Punktekorrektur wandert mit in den Stapel: `discard`
-      // braucht sie, um sie nach dem Rücksprung erneut aufzuschlagen. Alle
-      // anderen Züge sind aus dem Schnappschuss allein wiederherstellbar.
-      korrektur: type === 'adjustScore' ? { teamId: body.teamId, delta: body.delta } : null,
-    }
+    ? { state: structuredClone(state), was: benenne(type, state) }
     : null;
 
   switch (type) {
@@ -701,10 +694,35 @@ async function handleAction(clientId, body) {
        * nichts zu tun hat. Beide Knöpfe liegen sogar im selben Menü, und der
        * übliche Ablauf ist ein einziger Besuch darin: erst „ihr habt uns vorhin
        * 100 zu wenig gegeben" richtigstellen, dann die Frage austauschen.
-       * Vorher war die Korrektur danach stillschweigend wieder weg, und gemerkt
-       * hätte es am Ende niemand mehr.
+       *
+       * Gerechnet wird das aus dem ZUSTAND, nicht aus dem Rückweg-Stapel.
+       *
+       * Ein erster Anlauf sammelte die Korrekturen als Nutzlast der Einträge
+       * über dem Anker ein. Das hielt genau einen Austausch lang: Der erste
+       * kappt den Stapel über dem Anker, ein „Zurücknehmen" holt die Frage
+       * samt Korrektur zurück – aber der adjustScore-Eintrag ist weg, und der
+       * zweite Austausch fand nichts mehr einzusammeln. Nachgestellt: 200
+       * Punkte, Austausch, Zurücknehmen, Austausch – und die 200 waren weg.
+       *
+       * Die Rechnung dagegen hängt an nichts, was verschwinden kann: Zwischen
+       * dem Anker und jetzt ändern nur zwei Dinge einen Punktestand – die
+       * Wertungen dieser Frage (die stehen alle in `q.log`) und Korrekturen von
+       * Hand. Was übrig bleibt, wenn man die Wertungen abzieht, ist von Hand.
        */
-      const korrekturen = rueckWeg.slice(bis + 1).map((e) => e.korrektur).filter(Boolean);
+      const ankerStand = new Map(rueckWeg[bis].state.teams.map((t) => [t.id, t.score]));
+      const ausDerFrage = new Map();
+      for (const e of q.log || []) {
+        ausDerFrage.set(e.teamId, (ausDerFrage.get(e.teamId) || 0) + (e.delta || 0));
+      }
+      const korrekturen = [];
+      for (const team of state.teams) {
+        // Wer erst während der Frage dazukam, steht nicht im Anker – `uebernimm`
+        // nimmt ihn mitsamt seinem jetzigen Stand hinüber, da ist nichts zu tun.
+        if (!ankerStand.has(team.id)) continue;
+        const ausGruenden = ankerStand.get(team.id) + (ausDerFrage.get(team.id) || 0);
+        const vonHand = team.score - ausGruenden;
+        if (vonHand) korrekturen.push({ teamId: team.id, delta: vonHand });
+      }
       const vorher = { state: structuredClone(state), was: 'Frage verworfen' };
       // Der Ankerpunkt bleibt im Stapel stehen, und übernommen wird eine Kopie.
       //
