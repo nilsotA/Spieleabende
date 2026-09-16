@@ -109,6 +109,11 @@ der Farbe des Teams, und im Protokoll steht, wem er sie weggenommen hat –
 „🐻 Mira: schnappt sich +500 von 🦊 Nils“. Das ändert an den Punkten nichts, es
 sagt nur endlich, was gerade passiert ist.
 
+Nur dann, wenn wirklich etwas weggenommen wurde: Steht „Buzzer auch nach
+richtig" an, punktet das Zugteam voll und der Buzzer geht trotzdem auf. Die
+halben Punkte danach sind eine Zugabe, kein Diebstahl – dort steht schlicht
+„auch richtig +250", und die Bühne bleibt ruhig.
+
 ### Wann kann ich starten?
 
 Über dem Startknopf steht, wie es um die Handys steht – und zwar das, was die
