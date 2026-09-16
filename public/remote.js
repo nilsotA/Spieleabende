@@ -225,10 +225,15 @@ function render() {
       setzeText(phase, state.settings.feldwahl === 'host'
         ? `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – sie sagen an, du rufst auf.`
         : `Am Zug: ${teamName(state.teams[state.turnIndex]?.id)} – wählt ein Feld.`);
+      // Eigener Bezugspunkt, nicht `seit`: Der gehört den Wertungsknöpfen und
+      // kennt den Zugwechsel nicht – auf dem Brett steht dort die ganze Zeit
+      // dieselbe Lage. Der Knopf baute sich aber bei jedem Wechsel neu auf und
+      // war trotzdem sofort scharf. Gemessen: zweimal getippt im Abstand von
+      // 250 ms, zwei Teams übersprungen statt einem.
       setz(big('Zug überspringen', 'btn-ghost', () => {
         const next = state.teams[(state.turnIndex + 1) % state.teams.length];
         act('setTurn', { teamId: next.id });
-      }, seit));
+      }, lageSeit('zug', String(state.turnIndex))));
       break;
     case 'roundEnd':
       setzeText(phase, `Runde ${state.round} beendet.`);

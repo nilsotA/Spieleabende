@@ -474,6 +474,26 @@ test('der Einsatz steht im Schlüssel der Feldraster', () => {
 });
 
 /*
+ * „Zug überspringen" braucht einen eigenen Bezugspunkt für die Anlaufsperre.
+ *
+ * `seit` gehört den Wertungsknöpfen; sein Bezugspunkt kennt Phase, Schritt und
+ * Buzzer, aber nicht den Zugwechsel – auf dem Brett steht dort die ganze Zeit
+ * dieselbe Lage. Der Knopf baute sich bei jedem Wechsel trotzdem neu auf und
+ * war sofort scharf. Gemessen auf der Fernbedienung: zweimal getippt im
+ * Abstand von 250 ms, zwei Teams übersprungen statt einem. Mit 700 ms kommt
+ * der zweite Tipp weiter durch.
+ */
+test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
+  for (const [datei, muster] of [
+    ['remote.js', /Zug überspringen'[\s\S]{0,220}?lageSeit\('zug', String\(state\.turnIndex\)\)/],
+    ['host.js', /Zug überspringen'[\s\S]{0,220}?lageSeit\('zug', String\(state\.turnIndex\)\)/],
+  ]) {
+    assert.match(ohneKommentare(lies(datei)), muster,
+      `${datei}: ohne eigenen Bezugspunkt springt ein Doppeltipp zwei Teams weiter`);
+  }
+});
+
+/*
  * „Geklaut" ist nur, was dem Zugteam auch wirklich weggenommen wurde.
  *
  * Steht „Buzzer auch nach richtig" an, punktet das Zugteam voll und der Buzzer

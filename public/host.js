@@ -2328,10 +2328,14 @@ function renderControls() {
         // Renderer keinen Unterschied und spielt keine Übergänge noch einmal ab.
         () => { einsatzFuer = einsatzScharf ? null : zugteamJetzt.id; render(state); }, null, seit));
     }
+    // Eigener Bezugspunkt wie auf der Fernbedienung: `seit` gehört den
+    // Wertungsknöpfen und ändert sich beim Zugwechsel nicht, der Knopf hier
+    // baut sich aber neu auf. Der Host-Screen ist oft ein iPad – zweimal
+    // getippt sind sonst zwei übersprungene Teams.
     add(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];
       act('setTurn', { teamId: next.id });
-    }));
+    }, null, lageSeit('zug', String(state.turnIndex))));
     return;
   }
 
