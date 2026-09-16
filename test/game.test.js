@@ -1071,6 +1071,24 @@ test('ohne die Einstellung lässt sich kein Einsatz setzen', () => {
   assert.equal(state.current.einsatz, false);
 });
 
+/*
+ * Ein Spielstand aus der Zeit vor dem Einsatz kennt das Feld nicht.
+ *
+ * viewFor liest es als `einsatzOffen !== false` und böte den Einsatz an; ein
+ * `!activeTeam.einsatzOffen` in pickCell hätte ihn danach kommentarlos
+ * abgewiesen. Der Tisch sieht den goldenen Schalter, drückt ihn, und das Spiel
+ * sagt „habt ihr schon gesetzt" – für einen Einsatz, den es nie gab.
+ */
+test('ein alter Spielstand ohne das Feld darf trotzdem setzen', () => {
+  const state = mitEinsatz();
+  delete state.teams[0].einsatzOffen;
+  assert.equal(G.viewFor(state, { isHost: true }).teams[0].einsatzOffen, true,
+    'die Sicht bietet ihn an');
+  G.pickCell(state, 0, 0, null, true);
+  assert.equal(state.current.value, 200, 'also muss er auch greifen');
+  assert.equal(state.teams[0].einsatzOffen, false, 'und danach verbraucht sein');
+});
+
 test('die Spielersicht kennt den Einsatz – und weiß, wer ihn setzen darf', () => {
   const state = mitEinsatz();
   state.teams[0].members.push({ clientId: 'g1', name: 'Anna', online: true });

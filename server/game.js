@@ -483,7 +483,11 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null, einsatz = false
     if (state.settings.einsatz !== 'runde') {
       throw new GameError('Der Einsatz ist für dieses Spiel nicht eingeschaltet.');
     }
-    if (!activeTeam.einsatzOffen) {
+    // Ausdrücklich gegen `false`, nicht gegen „falsy": Ein Spielstand, der vor
+    // dem Einsatz gespeichert wurde, kennt das Feld nicht. viewFor liest es
+    // genauso (`einsatzOffen !== false`) und böte den Einsatz an – ein `!`
+    // hier hätte ihn dann kommentarlos abgewiesen.
+    if (activeTeam.einsatzOffen === false) {
       throw new GameError('Euren Einsatz habt ihr in dieser Runde schon gesetzt.');
     }
     activeTeam.einsatzOffen = false;

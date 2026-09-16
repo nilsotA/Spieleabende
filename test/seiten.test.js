@@ -506,14 +506,61 @@ test('der Einsatz-Schalter entschärft sich, sobald das Brett weg ist', () => {
   const host = ohneKommentare(lies('host.js'));
   const leiste = /function renderControls\(\)[\s\S]*?\n  const key = \[/.exec(host)?.[0] || '';
   assert.ok(leiste, 'renderControls und sein Schlüssel sollten auffindbar bleiben');
-  assert.match(leiste, /state\.phase !== 'board'[\s\S]*?einsatzScharf = false/,
+  assert.match(leiste, /state\.phase !== 'board'[\s\S]*?einsatzFuer = null/,
     'host.js: das Entschärfen muss vor dem Schlüssel stehen, nicht im Board-Zweig');
 
   const fern = ohneKommentare(lies('remote.js'));
   const vorAusstieg = /function renderFeldwahl\(\)[\s\S]*?if \(!zeigen\) \{/.exec(fern)?.[0] || '';
   assert.ok(vorAusstieg, 'renderFeldwahl sollte auffindbar bleiben');
-  assert.match(vorAusstieg, /if \(!zeigen\) einsatzScharf = false;/,
+  assert.match(vorAusstieg, /if \(!zeigen\) einsatzFuer = null;/,
     'remote.js: das Entschärfen muss VOR dem frühen Ausstieg stehen');
+});
+
+/*
+ * Und sie darf den Zugwechsel nicht überleben.
+ *
+ * Nachgestellt im Browser, beide Geräte: Anna sagt den Einsatz an, überlegt es
+ * sich anders, der Host drückt „Zug überspringen" – jetzt ist Bea dran. Der
+ * Schalter stand weiter auf Gold; auf der Fernbedienung schrieb er sich sogar
+ * klaglos auf „✦ Einsatz steht für 🐻 Bea" um. Beas erstes Feld ging dann
+ * verdoppelt ins Spiel und ihr Einsatz war für die Runde weg: gemessen Kachel
+ * 200 → Wert 400, einsatzOffen false, ohne dass jemand das gesagt hätte.
+ *
+ * Ein Ja/Nein kann das nicht auffangen – ein Einsatz gehört einem Tisch.
+ * Deshalb merken sich beide Geräte die Team-ID und vergleichen sie mit dem,
+ * der gerade am Zug ist. Das Handy braucht das nicht: Dort hängt der Schalter
+ * an `you.darfEinsatz`, und das prüft der Server ohnehin gegen das Zugteam.
+ */
+test('der Einsatz-Schalter gehört einem Team, nicht dem Gerät', () => {
+  const host = ohneKommentare(lies('host.js'));
+  assert.match(host, /let einsatzFuer = null;/,
+    'host.js: die Ansage muss die Team-ID festhalten, nicht bloß „ja"');
+  assert.match(host, /einsatzFuer === state\?\.teams\?\.\[state\.turnIndex\]\?\.id/,
+    'host.js: die Ansage gilt nur, solange dasselbe Team am Zug ist');
+  const tile = /onclick: \(\) => \{\s*const mitEinsatz = einsatzSteht\(\);/.exec(host)?.[0] || '';
+  assert.ok(tile, 'host.js: der Feldklick muss über einsatzSteht() gehen, nicht über ein rohes Ja/Nein');
+
+  const fern = ohneKommentare(lies('remote.js'));
+  assert.match(fern, /let einsatzFuer = null;/,
+    'remote.js: dasselbe für die Fernbedienung');
+  assert.match(fern, /if \(!darfEinsatz \|\| einsatzFuer !== zugteam\?\.id\) einsatzFuer = null;/,
+    'remote.js: der Zugwechsel muss die Ansage löschen');
+  assert.match(fern, /const mitEinsatz = einsatzFuer !== null\s*&& einsatzFuer === state\.teams\[state\.turnIndex\]\?\.id;/,
+    'remote.js: auch der Feldklick prüft noch einmal gegen das Zugteam');
+});
+
+/*
+ * Der Einsatz lässt sich mitten im Spiel abschalten – dann muss der Knopf weg.
+ *
+ * Die Steuerleiste baut sich nur bei Schlüsselwechsel neu. Ohne die Einstellung
+ * im Schlüssel bliebe ein „✦ Einsatz" stehen, das der Server längst abweist.
+ */
+test('die Einsatz-Einstellung steht im Schlüssel der Steuerleiste', () => {
+  const host = ohneKommentare(lies('host.js'));
+  const key = /const key = \[\s*state\.phase, q\?\.step,[\s\S]*?\]\.join\('#'\);/.exec(host)?.[0] || '';
+  assert.ok(key, 'der Schlüssel der Steuerleiste sollte auffindbar bleiben');
+  assert.match(key, /state\.settings\.einsatz/,
+    'ohne die Einstellung im Schlüssel überlebt der Knopf das Abschalten');
 });
 
 /*

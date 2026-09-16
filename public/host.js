@@ -17,8 +17,16 @@ let peek = false;         // Lösung auf dem großen Screen kurz sichtbar?
    Er reist als Nutzlast des Feldaufrufs mit, genau wie auf dem Handy; es gibt
    also keine Ansage, die irgendwo hängen bleibt. Gebraucht wird er, wenn die
    Feldwahl auf „nur Host" steht: Dann ruft kein Handy ein Feld auf, und ohne
-   diesen Schalter hätte das Zugteam keinen Weg, seinen Einsatz zu setzen. */
-let einsatzScharf = false;
+   diesen Schalter hätte das Zugteam keinen Weg, seinen Einsatz zu setzen.
+
+   Hier steht die Team-ID, nicht bloß „ja": Ein Einsatz gehört immer einem
+   bestimmten Tisch. Wer ihn ansagt und dann den Zug abgibt, hat ihn nicht
+   angesagt – siehe die Prüfung unten in der Leiste. */
+let einsatzFuer = null;
+
+/** Steht der angesagte Einsatz noch dem, der gerade dran ist? */
+const einsatzSteht = () => einsatzFuer !== null
+  && einsatzFuer === state?.teams?.[state.turnIndex]?.id;
 let standVorRunde = null; // Platzierung am Ende der vorletzten Runde, für den Endstand
 let letzteRunde = null;   // zuletzt gesehene Rundennummer, für die Rundenansage
 let fuehrend = null;      // wer zuletzt allein vorne lag, für den Führungswechsel
@@ -822,8 +830,8 @@ function renderBoard() {
             // sich auch vom Handy des Hosts aus wählen, und dann klappte das
             // Panel auf der Leinwand stumm auf.
             onclick: () => {
-              const mitEinsatz = einsatzScharf;
-              einsatzScharf = false;
+              const mitEinsatz = einsatzSteht();
+              einsatzFuer = null;
               act('pick', { catIdx, rowIdx, einsatz: mitEinsatz });
             },
           }, el('span', {}, String(cell.value))),
@@ -2203,23 +2211,32 @@ function renderControls() {
   };
 
   /*
-   * Eine scharfe Einsatz-Ansage gilt nur, solange das Brett steht.
+   * Eine scharfe Einsatz-Ansage gilt nur, solange das Brett steht – und nur
+   * für den Tisch, der sie angesagt hat.
    *
-   * Nachgestellt: Der Host legt den Schalter um, das Team ruft sein Feld aber
-   * selbst auf dem Handy auf – ohne Einsatz, völlig richtig. Danach stand der
-   * Schalter hier weiter auf Gold, und der nächste Klick des Hosts auf ein Feld
-   * verdoppelte es und verbrauchte den Einsatz des Teams, ohne dass jemand das
-   * entschieden hätte. Gemessen: Wert 400 statt 200, Einsatz verbraucht.
+   * Nachgestellt (1): Der Host legt den Schalter um, das Team ruft sein Feld
+   * aber selbst auf dem Handy auf – ohne Einsatz, völlig richtig. Danach stand
+   * der Schalter hier weiter auf Gold, und der nächste Klick des Hosts auf ein
+   * Feld verdoppelte es und verbrauchte den Einsatz des Teams, ohne dass
+   * jemand das entschieden hätte. Gemessen: Wert 400 statt 200.
    *
-   * Deshalb vor dem Schlüssel und außerhalb jeder Phasenweiche – das Handy tut
-   * seit jeher dasselbe (renderEinsatz in player.js).
+   * Nachgestellt (2): Rot sagt den Einsatz an, überlegt es sich anders und
+   * gibt ab – „Zug überspringen". Jetzt ist Blau dran. Der Schalter stand
+   * weiter auf Gold, und Blaus erstes Feld ging verdoppelt und mit verbrauchtem
+   * Einsatz ins Spiel. Gemessen: Feld 200 → Wert 400, Blaus Einsatz weg.
+   * Deshalb hängt die Ansage an einer Team-ID und nicht an einem Ja/Nein.
+   *
+   * Vor dem Schlüssel und außerhalb jeder Phasenweiche – das Handy tut seit
+   * jeher dasselbe (renderEinsatz in player.js).
    */
   const zugteamJetzt = state.teams[state.turnIndex];
   if (state.phase !== 'board'
     || state.settings.einsatz !== 'runde'
-    || zugteamJetzt?.einsatzOffen === false) {
-    einsatzScharf = false;
+    || zugteamJetzt?.einsatzOffen === false
+    || !einsatzSteht()) {
+    einsatzFuer = null;
   }
+  const einsatzScharf = einsatzFuer !== null;
 
   // Die Leiste war der einzige Renderer ohne Schlüssel und baute sich bei jedem
   // Broadcast neu auf – auch wenn nur ein Handy beigetreten ist. Fällt so ein
@@ -2232,6 +2249,9 @@ function renderControls() {
     // der Host sah nicht, ob der Einsatz nun steht. Dazu, wovon sein Dasein
     // abhängt – wer dran ist und ob der noch einen hat.
     einsatzScharf ? 'e1' : 'e0', state.turnIndex, zugteamJetzt?.einsatzOffen !== false,
+    // Der Einsatz lässt sich auch mitten im Spiel abschalten – dann muss der
+    // Knopf verschwinden, und dafür muss die Leiste neu gebaut werden.
+    state.settings.einsatz,
     (q?.lockedOut || []).join(','),
     // Ob ein Team ein Handy am Netz hat, entscheidet über seinen Vertreterknopf –
     // ohne das im Schlüssel bliebe die Leiste stehen, wenn jemand mitten in der
@@ -2287,7 +2307,7 @@ function renderControls() {
         // `render(state)`: Der Schalter ändert nur diese Oberfläche, nicht den
         // Spielstand. Mit dem aktuellen Zustand als Vorzustand findet der
         // Renderer keinen Unterschied und spielt keine Übergänge noch einmal ab.
-        () => { einsatzScharf = !einsatzScharf; render(state); }, null, seit));
+        () => { einsatzFuer = einsatzScharf ? null : zugteamJetzt.id; render(state); }, null, seit));
     }
     add(button('Zug überspringen', 'btn-ghost btn-sm', () => {
       const next = state.teams[(state.turnIndex + 1) % state.teams.length];

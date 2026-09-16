@@ -11,8 +11,11 @@ verbergeSchluessel();
 let state = null;
 /* Der Einsatz, den der Host für das Zugteam ansagt – nur auf diesem Gerät.
    Er reist als Nutzlast des Feldaufrufs mit, wie auf dem Handy; es gibt also
-   keine Ansage, die irgendwo hängen bleiben könnte. */
-let einsatzScharf = false;
+   keine Ansage, die irgendwo hängen bleiben könnte.
+
+   Gemerkt wird die Team-ID, nicht bloß „ja": Ein Einsatz gehört einem Tisch.
+   Wer ansagt und dann abgibt, hat nicht angesagt. */
+let einsatzFuer = null;
 /**
  * Die Uhr beim freien Buzzer – hier als Sekundenzahl in der Lagezeile.
  *
@@ -407,7 +410,7 @@ function renderFeldwahl() {
   // Stünde sie weiter, verdoppelte der nächste Feldaufruf des Hosts ein Feld,
   // das niemand als Einsatz gemeint hat – nachgestellt auf der Leinwand, wo
   // derselbe Fehler saß.
-  if (!zeigen) einsatzScharf = false;
+  if (!zeigen) einsatzFuer = null;
   karte.hidden = !zeigen;
   if (!zeigen) {
     // Schlüssel löschen, damit die Wahl beim nächsten Auftauchen sicher neu
@@ -418,7 +421,12 @@ function renderFeldwahl() {
 
   const zugteam = state.teams[state.turnIndex];
   const darfEinsatz = state.settings.einsatz === 'runde' && zugteam?.einsatzOffen !== false;
-  if (!darfEinsatz) einsatzScharf = false;
+  // Auch der Zugwechsel löscht die Ansage. Nachgestellt: Ansage für Anna, dann
+  // „Zug überspringen" auf der Leinwand – der Schalter hier schrieb sich
+  // klaglos auf Bea um und verdoppelte Beas nächstes Feld. Niemand hatte das
+  // gesagt, und Beas Einsatz war für die Runde weg.
+  if (!darfEinsatz || einsatzFuer !== zugteam?.id) einsatzFuer = null;
+  const einsatzScharf = einsatzFuer !== null;
 
   // Der Schalterzustand gehört in den Schlüssel: Er färbt die Liste um und
   // verdoppelt jede Zahl darin. Ohne ihn bliebe die Liste stehen, und das
@@ -435,7 +443,7 @@ function renderFeldwahl() {
       type: 'button',
       class: `btn r-einsatz ${einsatzScharf ? 'an' : 'btn-ghost'}`,
       'aria-pressed': String(einsatzScharf),
-      onclick: () => { einsatzScharf = !einsatzScharf; renderFeldwahl(); },
+      onclick: () => { einsatzFuer = einsatzScharf ? null : zugteam.id; renderFeldwahl(); },
     }, einsatzScharf
       ? `✦ Einsatz steht für ${zugteam.wappen} ${zugteam.name} – jetzt Feld wählen`
       : `✦ Einsatz für ${zugteam.wappen} ${zugteam.name}`));
@@ -452,8 +460,9 @@ function renderFeldwahl() {
         // Kategorien untereinander sagt das nichts.
         'aria-label': `${cat.name}, ${cell.value} Punkte${cell.used ? ' – schon gespielt' : ''}`,
         onclick: () => {
-          const mitEinsatz = einsatzScharf;
-          einsatzScharf = false;
+          const mitEinsatz = einsatzFuer !== null
+            && einsatzFuer === state.teams[state.turnIndex]?.id;
+          einsatzFuer = null;
           act('pick', { catIdx, rowIdx, einsatz: mitEinsatz });
         },
       }, String(einsatzScharf ? cell.value * 2 : cell.value)))),
