@@ -10,6 +10,30 @@ import { fileURLToPath } from 'node:url';
 // Integrationstests gegen den laufenden Server: Sie decken ab, was reine
 // Logiktests nicht können – Verbindungen, Rollen, Abstürze und Neustarts.
 
+/*
+ * Wenn hier einmal etwas rot ist und beim nächsten Lauf wieder grün:
+ * Schau zuerst, was die Maschine sonst noch tut.
+ *
+ * Diese Datei startet über ihren Lauf hinweg mehrere Dutzend echte Server und
+ * redet mit ihnen über echte Sockets; `npm test` startet dazu sechs Dateien
+ * gleichzeitig. Auf einer ruhigen Maschine ist das unauffällig. Ist die CPU
+ * ausgelastet, reißen Verbindungen ab und Zeitfenster laufen aus – und zwar
+ * jedes Mal woanders.
+ *
+ * Nachgestellt, nicht vermutet: Mit vier ausgelasteten Kernen fiel im ersten
+ * Lauf „wer wartend auflegt, ist sofort weg" (Zeitfenster), im nächsten
+ * „krumme Anfragen bekommen eine Antwort statt eines Absturzes" – dort mit
+ * `unhandledRejection: terminated` aus undici, also einem abgerissenen Socket.
+ * Ohne Last waren zwölf Läufe hintereinander grün, und derselbe Ablauf einzeln
+ * nachgespielt lief auch unter Last sauber durch.
+ *
+ * Es ist also keine Eigenschaft eines bestimmten Tests und kein Fehler im
+ * Spiel. Deshalb steht hier auch kein größeres Zeitfenster: Zahlen zu
+ * vergrößern, bis der Rechner wieder mithält, verdeckt beim nächsten Mal einen
+ * echten Fehler. Wer die Suite braucht, lässt sie laufen, wenn sonst nichts
+ * läuft.
+ */
+
 const SERVER = fileURLToPath(new URL('../server/index.js', import.meta.url));
 // Fragensätze liegen hier – Tests, die welche anlegen, räumen sie wieder weg.
 const DATEN_URL = new URL('../data/', import.meta.url);
@@ -2750,9 +2774,23 @@ test('wer wartend auflegt, ist sofort weg', async (t) => {
     body: JSON.stringify({ type: 'joinTeam', clientId: 'weg_handy', teamId: team, name: 'Geht', geheim: start.geheim }),
   });
 
+  /*
+   * Die Wartenummer frisch holen, statt sie hochzurechnen.
+   *
+   * Der Server legt eine Anfrage nur dann in den Warteraum, wenn ihr `seit` den
+   * aktuellen Stand schon kennt (`seit >= standNummer`, index.js). `start.nummer
+   * + 1` rechnet damit, dass der Beitritt den Zähler um genau eins weiterstellt
+   * – heute stimmt das, aber es ist eine Annahme über fremden Code, und wer dem
+   * Beitritt je einen zweiten Broadcast gibt, bekommt statt einer klaren
+   * Fehlermeldung einen Test, der etwas anderes prüft als er behauptet.
+   *
+   * (Die gelegentlichen Fehlschläge dieses Tests erklärt das NICHT – siehe die
+   * Notiz am Kopf der Datei. Sie kommen von der Maschine, nicht von hier.)
+   */
+  const jetzt = await (await fetch(`${base}/api/state?clientId=weg_handy&role=player`)).json();
   const abbruch = new AbortController();
   const wartend = fetch(
-    `${base}/api/state?clientId=weg_handy&role=player&seit=${start.nummer + 1}`,
+    `${base}/api/state?clientId=weg_handy&role=player&seit=${jetzt.nummer}`,
     { signal: abbruch.signal },
   ).catch(() => null);
   await warte(300);

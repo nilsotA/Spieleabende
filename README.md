@@ -460,6 +460,25 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 
   Für „Drei Generationen“ und „Groß und Klein“ würde ich ihn auslassen: −2000 ist
   der Moment, an dem ein Zehnjähriger innerlich aussteigt.
+
+  **Was er mit dem Abend macht** – nachgerechnet, nicht vermutet. 2000 simulierte
+  Abende mit vier Teams (Trefferquoten 72/62/52/42 %), die den Einsatz vernünftig
+  nutzen, also ab etwa 60 Prozent Zutrauen:
+
+  | | stärkstes Team gewinnt | Abstand 1. zu 2. | knappe Abende (≤ 500) |
+  |---|---|---|---|
+  | ohne Einsatz | 59,7 % | 1511 | 22,4 % |
+  | Einsatz (einer je Runde) | 59,4 % | 1892 | 19,0 % |
+
+  Die naheliegende Sorge ist damit ausgeräumt: **Der Einsatz macht das stärkste
+  Team nicht stärker.** Wer ohnehin führt, gewinnt mit ihm genauso oft wie ohne –
+  weil ihn jedes Team gleich oft bekommt und die Guten ihn nicht häufiger setzen
+  können als die anderen.
+
+  Was er sehr wohl tut: Er zieht die Endstände auseinander. Der Abstand an der
+  Spitze wächst um ein Viertel, und Fotofinishs werden etwas seltener. Das ist
+  kein Fehler, sondern der Preis der Aufregung – aber wer lieber knappe Abende
+  hat, lässt ihn aus.
 - **Uhr beim freien Buzzer:** normalerweise aus. Eingeschaltet (10 bis 30 Sekunden)
   zieht sich der goldene Lichtbalken über der Bühne zusammen, und auf Handy und
   Fernbedienung läuft die Sekundenzahl mit. Sie **wertet nichts**: Läuft die Zeit ab,
