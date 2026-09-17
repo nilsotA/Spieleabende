@@ -60,6 +60,37 @@ process.on('unhandledRejection', (err) => console.error('Unerwarteter Fehler:', 
 let state = G.createState();
 let bilder = new Map(); // Bilder des laufenden Fragensatzes, siehe externalizeImages
 
+/*
+ * Welche Dateien aus data/bilder heute schon auf dem Brett lagen.
+ *
+ * Eingebettete Bilder sind nicht zu erraten: Ihre Adresse ist ein sha1-Abzug
+ * des Inhalts (/api/bild/<id>, siehe questions.js). Dateien aus data/bilder
+ * haben dagegen die Namen, die jemand ihnen gegeben hat – im mitgelieferten
+ * Satz „Länder & Flaggen" sind das flagge-01.svg bis flagge-08.svg. Wer bei
+ * der ersten Flaggenfrage in den Seitenquelltext schaut, kennt das Muster und
+ * ruft die übrigen sieben einzeln auf. Damit fällt „Flaggen für
+ * Fortgeschrittene" in Runde 2, wo alles doppelt zählt, ohne Nachdenken.
+ *
+ * Der Host bekommt weiterhin jede Datei – er baut ja das Brett. Ein Handy
+ * bekommt, was schon einmal offen lag. Einmal gezeigt bleibt abrufbar: Sonst
+ * verlöre ein Handy mit zäher Leitung das Bild mitten in der Frage, weil die
+ * Anfrage eine Sekunde nach dem Weiterschalten ankommt.
+ *
+ * Greift naturgemäß nur beim Spiel über den Tunnel: Im Heimnetz ist `rolle`
+ * immer 'host' (siehe die Tür weiter unten), und dort steht ohnehin jedem der
+ * ganze Host-Screen samt Lösungen offen – das ist die bewusste Entscheidung,
+ * kein Passwort im eigenen WLAN zu verlangen.
+ */
+let gezeigteBilder = new Set();
+
+/** Merkt sich das Bild der laufenden Frage, falls es eine Datei ist. */
+function merkeBild() {
+  const bild = state.current?.image;
+  if (typeof bild === 'string' && bild.startsWith('/bilder/')) {
+    gezeigteBilder.add(path.basename(bild));
+  }
+}
+
 /* ------------------------------------------------------ Spielstand sichern
  *
  * Ohne das wäre ein versehentlich geschlossenes Terminal das Ende des Abends:
@@ -1002,6 +1033,7 @@ async function handleAction(clientId, body) {
       state = G.backToLobby(state);
       rueckWeg = [];
       bilder = new Map();
+      gezeigteBilder = new Set();
       await forgetSave();
       break;
     default:
@@ -1014,6 +1046,7 @@ async function handleAction(clientId, body) {
     rueckWeg.push(schnappschuss);
     if (rueckWeg.length > RUECKWEG_TIEFE) rueckWeg.shift();
   }
+  merkeBild();
   broadcast();
 }
 
@@ -1163,7 +1196,13 @@ const server = http.createServer(async (req, res) => {
     if (pathname.startsWith('/api/')) return await apiHandler(req, res, url, pathname, rolle);
 
     if (pathname.startsWith('/bilder/')) {
-      return serveFile(res, path.join(DATA_DIR, 'bilder', path.basename(pathname)));
+      const datei = path.basename(pathname);
+      // Siehe `gezeigteBilder`: Der Host baut das Brett und sieht alles, ein
+      // Handy nur, was schon einmal offen lag.
+      if (rolle !== 'host' && !gezeigteBilder.has(datei)) {
+        return send(res, 404, 'text/plain; charset=utf-8', 'Nicht gefunden');
+      }
+      return serveFile(res, path.join(DATA_DIR, 'bilder', datei));
     }
     const file = ROUTES[pathname] || pathname.replace(/^\//, '');
     const full = path.join(PUBLIC_DIR, file);
@@ -1516,6 +1555,9 @@ server.on('error', (err) => {
 const wiederhergestellt = await restore();
 if (wiederhergestellt) {
   state = wiederhergestellt;
+  // Stand beim Neustart eine Bildfrage offen, gehört ihr Bild sofort wieder
+  // zu den gezeigten – sonst stünde auf den Handys ein leerer Rahmen.
+  merkeBild();
 }
 // Vor dem ersten Lauschen: Sonst käme die erste Anfrage an eine Tür ohne Schloss.
 if (ONLINE) zugang = await ladeZugang();

@@ -1665,6 +1665,88 @@ test('eine Wertung für die vorige Lage wird abgelehnt', async (t) => {
   assert.equal(ohne.ok, true, 'ohne Lage-Angabe wird nicht blockiert');
 });
 
+/*
+ * Und der Fall, für den die Signatur eigentlich gebaut ist: zwei Wertungen
+ * NACHEINANDER in derselben Buzzer-Runde.
+ *
+ * Der Test darüber prüft den Sprung primary → buzz. Dort unterscheiden sich die
+ * beiden Signaturen schon am Schritt allein (`f0.3#primary#` gegen
+ * `f0.3#buzz#…`) – die Gerätekennung des Buzzers trägt nichts dazu bei.
+ * Gegenprobe gemacht: Nimmt man `q.buzzedTeamId` aus `lageSignatur` heraus,
+ * bleiben alle 263 Prüfungen des Projekts grün.
+ *
+ * Am Tisch: Zugteam weiß es nicht, Buzzer auf, Bea drückt. Der Host tippt auf
+ * der Fernbedienung „Falsch" – Bea ist raus, der Buzzer bleibt offen, und im
+ * selben Moment drückt Cem. Die Leinwand hinkt hinterher und zeigt noch „Bea
+ * hat gebuzzert"; der Host tippt dort ein zweites Mal „Falsch". Ohne die
+ * Kennung in der Signatur ginge der Druck durch, und Cem verlöre 250 Punkte für
+ * eine Antwort, die er nie gegeben hat.
+ */
+test('eine Wertung für den vorigen Buzzer wird abgelehnt', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-lage2-'));
+  const { proc, base } = await starteServer(6500 + Math.floor(Math.random() * 200), path.join(dir, 'stand.json'));
+  const offen = [];
+  t.after(async () => {
+    for (const r of offen) await r.cancel().catch(() => {});
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const hostGeraet = await verbinde(base, 'lage2-host', 'host');
+  offen.push(hostGeraet.reader);
+  await warte(200);
+  const host = hostGeraet.tu;
+  for (const name of ['Zugteam', 'Bea', 'Cem']) await host({ type: 'addTeam', name });
+  let st = await zustand(base);
+  const [zug, beaTeam, cemTeam] = st.teams.map((x) => x.id);
+
+  const bea = await verbinde(base, 'handy-bea', 'player');
+  const cem = await verbinde(base, 'handy-cem', 'player');
+  offen.push(bea.reader, cem.reader);
+  await warte(200);
+  await bea.tu({ type: 'joinTeam', teamId: beaTeam, name: 'Bea' });
+  await cem.tu({ type: 'joinTeam', teamId: cemTeam, name: 'Cem' });
+
+  await host({ type: 'startGame', file: 'kueche-und-keller.json' });
+  await host({ type: 'setTurn', teamId: zug });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 });
+  await host({ type: 'pass' });                 // Buzzer auf
+
+  await bea.tu({ type: 'buzz' });
+  st = await zustand(base);
+  assert.equal(st.current.buzzedTeamId, beaTeam, 'Bea hat gebuzzert');
+  const lageBeiBea = st.lage;
+  assert.equal(st.current.step, 'buzz', 'derselbe Schritt wie gleich bei Cem');
+
+  // Der Host wertet Bea – sie ist raus, der Buzzer bleibt offen.
+  const erste = await host({ type: 'judge', correct: false, lage: lageBeiBea });
+  assert.equal(erste.ok, true, erste.error || '');
+  st = await zustand(base);
+  assert.equal(st.current.buzzedTeamId, null, 'der Buzzer steht wieder offen');
+
+  // Cem drückt – gleicher Schritt, gleiches Feld, anderes Team.
+  await cem.tu({ type: 'buzz' });
+  st = await zustand(base);
+  assert.equal(st.current.buzzedTeamId, cemTeam, 'jetzt hängt Cem am Haken');
+  assert.equal(st.current.step, 'buzz');
+
+  const punkteVorher = st.teams.map((x) => x.score);
+  // Derselbe Druck noch einmal, mit Beas Lage im Gepäck.
+  const nachgetippt = await host({ type: 'judge', correct: false, lage: lageBeiBea });
+  assert.equal(nachgetippt.ok, false,
+    'ohne die Gerätekennung in der Signatur trifft dieser Druck Cem');
+  assert.match(nachgetippt.error, /geändert/);
+  st = await zustand(base);
+  assert.deepEqual(st.teams.map((x) => x.score), punkteVorher,
+    'und er darf keine Punkte bewegt haben');
+
+  // Mit der aktuellen Lage geht es durch – und trifft Cem.
+  const jetzt = await host({ type: 'judge', correct: false, lage: st.lage });
+  assert.equal(jetzt.ok, true, jetzt.error || '');
+  st = await zustand(base);
+  assert.ok(st.teams.find((x) => x.id === cemTeam).score < 0, 'jetzt zahlt Cem');
+});
+
 /* ------------------------------------------------------- Losspielen */
 
 test('ein belegter Port hält den Start nicht auf', async (t) => {
@@ -2825,6 +2907,74 @@ test('der Notweg steht hinter derselben Tür wie alles andere', async (t) => {
  * Hostrechte. Es war die leere Hülle der Seite. Eine Tür, die nur eine von zwei
  * Schreibweisen kennt, ist trotzdem keine.
  */
+/*
+ * Bilder aus data/bilder gibt es erst, wenn sie auf dem Brett lagen.
+ *
+ * Eingebettete Bilder sind nicht zu erraten – ihre Adresse ist ein sha1-Abzug
+ * des Inhalts (/api/bild/<id>). Dateien aus data/bilder heißen dagegen so, wie
+ * jemand sie genannt hat: im Satz „Länder & Flaggen" flagge-01.svg bis
+ * flagge-08.svg. Wer bei der ersten Flaggenfrage in den Seitenquelltext schaut,
+ * kennt das Muster und holt sich die übrigen sieben einzeln – damit fällt
+ * „Flaggen für Fortgeschrittene" in Runde 2, wo alles doppelt zählt.
+ *
+ * Nur über den Tunnel prüfbar und nur dort wirksam: Im Heimnetz ist `rolle`
+ * immer 'host', und dort steht ohnehin jedem der ganze Host-Screen offen.
+ */
+test('ein Handy bekommt nur die Bilder, die schon auf dem Brett lagen', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-bilder-'));
+  const { proc, base, host, spiel } = await starteOnline(9960 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const hol = (datei, keks) => fetch(`${base}/bilder/${datei}`, { headers: { Cookie: keks } }).then((r) => r.status);
+  // Über den Tunnel wird die Hostrolle nachgewiesen, nicht behauptet: Erst die
+  // Abfrage MIT Hostschlüssel macht dieses Gerät zum Host – und liefert ihm
+  // seinen Nachweis mit (siehe „der Notweg macht handlungsfähig").
+  const geheimHost = (await (await fetch(
+    `${base}/api/state?clientId=bild-host&role=host`,
+    { headers: { Cookie: `qd_host=${host}` } },
+  )).json()).geheim;
+  assert.ok(geheimHost, 'der Host bekommt seinen Nachweis über den Notweg');
+  const tu = (b) => fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: `qd_host=${host}` },
+    body: JSON.stringify({ ...b, role: 'host', clientId: 'bild-host', geheim: geheimHost }),
+  }).then((r) => r.json());
+
+  for (const name of ['Rot', 'Blau']) await tu({ type: 'addTeam', name });
+  const gestartet = await tu({ type: 'startGame', file: 'laender-flaggen.json' });
+  assert.equal(gestartet.ok, true, gestartet.error || '');
+
+  const alle = ['01', '02', '03', '04', '05', '06', '07', '08'].map((n) => `flagge-${n}.svg`);
+  for (const datei of alle) {
+    assert.equal(await hol(datei, `qd_spiel=${spiel}`), 404,
+      `${datei} lag noch nicht auf dem Brett`);
+  }
+
+  const gewaehlt = await tu({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  assert.equal(gewaehlt.ok, true, gewaehlt.error || '');
+  const zustandJetzt = await (await fetch(`${base}/api/state?clientId=bild-host&role=host`,
+    { headers: { Cookie: `qd_host=${host}` } })).json();
+  const offen = (zustandJetzt.current.image || '').split('/').pop();
+  assert.ok(alle.includes(offen), `die Frage sollte ein Flaggenbild tragen, hat aber „${offen}"`);
+
+  assert.equal(await hol(offen, `qd_spiel=${spiel}`), 200, 'das offene Bild muss durch');
+  for (const datei of alle.filter((d) => d !== offen)) {
+    assert.equal(await hol(datei, `qd_spiel=${spiel}`), 404,
+      `${datei} lag noch nicht offen und darf nicht herausgehen`);
+  }
+  // Der Host baut das Brett – er sieht alles.
+  for (const datei of alle) {
+    assert.equal(await hol(datei, `qd_host=${host}`), 200, `${datei} für den Host`);
+  }
+
+  // Einmal gezeigt bleibt abrufbar: Ein Handy mit zäher Leitung fragt das Bild
+  // sonst eine Sekunde nach dem Weiterschalten an und bekommt einen Rahmen.
+  await tu({ type: 'endQuestion' });
+  await tu({ type: 'close' });
+  assert.equal(await hol(offen, `qd_spiel=${spiel}`), 200,
+    'was einmal offen lag, bleibt abrufbar');
+});
+
 test('die Tür kennt auch die Dateinamen der Hostseiten', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-tuer-html-'));
   const { proc, base, host, spiel } = await starteOnline(9760 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
