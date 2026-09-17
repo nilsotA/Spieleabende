@@ -2304,10 +2304,12 @@ test('kein Handy handelt für ein fremdes Gerät', async (t) => {
   await anna.tu({ type: 'joinTeam', teamId: teams[0].id, name: 'Anna' });
   await bea.tu({ type: 'joinTeam', teamId: teams[1].id, name: 'Bea' });
 
-  // Die Kennung steht offen in der Sicht – genau daraus bestand der Angriff.
+  // In der Hostsicht steht die Kennung weiterhin – er braucht sie, um eine
+  // Karteileiche aus einem Team zu nehmen. Auf den Handys steht sie nicht mehr
+  // (siehe die Prüfung unten), und genau daraus bestand der Angriff.
   const sicht = await zustand(base);
   assert.ok(sicht.teams[0].members.some((m) => m.clientId === 'handy-anna'),
-    'die Kennung steht weiterhin in der Sicht');
+    'die Kennung steht weiterhin in der Sicht des Hosts');
 
   const alsWer = (clientId, geheim, body) => fetch(`${base}/api/action`, {
     method: 'POST',
@@ -2336,6 +2338,82 @@ test('kein Handy handelt für ein fremdes Gerät', async (t) => {
   const eigener = await bea.tu({ type: 'buzz' });
   assert.equal(eigener.ok, true, eigener.error || '');
   assert.equal((await zustand(base)).current.buzzedTeamId, teams[1].id);
+});
+
+/*
+ * Der Nachweis taugt nur, solange der Server ihn nicht selbst verrät.
+ *
+ * Nachgestellt, bevor es stand: Anna und Bert sind im Spiel. Annas eigene Sicht
+ * nennt ihr Berts Kennung. Ein GET auf /api/state?clientId=c_bert liefert Berts
+ * Geheimnis im Klartext – ohne jede Prüfung, ob die Kennung dem Fragenden
+ * gehört. Damit ging „leaveTeam" in Berts Namen glatt durch: Bert stand mitten
+ * im Spiel ohne Team da, und der Riegel aus dem Test darüber war ein Riegel vor
+ * einer Tür mit Schlüssel im Schloss. Derselbe Weg über einen zweiten
+ * Ereignisstrom auf dieselbe Kennung.
+ *
+ * Zwei Sperren, absichtlich unabhängig voneinander:
+ *   - Der Server gibt ein Geheimnis nicht mehr heraus, sobald die Kennung es
+ *     einmal vorgezeigt hat. (Vorher ginge der Notweg kaputt – siehe „der
+ *     Notweg macht handlungsfähig".)
+ *   - Die Kennungen anderer Geräte stehen nur noch in der Sicht des Hosts.
+ */
+test('der Server verrät das Geheimnis eines fremden Geräts nicht', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-geheimnisverrat-'));
+  const { proc, base } = await starteServer(9280 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const host = await alsHost(base, 'verrat-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  const teams = (await zustand(base)).teams;
+
+  const anna = await verbinde(base, 'handy-anna', 'player');
+  const bert = await verbinde(base, 'handy-bert', 'player');
+  await warte(150);
+  await anna.tu({ type: 'joinTeam', teamId: teams[0].id, name: 'Anna' });
+  const beitritt = await bert.tu({ type: 'joinTeam', teamId: teams[1].id, name: 'Bert' });
+  assert.equal(beitritt.ok, true, beitritt.error || 'Bert muss beitreten können');
+
+  // 1) Annas Handy sieht Berts Kennung gar nicht erst.
+  const alsSpieler = await (await fetch(`${base}/api/state?clientId=handy-anna&role=player`)).json();
+  const fremde = alsSpieler.teams.flatMap((t2) => t2.members.map((m) => m.clientId)).filter(Boolean);
+  assert.deepEqual(fremde, [], `die Spielersicht nennt Gerätekennungen: ${fremde.join(', ')}`);
+  // Der Host braucht sie weiter – sonst kann er niemanden mehr entfernen.
+  const alsHostSicht = await (await fetch(`${base}/api/state?clientId=verrat-host&role=host`)).json();
+  assert.ok(alsHostSicht.teams.flatMap((t2) => t2.members.map((m) => m.clientId)).includes('handy-bert'),
+    'der Host muss die Kennungen weiter sehen');
+
+  // 2) Und selbst wer die Kennung kennt, bekommt das Geheimnis nicht.
+  const ueberNotweg = await (await fetch(`${base}/api/state?clientId=handy-bert&role=player`)).json();
+  assert.ok(!ueberNotweg.geheim,
+    'der Notweg gibt das Geheimnis einer Kennung heraus, die es längst vorgezeigt hat');
+
+  const zweiterStrom = await fetch(`${base}/api/events?clientId=handy-bert&role=player`);
+  const leser = zweiterStrom.body.getReader();
+  t.after(() => leser.cancel().catch(() => {}));
+  let hallo = null, puffer = '';
+  for (let i = 0; i < 40 && !hallo; i++) {
+    const { value, done } = await leser.read();
+    if (done) break;
+    puffer += new TextDecoder().decode(value);
+    const treffer = /event: hello\ndata: (.*)\n\n/.exec(puffer);
+    if (treffer) hallo = JSON.parse(treffer[1]);
+  }
+  assert.ok(hallo, 'der zweite Strom muss trotzdem begrüßen');
+  assert.ok(!hallo.geheim, 'und auch er darf das Geheimnis nicht noch einmal nennen');
+
+  // 3) Der Angriff, der vorher durchging, geht nicht mehr durch.
+  const angriff = await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'leaveTeam', role: 'player', clientId: 'handy-bert', geheim: ueberNotweg.geheim }),
+  }).then((r) => r.json());
+  assert.equal(angriff.ok, false, 'leaveTeam in Berts Namen');
+  assert.ok((await zustand(base)).teams[1].members.some((m) => m.clientId === 'handy-bert'),
+    'Bert steht noch in seinem Team');
+
+  // 4) Bert selbst merkt von alldem nichts.
+  const eigenes = await bert.tu({ type: 'wappen', wappen: '🐻' });
+  assert.equal(eigenes.ok, true, eigenes.error || 'Bert muss weiter handeln können');
 });
 
 test('eine Kennung, die der Server nicht kennt, wird nicht ausgesperrt', async (t) => {

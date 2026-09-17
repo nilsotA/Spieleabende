@@ -1067,9 +1067,18 @@ export function viewFor(state, { isHost, clientId }) {
       // Alte Spielstände kennen die Bilanz nicht oder nur teilweise – fehlende
       // Felder werden aufgefüllt, statt dass das Handy auf `undefined` läuft.
       bilanz: { ...leereBilanz(), ...(t.bilanz || {}) },
+      // Die Gerätekennung sieht nur der Host. Er braucht sie, um eine
+      // Karteileiche aus einem Team zu nehmen (`removeMember`); kein Handy
+      // fasst sie an – weder player.js noch remote.js lesen sie je.
+      //
+      // Vorher stand sie in jeder Sicht. Zusammen mit einem Server, der das
+      // Geräte-Geheimnis zu jeder genannten Kennung herausgab, war das der
+      // halbe Weg zu einem fremden Buzz: Annas Handy las Berts Kennung
+      // einfach aus dem Spielstand ab. Die Lücke selbst ist zu, aber die
+      // Kennung gehört trotzdem nicht auf jedes Handy im Raum.
       members: t.members.map((m) => ({
         name: m.name,
-        clientId: m.clientId,
+        ...(isHost ? { clientId: m.clientId } : {}),
         online: m.online !== false,
       })),
     })),

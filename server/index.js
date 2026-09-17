@@ -214,9 +214,16 @@ const connections = new Map(); // connId -> { res, clientId, isHost }
  * anderes buzzern, es aus seinem Team werfen oder es woanders eintragen –
  * nachgestellt mit einem einzigen POST.
  *
- * Deshalb bekommt jede Kennung beim ersten Ereignisstrom ein Geheimnis, das
- * nur über diesen Strom herausgeht (`hello`). Wer eine Kennung benutzt, für die
- * eines hinterlegt ist, muss es mitschicken.
+ * Deshalb bekommt jede Kennung beim ersten Ereignisstrom ein Geheimnis. Wer
+ * eine Kennung benutzt, für die eines hinterlegt ist, muss es mitschicken.
+ *
+ * Herausgegeben wird es nur, solange die Kennung es noch nicht bewiesen hat –
+ * siehe `geheimnisHeraus`. Solange der Server es jedem nannte, der die Kennung
+ * bloß nannte, war der ganze Nachweis wirkungslos: Nachgestellt mit zwei Handys
+ * am selben Server – Annas Sicht nennt ihr Berts Kennung, ein GET auf
+ * /api/state?clientId=c_bert liefert Berts Geheimnis im Klartext, und damit
+ * ging ein leaveTeam in Berts Namen glatt durch; Bert stand mitten im Spiel
+ * ohne Team da.
  *
  * Bewusst nachsichtig, wo nichts zu gewinnen ist: Für eine Kennung ohne
  * hinterlegtes Geheimnis geht der Zug durch. Sonst stünde nach einem
@@ -241,6 +248,48 @@ function geheimnisFuer(clientId) {
   return geheimnisse.get(clientId);
 }
 
+/*
+ * Kennungen, die ihr Geheimnis schon einmal vorgezeigt haben.
+ *
+ * Immer Teilmenge von `geheimnisse` – wer dort gelöscht wird, fliegt auch hier
+ * raus, sonst bliebe ein Gerät mit einem Geheimnis zurück, das der Server nicht
+ * mehr kennt und ihm auch nicht mehr sagen würde.
+ */
+const bewiesen = new Set();
+
+/**
+ * Das Geheimnis, das diese Anfrage mitbekommen darf – oder nichts.
+ *
+ * Die Gratwanderung hier hat zwei Kanten, und beide sind schon einmal
+ * abgerutscht.
+ *
+ * Nach der einen Seite: Solange der Server es jedem nannte, der die Kennung
+ * nannte, war er kein Türsteher, sondern ein Schlüsselautomat – Annas Handy
+ * las Berts Kennung aus dem Spielstand ab, holte sich sein Geheimnis mit einem
+ * GET und warf ihn aus seinem Team.
+ *
+ * Nach der anderen: Es einfach nur beim allerersten Mal herauszugeben, bricht
+ * den Notweg (siehe den Test „der Notweg macht handlungsfähig"). Ein Handy,
+ * dessen Ereignisstrom unterwegs hängen bleibt, hat den Server schon dazu
+ * gebracht, ein Geheimnis anzulegen – gesagt bekommen hat es das nie. Genau
+ * dafür gibt es die Abholung über /api/state, und die ginge dann leer aus.
+ *
+ * Dazwischen liegt: Wer sein Geheimnis schon einmal VORGEZEIGT hat, kennt es
+ * und braucht es nie wieder gesagt zu bekommen. Wer es noch nie vorgezeigt hat,
+ * hat auch noch nichts getan, das sich zu übernehmen lohnte – dieselbe
+ * Nachsicht wie oben, nur an der richtigen Stelle.
+ *
+ * Was bleibt: Startet der Server mitten im Abend neu, sind beide Listen leer,
+ * und das erste Gerät, das eine Kennung nennt, bekommt ein frisches Geheimnis
+ * dafür. In den paar Sekunden, bis die echten Handys wieder da sind, ließe sich
+ * eine fremde Kennung besetzen. Dafür muss man den Neustart abpassen; vorher
+ * genügte ein GET zu jedem beliebigen Zeitpunkt.
+ */
+function geheimnisHeraus(clientId) {
+  if (bewiesen.has(clientId)) return undefined;
+  return geheimnisFuer(clientId);
+}
+
 /**
  * Platz schaffen – zuerst bei denen, die niemandem mehr gehören.
  *
@@ -256,12 +305,13 @@ function vergissAlteGeheimnisse() {
   ]);
   for (const id of geheimnisse.keys()) {
     if (geheimnisse.size <= GEHEIMNISSE_MAX / 2) break;
-    if (!gebraucht.has(id)) geheimnisse.delete(id);
+    if (!gebraucht.has(id)) { geheimnisse.delete(id); bewiesen.delete(id); }
   }
   // Selbst wenn alle gebraucht werden: Der Deckel gilt trotzdem.
   for (const id of geheimnisse.keys()) {
     if (geheimnisse.size < GEHEIMNISSE_MAX) break;
     geheimnisse.delete(id);
+    bewiesen.delete(id);
   }
 }
 
@@ -279,7 +329,11 @@ const VORSPANN = randomBytes(6144).toString('base64');
 
 function darfHandeln(clientId, mitgebracht) {
   const erwartet = geheimnisse.get(clientId);
-  return !erwartet || erwartet === mitgebracht;
+  if (!erwartet) return true;
+  if (erwartet !== mitgebracht) return false;
+  // Vorgezeigt: Ab jetzt sagt der Server dieses Geheimnis niemandem mehr.
+  bewiesen.add(clientId);
+  return true;
 }
 
 function connectionsOf(clientId) {
@@ -371,7 +425,10 @@ function weckeWartende() {
 function antworteMitStand(res, { isHost, clientId }) {
   const sicht = sichtFuer({ isHost, clientId });
   sicht.nummer = standNummer;
-  if (clientId) sicht.geheim = geheimnisFuer(clientId);
+  if (clientId) {
+    const geheim = geheimnisHeraus(clientId);
+    if (geheim) sicht.geheim = geheim;
+  }
   sendJson(res, 200, sicht);
 }
 
@@ -1094,7 +1151,7 @@ function sseHandler(req, res, url, rolle) {
   connections.set(connId, conn);
   G.setMemberOnline(state, clientId, true);
 
-  write(conn, 'hello', { clientId, isHost, geheim: geheimnisFuer(clientId) });
+  write(conn, 'hello', { clientId, isHost, geheim: geheimnisHeraus(clientId) });
   sendState(conn);
   broadcast(); // die anderen sehen sofort, dass jemand wieder online ist
 
