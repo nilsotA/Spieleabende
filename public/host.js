@@ -2401,9 +2401,24 @@ function renderControls() {
       && !q.lockedOut.includes(team.id)
       && !team.members.some((m) => m.online !== false));
     const aufschriften = knopfAufschriften(vertreten);
-    vertreten.forEach((team, i) => add(buzzKnopf(team, aufschriften[i])));
+    /*
+     * Eigener Bezugspunkt für die Vertreterknöpfe.
+     *
+     * Sie kommen und gehen mit der Online-Lage, und genau dann sollen sie kurz
+     * taub sein – deshalb reicht `seit` nicht, der kennt die Handys nicht. Die
+     * Geburt des Knotens reicht aber auch nicht: Die Leiste baut sich schon
+     * neu, wenn irgendein anderes Handy aufwacht, und dann standen unveränderte
+     * Vertreterknöpfe 400 ms taub da – auf der Leiste, mit der der Host für
+     * einen Tisch ohne Handy buzzert.
+     */
+    const vertreterSeit = lageSeit('vertreter',
+      `${state.phase}#${q.step}#${vertreten.map((t) => t.id).join(',')}`);
+    vertreten.forEach((team, i) => add(buzzKnopf(team, aufschriften[i], vertreterSeit)));
+    // Mit `seit`: Der Knopf gehört zur Wertungsreihe – er ist taub, wenn sich
+    // die Lage ändert (ein Buzz kommt herein), nicht wenn irgendwo ein Handy
+    // aufwacht. Die Fernbedienung macht das seit jeher so.
     add(button(q.stechen ? 'Keiner weiß es → nächste Frage' : 'Keiner weiß es → auflösen',
-      'btn-primary', () => act('endQuestion'), '4'));
+      'btn-primary', () => act('endQuestion'), '4', seit));
   } else if (q.buzzedTeamId && q.step === 'buzz') {
     // Im Stechen gibt es keine Punkte zu gewinnen, sondern den Abend.
     setzeText(hint, q.stechen
@@ -2462,12 +2477,15 @@ function button(label, cls, onclick, key, seit = performance.now()) {
  * Der volle Name bleibt als Titel dran, für den Fall, dass zwei Teams sich
  * ähnlich nennen.
  */
-function buzzKnopf(team, aufschrift) {
+function buzzKnopf(team, aufschrift, seit = performance.now()) {
   const node = el('button', {
     class: 'btn btn-ghost btn-sm buzz-fuer',
     title: `Buzz für ${team.name}`,
     'aria-label': `Buzz für ${team.name}`,
-    onclick: () => act('buzzFor', { teamId: team.id }),
+    onclick: () => {
+      if (performance.now() - seit < 400) return;
+      act('buzzFor', { teamId: team.id });
+    },
   },
     // `color` mit setzen: Der Schein um den Punkt kommt aus currentColor
     // (host.css .buzz-fuer .dot). Ohne das erbte er die Textfarbe des Knopfes
@@ -2552,10 +2570,17 @@ function zusammenfassung() {
   zeilen.push('', 'Bilanz');
   for (const t of [...state.teams].sort((a, b) => b.score - a.score)) {
     const b = t.bilanz || {};
+    // `falsch` zählt alles, was nicht getroffen wurde – auch jedes „weiß
+    // nicht". Für die Punkte ist das richtig (beide kosten dasselbe, siehe
+    // verrechneFalsch), für diese Zeile nicht: Danebenstehend las sich „1
+    // richtig, 3 falsch, 2× weiß nicht" wie sechs Fragen, gespielt waren vier.
+    // Das Handy rechnet dieselbe Differenz schon lange (player.js, „Daneben").
+    const gepasst = b.gepasst || 0;
+    const daneben = Math.max(0, (b.falsch || 0) - gepasst);
     const teile = [
       `${b.richtig || 0} richtig`,
-      `${b.falsch || 0} falsch`,
-      `${b.gepasst || 0}× weiß nicht`,
+      `${daneben} falsch`,
+      `${gepasst}× weiß nicht`,
     ];
     if (b.geklaut) teile.push(`${b.geklaut}× gebuzzert`);
     if (t.serieBest >= 3) teile.push(`beste Serie ${t.serieBest}`);
@@ -2667,8 +2692,12 @@ function fillMenu() {
   // taub. Er wird stattdessen nachgetragen, so wie die Mitgliederzeile am Pult.
   // Die Zahl der abgemeldeten Geräte gehört dagegen hinein: Von ihr hängt ab,
   // ob es den Knopf „Offline entfernen" überhaupt gibt.
-  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.members.some((m) => !m.online) ? 1 : 0}`).join('|')
-    + `#${state.turnIndex}`;
+  // Der Zugindex stand hier auch einmal drin – aber keine Zeile dieser Liste
+  // zeigt ihn an: „dran" sieht bei jedem Team gleich aus, egal wer gerade dran
+  // ist. Er baute die Reihe also grundlos neu und machte damit genau die Knöpfe
+  // 400 ms taub, die der Absatz darüber ausdrücklich verschont: Ein Tipp auf
+  // „dran" und die nächste Punktekorrektur verpuffte.
+  const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.members.some((m) => !m.online) ? 1 : 0}`).join('|');
   const seit = lageSeit('menu', key);
   if (list.dataset.key !== key) {
     list.dataset.key = key;

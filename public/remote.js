@@ -287,10 +287,20 @@ function render() {
         setz(big(q.stechen ? 'Keiner weiß es → nächste Frage' : 'Keiner weiß es → auflösen',
           'btn-primary', () => act('endQuestion'), seit));
         // Vertreten wird nur, wer keinen eigenen Buzzer in der Hand hat.
-        for (const team of state.teams) {
-          if (team.id === q.teamId || q.lockedOut.includes(team.id)) continue;
-          if (team.members.some((m) => m.online !== false)) continue;
-          setz(big(`Buzz: ${team.wappen} ${team.name}`, 'btn-ghost', () => act('buzzFor', { teamId: team.id })));
+        //
+        // Eigener Bezugspunkt: Diese Knöpfe kommen und gehen mit der
+        // Online-Lage, und genau dann sollen sie kurz taub sein. Die Geburt des
+        // Knotens reicht dafür nicht – die Leiste baut sich schon neu, wenn
+        // irgendein anderes Handy aufwacht, und dann standen unveränderte
+        // Vertreterknöpfe 400 ms taub da.
+        const vertreten = state.teams.filter((team) => team.id !== q.teamId
+          && !q.lockedOut.includes(team.id)
+          && !team.members.some((m) => m.online !== false));
+        const vertreterSeit = lageSeit('vertreter',
+          `${state.phase}#${q.step}#${vertreten.map((t) => t.id).join(',')}`);
+        for (const team of vertreten) {
+          setz(big(`Buzz: ${team.wappen} ${team.name}`, 'btn-ghost',
+            () => act('buzzFor', { teamId: team.id }), vertreterSeit));
         }
       } else if (q.step === 'buzz' && q.buzzedTeamId) {
         setzeText(phase, q.stechen
@@ -424,7 +434,13 @@ function renderRueckgaengig() {
 function renderFeldwahl() {
   const karte = $('#r-board');
   const liste = $('#r-board-list');
-  const zeigen = state.phase === 'board' && !!state.board;
+  // In der Pause verschwindet die Feldwahl – wie auf der Leinwand und auf dem
+  // Handy. Der Server weist einen Feldaufruf in der Pause ohnehin ab
+  // („Ihr seid gerade in der Pause", pickCell in game.js); hier stand die Liste
+  // trotzdem scharf da, und ein Tipp im Vorbeigehen antwortete mit einem roten
+  // Kasten. Eine Liste, die auf jeden Tipp mit einer Absage antwortet, sieht
+  // nach kaputt aus – dieselbe Begründung wie beim Raster des Handys.
+  const zeigen = state.phase === 'board' && !!state.board && !state.pause;
   // Vor dem Ausstieg: Eine scharfe Ansage gilt nur, solange das Brett steht.
   // Stünde sie weiter, verdoppelte der nächste Feldaufruf des Hosts ein Feld,
   // das niemand als Einsatz gemeint hat – nachgestellt auf der Leinwand, wo

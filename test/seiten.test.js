@@ -521,6 +521,94 @@ test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
 });
 
 /*
+ * Vier Knöpfe, die zu oft taub waren – und einer, der zu lange scharf stand.
+ *
+ * Die Anlaufsperre soll verhindern, dass ein Knopf unter dem Daumen
+ * ausgetauscht wird. Sie zählt ab dem Moment, in dem sich die BEDEUTUNG ändert;
+ * hängt sie stattdessen an der Geburt des Knotens, schlägt sie auch dann zu,
+ * wenn sich gar nichts geändert hat. Gemessen im Browser, jeweils mit
+ * Gegenprobe auf dem alten Stand:
+ *
+ *   Menü: Der Zugindex stand im Schlüssel, obwohl keine Zeile ihn anzeigt –
+ *   „dran" baute die Reihe neu (Schlüssel …#0 → …#1), der „+100"-Knopf war ein
+ *   frischer Knoten. Genau die Knöpfe, die der Kommentar dort ausdrücklich
+ *   verschonen will.
+ *
+ *   Vertreterknöpfe: Geht das Handy des ZUGTEAMS weg, ändert sich an ihnen
+ *   nichts – es steht nie in ihrer Liste. Die Leiste baut sich trotzdem neu,
+ *   weil die Online-Lage in ihrem Schlüssel steht. Sofort danach gedrückt:
+ *   ohne eigenen Bezugspunkt kam der Buzz nicht an, mit kommt er an.
+ *
+ *   „Keiner weiß es → auflösen" hatte gar keinen Bezugspunkt, obwohl es zur
+ *   Wertungsreihe gehört – die Fernbedienung macht das seit jeher richtig.
+ */
+test('die Knöpfe der Leinwand hängen an der Lage, nicht an ihrer Geburt', () => {
+  const js = ohneKommentare(lies('host.js'));
+
+  const menue = /function fillMenu\(\)[\s\S]*?const seit = lageSeit\('menu', key\);/.exec(js)?.[0] || '';
+  assert.ok(menue, 'fillMenu und sein Schlüssel sollten auffindbar bleiben');
+  assert.doesNotMatch(menue, /state\.turnIndex/,
+    'der Zugindex zeigt in dieser Liste nichts an und baut sie nur grundlos neu');
+
+  assert.match(js, /lageSeit\('vertreter',/,
+    'die Vertreterknöpfe brauchen einen eigenen Bezugspunkt');
+  assert.match(js, /buzzKnopf\(team, aufschriften\[i\], vertreterSeit\)/,
+    'und müssen ihn auch bekommen');
+  assert.match(js, /function buzzKnopf\(team, aufschrift, seit = performance\.now\(\)\)/,
+    'buzzKnopf muss eine Anlaufsperre überhaupt kennen');
+
+  assert.match(js, /'Keiner weiß es → auflösen',\s*\n?\s*'btn-primary', \(\) => act\('endQuestion'\), '4', seit\)/,
+    '„Keiner weiß es" gehört zur Wertungsreihe und damit an deren Bezugspunkt');
+});
+
+test('die Vertreterknöpfe der Fernbedienung haben denselben Bezugspunkt', () => {
+  const js = ohneKommentare(lies('remote.js'));
+  assert.match(js, /lageSeit\('vertreter',/, 'auch hier');
+  assert.match(js, /act\('buzzFor', \{ teamId: team\.id \}\), vertreterSeit\)/,
+    'und die Knöpfe müssen ihn mitbekommen');
+});
+
+/*
+ * In der Pause verschwindet die Feldwahl – auf allen drei Schirmen.
+ *
+ * Der Server weist einen Feldaufruf in der Pause ab („Ihr seid gerade in der
+ * Pause", pickCell). Auf der Fernbedienung stand die Liste trotzdem scharf da;
+ * ein Tipp im Vorbeigehen antwortete mit einem roten Kasten. Eine Liste, die
+ * auf jeden Tipp mit einer Absage antwortet, sieht nach kaputt aus – dieselbe
+ * Begründung, mit der das Raster des Handys längst verschwindet.
+ */
+test('die Feldwahl der Fernbedienung verschwindet in der Pause', () => {
+  const fern = ohneKommentare(lies('remote.js'));
+  assert.match(fern, /const zeigen = state\.phase === 'board' && !!state\.board && !state\.pause;/,
+    'sonst prallt jeder Tipp am Server ab');
+  const handy = ohneKommentare(lies('player.js'));
+  assert.match(handy, /const zeigen = state\.phase === 'board' &&[^;]*!state\.pause;/,
+    'auf dem Handy war es immer schon so');
+});
+
+/*
+ * Die Zusammenfassung darf jedes „weiß nicht" nur einmal zählen.
+ *
+ * `bilanz.falsch` zählt alles, was nicht getroffen wurde – auch jedes „weiß
+ * nicht" (passQuestion ruft verrechneFalsch). Für die Punkte ist das genau
+ * richtig, beide kosten dasselbe. In der Zeile der Zusammenfassung stand es
+ * aber roh daneben: Gemessen „1 richtig, 3 falsch, 2× weiß nicht" für vier
+ * gespielte Fragen – sechs Zahlen für vier Fragen. Über einen ganzen Abend:
+ * 16 + 32 + 32 = 80 statt 48.
+ *
+ * Das Handy rechnet dieselbe Differenz seit jeher (player.js, „Daneben").
+ */
+test('die Zusammenfassung zählt „weiß nicht" nicht doppelt', () => {
+  const js = ohneKommentare(lies('host.js'));
+  const block = /function zusammenfassung\(\)[\s\S]*?\n\}/.exec(js)?.[0] || '';
+  assert.ok(block, 'zusammenfassung() sollte auffindbar bleiben');
+  assert.match(block, /Math\.max\(0, \(b\.falsch \|\| 0\) - gepasst\)/,
+    'ohne den Abzug liest sich die Zeile wie doppelt so viele Fragen');
+  assert.doesNotMatch(block, /\$\{b\.falsch \|\| 0\} falsch/,
+    'die rohe Zahl gehört nicht in die Zeile');
+});
+
+/*
  * Der Notweg muss auch aufmachen können, wenn der Strom SPÄTER abreißt.
  *
  * `stromKam` hieß „ist je ein Zustand angekommen" und entschied gleichzeitig,
