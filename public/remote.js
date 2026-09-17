@@ -25,6 +25,17 @@ let einsatzFuer = null;
 let uhrStopp = null;
 let uhrSchluessel = null;
 let uhrText = '';
+/*
+ * Was die Uhr zuletzt an die Lagezeile gehängt hat.
+ *
+ * starteUhr() hört bei null auf zu ticken – „⏱ Zeit ist um" wird also genau
+ * einmal geschrieben. Der nächste beliebige Rundruf (ein Handy wacht auf) baute
+ * die Lagezeile neu und übermalte es; danach stand dort wieder „Buzzer ist
+ * frei", als liefe die Uhr noch, und sie kam nie wieder. Der Buzzer bleibt ja
+ * offen – die abgelaufene Uhr ist genau der Hinweis, dass jetzt aufgelöst
+ * werden darf.
+ */
+let uhrSuffix = '';
 
 function renderUhr() {
   const q = state.current;
@@ -35,6 +46,7 @@ function renderUhr() {
     uhrStopp?.();
     uhrStopp = null;
     uhrSchluessel = null;
+    uhrSuffix = '';
     return;
   }
   if (schluessel === uhrSchluessel) return;
@@ -42,7 +54,8 @@ function renderUhr() {
   uhrSchluessel = schluessel;
   uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
     const sek = Math.ceil(rest / 1000);
-    setzeText($('#r-phase'), rest > 0 ? `${uhrText}  ⏱ ${sek}` : `${uhrText}  ⏱ Zeit ist um`);
+    uhrSuffix = rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um';
+    setzeText($('#r-phase'), uhrText + uhrSuffix);
   });
 }
 
@@ -280,7 +293,7 @@ function render() {
         uhrText = q.stechen
           ? 'Stechen – wer zuerst drückt, antwortet.'
           : `Buzzer ist frei · ${q.halfValue} Punkte`;
-        setzeText(phase, uhrText);
+        setzeText(phase, uhrText + uhrSuffix);
         // „Keiner weiß es" zuerst: Das ist der Knopf, der die Frage beendet,
         // und bei acht Teams stand er vorher unter sieben Vertreterknöpfen –
         // also außerhalb des Bildschirms, obwohl der Tisch längst wartet.

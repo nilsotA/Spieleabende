@@ -521,6 +521,43 @@ test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
 });
 
 /*
+ * „⏱ Zeit ist um" bleibt stehen, bis die Frage vorbei ist.
+ *
+ * starteUhr() hört bei null auf zu ticken – der Satz wird genau einmal
+ * geschrieben. Der nächste beliebige Rundruf baute die Lagezeile neu und
+ * übermalte ihn; danach stand dort wieder „Buzzer ist frei · 50 Punkte", als
+ * liefe die Uhr noch, und er kam nie wieder. Gemessen auf Fernbedienung und
+ * Handy. Der Buzzer bleibt dabei offen – die abgelaufene Uhr ist genau der
+ * Hinweis an den Host, dass er jetzt auflösen darf.
+ */
+test('die abgelaufene Buzzer-Uhr bleibt in der Lagezeile stehen', () => {
+  for (const [datei, knoten] of [['remote.js', 'phase'], ['player.js', 'status']]) {
+    const js = ohneKommentare(lies(datei));
+    assert.match(js, /let uhrSuffix = '';/, `${datei}: der Anhang braucht ein Gedächtnis`);
+    assert.match(js, /uhrSuffix = rest > 0 \? `  ⏱ \$\{sek\}` : '  ⏱ Zeit ist um';/,
+      `${datei}: die Uhr muss ihn füllen`);
+    assert.match(js, new RegExp(`setzeText\\(${knoten}, (uhrText|grundtext) \\+ uhrSuffix\\)`),
+      `${datei}: und die Lagezeile muss ihn wieder anhängen`);
+    assert.match(js, /uhrSchluessel = null;\s*\n\s*uhrSuffix = '';/,
+      `${datei}: beim Abschalten der Uhr gehört er weg`);
+  }
+});
+
+/*
+ * Die Rundenansage geht nur vorwärts.
+ *
+ * Sie ist die einzige Vollbildansage des Abends und auf zweimal budgetiert
+ * (siehe ansagen() in host.js). Nimmt der Host den Rundenwechsel zurück, ging
+ * sie noch einmal auf – gemessen „Runde 1 / Los geht's!" über dem Rundenende,
+ * mit Ton, obwohl gerade gar nichts losgeht.
+ */
+test('die Rundenansage feuert nicht beim Zurücknehmen', () => {
+  const js = ohneKommentare(lies('host.js'));
+  assert.match(js, /const neueRunde = frischGebaut && letzteRunde !== null && state\.round > letzteRunde;/,
+    'mit `!==` statt `>` feuert sie auch rückwärts');
+});
+
+/*
  * Vier Knöpfe, die zu oft taub waren – und einer, der zu lange scharf stand.
  *
  * Die Anlaufsperre soll verhindern, dass ein Knopf unter dem Daumen

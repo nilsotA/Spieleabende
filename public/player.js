@@ -741,6 +741,17 @@ function renderPicker() {
 let uhrStopp = null;
 let uhrSchluessel = null;
 let uhrText = '';
+/*
+ * Was die Uhr zuletzt an die Lagezeile gehängt hat.
+ *
+ * starteUhr() hört bei null auf zu ticken – „⏱ Zeit ist um" wird also genau
+ * einmal geschrieben. Der nächste beliebige Rundruf (ein Handy wacht auf) baute
+ * die Lagezeile neu und übermalte es; danach stand dort wieder „Buzzer ist
+ * frei", als liefe die Uhr noch, und sie kam nie wieder. Der Buzzer bleibt ja
+ * offen – die abgelaufene Uhr ist genau der Hinweis, dass jetzt aufgelöst
+ * werden darf.
+ */
+let uhrSuffix = '';
 
 function renderUhr() {
   const q = state.current;
@@ -753,6 +764,7 @@ function renderUhr() {
     uhrStopp?.();
     uhrStopp = null;
     uhrSchluessel = null;
+    uhrSuffix = '';
     return;
   }
   if (schluessel === uhrSchluessel) return;
@@ -760,7 +772,8 @@ function renderUhr() {
   uhrSchluessel = schluessel;
   uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
     const sek = Math.ceil(rest / 1000);
-    setzeText(status, rest > 0 ? `${uhrText}  ⏱ ${sek}` : `${uhrText}  ⏱ Zeit ist um`);
+    uhrSuffix = rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um';
+    setzeText(status, uhrText + uhrSuffix);
   });
 }
 
@@ -861,7 +874,7 @@ function renderBuzzer(prev) {
       ? 'Stechen! Wer zuerst drückt und richtig liegt, gewinnt.'
       : `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`;
     uhrText = grundtext;
-    setzeText(status, grundtext);
+    setzeText(status, grundtext + uhrSuffix);
     status.classList.add('you');
     // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst
     // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.

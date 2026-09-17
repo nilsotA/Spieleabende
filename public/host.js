@@ -801,7 +801,12 @@ function renderBoard() {
   // Unterschieden wird am Board selbst: Beim echten Anfang ist noch kein Feld
   // gespielt, nach einem Reload mittendrin schon.
   const nochNichtsGespielt = data.categories.every((c) => c.cells.every((z) => !z.used));
-  const neueRunde = frischGebaut && letzteRunde !== null && letzteRunde !== state.round;
+  // Nur vorwärts ansagen. Gemessen: Der Host nimmt den Rundenwechsel zurück –
+  // und über dem Rundenende ging die Vollbildansage samt Ton noch einmal auf,
+  // diesmal mit „Runde 1 / Los geht's!", obwohl gerade gar nichts losgeht. Die
+  // Ansage ist auf zweimal pro Abend budgetiert (siehe ansagen()); eine, die
+  // beim Zurücknehmen feuert, gehört nicht dazu.
+  const neueRunde = frischGebaut && letzteRunde !== null && state.round > letzteRunde;
   const spielStart = frischGebaut && letzteRunde === null && state.round === 1 && nochNichtsGespielt;
   if (neueRunde || spielStart) {
     sound('rundenstart');
