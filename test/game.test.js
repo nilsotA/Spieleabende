@@ -996,6 +996,69 @@ test('ein Satz lässt sich nicht mitten im Spiel neu starten', () => {
  * ändern sich nur die Nullen, und auf „sollen wir?" gäbe es nie eine
  * interessante Antwort. Deshalb kostet ein Einsatz den vollen doppelten Wert.
  */
+/*
+ * Eine Pause darf die Reaktionszeit eines Buzzes nicht schrumpfen lassen.
+ *
+ * setPause schiebt beim Weiterspielen `buzzOpenedAt` um die Pausendauer nach
+ * vorn, damit die Uhr am offenen Buzzer mit anhält. Hängt in dem Moment schon
+ * ein Buzz am Haken, blieb `buzzedAt` stehen – und die angezeigte Zeit ist die
+ * Differenz der beiden. Gemessen: Bernd drückt nach 903 ms, der Host pausiert
+ * zwei Sekunden, bevor er wertet, und danach stand auf der Leinwand „0,00 s",
+ * während der Rückblick am Ende weiter 903 ms meldete. Bei einer kurzen Pause
+ * fällt es nicht einmal auf: 600 ms machen aus 3,00 s ein falsches 2,40 s.
+ *
+ * Ohne Uhren gemessen: Die Zeitpunkte werden gesetzt, nicht abgewartet.
+ */
+test('eine Pause lässt die Reaktionszeit eines wartenden Buzzes stehen', () => {
+  const state = G.createState();
+  for (const name of ['Rot', 'Blau']) G.addTeam(state, name);
+  state.teams[0].members.push({ clientId: 'a', name: 'Anna', online: true });
+  state.teams[1].members.push({ clientId: 'b', name: 'Bernd', online: true });
+  G.startGame(state, SET);
+  G.pickCell(state, 0, 0);
+  G.passQuestion(state);
+  G.buzz(state, 'b');
+
+  const q = state.current;
+  const jetzt = Date.now();
+  q.buzzOpenedAt = jetzt - 3000;
+  q.buzzedAt = jetzt - 2100;          // 900 ms Reaktionszeit
+  const vorher = G.viewFor(state, { isHost: true }).current.buzzMs;
+  assert.equal(vorher, 900, 'Ausgangslage');
+
+  // Der Host pausiert zwei Sekunden, bevor er wertet.
+  G.setPause(state, true);
+  state.pauseSeit = jetzt - 2000;
+  G.setPause(state, false);
+
+  assert.equal(G.viewFor(state, { isHost: true }).current.buzzMs, 900,
+    'die Pause gehört nicht zur Reaktionszeit – aber sie darf sie auch nicht auffressen');
+});
+
+test('eine Pause vor dem Buzz zählt weiterhin nicht mit', () => {
+  // Die Gegenrichtung, die der Zweig eigentlich lösen soll: Die Pausenzeit
+  // gehört nicht zur Bedenkzeit. Ohne sie stünde nach einer Küchenpause sofort
+  // „Zeit ist um", obwohl niemand nachgedacht hat.
+  const state = G.createState();
+  for (const name of ['Rot', 'Blau']) G.addTeam(state, name);
+  state.teams[1].members.push({ clientId: 'b', name: 'Bernd', online: true });
+  G.startGame(state, SET);
+  G.pickCell(state, 0, 0);
+  G.passQuestion(state);
+
+  const q = state.current;
+  const jetzt = Date.now();
+  q.buzzOpenedAt = jetzt - 5000;      // Buzzer steht seit 5 s offen …
+  G.setPause(state, true);
+  state.pauseSeit = jetzt - 4700;     // … davon 4,7 s Pause
+  G.setPause(state, false);
+  G.buzz(state, 'b');
+
+  const gemessen = G.viewFor(state, { isHost: true }).current.buzzMs;
+  assert.ok(gemessen < 500,
+    `nur die 300 ms vor der Pause zählen, gemessen wurden ${gemessen} ms`);
+});
+
 function mitEinsatz(teams = ['Rot', 'Blau', 'Grün']) {
   const state = G.createState();
   for (const name of teams) G.addTeam(state, name);

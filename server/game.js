@@ -893,7 +893,26 @@ export function setPause(state, an) {
     // echten Küchenpause entsprechend zehn Minuten.
     const jetzt = Date.now();
     const q = state.current;
-    if (q?.buzzOpenedAt) q.buzzOpenedAt += jetzt - Math.max(state.pauseSeit, q.buzzOpenedAt);
+    if (q?.buzzOpenedAt) {
+      const versatz = jetzt - Math.max(state.pauseSeit, q.buzzOpenedAt);
+      q.buzzOpenedAt += versatz;
+      /*
+       * Hängt schon ein Buzz am Haken, wandert er um dieselbe Zeit mit.
+       *
+       * Die angezeigte Reaktionszeit ist die Differenz `buzzedAt −
+       * buzzOpenedAt` (viewFor). Wurde nur der Beginn verschoben, schrumpfte
+       * sie um die volle Pausendauer – gemessen: Bernd drückt nach 903 ms, der
+       * Host pausiert zwei Sekunden, bevor er wertet, und danach stand da
+       * „0,00 s", während der Rückblick am Ende weiter 903 ms meldete. Bei
+       * einer kurzen Pause fällt es nicht einmal auf: 600 ms machen aus 3,00 s
+       * ein plausibles, aber falsches 2,40 s.
+       *
+       * Nur ein Buzz VOR der Pause wandert mit. Der Fall, den der Absatz
+       * darüber verteidigt – der Host wertet mitten in der Pause, openBuzz
+       * setzt `buzzOpenedAt` neu –, bleibt damit unberührt.
+       */
+      if (q.buzzedAt && q.buzzedAt <= state.pauseSeit) q.buzzedAt += versatz;
+    }
     state.pauseSeit = null;
   }
   return state;
