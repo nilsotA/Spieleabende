@@ -87,7 +87,6 @@ function pruefeZustand(state, spur) {
     // bekommt – der Buzzer ist sofort frei, und zwar nur für die Punktgleichen.
     if (q.stechen) assert.equal(q.teamId ?? null, null, `Stechfrage mit Zugteam ${wo()}`);
     else assert.ok(ids.has(q.teamId), `Zugteam der Frage gibt es nicht mehr ${wo()}`);
-    assert.equal(q.halfValue ?? G.halfPoints(q.value), G.halfPoints(q.value), `halbe Punkte falsch ${wo()}`);
     for (const id of q.lockedOut) assert.ok(ids.has(id), `gesperrtes Team gibt es nicht ${wo()}`);
     if (q.buzzedTeamId) {
       assert.ok(ids.has(q.buzzedTeamId), `Buzzer-Team gibt es nicht ${wo()}`);
@@ -140,6 +139,20 @@ function pruefeZustand(state, spur) {
     sichtHost = G.viewFor(state, { isHost: true, clientId: 'c0' });
   } catch (err) {
     assert.fail(`viewFor für den Host wirft ${err.name}: ${err.message} ${wo()}`);
+  }
+  /*
+   * Die halben Punkte stehen NUR in der Sicht, nicht im Zustand.
+   *
+   * Hier stand einmal `q.halfValue ?? G.halfPoints(q.value)` gegen
+   * `G.halfPoints(q.value)` – geprüft wurde am rohen `state.current`, und der
+   * hat gar kein `halfValue`. Die Zusicherung verglich also immer eine Zahl mit
+   * sich selbst und wäre auch bei `halfValue: q.value` grün geblieben. Am Tisch
+   * stünde dann auf drei Schirmen „Buzzer frei · 500 Punkte", während der
+   * Server 250 abzieht.
+   */
+  if (sichtHost.current) {
+    assert.equal(sichtHost.current.halfValue, G.halfPoints(sichtHost.current.value),
+      `halbe Punkte in der Sicht falsch ${wo()}`);
   }
   for (const client of ['c0', 'c3', 'unbekannt']) {
     let sicht;

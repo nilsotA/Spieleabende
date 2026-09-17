@@ -511,12 +511,34 @@ test('das Handy sagt Bescheid, wenn der Einsatz nicht mitgegangen ist', () => {
  * der zweite Tipp weiter durch.
  */
 test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
-  for (const [datei, muster] of [
-    ['remote.js', /Zug überspringen'[\s\S]{0,220}?lageSeit\('zug', String\(state\.turnIndex\)\)/],
-    ['host.js', /Zug überspringen'[\s\S]{0,220}?lageSeit\('zug', String\(state\.turnIndex\)\)/],
-  ]) {
-    assert.match(ohneKommentare(lies(datei)), muster,
-      `${datei}: ohne eigenen Bezugspunkt springt ein Doppeltipp zwei Teams weiter`);
+  for (const datei of ['remote.js', 'host.js']) {
+    const js = ohneKommentare(lies(datei));
+    /*
+     * Der Bezugspunkt wird bei JEDEM Aufbau neu signiert, nicht nur im
+     * Board-Zweig – und die Phase steht darin.
+     *
+     * Erste Fassung war `lageSeit('zug', String(state.turnIndex))`, und der
+     * Aufruf stand unten im Board-Zweig. Damit lief der Eimer zwischen zwei
+     * Feldern nicht mit, und bei Zugart „Wer trifft, bleibt dran" ändert sich
+     * der Zugindex nach einer richtigen Antwort gar nicht. Gemessen: Anna
+     * trifft, bleibt dran, der Host tippt „Weiter", der Daumen setzt kurz
+     * danach noch einmal auf dieselbe Fläche – und Anna hatte den gerade
+     * verdienten Zug verloren.
+     */
+    assert.match(js, /const zugSeit = lageSeit\('zug', `\$\{state\.phase\}#\$\{state\.turnIndex\}`\);/,
+      `${datei}: die Signatur braucht die Phase, sonst läuft sie über eine Frage hinweg nicht mit`);
+    assert.match(js, /Zug überspringen'[\s\S]{0,260}?zugSeit\)/,
+      `${datei}: und der Knopf muss sie bekommen`);
+    // Der Aufruf gehört VOR die Phasenweiche der Leiste: Im Board-Zweig
+    // gelesen, wird er zwischen zwei Feldern nie aktualisiert.
+    const leiste = datei === 'host.js'
+      ? js.slice(js.indexOf('function renderControls()'))
+      : js.slice(js.indexOf("lageSeit('leiste'"));
+    const bisZurWeiche = leiste.slice(0, leiste.indexOf("state.phase === 'board'"));
+    assert.ok(bisZurWeiche.length > 0 && bisZurWeiche.length < leiste.length,
+      `${datei}: die Phasenweiche der Leiste sollte auffindbar bleiben`);
+    assert.match(bisZurWeiche, /const zugSeit = lageSeit\('zug'/,
+      `${datei}: der Bezugspunkt muss vor der Phasenweiche gezogen werden`);
   }
 });
 

@@ -152,6 +152,21 @@ function render() {
     (q?.lockedOut || []).join(','), state.stechenSieger,
   ].join('#');
   const seit = lageSeit('leiste', wertungsLage);
+  /*
+   * Der Bezugspunkt für „Zug überspringen" – bewusst hier oben, nicht erst im
+   * Board-Zweig.
+   *
+   * Stand der Aufruf unten, wurde der Eimer nur dort gelesen: Zwischen zwei
+   * Feldern lief er nicht mit, und bei Zugart „Wer trifft, bleibt dran" ändert
+   * sich der Zugindex nach einer richtigen Antwort gar nicht. Der Knopf stand
+   * dann sofort scharf da, wo eine halbe Sekunde vorher „Weiter" war.
+   *
+   * Nachgestellt: Anna trifft, bleibt dran, der Host tippt „Weiter", der Daumen
+   * setzt kurz danach noch einmal auf – und Anna hatte den gerade verdienten
+   * Zug verloren. Mit der Phase in der Signatur wird bei jedem Wechsel zwischen
+   * Frage und Brett neu gezählt.
+   */
+  const zugSeit = lageSeit('zug', `${state.phase}#${state.turnIndex}`);
   const setz = (...knoepfe) => { if (neueLeiste) bar.append(...knoepfe); };
 
   renderFeldwahl();
@@ -249,7 +264,7 @@ function render() {
       setz(big('Zug überspringen', 'btn-ghost', () => {
         const next = state.teams[(state.turnIndex + 1) % state.teams.length];
         act('setTurn', { teamId: next.id });
-      }, lageSeit('zug', String(state.turnIndex))));
+      }, zugSeit));
       break;
     case 'roundEnd':
       setzeText(phase, `Runde ${state.round} beendet.`);
