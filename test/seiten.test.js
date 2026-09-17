@@ -608,6 +608,23 @@ test('der Editor benennt die zwei Arten von verratener Lösung getrennt', () => 
   assert.match(js, /inNachbarfrage && imEigenenText/, 'beide zusammen brauchen beide Sätze');
 });
 
+/*
+ * Der Baukasten liest den Vorrat einmal ein – und danach nie wieder.
+ *
+ * Nachgestellt: Der Host öffnet einmal ⇱ Holen (204 Kategorien aus 17 Sätzen),
+ * lädt dann „Kopfnuss", korrigiert eine Lösung und speichert. Holt er sich
+ * dieselbe Kategorie danach im selben Tab per ⇱ Holen dazu, kam wortwörtlich
+ * die Fassung von vorher zurück – samt der Lösung, die er gerade repariert hat.
+ * Nach dem Speichern zeigt der Baukasten jetzt 216 Kategorien aus 18 Sätzen.
+ */
+test('ein Speichern macht den Vorrat des Baukastens ungültig', () => {
+  const js = ohneKommentare(lies('editor.js'));
+  const erfolg = /toast\(`Gespeichert als \$\{data\.file\}`\);[\s\S]{0,200}?loadSetList\(\);/.exec(js)?.[0] || '';
+  assert.ok(erfolg, 'der Erfolgszweig von save() sollte auffindbar bleiben');
+  assert.match(erfolg, /baukastenDaten = null;/,
+    'sonst holt der Baukasten die Fassung von vor dem Speichern');
+});
+
 test('der Warnbalken des Editors steht in der klebenden Leiste', () => {
   const html = fs.readFileSync(path.join(PUBLIC, 'editor.html'), 'utf8');
   const leiste = /<div class="bar">[\s\S]*?\n  <\/div>/.exec(html)?.[0] || '';

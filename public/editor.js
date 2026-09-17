@@ -449,6 +449,12 @@ async function save(overwrite) {
       persist();
       zeigeZiel();
       toast(`Gespeichert als ${data.file}`);
+      // Der Vorrat des Baukastens ist jetzt veraltet: Er wird einmal eingelesen
+      // und danach nie wieder (siehe `baukastenDaten`). Wer in „Küche & Keller"
+      // eine falsche Lösung korrigiert, speichert – und sich dieselbe Kategorie
+      // im nächsten Satz per ⇱ Holen dazuholt, bekam wortwörtlich die Fassung
+      // von vorher zurück, samt der Lösung, die er gerade repariert hat.
+      baukastenDaten = null;
       loadSetList();
     } else if (data.exists) {
       // Wer hier abbricht, hat auf „Speichern“ gedrückt und sieht sonst gar
