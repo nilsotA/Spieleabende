@@ -2129,6 +2129,56 @@ test('geht der Buzzer erst in der Pause auf, fängt die Uhr bei null an', async 
   assert.ok(!rekord || rekord.ms > 0, `kein negativer Rekord, gemessen ${JSON.stringify(rekord)}`);
 });
 
+test('Name und Wappen überleben ein Zurücknehmen', async (t) => {
+  /*
+   * Beides lässt sich nur in der Lobby ändern – und dort gibt es
+   * zurücknehmbare Züge: „dran" setzen und Punkte korrigieren.
+   *
+   * Gemessen: Ein Team tauft sich um („Rot" → „Die Grübelmeister"), der Host
+   * nimmt danach einen Zugwechsel zurück, und der Name ist wieder „Rot".
+   *
+   * Schlimmer beim Wappen: Rot wechselt von 🦊 auf 🐼, ein Handy legt danach
+   * sein eigenes Team an und bekommt das frei gewordene 🦊. Das Zurücknehmen
+   * holte Rots 🦊 zurück – und dann trugen zwei Teams dasselbe Wappen. Auf der
+   * Leinwand ist genau das die Art, wie der Raum die Tische auseinanderhält.
+   */
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-wappenundo-'));
+  const { proc, base } = await starteServer(7300 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const host = await alsHost(base, 'wappen-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  const vorher = await zustand(base);
+  const rot = vorher.teams[0];
+  const rotsWappen = rot.wappen;
+
+  // Ein zurücknehmbarer Zug in der Lobby.
+  await host({ type: 'setTurn', teamId: vorher.teams[1].id });
+
+  const frei = (vorher.wappenAuswahl || []).find((w) => !vorher.teams.some((x) => x.wappen === w));
+  assert.ok(frei, 'es sollte noch ein freies Wappen geben');
+  await host({ type: 'wappen', teamId: rot.id, wappen: frei });
+  await host({ type: 'renameTeam', teamId: rot.id, name: 'Die Grübelmeister' });
+
+  // Ein Handy legt sein eigenes Team an und bekommt das frei gewordene Wappen.
+  const cem = await verbinde(base, 'handy-cem', 'player');
+  await warte(150);
+  await cem.tu({ type: 'eigenesTeam', name: 'Cem' });
+  const mitCem = await zustand(base);
+  assert.equal(mitCem.teams.find((x) => x.name === 'Cem')?.wappen, rotsWappen,
+    'sonst prüft dieser Test den falschen Fall');
+
+  await host({ type: 'undo' });
+
+  const nach = await zustand(base);
+  const wappen = nach.teams.map((x) => x.wappen);
+  assert.equal(new Set(wappen).size, wappen.length,
+    `zwei Teams tragen dasselbe Wappen: ${nach.teams.map((x) => `${x.wappen} ${x.name}`).join(' · ')}`);
+  assert.equal(nach.teams.find((x) => x.id === rot.id).name, 'Die Grübelmeister',
+    'der Name gehört dem Raum, nicht dem Spielzug');
+  assert.equal(nach.turnIndex, 0, 'der Zugwechsel selbst wurde trotzdem zurückgenommen');
+});
+
 test('die Regeln überleben ein Zurücknehmen', async (t) => {
   /*
    * Dieselbe Sache wie bei der Pause, eine Ebene tiefer: `settings` steht mit

@@ -570,7 +570,26 @@ let rueckWeg = []; // [{ state, was }, …] – hinten liegt der nächste Rücks
 function uebernimm(alt, jetztStand) {
   for (const team of alt.teams) {
     const jetzt = jetztStand.teams.find((t) => t.id === team.id);
-    if (jetzt) team.members = jetzt.members;
+    if (!jetzt) continue;
+    team.members = jetzt.members;
+    /*
+     * Name und Wappen gehören auch dem Raum, nicht dem Spielzug.
+     *
+     * Beides lässt sich nur in der Lobby ändern – und dort gibt es
+     * zurücknehmbare Züge: „dran" setzen und Punkte korrigieren. Zwei Sachen
+     * gemessen:
+     *
+     * Ein Team taufte sich um („Rot" → „Die Grübelmeister"), der Host nahm
+     * danach einen Zugwechsel zurück, und der Name war wieder „Rot".
+     *
+     * Schlimmer beim Wappen: Rot wechselt von 🦊 auf 🐼, ein Handy legt danach
+     * sein eigenes Team an und bekommt das frei gewordene 🦊. Ein
+     * „Zurücknehmen" holte Rots 🦊 zurück – und dann trugen zwei Teams
+     * dasselbe Wappen. Auf der Leinwand ist genau das die Art, wie der Raum
+     * die Tische auseinanderhält.
+     */
+    team.name = jetzt.name;
+    team.wappen = jetzt.wappen;
   }
   // Entfernte Teams bleiben entfernt.
   //

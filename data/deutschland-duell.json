@@ -15,7 +15,7 @@
             {
               "text": "Welche Stadt hat das Kennzeichen M?",
               "answer": "München",
-              "note": "Ein Buchstabe bekamen nur die größten Städte: B, M, K, F, S, H."
+              "note": "Zwölf Städte haben einen einzelnen Buchstaben: B, C, D, E, F, H, K, L, M, N, S und Z."
             },
             {
               "text": "Welche Stadt hat das Kennzeichen KI?",
