@@ -543,6 +543,48 @@ test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
 });
 
 /*
+ * Die Zusammenfassung enthält alle Auszeichnungen – auch die, für die auf der
+ * Leinwand kein Platz war.
+ *
+ * Bei vielen Teams wurde die Liste gekürzt, BEVOR sie im DOM stand – und die
+ * Zusammenfassung zum Weiterschicken liest genau von dort. Gemessen mit sechs
+ * Teams und sechs Auszeichnungen: vier im DOM, vier im Text, zwei nirgends. Die
+ * Restzeile darunter versprach dabei „4 weitere Auszeichnungen stehen in der
+ * Zusammenfassung" – von den beiden anderen erfuhr niemand.
+ *
+ * Jetzt stehen alle im DOM; weggerückt wird nur fürs Auge.
+ */
+test('alle Auszeichnungen stehen im DOM, auch die weggerückten', () => {
+  const js = ohneKommentare(lies('host.js'));
+  assert.doesNotMatch(js, /zeilen\.length = Math\.min\(zeilen\.length, 4\)/,
+    'gekürzt werden darf erst beim Anzeigen, nicht vor dem Bauen');
+  assert.match(js, /const zuviel = voll && i >= 4;/,
+    'die überzähligen werden markiert statt weggeworfen');
+  assert.match(js, /class: `rekord\$\{zuviel \? ' rekord-zuviel' : ''\}`/,
+    'und bekommen ihre Klasse');
+  assert.match(js, /for \(const z of zeilen\) z\.hidden = z\.classList\.contains\('rekord-zuviel'\);/,
+    'passeStandEin darf sie nicht wieder einblenden');
+  assert.match(js, /if \(r\.classList\.contains\('rekord-rest'\)\) continue;/,
+    'die Restzeile selbst gehört nicht in den Text – sie hätte dort eine leere Zeile hinterlassen');
+});
+
+/*
+ * Umbenennen war versprochen, aber nirgends abzuschicken.
+ *
+ * In der Lobby steht „Hier kannst du sie genauso anlegen, umbenennen und
+ * entfernen", und das Handbuch sagt dasselbe. `renameTeam` gibt es im Server
+ * seit jeher – abgeschickt hat die Aktion keine einzige Seite. Der einzige Weg
+ * war: Team entfernen und neu anlegen lassen, wobei das Handy seine
+ * Teamzugehörigkeit verliert und Farbe wie Wappen neu vergeben werden.
+ */
+test('die Lobby kann ein Team auch wirklich umbenennen', () => {
+  const js = ohneKommentare(lies('host.js'));
+  assert.match(js, /act\('renameTeam', \{ teamId: team\.id, name: neuerName \}\)/,
+    'sonst ist das Versprechen in der Lobby und im Handbuch eine Lüge');
+  assert.match(js, /title: 'Team umbenennen'/, 'und der Knopf braucht eine Aufschrift');
+});
+
+/*
  * Der Editor zählt zwei verschiedene Fehler – und muss sie auch so nennen.
  *
  * Die Lösung steht in der NACHBARFRAGE derselben Kategorie, oder sie steht in

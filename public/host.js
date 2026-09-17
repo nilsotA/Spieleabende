@@ -563,6 +563,34 @@ function renderLobby() {
               ? team.members.map((m) => (m.online ? m.name : `${m.name} (offline)`)).join(', ')
               : 'kein Handy verbunden'),
         ),
+        /*
+         * Umbenennen – der Knopf, den es nie gab.
+         *
+         * Direkt darüber steht in der Lobby „Hier kannst du sie genauso
+         * anlegen, umbenennen und entfernen", und das Handbuch verspricht
+         * dasselbe. `renameTeam` gibt es im Server seit jeher und ist
+         * host-only – abgeschickt hat die Aktion aber keine einzige Seite.
+         * Wer sein Team „Sarah" genannt hat und es „Die Grübelmeister" nennen
+         * wollte, hatte nur einen Weg: Team entfernen (geht ohnehin nur in der
+         * Lobby) und neu anlegen lassen – dabei verliert das Handy seine
+         * Teamzugehörigkeit, und das Team bekommt neue Farbe und neues Wappen.
+         *
+         * `prompt` statt eines eigenen Feldes: Dieselbe Stelle benutzt schon
+         * `confirm` fürs Entfernen, und ein Eingabefeld in jeder Zeile wäre in
+         * der Lobby acht Felder, die niemand braucht.
+         */
+        el('button', {
+          class: 'btn btn-sm btn-ghost',
+          'aria-label': `Team „${team.name}“ umbenennen`,
+          title: 'Team umbenennen',
+          onclick: () => {
+            const eingabe = prompt(`Wie soll „${team.name}“ heißen?`, team.name);
+            if (eingabe === null) return;
+            const neuerName = eingabe.trim();
+            if (!neuerName || neuerName === team.name) return;
+            act('renameTeam', { teamId: team.id, name: neuerName });
+          },
+        }, '✎'),
         el('button', {
           class: 'btn btn-sm btn-ghost',
           'aria-label': `Team „${team.name}“ entfernen`,
@@ -2015,8 +2043,18 @@ function passeStandEin() {
     // Die Restzeile zählt nicht als Auszeichnung – sie sagt nur, wie viele
     // fehlen, und wird gleich neu beschriftet.
     const zeilen = rekorde ? [...rekorde.children].filter((z) => !z.classList.contains('rekord-rest')) : [];
-    for (const z of zeilen) z.hidden = false;
-    restZeile(rekorde).hidden = true;
+    // Wer schon in renderRekorde weggerückt wurde, bleibt weg: Diese Zeilen
+    // stehen nur im DOM, damit die Zusammenfassung sie mitnimmt.
+    for (const z of zeilen) z.hidden = z.classList.contains('rekord-zuviel');
+    const rest = restZeile(rekorde);
+    const zeigeRest = () => {
+      const weg = zeilen.filter((z) => z.hidden).length;
+      rest.hidden = weg === 0;
+      rest.textContent = weg === 1
+        ? '1 weitere Auszeichnung steht in der Zusammenfassung'
+        : `${weg} weitere Auszeichnungen stehen in der Zusammenfassung`;
+    };
+    zeigeRest();
     panel.classList.remove('voll', 'sehr-voll', 'extrem-voll');
     if (passt()) return;
 
@@ -2025,14 +2063,10 @@ function passeStandEin() {
     // geblieben sind. Ohne die stand am Ende eines Abends auf einem 1024er
     // Schirm gar keine Auszeichnung mehr – und niemand konnte wissen, dass es
     // welche gab. Der Hinweis kostet eine Zeile und spart bis zu fünf.
-    const rest = restZeile(rekorde);
     for (let i = zeilen.length - 1; i >= 0 && !passt(); i--) {
+      if (zeilen[i].hidden) continue;
       zeilen[i].hidden = true;
-      const weg = zeilen.filter((z) => z.hidden).length;
-      rest.hidden = weg === 0;
-      rest.textContent = weg === 1
-        ? '1 weitere Auszeichnung steht in der Zusammenfassung'
-        : `${weg} weitere Auszeichnungen stehen in der Zusammenfassung`;
+      zeigeRest();
     }
     // Zuletzt noch zweimal nachgeben – erst enger stellen, dann die Schrift der
     // Rangliste. Getrennt, weil eine einzige große Stufe bei sechs Teams ein
@@ -2148,11 +2182,18 @@ function zeigeRekorde(final, ranked) {
     zeilen.push(['🤷 Ehrlichste Haut', `${nenne(ehrlich.wer)} – ${ehrlich.best}× „weiß nicht“`]);
   }
 
-  // Bei vielen Teams frisst die Rangliste den Platz. Vier Auszeichnungen sind
-  // dann genug – gekürzt wird am Ende, wo die am wenigsten überraschenden
-  // stehen. Vorne bleibt, was der Abend Besonderes hergab.
+  // Bei vielen Teams frisst die Rangliste den Platz – dann rückt das Panel
+  // zusammen (siehe die Klasse unten) und passeStandEin() blendet von hinten
+  // aus, bis es passt.
+  //
+  // Hier stand einmal `zeilen.length = Math.min(zeilen.length, 4)`. Das schnitt
+  // die Auszeichnungen weg, BEVOR sie im DOM standen – und die Zusammenfassung
+  // zum Weiterschicken liest genau von dort. Sechs Teams, sechs Auszeichnungen:
+  // Zwei fehlten auf der Leinwand, und sie fehlten auch im Text, obwohl die
+  // Restzeile darunter ausdrücklich verspricht, sie stünden „in der
+  // Zusammenfassung". Jetzt stehen alle im DOM; ausgeblendet wird nur für das
+  // Auge, und zwar genau so viel, wie der Platz verlangt.
   const voll = ranked.length + zeilen.length >= 11;
-  if (voll) zeilen.length = Math.min(zeilen.length, 4);
 
   box.hidden = zeilen.length === 0;
   // Acht Teams und fünf Auszeichnungen passen nicht mehr locker untereinander –
@@ -2163,7 +2204,17 @@ function zeigeRekorde(final, ranked) {
   box.dataset.key = JSON.stringify(zeilen);
   box.innerHTML = '';
   zeilen.forEach(([titel, text], i) => {
-    box.append(el('div', { class: 'rekord', style: { '--i': i } },
+    // Bei vielen Teams stehen nur die ersten vier auf der Leinwand – vorne
+    // bleibt, was der Abend Besonderes hergab. Die übrigen werden trotzdem
+    // gebaut, nur gleich weggerückt: Die Zusammenfassung zum Weiterschicken
+    // liest aus genau diesem DOM, und die Restzeile darunter verspricht sie
+    // ausdrücklich „in der Zusammenfassung".
+    const zuviel = voll && i >= 4;
+    box.append(el('div', {
+      class: `rekord${zuviel ? ' rekord-zuviel' : ''}`,
+      hidden: zuviel,
+      style: { '--i': i },
+    },
       el('span', { class: 'rk-titel' }, titel),
       el('span', { class: 'rk-text' }, text)));
   });
@@ -2583,6 +2634,13 @@ function zusammenfassung() {
   if (rek && !rek.hidden && rek.children.length) {
     zeilen.push('', 'Auszeichnungen');
     for (const r of rek.children) {
+      // Ausgeblendete Zeilen gehören mit hinein – sie sind nur auf der Leinwand
+      // weggerückt, und die Restzeile verspricht sie ausdrücklich „in der
+      // Zusammenfassung". Die Restzeile selbst nicht: „2 weitere
+      // Auszeichnungen stehen in der Zusammenfassung" ist in der
+      // Zusammenfassung sinnlos, und sie hat ohnehin keine Kindknoten – sie
+      // hätte hier eine leere Zeile hinterlassen.
+      if (r.classList.contains('rekord-rest')) continue;
       zeilen.push([...r.children].map((n) => n.textContent.trim()).join(': '));
     }
   }

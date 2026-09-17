@@ -335,6 +335,29 @@ export function adjustScore(state, teamId, delta) {
   const team = findTeam(state, teamId);
   const d = Math.trunc(Number(delta) || 0);
   team.score += d;
+  /*
+   * Eine Korrektur kann das Stechen entwerten – dann muss es weichen.
+   *
+   * Nachgestellt: Rot und Blau stehen 5000:5000, das Stechen entscheidet für
+   * Rot. Blau reklamiert eine nicht gutgeschriebene Frage, der Host gibt +100.
+   * Danach stand oben „Sieg im Stechen: Rot" und darunter „1. Blau 5100" mit
+   * Krone – und ein zweites Stechen ließ sich nicht starten, weil der Knopf an
+   * `!stechenSieger` hängt. Der Host hatte nur die Wahl zwischen falschem
+   * Punktestand und einer Tafel, die sich selbst widerspricht. Genau die wird
+   * fotografiert.
+   *
+   * Nur wenn der Sieger UNTER die Spitze rutscht. Gleichauf ist der Normalfall
+   * direkt nach einem Stechen – das Stechen ist ja die Antwort auf genau diesen
+   * Gleichstand.
+   */
+  if (state.stechenSieger) {
+    const best = Math.max(...state.teams.map((t) => t.score));
+    const sieger = state.teams.find((t) => t.id === state.stechenSieger);
+    if (!sieger || sieger.score < best) {
+      state.stechenSieger = null;
+      state.message = 'Die Korrektur hebt das Stechen auf – es zählt wieder der Punktestand.';
+    }
+  }
   return state;
 }
 

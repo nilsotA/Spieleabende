@@ -997,6 +997,49 @@ test('ein Satz lässt sich nicht mitten im Spiel neu starten', () => {
  * interessante Antwort. Deshalb kostet ein Einsatz den vollen doppelten Wert.
  */
 /*
+ * Eine Punktekorrektur kann das Stechen entwerten – dann muss es weichen.
+ *
+ * Nachgestellt: Rot und Blau stehen 5000:5000, das Stechen entscheidet für Rot.
+ * Blau reklamiert eine nicht gutgeschriebene Frage, der Host gibt +100. Danach
+ * stand auf der Leinwand oben „Sieg im Stechen: Rot" und darunter „1. Blau
+ * 5100" mit Krone – und ein zweites Stechen ließ sich nicht starten, weil der
+ * Knopf an `!stechenSieger` hängt. Der Host hatte nur die Wahl zwischen
+ * falschem Punktestand und einer Tafel, die sich selbst widerspricht.
+ */
+test('eine Korrektur, die den Stechsieger überholt, hebt das Stechen auf', () => {
+  const stechenEntschieden = () => {
+    const state = G.createState();
+    for (const name of ['Rot', 'Blau']) G.addTeam(state, name);
+    G.startGame(state, SET);
+    state.phase = 'gameOver';
+    state.teams[0].score = 5000;
+    state.teams[1].score = 5000;
+    G.startStechen(state, { text: 'Entscheidungsfrage?', answer: 'Ja', category: 'Stechen' });
+    G.buzzFor(state, state.teams[0].id);
+    G.judge(state, true);
+    G.closeQuestion(state);
+    assert.equal(state.stechenSieger, state.teams[0].id, 'Ausgangslage');
+    return state;
+  };
+
+  // Blau überholt – das Stechen entscheidet nichts mehr.
+  const ueberholt = stechenEntschieden();
+  G.adjustScore(ueberholt, ueberholt.teams[1].id, 100);
+  assert.equal(ueberholt.stechenSieger, null,
+    'sonst widerspricht das Banner der Krone darunter');
+  assert.match(ueberholt.message, /Stechen/, 'und der Host erfährt, warum es weg ist');
+
+  // Gleichauf bleiben ist der Normalfall direkt nach einem Stechen – und
+  // der Sieger darf auch selbst dazugewinnen.
+  for (const [wer, delta] of [[0, 100], [1, -100]]) {
+    const bleibt = stechenEntschieden();
+    G.adjustScore(bleibt, bleibt.teams[wer].id, delta);
+    assert.equal(bleibt.stechenSieger, bleibt.teams[0].id,
+      `solange der Sieger oben steht, gilt sein Stechen (Team ${wer}, ${delta})`);
+  }
+});
+
+/*
  * Eine Pause darf die Reaktionszeit eines Buzzes nicht schrumpfen lassen.
  *
  * setPause schiebt beim Weiterspielen `buzzOpenedAt` um die Pausendauer nach

@@ -535,7 +535,7 @@ in die Datei eingebettet). Speichern geht auf den Server (landet in `data/`) ode
 Download – zwischendurch merkt sich der Browser den Stand automatisch.
 
 **Nicht alles selbst tippen:** Jede Kategorie hat den Knopf **⇱ Holen**. Der zeigt alle
-Kategorien aus allen vorhandenen Sätzen – bei den mitgelieferten sind das 168 – mit Suche
+Kategorien aus allen vorhandenen Sätzen – bei den mitgelieferten sind das 204 – mit Suche
 über Kategorie- und Satznamen. Ein Tipp holt eine davon samt ihren vier Fragen, Antworten,
 Bildern und Zusätzen an diesen Platz; danach lässt sie sich normal weiterbearbeiten. Der
 Ursprungssatz bleibt unberührt. Das ist der Zufallsmix von Hand: sechs Kategorien selbst
