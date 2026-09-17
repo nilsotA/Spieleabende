@@ -11,27 +11,41 @@ import { fileURLToPath } from 'node:url';
 // Logiktests nicht können – Verbindungen, Rollen, Abstürze und Neustarts.
 
 /*
- * Wenn hier einmal etwas rot ist und beim nächsten Lauf wieder grün:
- * Schau zuerst, was die Maschine sonst noch tut.
+ * Diese Datei war unter Last unzuverlässig. Sie ist es nicht mehr, und es lag
+ * nicht an der Maschine.
  *
- * Diese Datei startet über ihren Lauf hinweg mehrere Dutzend echte Server und
- * redet mit ihnen über echte Sockets; `npm test` startet dazu sechs Dateien
- * gleichzeitig. Auf einer ruhigen Maschine ist das unauffällig. Ist die CPU
- * ausgelastet, reißen Verbindungen ab und Zeitfenster laufen aus – und zwar
- * jedes Mal woanders.
+ * Hier stand einmal, das sei eben so: mehrere Dutzend echte Server über echte
+ * Sockets, sechs Testdateien gleichzeitig, und auf einer ausgelasteten CPU
+ * reiße das eben jedes Mal woanders. Der Rat war, die Suite laufen zu lassen,
+ * wenn sonst nichts läuft. Das war bequem und falsch. Mit drei ausgelasteten
+ * Kernen ließ sich der Zustand auf Kommando herstellen – fünf von fünf Läufen
+ * rot –, und darunter lagen drei benennbare Fehler in DIESER DATEI:
  *
- * Nachgestellt, nicht vermutet: Mit vier ausgelasteten Kernen fiel im ersten
- * Lauf „wer wartend auflegt, ist sofort weg" (Zeitfenster), im nächsten
- * „krumme Anfragen bekommen eine Antwort statt eines Absturzes" – dort mit
- * `unhandledRejection: terminated` aus undici, also einem abgerissenen Socket.
- * Ohne Last waren zwölf Läufe hintereinander grün, und derselbe Ablauf einzeln
- * nachgespielt lief auch unter Last sauber durch.
+ *   1. Drei `reader.read()` ohne `catch`. Wird der Server eines Tests am Ende
+ *      abgeschossen, bricht so ein offener Lesevorgang mit `terminated` ab.
+ *      Ohne `catch` ist das eine unbehandelte Ablehnung – und node:test
+ *      schreibt die dem Test zu, der GERADE LÄUFT. Daher der Eindruck, es
+ *      treffe jedes Mal jemand anderen: Es traf jedes Mal jemand anderen.
  *
- * Es ist also keine Eigenschaft eines bestimmten Tests und kein Fehler im
- * Spiel. Deshalb steht hier auch kein größeres Zeitfenster: Zahlen zu
- * vergrößern, bis der Rechner wieder mithält, verdeckt beim nächsten Mal einen
- * echten Fehler. Wer die Suite braucht, lässt sie laufen, wenn sonst nichts
- * läuft.
+ *   2. „wer wartend auflegt, ist sofort weg" brach die wartende Anfrage nach
+ *      festen 300 ms ab. Unter Last war sie da noch gar nicht im Warteraum
+ *      angekommen, und der Server hat nichts zu bemerken, wenn nichts liegt.
+ *      Jetzt sieht der Test der Anfrage selbst an, ob sie liegen blieb – eine,
+ *      die nicht in den Warteraum kam, antwortet sofort – und versucht es
+ *      sonst noch einmal.
+ *
+ *   3. „ein ganzer Abend läuft ohne kaputten Zustand durch" las den Zustand
+ *      12 ms nach jedem Zug. Unter Last war das der Stand von VORHER, und der
+ *      Test verglich ihn mit sich selbst: „das Zurücknehmen muss die Punkte
+ *      auch wirklich zurücknehmen" schlug fehl, während am Zurücknehmen nichts
+ *      falsch war. Jetzt wartet er auf den Rundruf statt auf die Uhr.
+ *
+ * Gemessen mit demselben Lastmuster: vorher 5 von 5 Läufen rot, danach 0 von 8.
+ * Kein einziges Zeitfenster wurde dafür vergrößert – Zahlen aufzublasen, bis
+ * der Rechner mithält, verdeckt beim nächsten Mal einen echten Fehler.
+ *
+ * Wenn hier also wieder etwas rot ist und beim nächsten Lauf grün: Es ist
+ * wahrscheinlich ein Fehler. Schau ihn dir an.
  */
 
 const SERVER = fileURLToPath(new URL('../server/index.js', import.meta.url));
@@ -147,7 +161,12 @@ async function verbinde(base, id, rolle = 'host') {
     const treffer = /event: hello\ndata: (.*)\n\n/.exec(buf);
     if (treffer) geheim = JSON.parse(treffer[1]).geheim || null;
   }
-  reader.read(); // weiterlesen, damit die Verbindung offen bleibt
+  // Weiterlesen, damit die Verbindung offen bleibt – und den Abbruch
+  // abfangen. Wird der Server am Testende abgeschossen, bricht dieser Lesevorgang
+  // mit `terminated` ab; ohne `catch` ist das eine unbehandelte Ablehnung, und
+  // die zählt node:test dem Test an, der gerade LÄUFT. Genau daher kamen die
+  // Fehlschläge, die immer woanders auftauchten.
+  reader.read().catch(() => {});
   const tu = (body) => fetch(`${base}/api/action`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -173,7 +192,7 @@ async function zustand(base, alsHostRolle = true) {
     buf += new TextDecoder().decode(value);
     const treffer = buf.match(/event: state\ndata: (.*)\n\n/);
     if (treffer) {
-      reader.cancel();
+      reader.cancel().catch(() => {});
       return JSON.parse(treffer[1]);
     }
   }
@@ -1156,7 +1175,7 @@ test('acht Teams mit je zwei Handys überstehen Abbruch und Rückkehr', async (t
 
   // Und das abgestürzte Handy kommt zurück – mitten im Spiel, ohne neu beizutreten.
   const zurueck = await fetch(`${base}/api/events?clientId=handy-3-0&role=player`);
-  zurueck.body.getReader().read();
+  zurueck.body.getReader().read().catch(() => {});
   await warte(400);
   z = await zustand(base);
   const wieder = z.teams.find((x) => x.id === teamDesOpfers.id).members.find((m) => m.clientId === 'handy-3-0');
@@ -1203,6 +1222,7 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
   // Eine einzige offene Verbindung, die den Zustand mitschreibt: Für jeden
   // Schritt eine neue zu öffnen wären hunderte Verbindungen.
   let stand = null;
+  let standZaehler = 0;
   let geheim = null;
   const res = await fetch(`${base}/api/events?clientId=abend&role=host`);
   const reader = res.body.getReader();
@@ -1218,7 +1238,7 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
         const stueck = puffer.slice(0, i);
         puffer = puffer.slice(i + 2);
         const treffer = stueck.match(/^event: state\ndata: (.*)$/s);
-        if (treffer) stand = JSON.parse(treffer[1]);
+        if (treffer) { stand = JSON.parse(treffer[1]); standZaehler++; }
         // Der Nachweis für diese Gerätekennung – ohne ihn lehnt der Server ab.
         const hallo = stueck.match(/^event: hello\ndata: (.*)$/s);
         if (hallo) geheim = JSON.parse(hallo[1]).geheim || null;
@@ -1233,6 +1253,9 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
 
   /** Führt eine Aktion aus und prüft danach, dass der Zustand heil ist. */
   async function tu(body, darfScheitern = false) {
+    // Auf welchem Stand waren wir, bevor der Zug losging? Danach wird gewartet,
+    // bis wirklich ein neuer angekommen ist.
+    const vorher = standZaehler;
     const antwort = await fetch(`${base}/api/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1243,7 +1266,20 @@ test('ein ganzer Abend läuft ohne kaputten Zustand durch', async (t) => {
     if (!darfScheitern && daten.error) {
       throw new Error(`Schritt ${schrittZaehler} (${body.type}) abgelehnt: ${daten.error}`);
     }
-    await warte(12);
+    /*
+     * Auf den neuen Stand warten, statt ihn zu schätzen.
+     *
+     * Hier stand `warte(12)`. Jeder Zug löst einen Rundruf aus, und zwölf
+     * Millisekunden reichten dafür auf einer ruhigen Maschine. Auf einer
+     * ausgelasteten nicht: Dann las der Test den Stand von VORHER und verglich
+     * ihn mit sich selbst. Gemessen fiel darüber „das Zurücknehmen muss die
+     * Punkte auch wirklich zurücknehmen" um – ein Test, der behauptete, das
+     * Zurücknehmen sei kaputt, während in Wahrheit nur die Post noch unterwegs
+     * war. Ein größeres `warte` verschiebt das nur; gewartet wird jetzt auf das
+     * Ereignis selbst, mit einer großzügigen Schranke für den Fall, dass ein Zug
+     * gar keinen Rundruf auslöst.
+     */
+    for (let i = 0; i < 200 && standZaehler === vorher; i++) await warte(10);
     schrittZaehler++;
 
     const wo = `nach Schritt ${schrittZaehler} (${body.type})`;
@@ -1389,7 +1425,7 @@ test('die Pause zwischen zwei Sätzen kostet niemanden sein Team', async (t) => 
   // Aufwachen: gleiche clientId, und sie ist sofort wieder dabei.
   const zurueck = await fetch(`${base}/api/events?clientId=mira&role=player`);
   const wachLiest = zurueck.body.getReader();
-  wachLiest.read();
+  wachLiest.read().catch(() => {});
   await warte(300);
   const wieder = (await zustand(base)).teams[0].members[0];
   assert.equal(wieder.online, true, 'wieder online');
@@ -1465,7 +1501,7 @@ test('gleichzeitige Zugriffe von Host und Handys bringen den Server nicht aus de
   const strom = async (id, rolle) => {
     const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
     const r = res.body.getReader();
-    r.read();
+    r.read().catch(() => {});
     offen.push(r);
   };
   await strom('fuzz-host', 'host');
@@ -2899,32 +2935,58 @@ test('wer wartend auflegt, ist sofort weg', async (t) => {
   });
 
   /*
-   * Die Wartenummer frisch holen, statt sie hochzurechnen.
+   * Auflegen kann nur, wer schon im Warteraum liegt – und wann das so weit ist,
+   * sieht der Test von außen nicht.
    *
-   * Der Server legt eine Anfrage nur dann in den Warteraum, wenn ihr `seit` den
-   * aktuellen Stand schon kennt (`seit >= standNummer`, index.js). `start.nummer
-   * + 1` rechnet damit, dass der Beitritt den Zähler um genau eins weiterstellt
-   * – heute stimmt das, aber es ist eine Annahme über fremden Code, und wer dem
-   * Beitritt je einen zweiten Broadcast gibt, bekommt statt einer klaren
-   * Fehlermeldung einen Test, der etwas anderes prüft als er behauptet.
+   * Der Server merkt das Auflegen in `req.on('close')`, und der Zweig steigt
+   * gleich wieder aus, wenn die Anfrage gar nicht erst im Warteraum lag
+   * (`if (!wartende.delete(warte)) return;`). Zwischen „fetch abgeschickt" und
+   * „liegt im Warteraum" liegt aber eine Runde über echte Sockets, und die
+   * dauert, was die Maschine gerade hergibt. Vorher stand hier ein festes
+   * `warte(300)`; mit drei ausgelasteten Kernen gemessen fiel der Test dadurch
+   * in vier von fünf Läufen um – nicht weil der Server etwas falsch machte,
+   * sondern weil abgebrochen wurde, bevor überhaupt etwas zum Auflegen da war.
    *
-   * (Die gelegentlichen Fehlschläge dieses Tests erklärt das NICHT – siehe die
-   * Notiz am Kopf der Datei. Sie kommen von der Maschine, nicht von hier.)
+   * Statt die Zahl größer zu schreiben, bis der Rechner wieder mithält:
+   * noch einmal versuchen, mit mehr Luft. Wer wirklich nicht auflegt, wird auch
+   * im sechsten Versuch nicht auflegen – der Test bleibt scharf und wird nur
+   * gegen die Geschwindigkeit der Maschine gleichgültig.
+   *
+   * Die Wartenummer wird dabei jedes Mal frisch geholt statt hochgerechnet: Der
+   * Server legt eine Anfrage nur in den Warteraum, wenn ihr `seit` den aktuellen
+   * Stand schon kennt (`seit >= standNummer`, index.js). `start.nummer + 1`
+   * würde annehmen, dass der Beitritt den Zähler um genau eins weiterstellt –
+   * heute stimmt das, aber es ist eine Annahme über fremden Code.
    */
-  const jetzt = await (await fetch(`${base}/api/state?clientId=weg_handy&role=player`)).json();
-  const abbruch = new AbortController();
-  const wartend = fetch(
-    `${base}/api/state?clientId=weg_handy&role=player&seit=${jetzt.nummer}`,
-    { signal: abbruch.signal },
-  ).catch(() => null);
-  await warte(300);
-  abbruch.abort();
-  await wartend;
+  // Nachschauen ohne Nebenwirkung: immer dieselbe Kennung, damit nicht jede
+  // Nachfrage eine neue Verbindung auf- und wieder abbaut. Jeder solche Ab- und
+  // Aufbau löst einen Rundruf aus und stellt damit die Wartenummer weiter –
+  // genau die Nummer, auf der die Anfrage unten sitzt.
+  const nachschauen = async () => (await (await fetch(
+    `${base}/api/state?clientId=weg_spion&role=host`,
+  )).json()).teams[0].members.find((x) => x.clientId === 'weg_handy');
+  await nachschauen(); // einmal vorab, damit auch diese Kennung eingetragen ist
 
-  for (let i = 0; i < 40; i++) {
-    const m = (await zustand(base)).teams[0].members.find((x) => x.clientId === 'weg_handy');
-    if (m && m.online === false) return; // gut
-    await warte(50);
+  for (let versuch = 1; versuch <= 8; versuch++) {
+    const jetzt = await (await fetch(`${base}/api/state?clientId=weg_handy&role=player`)).json();
+    const abbruch = new AbortController();
+    // Ob die Anfrage wirklich liegen blieb, verrät sie selbst: Eine, die nicht
+    // in den Warteraum kam, antwortet sofort. Nur dann zählt der Versuch.
+    let sofortGeantwortet = false;
+    const wartend = fetch(
+      `${base}/api/state?clientId=weg_handy&role=player&seit=${jetzt.nummer}`,
+      { signal: abbruch.signal },
+    ).then(() => { sofortGeantwortet = true; }).catch(() => {});
+    await warte(150 * versuch);
+    if (sofortGeantwortet) continue; // lag nie im Warteraum – nichts zum Auflegen
+    abbruch.abort();
+    await wartend;
+
+    for (let i = 0; i < 40; i++) {
+      const m = await nachschauen();
+      if (m && m.online === false) return; // gut
+      await warte(50);
+    }
   }
   assert.fail('das Handy gilt immer noch als anwesend');
 });
