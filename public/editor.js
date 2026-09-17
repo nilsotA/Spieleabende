@@ -512,7 +512,13 @@ function verraeterMarkieren() {
   }
 
   let index = 0;
-  let gefunden = 0;
+  // Zwei verschiedene Fehler, getrennt gezählt: Die Lösung steht in der
+  // NACHBARFRAGE derselben Kategorie – oder sie steht in der eigenen Frage.
+  // Beides wurde in eine Zahl geworfen und mit dem Satz für den ersten Fall
+  // beschriftet; wer nur Selbstverräter hatte, las „steht schon in anderen
+  // Fragen derselben Kategorie" und suchte dort vergeblich.
+  let inNachbarfrage = 0;
+  let imEigenenText = 0;
   let ersteZeile = null;
   for (const runde of set.rounds) {
     for (const cat of runde.categories) {
@@ -527,7 +533,7 @@ function verraeterMarkieren() {
           feld.title = 'Diese Lösung steht schon in einer anderen Frage dieser Kategorie '
             + `– auf der Leinwand ist sie damit verschenkt:\n„${andere}…“`;
         }
-        gefunden += 1;
+        inNachbarfrage += 1;
         if (!ersteZeile) ersteZeile = zeile;
       }
       // Und der Fall, den die Prüfung darüber ausdrücklich auslässt: Die Frage
@@ -541,7 +547,7 @@ function verraeterMarkieren() {
           feld.title = 'Diese Lösung steht wörtlich in der Frage selbst – damit ist sie '
             + 'keine Frage mehr, sondern Vorlesen.';
         }
-        gefunden += 1;
+        imEigenenText += 1;
         if (!ersteZeile) ersteZeile = zeile;
       }
       index += cat.questions.length;
@@ -550,16 +556,28 @@ function verraeterMarkieren() {
 
   const hinweis = $('#fortschritt-verraet');
   if (hinweis) {
+    const gefunden = inNachbarfrage + imEigenenText;
+    const nachbar = inNachbarfrage === 1
+      ? '1 Lösung steht schon in einer anderen Frage derselben Kategorie'
+      : `${inNachbarfrage} Lösungen stehen schon in anderen Fragen derselben Kategorie`;
+    const eigen = imEigenenText === 1
+      ? '1 Lösung steht wörtlich in ihrer eigenen Frage'
+      : `${imEigenenText} Lösungen stehen wörtlich in ihrer eigenen Frage`;
     hinweis.hidden = gefunden === 0;
-    hinweis.textContent = gefunden === 1
-      ? '1 Lösung steht schon in einer anderen Frage derselben Kategorie.'
-      : `${gefunden} Lösungen stehen schon in anderen Fragen derselben Kategorie.`;
-    hinweis.onclick = ersteZeile
-      ? () => ersteZeile.scrollIntoView({
-        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'center',
-      })
-      : null;
+    // Erst abräumen: Ein alter Klick-Handler zeigte sonst weiter auf eine Zeile,
+    // die es nicht mehr gibt.
+    hinweis.onclick = null;
+    if (gefunden) {
+      hinweis.textContent = inNachbarfrage && imEigenenText
+        ? `${nachbar}, ${eigen}.`
+        : `${inNachbarfrage ? nachbar : eigen}.`;
+      if (ersteZeile) {
+        hinweis.onclick = () => ersteZeile.scrollIntoView({
+          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          block: 'center',
+        });
+      }
+    }
   }
 }
 

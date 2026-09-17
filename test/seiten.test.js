@@ -521,6 +521,40 @@ test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
 });
 
 /*
+ * Der Editor zählt zwei verschiedene Fehler – und muss sie auch so nennen.
+ *
+ * Die Lösung steht in der NACHBARFRAGE derselben Kategorie, oder sie steht in
+ * der eigenen Frage. Beides landete in einer Zahl, beschriftet mit dem Satz für
+ * den ersten Fall. Gemessen: ein einziger Selbstverräter, und darüber stand „1
+ * Lösung steht schon in einer anderen Frage derselben Kategorie" – der Autor
+ * sucht dann in den Nachbarfragen, wo nichts ist.
+ *
+ * Und der Warnbalken „Zwischenspeicher voll" stand außerhalb der klebenden
+ * Leiste. Er erscheint, während jemand Frage 40 von 48 tippt – also weit unten
+ * auf der Seite; oben angeheftet hat ihn dort nie jemand gesehen, und genau
+ * dann wird nichts mehr gesichert. Sein Rat war obendrein halb falsch: „Auf dem
+ * Server speichern" verweigert save(), solange ein Feld leer ist, und leer sind
+ * beim Schreiben fast immer welche.
+ */
+test('der Editor benennt die zwei Arten von verratener Lösung getrennt', () => {
+  const js = ohneKommentare(lies('editor.js'));
+  assert.match(js, /let inNachbarfrage = 0;/, 'die Nachbarfragen brauchen eine eigene Zahl');
+  assert.match(js, /let imEigenenText = 0;/, 'die Selbstverräter auch');
+  assert.match(js, /wörtlich in ihrer eigenen Frage/, 'und einen eigenen Satz');
+  assert.match(js, /inNachbarfrage && imEigenenText/, 'beide zusammen brauchen beide Sätze');
+});
+
+test('der Warnbalken des Editors steht in der klebenden Leiste', () => {
+  const html = fs.readFileSync(path.join(PUBLIC, 'editor.html'), 'utf8');
+  const leiste = /<div class="bar">[\s\S]*?\n  <\/div>/.exec(html)?.[0] || '';
+  assert.ok(leiste, 'die klebende Leiste sollte auffindbar bleiben');
+  assert.match(leiste, /id="speicher-warnung"/,
+    'außerhalb sieht ihn niemand, der gerade Frage 40 tippt');
+  assert.match(leiste, /„Herunterladen“: Das geht auch mit halb gefülltem Satz/,
+    'der Rat muss auch stimmen, wenn noch Felder leer sind');
+});
+
+/*
  * „⏱ Zeit ist um" bleibt stehen, bis die Frage vorbei ist.
  *
  * starteUhr() hört bei null auf zu ticken – der Satz wird genau einmal

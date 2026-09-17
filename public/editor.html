@@ -78,9 +78,12 @@
   /* Die Kopfleiste klebt oben und ist rund 10rem hoch – ohne dieses Polster
      springt „Zur nächsten Lücke" genau dahinter. */
   html { scroll-padding-top: 11rem; }
-  .speicher-warnung { margin: 0 0 1rem; padding: .7rem .9rem; border-radius: 10px;
+  /* Sitzt jetzt in der klebenden Leiste – daher oben ein schmaler Abstand
+     statt unten einer, und etwas kleiner, damit die Leiste nicht auf das halbe
+     Fenster wächst, wenn der Balken kommt. */
+  .speicher-warnung { margin: .6rem 0 0; padding: .55rem .8rem; border-radius: 10px;
                       background: rgba(224,27,70,.16); border: 1px solid rgba(255,120,145,.55);
-                      color: #ffd7de; font-size: .92rem; line-height: 1.45; }
+                      color: #ffd7de; font-size: .88rem; line-height: 1.4; }
   .qrow .antwort { display: grid; gap: .35rem; }
   /* Der Zusatz ist ein Textfeld, das mit dem Inhalt wächst (siehe
      hoeheAnpassen): einzeilig war er nach rund 60 Zeichen abgeschnitten.
@@ -166,6 +169,19 @@
     <!-- Der teuerste Fehler beim Fragenschreiben: Die Lösung steht in der
          Nachbarfrage derselben Kategorie und ist auf der Leinwand verschenkt. -->
     <button id="fortschritt-verraet" class="fortschritt-verraet" type="button" hidden></button>
+    <!-- Bleibt stehen, solange der Zwischenspeicher voll ist. Ein Toast wäre nach
+         drei Sekunden weg, und danach sähe der Editor wieder gesund aus.
+
+         In der klebenden Leiste, nicht darunter: Der Balken erschien, während
+         jemand Frage 40 von 48 tippt – also weit unten auf der Seite. Oben
+         angeheftet hat ihn dort nie jemand gesehen, und genau dann wird nichts
+         mehr gesichert. -->
+    <div id="speicher-warnung" class="speicher-warnung" role="alert" hidden>
+      <strong>Zwischenspeicher voll.</strong> Es wird gerade <em>nichts</em> mehr automatisch
+      gesichert – meist liegt das an vielen eingebetteten Bildern. Jetzt bitte
+      „Herunterladen“: Das geht auch mit halb gefülltem Satz. „Auf dem Server
+      speichern“ verlangt, dass alle Felder ausgefüllt sind.
+    </div>
   </div>
   <!-- Marke direkt unter der Leiste. Woran erkannt wird, ob man schon im
        Formular ist, darf sich nicht dadurch ändern, dass die Leiste zusammen-
@@ -174,14 +190,6 @@
        halten. Gegen `scrollY` gemessen klappte die Leiste deshalb endlos auf
        und zu. Diese Marke bleibt bei genau dem Nachziehen stehen. -->
   <div id="bar-marke" aria-hidden="true"></div>
-
-  <!-- Bleibt stehen, solange der Zwischenspeicher voll ist. Ein Toast wäre nach
-       drei Sekunden weg, und danach sähe der Editor wieder gesund aus. -->
-  <div id="speicher-warnung" class="speicher-warnung" role="alert" hidden>
-    <strong>Zwischenspeicher voll.</strong> Es wird gerade <em>nichts</em> mehr automatisch
-    gesichert – meist liegt das an vielen eingebetteten Bildern. Bitte jetzt
-    „Herunterladen“ oder „Auf dem Server speichern“.
-  </div>
 
   <div id="rounds"></div>
 
