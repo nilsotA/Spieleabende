@@ -323,7 +323,26 @@ function panne(err, wo) {
 export function connect({ role, onState, onEvent, onStatus }) {
   setRole(role);
   const id = clientId();
-  let stromKam = false; // ist über den Strom je ein Zustand angekommen?
+  /*
+   * Zwei Fragen, nicht eine.
+   *
+   * `stromKam` hieß „ist über den Strom je ein Zustand angekommen" und
+   * entschied gleichzeitig darüber, ob der Notweg noch aufmachen darf. Beides
+   * zusammen ist ein Riegel, der nur in eine Richtung fällt: Nach dem ersten
+   * Zustand stand `stromKam` für immer auf wahr, die Schleife des Notwegs
+   * (`while … && !stromKam`) lief danach nie wieder, und der Fehler-Zweig des
+   * Stroms war hinter `if (!stromKam)` unerreichbar. Reißt der Strom später ab
+   * und kommt nicht wieder – ein Netz, das lange Verbindungen kappt; ein
+   * Vermittler, der irgendwann anfängt zu puffern –, gibt es keinen Weg zurück.
+   * Der Browser baut den Strom zwar weiter neu auf, aber wenn genau das nicht
+   * geht, steht das Handy für den Rest des Abends auf einem alten Stand.
+   *
+   * Also getrennt: `stromKam` sagt weiterhin, ob es je geklappt hat (davon
+   * hängen nur die Worte ab, die dabei auf dem Schirm stehen). `stromLaeuft`
+   * sagt, ob er GERADE trägt – und nur das entscheidet über den Notweg.
+   */
+  let stromKam = false;   // hat der Strom je einen Zustand geliefert?
+  let stromLaeuft = false; // trägt er gerade?
   let notwegLaeuft = false;
   let letzteNummer = null; // Stand, den dieses Handy schon hat
   let haeltNichts = false; // hält dieser Server wartende Anfragen wirklich?
@@ -417,7 +436,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
    */
   async function notwegSchleife() {
     let erstes = true;
-    while (notwegLaeuft && !stromKam) {
+    while (notwegLaeuft && !stromLaeuft) {
       const ok = await hole(!erstes);
       erstes = false;
       if (!ok) await schlaf(ABFRAGE_TAKT); // nicht in einer Endlosschleife hämmern
@@ -426,7 +445,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
   }
 
   function notwegAuf(grund) {
-    if (notwegLaeuft || stromKam) return;
+    if (notwegLaeuft || stromLaeuft) return;
     melde(grund);
     notwegLaeuft = true;
     notwegSchleife();
@@ -472,6 +491,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
     // Der Strom lebt – der Notweg wird nicht mehr gebraucht.
     const ersteMal = !stromKam;
     stromKam = true;
+    stromLaeuft = true;
     clearTimeout(fristTimer);
     notwegZu();
     nimm(JSON.parse(ev.data), 'Live-Verbindung');
@@ -491,13 +511,32 @@ export function connect({ role, onState, onEvent, onStatus }) {
   // ab jetzt läuft der Notweg daneben und macht wieder zu, sobald der Strom
   // doch noch etwas liefert.
   source.addEventListener('error', () => {
-    setOnline(false);
+    stromLaeuft = false;
     lageAkte.strom = source.readyState;
     lageAkte.letzterFehler = `Strom: ${source.readyState === 2 ? 'zu' : 'abgerissen'} nach ${lageAkte.zustaende} Zuständen`;
-    if (!stromKam) {
-      clearTimeout(fristTimer);
-      notwegAuf('Die Live-Verbindung wird abgewiesen – ich hole den Spielstand jetzt selbst.');
-    }
+    // Auch wenn er vorher lief: Der Browser baut zwar von selbst neu auf, aber
+    // solange das nicht klappt, holt der Notweg den Stand. Er macht von selbst
+    // wieder zu, sobald der Strom den nächsten Zustand liefert – dieselbe
+    // Mechanik wie beim ersten Verbinden.
+    clearTimeout(fristTimer);
+    notwegAuf(stromKam
+      ? 'Die Live-Verbindung ist abgerissen – ich hole den Spielstand solange selbst.'
+      : 'Die Live-Verbindung wird abgewiesen – ich hole den Spielstand jetzt selbst.');
+    /*
+     * Hier stand `setOnline(false)`. „Offline" heißt aber: KEIN Weg trägt –
+     * nicht: dieser eine Weg trägt nicht.
+     *
+     * Der Browser baut einen abgewiesenen Strom im Sekundentakt neu auf, und
+     * jeder Fehlschlag landete hier. Gemessen mit einem Handy, dessen Strom
+     * vollständig abgewiesen wurde: Es trat einem Team bei, sah das Spiel
+     * starten und bekam die Frage – und zeigte dabei den ganzen Abend „Keine
+     * Verbindung – warte kurz …", weil `nimm()` sein `setOnline(true)` jedes
+     * Mal eine Sekunde später wieder überschrieben bekam. Am Tisch lädt man
+     * dann neu, wechselt das WLAN und fragt den Host.
+     *
+     * Wer wirklich offline ist, merkt es weiterhin: `hole()` meldet es, sobald
+     * auch die Abfrage nicht mehr durchkommt.
+     */
   });
 
   // Der Zustand des Stroms gehört in die Akte, auch wenn nichts passiert:

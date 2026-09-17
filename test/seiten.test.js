@@ -521,6 +521,47 @@ test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
 });
 
 /*
+ * Der Notweg muss auch aufmachen können, wenn der Strom SPÄTER abreißt.
+ *
+ * `stromKam` hieß „ist je ein Zustand angekommen" und entschied gleichzeitig,
+ * ob der Notweg noch aufmachen darf – ein Riegel, der nur in eine Richtung
+ * fällt. Nach dem ersten Zustand lief die Schleife des Notwegs nie wieder
+ * (`while … && !stromKam`), und der Fehler-Zweig des Stroms lag hinter
+ * `if (!stromKam)`. Reißt der Strom später ab und kommt nicht wieder – ein
+ * Netz, das lange Verbindungen kappt –, steht das Handy für den Rest des
+ * Abends auf einem alten Stand.
+ *
+ * Zwei getrennte Fragen also: ob es je klappte (nur für die Wortwahl) und ob
+ * er GERADE trägt (dafür der Notweg).
+ */
+test('der Notweg hängt daran, ob der Strom gerade trägt', () => {
+  const js = ohneKommentare(lies('common.js'));
+  assert.match(js, /let stromLaeuft = false;/, 'die zweite Frage braucht eine eigene Antwort');
+  assert.match(js, /while \(notwegLaeuft && !stromLaeuft\)/,
+    'die Schleife darf nicht an „je gelaufen" hängen');
+  assert.match(js, /if \(notwegLaeuft \|\| stromLaeuft\) return;/,
+    'und das Aufmachen auch nicht');
+  const fehlerZweig = /source\.addEventListener\('error'[\s\S]*?\n  \}\);/.exec(js)?.[0] || '';
+  assert.ok(fehlerZweig, 'der Fehler-Zweig des Stroms sollte auffindbar bleiben');
+  assert.doesNotMatch(fehlerZweig, /if \(!stromKam\)/,
+    'der Notweg darf nicht nur beim allerersten Fehlschlag aufmachen');
+  assert.match(fehlerZweig, /notwegAuf\(/, 'er muss ihn überhaupt aufmachen');
+
+  /*
+   * Und „offline" heißt: kein Weg trägt.
+   *
+   * Der Browser baut einen abgewiesenen Strom im Sekundentakt neu auf, und jeder
+   * Fehlschlag rief `setOnline(false)`. Gemessen mit einem Handy, dessen Strom
+   * vollständig abgewiesen wurde: Es trat bei, sah das Spiel starten und bekam
+   * die Frage – und zeigte dabei „Keine Verbindung – warte kurz …", weil das
+   * `setOnline(true)` aus `nimm()` jede Sekunde überschrieben wurde. Jetzt
+   * steht dort, was wirklich los ist.
+   */
+  assert.doesNotMatch(fehlerZweig, /setOnline\(false\)/,
+    'ein abgewiesener Strom allein macht das Handy nicht offline – hole() meldet das');
+});
+
+/*
  * Im Stechen gibt es keine Punkte – dann gehört auch keine Zahl in die Zeile.
  *
  * Gemessen auf der Leinwand, unter der Antwort, die den ganzen Abend
