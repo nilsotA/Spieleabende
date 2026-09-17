@@ -261,6 +261,34 @@ export async function setExists(file) {
  * Damit ist kein Abend wie der andere, ohne dass jemand neue Fragen schreiben muss.
  * Kategorienamen werden entdoppelt – „Was ist die Frage?" gibt es in fast jedem Satz.
  */
+/**
+ * Zwei Namen, eine Kategorie: „Marken & Logos" und „Logos & Marken".
+ *
+ * Für den Mix sind das dieselbe Kategorie – und solange er sie auseinanderhielt,
+ * passierte zweierlei. Erstens landeten sie manchmal zusammen auf einem Brett:
+ * über 2000 gewürfelte Bretter gemessen 24-mal, also jedes 83. Auf der Leinwand
+ * steht dann zweimal dasselbe, nur andersherum geschrieben, und es sieht aus wie
+ * ein Fehler. Zweitens bekam der Begriff zwei Lose statt einem, und damit war
+ * genau die Schieflage wieder da, gegen die das Ein-Los-je-Name weiter unten
+ * antritt: „logos marken" stand auf 17,1 Prozent aller Bretter, die seltenste
+ * Kategorie auf 4,6 – Faktor 3,7 statt der angestrebten 2,4.
+ *
+ * Sortierte Wörter als Schlüssel fangen genau diese Fälle. Über alle 187
+ * Kategorienamen der Sätze fallen dabei zwei Paare zusammen – „Marken & Logos"
+ * mit „Logos & Marken" und „Flüsse & Berge" mit „Berge & Flüsse" – und sonst
+ * nichts. „Flaggen" und „Flaggen für Fortgeschrittene" bleiben getrennt, die
+ * gehören auch getrennt.
+ *
+ * Exportiert, damit die Prüfung die Regel direkt festhalten kann statt sie über
+ * hundert gewürfelte Bretter zu erraten.
+ */
+export function kategorieMarke(name) {
+  return String(name).toLowerCase()
+    .replace(/[^\p{L}\p{N} ]/gu, ' ')
+    .split(/\s+/).filter(Boolean).sort()
+    .join(' ');
+}
+
 export async function mixSet() {
   const dateien = (await listSets()).filter((s) => !s.error);
   // Nach Ursprungsrunde getrennt sammeln: Runde 2 zählt doppelt, dort gehören
@@ -273,10 +301,13 @@ export async function mixSet() {
     set.rounds.forEach((round, ri) => {
       const topf = toepfe[Math.min(ri, toepfe.length - 1)];
       for (const cat of round.categories) {
-        if (!topf.has(cat.name)) topf.set(cat.name, []);
+        // Schlüssel ist die Marke, nicht die Schreibweise – siehe oben.
+        // Angezeigt wird weiterhin der Name der gezogenen Kategorie.
+        const marke = kategorieMarke(cat.name);
+        if (!topf.has(marke)) topf.set(marke, []);
         // Woher die Kategorie stammt, wird mitgeführt: Der Mix zieht reihum
         // über die Sätze, und dafür muss er sie auseinanderhalten können.
-        topf.get(cat.name).push({ cat, satz: eintrag.file });
+        topf.get(marke).push({ cat, satz: eintrag.file });
       }
     });
   }
@@ -328,7 +359,8 @@ export async function mixSet() {
       for (const liste of reihen) {
         if (sechs.length >= 6) break;
         let k = liste.pop();
-        // Denselben Kategorienamen nicht zweimal – auch nicht aus zwei Sätzen.
+        // Dieselbe Kategorie nicht zweimal – nicht aus zwei Sätzen und nicht
+        // in zwei Schreibweisen (`name` ist die Marke, nicht der Name).
         while (k && (vergeben.has(k.name) || genommen.has(k.name))) k = liste.pop();
         if (!k) continue;
         genommen.add(k.name);

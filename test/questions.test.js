@@ -504,6 +504,63 @@ test('ein Satz mit fehlender Bilddatei wird gemeldet statt still gespielt', asyn
   }
 });
 
+/*
+ * „Marken & Logos" und „Logos & Marken" sind für den Mix dieselbe Kategorie.
+ *
+ * Solange er sie auseinanderhielt, passierte zweierlei. Sie landeten manchmal
+ * zusammen auf einem Brett – über 2000 gewürfelte Bretter gemessen 24-mal, also
+ * jedes 83.; auf der Leinwand steht dann zweimal dasselbe, nur andersherum
+ * geschrieben. Und der Begriff bekam zwei Lose statt einem, womit genau die
+ * Schieflage zurück war, gegen die das Ein-Los-je-Name antritt: „logos marken"
+ * stand auf 17,1 Prozent aller Bretter, die seltenste Kategorie auf 4,6 –
+ * Faktor 3,7. Mit einem Los sind es 12,6 gegen 4,4, Faktor 2,9, und die Paare
+ * kommen in 2000 Brettern kein einziges Mal zusammen.
+ *
+ * Geprüft wird die Regel selbst statt hundert Würfe: Welche Namen der echten
+ * Sätze fallen zusammen, und fallen die richtigen zusammen?
+ */
+test('der Zufallsmix hält zwei Namen für dieselbe Kategorie auseinander', async () => {
+  const { kategorieMarke } = await import('../server/questions.js');
+
+  assert.equal(kategorieMarke('Marken & Logos'), kategorieMarke('Logos & Marken'));
+  assert.equal(kategorieMarke('Flüsse & Berge'), kategorieMarke('Berge & Flüsse'));
+  assert.notEqual(kategorieMarke('Flaggen'), kategorieMarke('Flaggen für Fortgeschrittene'),
+    'unterschiedliche Kategorien dürfen NICHT zusammenfallen');
+
+  // Und über alle echten Namen: genau diese zwei Paare, sonst nichts.
+  const namen = new Set();
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    for (const round of set.rounds) for (const cat of round.categories) namen.add(cat.name);
+  }
+  const nachMarke = new Map();
+  for (const name of namen) {
+    const marke = kategorieMarke(name);
+    if (!nachMarke.has(marke)) nachMarke.set(marke, []);
+    nachMarke.get(marke).push(name);
+  }
+  const zusammen = [...nachMarke.values()].filter((g) => g.length > 1)
+    .map((g) => [...g].sort().join(' / ')).sort();
+  assert.deepEqual(zusammen, ['Berge & Flüsse / Flüsse & Berge', 'Logos & Marken / Marken & Logos'],
+    'fällt etwas Neues zusammen, ist entweder ein Name dazugekommen oder die Marke zu grob');
+
+  // Und mixSet muss sie auch BENUTZEN. Das lässt sich nicht erwürfeln: Die
+  // beiden Paare treffen sich nur auf jedem 83. Brett, vierzig Würfe sehen das
+  // nicht. Gegenprobe gemacht – ohne diese Zusicherung bleibt die Prüfung grün,
+  // wenn man den Schlüssel wieder auf den Rohnamen stellt.
+  const quelle = await readFile(new URL('../server/questions.js', import.meta.url), 'utf8');
+  // Erst mixSet herausschneiden: `for (const cat of round.categories)` steht
+  // auch in stechenVorrat, und das ist nicht gemeint.
+  const mixQuelle = /export async function mixSet\(\)[\s\S]*?\n\}/.exec(quelle)?.[0] || '';
+  assert.ok(mixQuelle, 'mixSet sollte auffindbar bleiben');
+  const topfBlock = /for \(const cat of round\.categories\) \{[\s\S]*?\n      \}/.exec(mixQuelle)?.[0] || '';
+  assert.ok(topfBlock, 'der Topf-Aufbau in mixSet sollte auffindbar bleiben');
+  assert.match(topfBlock, /kategorieMarke\(cat\.name\)/,
+    'mixSet muss seine Töpfe nach der Marke schlüsseln, nicht nach der Schreibweise');
+  assert.doesNotMatch(topfBlock, /topf\.(has|set|get)\(cat\.name\)/,
+    'kein Rest des alten Rohnamen-Schlüssels');
+});
+
 test('der Zufallsmix verteilt sich über die Sätze', async () => {
   // „Zufallsmix aus allen Sätzen" soll sich auch so anfühlen. Vorher wurden
   // sechs Kategorien je Runde blind aus einem gemeinsamen Topf gezogen; bei acht
@@ -523,9 +580,17 @@ test('der Zufallsmix verteilt sich über die Sätze', async () => {
     }
   }
 
+  const { kategorieMarke } = await import('../server/questions.js');
   const gesehen = new Map();
   for (let i = 0; i < 40; i++) {
     const mix = normalizeSet(await mixSet());
+    // Zweimal dieselbe Kategorie auf einem Brett gibt es nicht – auch nicht in
+    // zwei Schreibweisen. Vierzig Würfe erwischen das nicht zuverlässig (es
+    // traf jedes 83. Brett), die Regel selbst steht deshalb in einer eigenen
+    // Prüfung darüber; hier fällt nur ein grober Rückfall auf.
+    const marken = mix.rounds.flatMap((r) => r.categories.map((c) => kategorieMarke(c.name)));
+    assert.equal(new Set(marken).size, marken.length,
+      `zwei gleichbedeutende Kategorien auf einem Brett: ${mix.rounds.flatMap((r) => r.categories.map((c) => c.name)).join(', ')}`);
     const proSatz = new Map();
     for (const round of mix.rounds) {
       const inDieserRunde = new Map();
