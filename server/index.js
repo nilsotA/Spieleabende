@@ -1042,12 +1042,33 @@ const ROUTES = {
   '/editor': 'editor.html',
 };
 
-// Seiten, hinter denen die Lösungen stehen. Bei den Schnittstellen ist die
-// Liste andersherum gedacht – alles ist Hostsache, außer den dreien, die ein
-// Handy wirklich braucht: die Live-Verbindung, sein Zug und die Adressen.
-// Ein Fragensatz (/api/set) enthält die Antworten und gehört ausdrücklich nicht
-// dazu.
-const NUR_HOST_SEITEN = new Set(['/host', '/remote', '/editor']);
+/*
+ * Seiten, hinter denen die Lösungen stehen. Bei den Schnittstellen ist die
+ * Liste andersherum gedacht – alles ist Hostsache, außer den dreien, die ein
+ * Handy wirklich braucht: die Live-Verbindung, sein Zug und die Adressen.
+ * Ein Fragensatz (/api/set) enthält die Antworten und gehört ausdrücklich nicht
+ * dazu.
+ *
+ * Die Dateinamen kommen aus ROUTES, nicht noch einmal von Hand: Hier standen
+ * nur die Kurzadressen, und /host.html ging damit an der Tür vorbei. Gemessen
+ * mit einem Spielschlüssel, wie ihn jeder Gast aus dem QR-Code hat:
+ *
+ *   /host         403      /host.html      200
+ *   /remote       403      /remote.html    200
+ *   /editor       403      /editor.html    200
+ *
+ * Herausgekommen ist dabei nichts – viewFor ist das eigentliche Tor, und der
+ * Gast bekam dieselbe Sicht wie immer: Lösung null, Zusatz null, kein Rückweg,
+ * werten abgewiesen. Es war die leere Hülle der Seite. Aber eine Tür, die nur
+ * eine von zwei Schreibweisen kennt, ist keine, und wer als Nächstes eine Seite
+ * dazunimmt, hätte dieselbe Lücke wieder.
+ *
+ * Die Skripte (/host.js und Freunde) stehen bewusst nicht in der Liste: In
+ * ihnen steht keine einzige Antwort, die kommen alle über die Schnittstelle.
+ */
+const NUR_HOST_SEITEN = new Set(
+  ['/host', '/remote', '/editor'].flatMap((kurz) => [kurz, `/${ROUTES[kurz]}`]),
+);
 const AUCH_FUER_HANDYS = new Set(['/api/events', '/api/state', '/api/action', '/api/info']);
 
 function hostNoetig(pathname) {

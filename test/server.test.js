@@ -2765,6 +2765,36 @@ test('der Notweg steht hinter derselben Tür wie alles andere', async (t) => {
   assert.equal(alsHostSicht.status, 200);
 });
 
+/*
+ * Die Tür muss beide Schreibweisen derselben Seite kennen.
+ *
+ * Bewacht waren nur die Kurzadressen. Gemessen mit einem Spielschlüssel, wie
+ * ihn jeder Gast aus dem QR-Code hat: /host gab 403, /host.html gab 200 –
+ * dasselbe bei /remote und /editor. Herausgekommen ist dabei nichts, viewFor
+ * ist das eigentliche Tor und lieferte dem Gast Lösung null und keinerlei
+ * Hostrechte. Es war die leere Hülle der Seite. Eine Tür, die nur eine von zwei
+ * Schreibweisen kennt, ist trotzdem keine.
+ */
+test('die Tür kennt auch die Dateinamen der Hostseiten', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-tuer-html-'));
+  const { proc, base, host, spiel } = await starteOnline(9760 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const hol = (pfad, keks) => fetch(`${base}${pfad}`, { headers: { Cookie: keks } }).then((r) => r.status);
+
+  for (const pfad of ['/host', '/host.html', '/remote', '/remote.html', '/editor', '/editor.html']) {
+    assert.equal(await hol(pfad, ''), 403, `${pfad} ohne Schlüssel`);
+    assert.equal(await hol(pfad, `qd_spiel=${spiel}`), 403,
+      `${pfad}: ein Spielschlüssel darf keine Hostseite aufmachen`);
+    assert.equal(await hol(pfad, `qd_host=${host}`), 200, `${pfad} mit Hostschlüssel`);
+  }
+
+  // Und die Seiten der Mitspieler bleiben offen – in beiden Schreibweisen.
+  for (const pfad of ['/', '/index.html', '/play', '/player.html']) {
+    assert.equal(await hol(pfad, `qd_spiel=${spiel}`), 200, `${pfad} muss für Gäste offen bleiben`);
+  }
+});
+
 test('die Startwache kommt auch ohne Schlüssel durch die Tür', async (t) => {
   // Der Schlüssel steckt nur in der Adresse der Seite; Stylesheet und Skripte
   // holt der Browser allein über den Keks. Legt ein Handy den nicht ab, bekommt
