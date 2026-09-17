@@ -2093,6 +2093,52 @@ test('geht der Buzzer erst in der Pause auf, fängt die Uhr bei null an', async 
   assert.ok(!rekord || rekord.ms > 0, `kein negativer Rekord, gemessen ${JSON.stringify(rekord)}`);
 });
 
+test('die Regeln überleben ein Zurücknehmen', async (t) => {
+  /*
+   * Dieselbe Sache wie bei der Pause, eine Ebene tiefer: `settings` steht mit
+   * Absicht NICHT in RUECKNEHMBAR – eine Einstellung ist kein Zug und soll sich
+   * nicht zurücknehmen lassen. Sie fuhr aber im Schnappschuss mit, und damit tat
+   * es jedes beliebige „Zurücknehmen".
+   *
+   * Nachgestellt: Abzug steht auf „halbe", der Host wertet aus Versehen
+   * „Richtig" auf ein 500er-Feld. Der Tisch beschwert sich über zu teure
+   * Fehler, der Host stellt den Abzug auf „keiner" und schaltet den Einsatz
+   * ein. Dann fällt die Fehlwertung auf und er nimmt sie zurück. Gemessen: Die
+   * 500 gingen richtig weg – und mit ihnen stumm beide Menü-Änderungen.
+   */
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-regelnundo-'));
+  const port = 7500 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'regeln-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  assert.equal((await zustand(base)).settings.wrongPenalty, 'half', 'Ausgangslage');
+
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 });
+  await host({ type: 'judge', correct: true });      // aus Versehen
+
+  await host({ type: 'settings', settings: { wrongPenalty: 'none', einsatz: 'runde', buzzUhr: 20 } });
+  await host({ type: 'undo' });
+
+  const nach = await zustand(base);
+  assert.equal(nach.settings.wrongPenalty, 'none', 'der Abzug bleibt, wie der Host ihn eingestellt hat');
+  assert.equal(nach.settings.einsatz, 'runde', 'und der Einsatz bleibt eingeschaltet');
+  assert.equal(nach.settings.buzzUhr, 20, 'und die Buzzer-Uhr auch');
+  assert.equal(nach.teams[0].score, 0, 'zurückgenommen wurde trotzdem');
+
+  // Und in der Gegenrichtung: Eine Einstellung zu ändern ist weiterhin kein
+  // Zug, den man zurücknehmen könnte.
+  await host({ type: 'settings', settings: { wrongPenalty: 'full' } });
+  await host({ type: 'undo' });
+  assert.equal((await zustand(base)).settings.wrongPenalty, 'full',
+    'ein Zurücknehmen darf eine Einstellung auch nicht absichtlich rückgängig machen');
+});
+
 test('die Pause überlebt ein Zurücknehmen – und springt nicht von selbst an', async (t) => {
   // Die Pause gehört zum Raum, nicht zum Spielzug. Wer in der Pause eine
   // Fehlwertung zurücknimmt – genau wozu sie da ist –, hob sie damit auf:

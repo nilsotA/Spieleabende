@@ -614,6 +614,24 @@ function uebernimm(alt, jetztStand) {
   // ist eine Frage weniger im Vorrat, und davon gibt es reichlich.
   alt.ersatzTexte = jetztStand.ersatzTexte;
   alt.stechenTexte = jetztStand.stechenTexte;
+  // Die Regeln gehören dem Abend, nicht dem Spielzug.
+  //
+  // `settings` steht mit Absicht NICHT in RUECKNEHMBAR: Eine Einstellung soll
+  // sich nicht zurücknehmen lassen, sie ist ja kein Zug. Sie fuhr aber im
+  // Schnappschuss mit, und damit tat es jedes beliebige „Zurücknehmen".
+  //
+  // Nachgestellt: Abzug steht auf „halbe". Der Host wertet aus Versehen
+  // „Richtig" auf ein 500er-Feld. Der Tisch beschwert sich, dass falsche
+  // Antworten zu teuer sind – der Host stellt im Menü den Abzug auf „keiner"
+  // und schaltet den Einsatz ein. Dann fällt die Fehlwertung auf, und er nimmt
+  // sie zurück. Gemessen: Die 500 Punkte gingen richtig weg, und mit ihnen
+  // stumm beide Menü-Änderungen; auf den Handys verschwand der Einsatz-Knopf
+  // wieder, ohne dass irgendwo etwas gestanden hätte.
+  //
+  // Dass sie dem Raum gehören, sagt das Spiel ohnehin schon an anderer Stelle:
+  // backToLobby trägt sie über ein ganzes neues Spiel hinweg mit (game.js,
+  // `fresh.settings = state.settings`).
+  alt.settings = jetztStand.settings;
   return alt;
 }
 
