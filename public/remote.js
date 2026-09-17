@@ -200,10 +200,13 @@ function render() {
     const log = $('#r-log');
     log.innerHTML = '';
     for (const entry of q.log) {
+      // Wie auf der Leinwand: Im Stechen gibt es keine Punkte, also auch keine
+      // Zahl – sonst steht hier „richtig +0" unter der entscheidenden Antwort.
       const label =
         entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${punkte(entry.delta)}` : 'wusste es nicht')
-          : entry.result === 'correct' ? `richtig +${entry.delta}`
-            : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
+          : entry.result === 'correct' ? (q.stechen ? 'richtig' : `richtig +${entry.delta}`)
+            : q.stechen ? 'falsch – raus'
+              : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
       log.append(el('span', { class: `r-chip ${entry.result}` }, `${teamName(entry.teamId)}: ${label}`));
     }
   }

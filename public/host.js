@@ -1029,13 +1029,20 @@ function renderQuestion(prev) {
     // +250 von 🦊 Anna" – während Anna ihre 500 behielt und nichts abgab.
     const fremd = entry.result === 'correct' && entry.teamId !== q.teamId && !q.stechen;
     const geklaut = fremd && !zugteamTraf;
+    // Im Stechen gibt es keine Punkte – dann gehört auch keine Zahl in die
+    // Zeile. Gemessen stand auf der Leinwand „🦊 Anna: richtig +0",
+    // ausgerechnet unter der Antwort, die den ganzen Abend entschieden hat.
+    // Und „falsch" heißt hier mehr als sonst: Wer danebenliegt, ist raus
+    // (lockedOut in game.js) – das darf die Zeile ruhig sagen.
     const label =
       entry.result === 'pass' ? (entry.delta ? `wusste es nicht ${punkte(entry.delta)}` : 'wusste es nicht')
         : entry.result === 'correct'
-          ? (geklaut ? `schnappt sich +${entry.delta} von ${teamName(q.teamId)}`
-            : fremd ? `auch richtig +${entry.delta}`
-              : `richtig +${entry.delta}`)
-          : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
+          ? (q.stechen ? 'richtig'
+            : geklaut ? `schnappt sich +${entry.delta} von ${teamName(q.teamId)}`
+              : fremd ? `auch richtig +${entry.delta}`
+                : `richtig +${entry.delta}`)
+          : q.stechen ? 'falsch – raus'
+            : entry.delta ? `falsch ${punkte(entry.delta)}` : 'falsch';
     status.append(el('div', { class: `chip log ${entry.result}${geklaut ? ' geklaut' : ''}` },
       `${teamName(entry.teamId)}: ${label}`));
   }

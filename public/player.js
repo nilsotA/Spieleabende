@@ -592,9 +592,6 @@ function renderQuestion() {
  */
 let einsatzScharf = false;
 
-/* Zuletzt gesehene Frage – damit der Hinweis unten nur einmal kommt. */
-let einsatzVerpufftBei = null;
-
 function renderEinsatz() {
   const box = $('#p-einsatz');
   if (!box) return;
@@ -612,13 +609,22 @@ function renderEinsatz() {
    * Der Einsatz bleibt dabei erhalten: Es ist nichts verloren, nur nicht
    * passiert. Ein Hinweis in dem Moment, in dem die Frage aufgeht, macht daraus
    * eine Sache von zehn Sekunden – zurücknehmen, Feld selbst antippen.
+   *
+   * Der Satz nennt bewusst NICHT den Host. In einem Zweierteam tippt genauso
+   * gut das zweite Handy das Feld an – dann hätte „das Feld kam vom Host" die
+   * falsche Person beschuldigt, und am Tisch wird darüber geredet statt über
+   * die Frage.
+   *
+   * Zwei Mal warnen kann es nicht: Zwei Zeilen tiefer wird `einsatzScharf`
+   * gelöscht, und ohne die gibt es keinen zweiten Durchlauf. Hier stand einmal
+   * ein Riegel aus Feldkoordinaten dagegen – der hätte nichts verhindert, was
+   * nicht ohnehin verhindert war, und in Runde 2 mit denselben Koordinaten
+   * ausgerechnet die echte Warnung geschluckt.
    */
   const q = state?.current;
   if (einsatzScharf && !darf && q && !q.einsatz && !q.stechen
-    && q.teamId === state?.you?.teamId
-    && einsatzVerpufftBei !== `${q.catIdx}:${q.rowIdx}`) {
-    einsatzVerpufftBei = `${q.catIdx}:${q.rowIdx}`;
-    toast('Der Einsatz ist nicht mitgegangen – das Feld kam vom Host. Er liegt noch bei euch.', 'error');
+    && q.teamId === state?.you?.teamId) {
+    toast('Der Einsatz ist nicht mitgegangen – das Feld wurde ohne ihn aufgerufen. Er liegt noch bei euch.', 'error');
   }
 
   // Außerhalb der eigenen Feldwahl entschärfen, sonst steht der Schalter beim

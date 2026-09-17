@@ -493,8 +493,8 @@ test('das Handy sagt Bescheid, wenn der Einsatz nicht mitgegangen ist', () => {
     'nur wenn die Frage OHNE Einsatz hereinkam – sonst meldet es sich beim eigenen Tipp');
   assert.match(stelle, /q\.teamId === state\?\.you\?\.teamId/,
     'und nur beim eigenen Feld');
-  assert.match(stelle, /einsatzVerpufftBei !== /,
-    'einmal pro Frage, nicht bei jedem Broadcast');
+  assert.doesNotMatch(stelle, /kam vom Host/,
+    'der Satz darf niemanden beschuldigen – in einem Zweierteam tippt auch das andere Handy');
   // Und er muss VOR dem Entschärfen stehen, sonst ist einsatzScharf schon weg.
   const reihenfolge = /if \(einsatzScharf && !darf[\s\S]*?if \(!darf\) einsatzScharf = false;/.test(js);
   assert.ok(reihenfolge, 'der Hinweis muss vor dem Entschärfen stehen');
@@ -517,6 +517,28 @@ test('„Zug überspringen" hat seine eigene Anlaufsperre', () => {
   ]) {
     assert.match(ohneKommentare(lies(datei)), muster,
       `${datei}: ohne eigenen Bezugspunkt springt ein Doppeltipp zwei Teams weiter`);
+  }
+});
+
+/*
+ * Im Stechen gibt es keine Punkte – dann gehört auch keine Zahl in die Zeile.
+ *
+ * Gemessen auf der Leinwand, unter der Antwort, die den ganzen Abend
+ * entschieden hat: „🦊 Anna: richtig +0". Der Server schreibt dort bewusst
+ * `delta: 0` (game.js, der `q.stechen`-Zweig in judge); die Oberflächen setzten
+ * das ungeprüft hinter ein Pluszeichen. Auf der Fernbedienung stand dasselbe.
+ *
+ * Und „falsch" heißt im Stechen mehr als sonst: Wer danebenliegt, ist raus.
+ */
+test('das Protokoll schreibt im Stechen keine Nullpunkte', () => {
+  for (const datei of ['host.js', 'remote.js']) {
+    const js = ohneKommentare(lies(datei));
+    const zeile = /const label =\s*\n?\s*entry\.result === 'pass'[\s\S]*?;/.exec(js)?.[0] || '';
+    assert.ok(zeile, `${datei}: die Protokollzeile sollte auffindbar bleiben`);
+    assert.match(zeile, /q\.stechen \? 'richtig'/,
+      `${datei}: ohne diesen Zweig steht „richtig +0" auf dem Schirm`);
+    assert.match(zeile, /q\.stechen \? 'falsch – raus'/,
+      `${datei}: und „falsch" darf sagen, was es im Stechen bedeutet`);
   }
 });
 
