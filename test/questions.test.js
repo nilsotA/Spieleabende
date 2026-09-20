@@ -243,6 +243,50 @@ test('keine Frage ist eine umformulierte Fassung einer anderen', async () => {
   assert.deepEqual(umformuliert, [], 'dieselbe Frage in anderen Worten');
 });
 
+/*
+ * Das Handbuch kennt jeden Satz, den es gibt – und keinen, den es nicht gibt.
+ *
+ * Im README steht eine Tabelle aller Fragensätze, von Hand gepflegt. Nichts
+ * hielt sie an den Bestand gebunden. Wer einen Satz dazulegt, merkt nicht, dass
+ * die Liste ihn nicht kennt; wer einen wegnimmt, lässt eine Zeile stehen, die
+ * auf nichts mehr zeigt. Beides ist dieselbe Sorte Fehler wie das Umbenennen
+ * von Teams, das der README versprach und das es nicht gab: Das Handbuch ist
+ * das Erste, was jemand liest, und das Letzte, woran jemand denkt.
+ *
+ * Gelesen wird ausdrücklich NUR die Tabelle unter „Satz | Kategorien“. Ein
+ * Muster über alle fetten ersten Zellen fände auch die Punktwerte-Tabelle
+ * (100, 200, 300, 500) und meldete vier Sätze, die es nicht gibt.
+ */
+test('das Handbuch kennt genau die Sätze, die es gibt', async () => {
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  const kopf = readme.indexOf('| Satz | Kategorien |');
+  assert.ok(kopf > 0, 'die Satz-Tabelle sollte es im Handbuch weiter geben');
+
+  // Ab dem Kopf so lange Zeilen nehmen, wie die Tabelle läuft.
+  const zeilen = readme.slice(kopf).split('\n');
+  const imHandbuch = [];
+  for (const zeile of zeilen.slice(2)) {
+    if (!zeile.startsWith('|')) break;
+    const name = /^\|\s*\*\*(.+?)\*\*\s*\|/.exec(zeile)?.[1]?.trim();
+    if (name) imHandbuch.push(name);
+  }
+  assert.ok(imHandbuch.length >= 4, `nur ${imHandbuch.length} Zeilen gefunden – stimmt die Tabelle noch?`);
+
+  const echte = [];
+  for (const datei of DATEIEN) {
+    echte.push(normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8'))).name);
+  }
+
+  const fehlen = echte.filter((n) => !imHandbuch.includes(n));
+  const verwaist = imHandbuch.filter((n) => !echte.includes(n));
+  assert.deepEqual(fehlen, [], 'diese Sätze gibt es, aber das Handbuch nennt sie nicht');
+  assert.deepEqual(verwaist, [], 'diese Zeilen im Handbuch zeigen auf keinen Satz mehr');
+
+  // Und doppelte Zeilen sind auch keine Hilfe.
+  const doppelt = imHandbuch.filter((n, i) => imHandbuch.indexOf(n) !== i);
+  assert.deepEqual(doppelt, [], 'derselbe Satz steht mehrfach in der Tabelle');
+});
+
 test('der gesicherte Spielstand taucht nicht als Fragensatz auf', async () => {
   const { listSets, DATA_DIR } = await import('../server/questions.js');
   const { writeFile, unlink } = await import('node:fs/promises');
