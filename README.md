@@ -611,12 +611,14 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   bei einem Bruchteil ihrer Größe und ist aus vier Metern nicht mehr zu lesen.
   Maßgeblich ist dabei nicht die Frage allein, sondern Frage plus Lösung plus
   Zusatz zusammen: Beim Auflösen steht alles drei gleichzeitig im Kasten.
-  Nachgemessen über alle 1008 mitgelieferten Fragen wird auf 1920×1080, auf
+  Nachgemessen über alle 1056 mitgelieferten Fragen wird auf 1920×1080, auf
   1440×900 und auf einem 1280×720-Beamer keine einzige verkleinert. Der 720er
   ist dabei der engste der drei: Der Kasten ist auf allen dreien gleich breit,
-  unten bleibt aber am wenigsten Platz übrig. Als Faustzahl: Frage bis 105,
-  Lösung bis 70, Zusatz bis 145 Zeichen – die längsten im Bestand liegen bei
-  101, 67 und 143. Darüber sagt es der Editor.
+  unten bleibt aber am wenigsten Platz übrig. Gemessen wird die Schriftgröße,
+  die am Ende wirklich dasteht, und zwar in beiden Bewegungs-Einstellungen –
+  bei „Bewegung reduzieren" hat die Leiter lange etwas anderes getan als sonst.
+  Als Faustzahl: Frage bis 105, Lösung bis 70, Zusatz bis 145 Zeichen – die
+  längsten im Bestand liegen bei 101, 67 und 143. Darüber sagt es der Editor.
   Reicht auch die kleinste Stufe nicht, rückt beim Auflösen wenigstens die
   Lösung ins Bild – die Frage hat der Host ohnehin vorgelesen.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.

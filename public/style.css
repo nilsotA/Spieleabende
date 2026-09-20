@@ -309,13 +309,31 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
    ein Quizspiel: Kacheln, die aufklappen, ein Buzzer, der pulsiert, Konfetti,
    das fällt. Die Regel stand bisher nur im Stylesheet des Host-Screens – die
    Startseite, die Handys und der Editor animierten weiter.
-   Ausgeschaltet wird nichts, nur beschleunigt: Ein Übergang mit 0,01 ms ist
-   für JavaScript weiterhin ein Übergang, und `transitionend` feuert. */
+
+   Übergänge werden abgeschaltet, nicht verkürzt. Der Unterschied ist kein
+   kosmetischer: `transition-duration` allein lässt `transition-property` auf
+   seinem Ausgangswert `all` stehen. Damit bekommt jede Eigenschaft jedes
+   Elements einen Übergang – auch die vielen tausend, die nie einen hatten.
+   Und solange ein Übergang läuft, liefert eine Messung direkt nach dem
+   Setzen noch den alten Wert.
+
+   Gemessen auf dem Host-Screen bei gesetztem „Bewegung reduzieren": Nach
+   `--frageskala: 0.6` stand die Panelhöhe unverändert auf 476px und erst
+   zwei Bilder später auf 315px. passeFrageEin() misst aber in demselben
+   Durchlauf, in dem es setzt – es sah also auf jeder Stufe die Geometrie von
+   Stufe 1. Das Ergebnis: Was bei voller Größe passte, blieb groß; alles
+   andere fiel nicht eine Stufe tiefer, sondern sofort auf die kleinste –
+   17px Frage und 6,7px Zusatz auf der Leinwand. Über alle 1056
+   mitgelieferten Fragen landete keine einzige auf einer der sechs Stufen
+   dazwischen. Ohne diese Zeile ist die Leiter wieder eine Leiter.
+
+   Auf `transitionend` hört in diesem Haus niemand, und sichtbar war ein
+   Übergang von 0,01 ms ohnehin nie. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition: none !important;
     scroll-behavior: auto !important;
   }
 }

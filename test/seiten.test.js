@@ -1832,3 +1832,49 @@ test('„Neues Spiel" fragt auf Leinwand und Fernbedienung nach', () => {
   assert.ok(fernNeu, 'auch auf der Fernbedienung sollte er auffindbar bleiben');
   assert.match(fernNeu, /if \(!confirm[\s\S]*?\) return;/);
 });
+
+/*
+ * Eine einzige Zeile in style.css hatte die Schriftleiter des Host-Screens
+ * stillgelegt – für alle, die „Bewegung reduzieren“ gesetzt haben.
+ *
+ * `transition-duration: 0.01ms !important` auf `*` liest sich wie eine
+ * Abkürzung, ist aber eine Erweiterung: `transition-property` bleibt dabei auf
+ * seinem Ausgangswert `all`. Damit bekommt jede Eigenschaft jedes Elements
+ * einen Übergang – auch die vielen tausend, die nie einen hatten. Und solange
+ * ein Übergang läuft, liefert eine Messung direkt nach dem Setzen noch den
+ * alten Wert.
+ *
+ * passeFrageEin() setzt `--frageskala` und misst im selben Durchlauf. Gemessen
+ * im Browser mit gesetzter Einstellung: Nach `--frageskala: 0.6` stand die
+ * Panelhöhe unverändert auf 476px und erst zwei Bilder später auf 315px – und
+ * zwar gleichgültig, was man dazwischen erzwang (offsetHeight mehrfach lesen,
+ * Reflow am Body, die Kinder zuerst messen, die Panel-Animation abschalten).
+ * Auf einer Seite ohne dieses Stylesheet war derselbe Wert sofort da.
+ *
+ * Die Leiter sah damit auf jeder ihrer acht Stufen die Geometrie von Stufe 1:
+ * Was bei voller Größe passte, blieb groß; alles andere fiel nicht eine Stufe
+ * tiefer, sondern sofort auf die kleinste. Über alle 1056 mitgelieferten
+ * Fragen landete keine einzige auf einer der sechs Stufen dazwischen – auf
+ * einem 720p-Beamer standen zwei mit 17px Frage und 6,7px Zusatz da.
+ */
+test('„Bewegung reduzieren" schaltet Übergänge ab, statt sie zu kürzen', () => {
+  let gesehen = 0;
+  for (const datei of fs.readdirSync(PUBLIC).filter((f) => f.endsWith('.css'))) {
+    const css = lies(datei).replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const regel of css.match(/[{},;]\s*\*[^{};]*\{[^{}]*\}/g) || []) {
+      const inhalt = regel.slice(regel.indexOf('{'));
+      assert.doesNotMatch(inhalt, /transition-duration/,
+        `${datei}: eine Regel auf * darf transition-duration nicht setzen – `
+        + 'transition-property steht dann auf „all", jede Eigenschaft bekommt '
+        + 'einen Übergang, und jede Messung direkt nach dem Setzen liest den '
+        + 'alten Wert');
+      if (/transition/.test(inhalt)) {
+        assert.match(inhalt, /transition:\s*none/,
+          `${datei}: wenn eine Regel auf * Übergänge anfasst, dann bitte ganz aus`);
+        gesehen += 1;
+      }
+    }
+  }
+  assert.equal(gesehen, 1, 'die Regel für „Bewegung reduzieren" sollte auffindbar bleiben');
+});
+
