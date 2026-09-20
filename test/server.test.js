@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
+import { createServer as createHttpServer } from 'node:http';
 import { rm, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -147,6 +148,21 @@ async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
     if (!belegt) throw new Error(`Server startet nicht (Port ${dieserPort})`);
   }
   throw new Error(`kein freier Port ab ${port} gefunden`);
+}
+
+/**
+ * Wartet auf das Ende eines Prozesses – aber nicht ewig.
+ *
+ * Ohne Frist hängt ein Test endlos, sobald das Geprüfte AUSBLEIBT: Der Server
+ * läuft dann ja einfach weiter. Gegengeprüft und genau so passiert – der
+ * Testlauf blieb stehen, statt rot zu werden. Ein Test, der hängt statt zu
+ * scheitern, sagt niemandem, was los ist.
+ */
+function mitFrist(proc, ms = 15000) {
+  return new Promise((fertig) => {
+    const frist = setTimeout(() => { proc.kill('SIGKILL'); fertig('läuft immer noch'); }, ms);
+    proc.on('exit', (code) => { clearTimeout(frist); fertig(code); });
+  });
 }
 
 /** Öffnet eine Host-Verbindung und liefert eine Funktion zum Absenden von Aktionen. */
@@ -2244,6 +2260,77 @@ test('cloudflared darf seine Adresse auch nach stderr schreiben', async (t) => {
 });
 
 /*
+ * Ein zweiter Doppelklick ist kein zweites Spiel.
+ *
+ * Wer die Startdatei zweimal anklickt – weil beim ersten Mal scheinbar nichts
+ * passiert ist –, bekam einen ZWEITEN Server auf dem nächsten Port. Der
+ * Browser ging dort auf, die Lobby war leer, während die Handys der Freunde
+ * am ersten Server hingen. Und beide schrieben in dieselbe Datei auf der
+ * Platte: Gemessen ersetzte die erste Aktion im zweiten Fenster den
+ * gespeicherten Stand des laufenden Abends – aus „Rot, Blau" wurde „Gruen".
+ * Ein Absturz oder Neustart danach hätte den Abend gekostet.
+ *
+ * Die Erkennung sitzt vor dem Weiterzählen des Ports und gilt deshalb auch,
+ * wenn jemand den Port selbst angibt. Genau das macht sie hier prüfbar, ohne
+ * dass ein Test auf dem festen Port 3000 stehen muss.
+ */
+test('ein zweiter Start stellt sich nicht daneben, sondern zeigt auf den ersten', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-doppelt-'));
+  const stateFile = path.join(dir, 's.json');
+  const { proc, base } = await starteServer(7100 + Math.floor(Math.random() * 200), stateFile);
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+  const port = Number(new URL(base).port);
+
+  const zweiter = spawn(process.execPath, [SERVER], {
+    env: { ...process.env, PORT: String(port), QUIZDUELL_STATE_FILE: stateFile },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let gesagt = '';
+  zweiter.stdout.on('data', (d) => { gesagt += String(d); });
+  zweiter.stderr.on('data', (d) => { gesagt += String(d); });
+
+  const ende = await mitFrist(zweiter);
+  assert.equal(ende, 0, 'der Host hat nichts falsch gemacht – also kein Fehler');
+  assert.match(gesagt, /läuft schon/, 'und er erfährt, warum');
+  assert.match(gesagt, new RegExp(`localhost:${port}/host`), 'und wo sein Abend läuft');
+  assert.doesNotMatch(gesagt, /Quizduell für Spieleabende läuft/, 'ein zweiter Server geht nicht auf');
+
+  // Der erste läuft ungestört weiter – dort hängen die Handys.
+  assert.equal((await (await fetch(`${base}/api/laeuft`)).json()).quizduell, true);
+});
+
+/*
+ * Sitzt dort aber ein FREMDES Programm, darf der Start es nicht für unser
+ * Spiel halten und den Host dorthin schicken. Dann ist der Port schlicht
+ * belegt – und das muss er auch sagen.
+ */
+test('ein fremdes Programm auf dem Port ist nicht unser Spiel', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-fremd-'));
+  const port = 7300 + Math.floor(Math.random() * 200);
+
+  // Antwortet auf alles mit 200 und JSON – nur eben nicht mit unserem.
+  const fremd = createHttpServer((_q, r) => {
+    r.writeHead(200, { 'Content-Type': 'application/json' });
+    r.end(JSON.stringify({ irgendwas: true }));
+  });
+  await new Promise((fertig, schief) => { fremd.once('error', schief); fremd.listen(port, fertig); });
+  t.after(() => new Promise((fertig) => fremd.close(fertig)));
+
+  const unserer = spawn(process.execPath, [SERVER], {
+    env: { ...process.env, PORT: String(port), QUIZDUELL_STATE_FILE: path.join(dir, 's.json') },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  t.after(async () => { unserer.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+  let gesagt = '';
+  unserer.stdout.on('data', (d) => { gesagt += String(d); });
+  unserer.stderr.on('data', (d) => { gesagt += String(d); });
+
+  assert.equal(await mitFrist(unserer), 1, 'ein belegter Port ist ein Fehler');
+  assert.match(gesagt, /ist schon belegt/, 'und wird auch so genannt');
+  assert.doesNotMatch(gesagt, /läuft schon/, 'nicht als „der Abend läuft dort"');
+});
+
+/*
  * Ein zu altes Node fällt vorne auf, nicht bei Frage eins.
  *
  * Die Startskripte fragten nur, OB Node da ist. Auf einem älteren startet der
@@ -2314,10 +2401,7 @@ test('mit zu altem Node startet der Server gar nicht', async () => {
    * Testlauf blieb stehen statt rot zu werden. Ein Test, der hängt statt zu
    * scheitern, sagt niemandem, was los ist.
    */
-  const ende = await new Promise((fertig) => {
-    const frist = setTimeout(() => { proc.kill('SIGKILL'); fertig('läuft immer noch'); }, 15000);
-    proc.on('exit', (code) => { clearTimeout(frist); fertig(code); });
-  });
+  const ende = await mitFrist(proc);
   assert.equal(ende, 1, 'der Server soll mit einem Fehler enden, nicht laufen');
   assert.match(klage, /zu alt für das Spiel/);
   assert.match(klage, /Node 16\.20\.2/, 'die Meldung nennt, was installiert ist');

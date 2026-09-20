@@ -71,8 +71,16 @@ Im Terminal geht es genauso:
 npm start                  # oder: node server/index.js
 ```
 
-Ist der übliche Port 3000 schon belegt, nimmt der Server von selbst den nächsten
-freien und sagt es dazu – ein zweiter Doppelklick läuft also nicht ins Leere.
+Ist der übliche Port 3000 von einem anderen Programm belegt, nimmt der Server
+von selbst den nächsten freien und sagt es dazu.
+
+Läuft dort aber schon ein Quizduell – weil die Startdatei ein zweites Mal
+angeklickt wurde –, fängt er keinen zweiten an. Das Fenster zeigt stattdessen
+auf den laufenden Abend und geht wieder zu. Das ist wichtiger, als es klingt:
+Ein zweiter Server hätte eine leere Lobby gezeigt, während die Handys der
+Freunde noch am ersten hängen – und beide hätten in dieselbe Datei auf der
+Platte geschrieben. Wer wirklich zwei Spiele nebeneinander will, startet das
+zweite mit `PORT=3001 npm start`.
 
 Der Server nennt beim Start alle Adressen:
 

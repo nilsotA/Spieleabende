@@ -1198,6 +1198,18 @@ const server = http.createServer(async (req, res) => {
   // Bewusst innerhalb des try: Diese Prüfung läuft vor allem anderen, und ein
   // Wurf hier hätte keinen Fänger gehabt. Die Anfrage blieb dann offen liegen –
   // keine Antwort, keine Fehlerseite, nur eine hängende Verbindung.
+  /*
+   * Eine Frage, die vor der Tür beantwortet wird: Läuft hier ein Quizduell?
+   *
+   * Gebraucht von einem zweiten Start, der sonst nicht unterscheiden kann, ob
+   * auf dem Port unser eigenes Spiel sitzt oder ein fremdes Programm – und
+   * der beim Raten einen zweiten Server daneben stellt, der in dieselbe Datei
+   * schreibt. Verraten wird dabei nichts: Dass hier ein Quizduell läuft, sagt
+   * die Fehlerseite hinter der Tür genauso. Kein Spielstand, keine Frage,
+   * keine Adresse, kein Schlüssel.
+   */
+  if (pathname === '/api/laeuft') return sendJson(res, 200, { quizduell: true });
+
   let rolle;
   try {
     rolle = pruefeZugang(req, url, zugang);
@@ -1587,8 +1599,51 @@ server.headersTimeout = 125000;
 const PORT_VERSUCHE = 10;
 let portVersuche = 0;
 
-server.on('error', (err) => {
-  if (err.code !== 'EADDRINUSE') throw err;
+/**
+ * Steht auf diesem Port schon ein Quizduell – oder irgendetwas anderes?
+ *
+ * Das ist der ganze Unterschied zwischen „der Port ist belegt" und „das Spiel
+ * läuft schon". Gefragt wird über /api/laeuft, das absichtlich vor der Tür
+ * liegt: Es verrät nichts, was die Fehlerseite nicht auch verrät.
+ */
+async function schonEinQuizduell(port) {
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/laeuft`, { signal: AbortSignal.timeout(1500) });
+    if (!res.ok) return false;
+    return (await res.json())?.quizduell === true;
+  } catch {
+    // Keine Antwort, kaputte Antwort, Zeitüberschreitung: dann eben nicht.
+    return false;
+  }
+}
+
+/*
+ * Ein zweiter Doppelklick ist kein zweites Spiel.
+ *
+ * Gemessen: Wer die Startdatei zweimal anklickt – weil beim ersten Mal
+ * scheinbar nichts passiert ist –, bekam einen ZWEITEN Server auf Port 3001.
+ * Der Browser ging dort auf, die Lobby war leer, während die Handys der
+ * Freunde am ersten Server auf 3000 hingen. Und beide schrieben in dieselbe
+ * Datei auf der Platte: Die erste Aktion im zweiten Fenster ersetzte den
+ * gespeicherten Stand des laufenden Abends (gemessen: aus „Rot, Blau" wurde
+ * „Gruen"). Ein Absturz oder Neustart danach hätte den Abend gekostet.
+ *
+ * Das Weiterzählen des Ports bleibt – es ist für den Fall gedacht, dass ein
+ * FREMDES Programm auf 3000 sitzt. Dann ist der nächste Port richtig. Sitzt
+ * dort aber unser eigenes Spiel, ist der richtige Zug, nichts Neues
+ * anzufangen und den Host dorthin zu schicken, wo sein Abend läuft.
+ */
+async function behandlePortBelegt() {
+  if (await schonEinQuizduell(PORT)) {
+    console.log('\n  Das Spiel läuft schon – in einem anderen Fenster.\n');
+    console.log(`  Host-Screen (Beamer/TV):  ${hostAdresse()}`);
+    console.log('\n  Dieses Fenster wird nicht gebraucht und geht gleich von selbst zu.');
+    console.log(`  Wirklich ein zweites, eigenes Spiel? Dann:  PORT=${PORT + 1} npm start\n`);
+    // Und der Host sieht, was er sehen wollte: den laufenden Abend.
+    if (process.env.QUIZDUELL_BROWSER === '1') oeffneImBrowser(hostAdresse());
+    // Kein Fehler: Der Host hat nichts falsch gemacht.
+    process.exit(0);
+  }
 
   if (!PORT_GESETZT && portVersuche < PORT_VERSUCHE) {
     portVersuche += 1;
@@ -1596,10 +1651,20 @@ server.on('error', (err) => {
     server.listen(PORT);
     return;
   }
-  console.error(`\n  Port ${PORT} ist schon belegt.`);
-  console.error('  Läuft der Server vielleicht bereits in einem anderen Fenster?');
-  console.error(`  Sonst mit einem anderen Port starten:  PORT=${PORT + 1} npm start\n`);
+  console.error(`\n  Port ${PORT} ist schon belegt – von einem anderen Programm.`);
+  console.error(`  Mit einem anderen Port starten:  PORT=${PORT + 1} npm start\n`);
   process.exit(1);
+}
+
+server.on('error', (err) => {
+  // Alles außer einem belegten Port bleibt synchron: Ein Wurf in einem
+  // async-Rückruf wäre eine abgelehnte Zusage ohne Fänger und käme ohne
+  // brauchbare Spur heraus.
+  if (err.code !== 'EADDRINUSE') throw err;
+  behandlePortBelegt().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 });
 
 const wiederhergestellt = await restore();
