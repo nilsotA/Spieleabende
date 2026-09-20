@@ -1,0 +1,314 @@
+{
+  "name": "Querbeet",
+  "description": "Zwölf Kategorien quer durch alles: Farben, Verkehrsschilder und Erste Hilfe, dazu Briefmarken, Kalender, Baustoffe und der Asteroidengürtel. Kein Schwerpunkt, keine Spezialistenfragen – nur das, was man sich unter Allgemeinwissen vorstellt.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Farben und ihre Namen",
+          "questions": [
+            {
+              "text": "Welche Farbe heißt im Deutschen genauso wie eine Zitrusfrucht?",
+              "answer": "Orange",
+              "note": "Das Wort wanderte über Französisch, Arabisch und Persisch aus dem Sanskrit zu uns – dort hieß die Frucht naranga."
+            },
+            {
+              "text": "Welche Farbe bezeichnet das Wort „bordeaux“?",
+              "answer": "Dunkelrot (auch: Weinrot)",
+              "note": "Benannt nach dem Wein aus der französischen Hafenstadt an der Garonne."
+            },
+            {
+              "text": "Welche Farbe war in der Antike Kaisern vorbehalten und wurde aus Meeresschnecken gewonnen?",
+              "answer": "Purpur",
+              "note": "Für ein einziges Gramm Farbstoff brauchte man Tausende Schnecken – gefärbte Seide war teurer als Gold."
+            },
+            {
+              "text": "Welche vier Farben benutzt der klassische Vierfarbdruck?",
+              "answer": "Cyan, Magenta, Gelb und Schwarz",
+              "note": "Die vierte Farbe kommt dazu, weil die drei Buntfarben zusammen nur ein schmutziges Dunkelbraun ergeben."
+            }
+          ]
+        },
+        {
+          "name": "Schilder am Straßenrand",
+          "questions": [
+            {
+              "text": "Welches Verkehrszeichen ist achteckig und rot?",
+              "answer": "Das Stoppschild",
+              "note": "An der Form allein erkennt man es – sogar von hinten und selbst dann, wenn die Aufschrift in fremden Buchstaben steht."
+            },
+            {
+              "text": "Welche Form hat das Schild „Vorfahrt gewähren“?",
+              "answer": "Ein auf der Spitze stehendes Dreieck",
+              "note": "Diese Form kommt im deutschen Schilderwald nur ein einziges Mal vor – man erkennt sie sogar von hinten."
+            },
+            {
+              "text": "Welches Tempolimit gilt automatisch, sobald man in eine geschlossene Ortschaft einfährt?",
+              "answer": "Höchstens 50 km/h",
+              "note": "Das gelbe Ortsschild trägt keine Zahl – die Regel gilt allein dadurch, dass es am Straßenrand steht."
+            },
+            {
+              "text": "Wie heißt das schräge Kreuz, das an Bahnübergängen dem Zug den Vorrang einräumt?",
+              "answer": "Das Andreaskreuz",
+              "note": "Benannt nach dem Apostel Andreas – ein schräg gestelltes Kreuz trägt in der Wappenkunde bis heute seinen Namen."
+            }
+          ]
+        },
+        {
+          "name": "Erste Hilfe",
+          "questions": [
+            {
+              "text": "Welche Nummer wählt man in Deutschland, um einen Rettungswagen zu rufen?",
+              "answer": "112",
+              "note": "Die Nummer gilt in der ganzen EU und funktioniert auch ohne Guthaben auf dem Mobiltelefon."
+            },
+            {
+              "text": "Wie heißt die Position, in die man eine bewusstlose Person mit normaler Atmung bringt?",
+              "answer": "Die stabile Seitenlage",
+              "note": "Der Kopf wird dabei überstreckt, der Mund zeigt nach unten – so bleiben die Atemwege frei."
+            },
+            {
+              "text": "Welchen Gegenstand muss ein Auto in Deutschland neben Warndreieck und Warnweste an Bord haben?",
+              "answer": "Einen Verbandkasten",
+              "note": "Der Inhalt ist in einer DIN-Norm festgelegt und trägt ein Haltbarkeitsdatum, das meist nach fünf Jahren abläuft."
+            },
+            {
+              "text": "Wofür stehen beim Erste-Hilfe-Merkspruch für Verstauchungen die vier Buchstaben „PECH“?",
+              "answer": "Pause, Eis, Compression, Hochlagern (auch: Kühlen, Hochlegen)",
+              "note": "Im Englischen heißt dieselbe Regel „RICE“ – Rest, Ice, Compression, Elevation."
+            }
+          ]
+        },
+        {
+          "name": "Alles Wasser",
+          "questions": [
+            {
+              "text": "Wie lautet die chemische Formel von Wasser?",
+              "answer": "H2O",
+              "note": "Der Winkel zwischen den beiden Wasserstoffatomen beträgt rund 105 Grad – deshalb ist das Molekül elektrisch schief."
+            },
+            {
+              "text": "Wie viel Prozent der Erdoberfläche sind ungefähr von Wasser bedeckt?",
+              "answer": "Rund 70 Prozent (auch 71 gilt)",
+              "note": "Vom gesamten Wasser der Erde sind nur etwa 2,5 Prozent Süßwasser – und das meiste davon steckt in Eis und Gletschern."
+            },
+            {
+              "text": "Bei welcher Temperatur ist Wasser am schwersten, also am dichtesten?",
+              "answer": "Bei 4 Grad Celsius",
+              "note": "Diese Anomalie rettet Fische: Das kälteste Wasser steigt nach oben und friert dort, der Grund bleibt flüssig."
+            },
+            {
+              "text": "Wie nennt man den Übergang, bei dem Eis ohne Schmelzen direkt zu Wasserdampf wird?",
+              "answer": "Sublimation",
+              "note": "Trockeneis macht nichts anderes: Es hinterlässt keine Pfütze, sondern nur Nebel."
+            }
+          ]
+        },
+        {
+          "name": "Post und Adresse",
+          "questions": [
+            {
+              "text": "Wie viele Ziffern hat eine deutsche Postleitzahl?",
+              "answer": "Fünf",
+              "note": "Bis 1993 waren es vier – nach der Wiedervereinigung reichten sie für ganz Deutschland nicht mehr aus."
+            },
+            {
+              "text": "Wofür steht bei einer Adresse die Abkürzung „z. Hd.“?",
+              "answer": "Zu Händen",
+              "note": "Gemeint ist eine bestimmte Person im Haus; der Zusatz „persönlich“ geht noch einen Schritt weiter."
+            },
+            {
+              "text": "Welches Land druckt als einziges keinen Staatsnamen auf seine Briefmarken?",
+              "answer": "Großbritannien",
+              "note": "Als Heimat der ersten Briefmarke genießt es dieses Vorrecht – stattdessen steht dort der Kopf des Monarchen."
+            },
+            {
+              "text": "Wie heißt das Fachwort für die gezackten Ränder einer Briefmarke?",
+              "answer": "Die Zähnung (auch: Perforation)",
+              "note": "Vor 1854 trennte man die Bogen mit der Schere – Sammler zahlen bis heute Aufschläge für allseits breite Ränder."
+            }
+          ]
+        },
+        {
+          "name": "Kalenderblätter",
+          "questions": [
+            {
+              "text": "Welcher Monat ist der einzige, der mal 28 und mal 29 Tage hat?",
+              "answer": "Der Februar",
+              "note": "Seinen Namen trägt er nach Februa, einem römischen Reinigungsfest, das in diesem Monat gefeiert wurde."
+            },
+            {
+              "text": "Welcher römische Gott mit zwei Gesichtern gab dem ersten Monat unseres Kalenders seinen Namen?",
+              "answer": "Janus",
+              "note": "Er war der Gott der Türen und Übergänge: Ein Gesicht blickt zurück, das andere nach vorn."
+            },
+            {
+              "text": "Welcher deutsche Wochentag heißt im Englischen nach dem germanischen Gott Wodan?",
+              "answer": "Der Mittwoch",
+              "note": "Im Namen Wednesday steckt der Gott bis heute; das deutsche Wort zählt dagegen schlicht die Wochenmitte."
+            },
+            {
+              "text": "Welcher Papst ließ 1582 den Kalender reformieren, nach dem wir heute rechnen?",
+              "answer": "Gregor XIII.",
+              "note": "Zehn Tage fielen damals einfach aus: Auf den 4. Oktober folgte direkt der 15."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Nachbarn im Weltall",
+          "questions": [
+            {
+              "text": "Wie heißt die Galaxie, in der unser Sonnensystem liegt?",
+              "answer": "Die Milchstraße",
+              "note": "Der Name stammt vom blassen Band am Nachthimmel, das die Griechen für verschüttete Milch hielten."
+            },
+            {
+              "text": "Wie heißt der größte Mond des Sonnensystems, der um Jupiter kreist?",
+              "answer": "Ganymed",
+              "note": "Er ist größer als der Planet Merkur und der einzige Mond mit einem eigenen Magnetfeld."
+            },
+            {
+              "text": "Wie heißt der rote Zwergstern, der unserer Sonne von allen Sternen am nächsten steht?",
+              "answer": "Proxima Centauri",
+              "note": "Er gehört zum Dreiersystem Alpha Centauri – 4,2 Lichtjahre weit weg, für heutige Sonden über 70.000 Jahre Reisezeit."
+            },
+            {
+              "text": "Wie heißt der größte Körper im Asteroidengürtel, der heute als Zwergplanet gilt?",
+              "answer": "Ceres",
+              "note": "Nach der Entdeckung 1801 galt er ein halbes Jahrhundert als Planet – dann fand man immer mehr Nachbarn."
+            }
+          ]
+        },
+        {
+          "name": "Wappen und Symbole",
+          "questions": [
+            {
+              "text": "Welches Tier ist das Wappentier der Bundesrepublik Deutschland?",
+              "answer": "Der Adler",
+              "note": "Die amtliche Fassung von 1950 übernahm den Entwurf aus der Weimarer Republik fast unverändert."
+            },
+            {
+              "text": "Welches Tier windet sich im Zeichen vieler Apotheken um einen Kelch?",
+              "answer": "Eine Schlange",
+              "note": "Das Gefäß steht für die Arznei; das Tier galt in der Antike als Sinnbild der Erneuerung, weil es sich häutet."
+            },
+            {
+              "text": "Welche stachelige Pflanze ist das Wahrzeichen Schottlands?",
+              "answer": "Die Distel",
+              "note": "Der Sage nach verriet sie heranschleichende Gegner, weil einer von ihnen barfuß hineintrat und aufschrie."
+            },
+            {
+              "text": "Welche Blume gab den englischen Thronkriegen des 15. Jahrhunderts ihren Namen?",
+              "answer": "Die Rose",
+              "note": "Weiß stand für das Haus York, Rot für Lancaster – die Tudors legten beide Farben einfach übereinander."
+            }
+          ]
+        },
+        {
+          "name": "Bekannte Bauwerke",
+          "questions": [
+            {
+              "text": "In welcher Stadt steht das Opernhaus mit den weißen Segeldächern am Hafen?",
+              "answer": "In Sydney",
+              "note": "Die Dächer bestehen aus über einer Million Keramikfliesen in zwei Farbtönen – rein weiß sind sie nicht."
+            },
+            {
+              "text": "Welches Hochhaus in New York war ab 1931 vierzig Jahre lang das höchste Gebäude der Welt?",
+              "answer": "Das Empire State Building",
+              "note": "Gebaut in nur 410 Tagen – in der heißen Phase wuchs der Stahlbau um viereinhalb Stockwerke pro Woche."
+            },
+            {
+              "text": "Welches Bauwerk ließ ein Großmogul aus weißem Marmor als Grabmal für seine Frau errichten?",
+              "answer": "Das Taj Mahal",
+              "note": "Der Stein wechselt mit dem Licht die Farbe: morgens rosa, mittags weiß, abends golden."
+            },
+            {
+              "text": "Wie heißt der Palast in Granada, den die maurischen Herrscher auf einem Hügel errichteten?",
+              "answer": "Die Alhambra",
+              "note": "Der Name kommt aus dem Arabischen und bedeutet „die Rote“ – nach der Farbe der Mauern."
+            }
+          ]
+        },
+        {
+          "name": "Woraus ist das gemacht?",
+          "questions": [
+            {
+              "text": "Aus welchem Rohstoff wird Glas hauptsächlich hergestellt?",
+              "answer": "Aus Quarzsand",
+              "note": "Bei rund 1700 Grad schmilzt er; ein Zusatz von Soda drückt den Schmelzpunkt auf etwa 1000 Grad."
+            },
+            {
+              "text": "Aus der Rinde welches Baumes schneidet man die Verschlüsse für Weinflaschen?",
+              "answer": "Aus der Korkeiche",
+              "note": "Die Rinde wächst nach: Alle neun bis zwölf Jahre lässt sich derselbe Baum erneut schälen."
+            },
+            {
+              "text": "Woraus besteht die Mine eines Bleistifts, wenn es kein Blei ist?",
+              "answer": "Aus Graphit",
+              "note": "Beigemischter Ton bestimmt die Härte: viel Ton macht die Mine hart, wenig lässt sie weich schreiben."
+            },
+            {
+              "text": "Welches Metall bildet auf Edelstahl die hauchdünne Schicht, die ihn vor Rost schützt?",
+              "answer": "Chrom",
+              "note": "Ab etwa zehn Prozent Anteil hält der Schutz – wird die Schicht zerkratzt, bildet sie sich an der Luft von selbst neu."
+            }
+          ]
+        },
+        {
+          "name": "Rund ums Geld",
+          "questions": [
+            {
+              "text": "Wie viele verschiedene Euro-Münzen gibt es vom kleinsten bis zum größten Wert?",
+              "answer": "Acht",
+              "note": "Eine Seite ist in allen Ländern gleich, die andere gestaltet jedes Land selbst – bezahlen kann man damit überall im Euroraum."
+            },
+            {
+              "text": "Welche Bauwerke sind auf der Rückseite jedes Euro-Scheins abgebildet?",
+              "answer": "Brücken",
+              "note": "Die Motive zeigen bewusst keine echten Vorbilder, damit sich kein Land übergangen fühlt."
+            },
+            {
+              "text": "Aus welchem Material bestehen Euro-Banknoten, wenn es kein Papier aus Holz ist?",
+              "answer": "Aus Baumwolle",
+              "note": "Die Fasern machen die Scheine reißfest; eine Runde in der Waschmaschine übersteht ein Schein meist unbeschadet."
+            },
+            {
+              "text": "Wie heißt der gekerbte Rand einer Münze, der früher das Abfeilen von Silber verhindern sollte?",
+              "answer": "Die Rändelung (auch: Riffelung)",
+              "note": "England führte den gerippten Rand schon im 17. Jahrhundert ein – abgeschabtes Silber fiel danach sofort auf."
+            }
+          ]
+        },
+        {
+          "name": "Wortgeschichten",
+          "questions": [
+            {
+              "text": "Welcher Gebäckname entstand, weil Bahlsen eine englische Mehrzahlform eindeutschte?",
+              "answer": "Keks",
+              "note": "Auf den ersten Packungen stand noch „Leibniz Cakes“ – 1911 stellte die Firma auf die deutsche Schreibweise um."
+            },
+            {
+              "text": "Welches deutsche Wort für ein sehr altes Auto bezeichnet im Englischen einen alten Menschen?",
+              "answer": "Oldtimer",
+              "note": "Auf Englisch heißt so ein Wagen classic car oder vintage car – als Fahrzeug versteht dort niemand das deutsche Wort."
+            },
+            {
+              "text": "Was bedeutete das Wort „Feierabend“ ursprünglich, im Mittelalter?",
+              "answer": "Den Vorabend eines Feiertags",
+              "note": "Weil am nächsten Tag nicht gearbeitet wurde, endete die Arbeit früher – später rutschte das Wort auf jeden Abend."
+            },
+            {
+              "text": "Welches deutsche Wort für das monatliche Gehalt geht auf das lateinische Wort für Salz zurück?",
+              "answer": "Salär",
+              "note": "Aus derselben Wurzel kommt das englische „salary“ – die Geschichte vom Soldatensold in Salz ist dagegen nicht belegt."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

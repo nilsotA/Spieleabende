@@ -1,0 +1,314 @@
+{
+  "name": "Wie funktioniert das?",
+  "description": "Kühlschrank, Kerze, Seife, Schraubgewinde: 48 Fragen über Alltagstechnik, Physik zum Anfassen und die Leute, die das alles erfunden haben.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Kalt gestellt",
+          "questions": [
+            {
+              "text": "Warum sprengt eine volle Wasserflasche im Gefrierfach ihren Verschluss?",
+              "answer": "Weil Eis mehr Platz braucht als Wasser",
+              "note": "Wasser ist bei 4 Grad am dichtesten. Deshalb frieren Seen von der Oberfläche her zu und bleiben am Grund flüssig."
+            },
+            {
+              "text": "Welches Heizgerät holt Energie aus der Außenluft ins Haus und braucht dafür nur Strom?",
+              "answer": "Die Wärmepumpe",
+              "note": "Im Prinzip ein Kühlschrank andersherum: drinnen wird es warm, draußen kalt."
+            },
+            {
+              "text": "Wie heißt das feste Kohlendioxid, mit dem Eisdielen ihre Ware für den Heimweg kühlen?",
+              "answer": "Trockeneis",
+              "note": "Wirft man es in warmes Wasser, wabert Bühnennebel aus dem Gefäß. Anfassen sollte man es nur mit Handschuhen."
+            },
+            {
+              "text": "Welches Bauteil brummt hinten am Kühlschrank und presst das Gas dort wieder zusammen?",
+              "answer": "Der Verdichter (Kompressor)",
+              "note": "Dabei wird das Gas heiß und gibt die Wärme über das schwarze Gitter an der Rückwand ab. Meist ist es Isobutan."
+            }
+          ]
+        },
+        {
+          "name": "Licht an",
+          "questions": [
+            {
+              "text": "Was saugt der Docht einer brennenden Kerze nach oben, damit die Flamme nicht ausgeht?",
+              "answer": "Flüssiges Wachs",
+              "note": "Die Flamme verbrennt nicht den festen Stoff, sondern den Dampf darüber – deshalb lässt sie sich am Rauch wieder anzünden."
+            },
+            {
+              "text": "Welche Einheit steht heute auf Lampenpackungen für die Helligkeit, nicht mehr die Watt-Zahl?",
+              "answer": "Das Lumen",
+              "note": "Eine alte 60-Watt-Birne kam auf rund 700 davon. Eine LED schafft dasselbe mit etwa acht Watt."
+            },
+            {
+              "text": "Wofür steht das D in der Abkürzung LED?",
+              "answer": "Für Diode",
+              "note": "Strom fließt darin nur in einer Richtung, und dabei entsteht das Licht direkt – ohne den Umweg über Hitze."
+            },
+            {
+              "text": "Aus welchem Metall bestand die Wendel in einer klassischen Glühlampe?",
+              "answer": "Wolfram",
+              "note": "Es schmilzt erst bei rund 3400 Grad – kein anderes Metall hält der Hitze länger stand."
+            }
+          ]
+        },
+        {
+          "name": "Küchenphysik",
+          "questions": [
+            {
+              "text": "Welcher lebende Zusatz, als Würfel im Kühlregal verkauft, lässt einen Brotteig aufgehen?",
+              "answer": "Die Hefe",
+              "note": "Die winzigen Pilze fressen Zucker und blasen den Teig mit Gasbläschen auf. Beim Backen sterben sie ab."
+            },
+            {
+              "text": "Warum kocht Wasser auf einem hohen Berg schon deutlich unter 100 Grad?",
+              "answer": "Weil der Luftdruck dort geringer ist",
+              "note": "Auf 4000 Metern siedet es bei rund 87 Grad. Nudeln brauchen dort spürbar länger, bis sie gar sind."
+            },
+            {
+              "text": "Wie heißt die Strömung, bei der erwärmtes Wasser im Topf aufsteigt und abgekühltes wieder absinkt?",
+              "answer": "Die Konvektion",
+              "note": "Dasselbe treibt die Luft über einer Heizung, das Wetter und sogar das Innere der Erde an."
+            },
+            {
+              "text": "Welches weiße Pulver im Backpulver setzt beim Erhitzen das Gas frei, das den Kuchen hebt?",
+              "answer": "Natron",
+              "note": "Mit Essig gemischt schäumt es sofort – der Klassiker für den Vulkan auf dem Schulfest."
+            }
+          ]
+        },
+        {
+          "name": "Kleine Dinge, große Wirkung",
+          "questions": [
+            {
+              "text": "Welcher Verschluss an Jacken läuft mit einem Schieber über zwei Reihen ineinandergreifender Zähne?",
+              "answer": "Der Reißverschluss",
+              "note": "Zum Erfolg wurde er erst 1923 an Gummistiefeln. Der englische Name „Zipper“ stammt vom Geräusch beim Zuziehen."
+            },
+            {
+              "text": "Auf welche Erfindung kam ein Schweizer beim Blick auf die Widerhaken im Fell seines Hundes?",
+              "answer": "Der Klettverschluss",
+              "note": "Georges de Mestral meldete ihn 1951 an. Der Markenname Velcro steckt die Wörter velours und crochet zusammen."
+            },
+            {
+              "text": "Welches Ding mit Feder und Bügel hält eine Stoffwindel zusammen, ohne dass die Spitze frei liegt?",
+              "answer": "Die Sicherheitsnadel",
+              "note": "Walter Hunt kam 1849 beim Herumbiegen eines Drahtes darauf und verkaufte das Patent sofort für 400 Dollar."
+            },
+            {
+              "text": "Welcher Ungar meldete 1938 den Kugelschreiber an? In England heißt das Ding heute nach ihm.",
+              "answer": "László Bíró",
+              "note": "Die Idee kam ihm in einer Druckerei: Dort trocknete die Tinte viel schneller als in seinem Füller."
+            }
+          ]
+        },
+        {
+          "name": "Fest, flüssig, gasförmig",
+          "questions": [
+            {
+              "text": "Wie heißt das unsichtbare Gas, das aus kochendem Wasser aufsteigt, bevor die weiße Wolke entsteht?",
+              "answer": "Wasserdampf",
+              "note": "Direkt über der Tülle sieht man nichts. Erst ein Stück höher kühlt es ab und wird zu den winzigen Tröpfchen der Wolke."
+            },
+            {
+              "text": "Bei welcher Temperatur in Grad Celsius liegt der absolute Nullpunkt?",
+              "answer": "Bei rund minus 273 Grad",
+              "note": "Kälter geht es nicht, dort steht jede Wärmebewegung still. Auf der Kelvin-Skala beginnt hier die Zählung."
+            },
+            {
+              "text": "Wie heißt der vierte Aggregatzustand, der in Leuchtstoffröhren und in der Sonne steckt?",
+              "answer": "Das Plasma",
+              "note": "Dabei sind die Elektronen von den Atomkernen getrennt. Der größte Teil der sichtbaren Materie im All liegt so vor."
+            },
+            {
+              "text": "Wie heißt der Übergang, bei dem ein Stoff direkt vom Festen ins Gasförmige wechselt?",
+              "answer": "Die Sublimation",
+              "note": "Auch gefrorene Wäsche auf der Leine wird im Frost trocken, ohne je nass zu tropfen."
+            }
+          ]
+        },
+        {
+          "name": "Strom im Haus",
+          "questions": [
+            {
+              "text": "Wie heißt die Einheit, für die man auf der Stromrechnung bezahlt?",
+              "answer": "Die Kilowattstunde",
+              "note": "Eine Stunde Föhnen mit 2000 Watt verbraucht zwei davon. Ein sparsamer Kühlschrank kommt im Jahr mit rund hundert aus."
+            },
+            {
+              "text": "Wie viel Volt liefert eine normale Steckdose in Deutschland?",
+              "answer": "230 Volt",
+              "note": "Bis in die 1980er sprach man von 220. Dann einigte sich Europa auf einen gemeinsamen Wert."
+            },
+            {
+              "text": "Welches Bauteil im Verteilerkasten schaltet ab, wenn auf einer Leitung zu viel Strom fließt?",
+              "answer": "Die Sicherung (Leitungsschutzschalter)",
+              "note": "Früher schmolz dafür ein dünner Draht in einem Schraubstöpsel durch. Heute klickt ein Schalter heraus, den man wieder eindrückt."
+            },
+            {
+              "text": "Wofür sind die Metallbügel oben und unten am Schuko-Stecker da?",
+              "answer": "Für die Erdung",
+              "note": "Schuko heißt Schutzkontakt. Der Leiter führt Fehlerströme ab, bevor sie durch einen Menschen fließen."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Einheiten mit Nachnamen",
+          "questions": [
+            {
+              "text": "Welche Einheit des Drucks trägt den Namen eines französischen Mathematikers?",
+              "answer": "Das Pascal",
+              "note": "Mit 19 Jahren baute er eine Rechenmaschine für seinen Vater, der Steuern eintrieb. Sie konnte addieren und subtrahieren."
+            },
+            {
+              "text": "Welche Einheit für den Schallpegel trägt verkleinert den Namen eines Telefon-Pioniers?",
+              "answer": "Das Dezibel",
+              "note": "Benannt ist sie nach Alexander Graham Bell. Zehn Punkte mehr auf der Skala bedeuten die zehnfache Schallenergie."
+            },
+            {
+              "text": "Welche Einheit der Energie trägt den Namen eines englischen Brauereisohns?",
+              "answer": "Das Joule",
+              "note": "Er wies mit einem Rührwerk nach, dass Arbeit sich in Wärme verwandelt. Auf Lebensmitteln steht die Einheit neben den Kalorien."
+            },
+            {
+              "text": "Welche Einheit der Radioaktivität trägt den Namen eines französischen Physikers?",
+              "answer": "Das Becquerel",
+              "note": "Er entdeckte 1896, dass Uransalz eine eingewickelte Fotoplatte schwärzt. Marie Curie führte die Arbeit fort."
+            }
+          ]
+        },
+        {
+          "name": "Die zündende Idee",
+          "questions": [
+            {
+              "text": "Welcher Schwede erfand das Dynamit und stiftete später einen berühmten Preis?",
+              "answer": "Alfred Nobel",
+              "note": "Er band Nitroglycerin an Kieselgur, damit man es sicher transportieren konnte."
+            },
+            {
+              "text": "Welcher Franzose entwickelte ab 1824 eine Schrift aus sechs tastbaren Punkten?",
+              "answer": "Louis Braille",
+              "note": "Er war damals selbst noch Schüler. Die Anregung gab ein tastbares Punktsystem von Charles Barbier, einem früheren Offizier."
+            },
+            {
+              "text": "Wer baute 1885 zusammen mit Wilhelm Maybach das erste Motorrad mit Verbrennungsmotor?",
+              "answer": "Gottlieb Daimler",
+              "note": "Der „Reitwagen“ hatte Holzräder, Stützräder und lief mit einem Riemen. Schnell war er nicht."
+            },
+            {
+              "text": "Wer ließ 1903 den Scheibenwischer patentieren, nach einer Fahrt in einer Straßenbahn im Schnee?",
+              "answer": "Mary Anderson",
+              "note": "Ihr Hebel saß im Innenraum und musste von Hand bewegt werden. Serienmäßig kam so etwas erst Jahre später."
+            }
+          ]
+        },
+        {
+          "name": "Hebel, Rad und Rolle",
+          "questions": [
+            {
+              "text": "Wie heißt beim Hebel die Stelle, an der er gelagert ist und um die er kippt?",
+              "answer": "Der Drehpunkt",
+              "note": "Auflagepunkt meint dasselbe. Archimedes soll gesagt haben, mit einem festen Ort dafür könne er die ganze Erde bewegen."
+            },
+            {
+              "text": "Wie heißt die Vorrichtung aus mehreren Rollen, mit der man eine Last mit weniger Kraft hebt?",
+              "answer": "Der Flaschenzug",
+              "note": "Vier tragende Seile vierteln die nötige Kraft. Dafür muss man das Seil viermal so weit durchziehen."
+            },
+            {
+              "text": "Wie nennt man bei einer Fahrradschaltung das Verhältnis der Zähnezahlen vorn zu hinten?",
+              "answer": "Die Übersetzung",
+              "note": "Großes Blatt vorn, kleines Ritzel hinten: Eine Kurbelumdrehung treibt das Hinterrad dann mehrfach herum."
+            },
+            {
+              "text": "Welche einfache Maschine steckt in einer Schraube, wenn man ihr Gewinde gedanklich abwickelt?",
+              "answer": "Die schiefe Ebene",
+              "note": "Eine Bergstraße mit Serpentinen nutzt denselben Trick: mehr Weg, dafür weniger Steigung auf einmal."
+            }
+          ]
+        },
+        {
+          "name": "Chemie im Haushalt",
+          "questions": [
+            {
+              "text": "Was entsteht, wenn Eisen lange Wasser und Luft ausgesetzt ist?",
+              "answer": "Rost",
+              "note": "Aluminium reagiert ebenfalls mit Luft, aber die Schicht bleibt dicht und schützt das Metall darunter."
+            },
+            {
+              "text": "Welches Element macht in der Zahnpasta den Schmelz widerstandsfähiger gegen Säure?",
+              "answer": "Fluor (auch: Fluorid)",
+              "note": "In Deutschland kann man dafür eigens Speisesalz mit Fluorid kaufen, in anderen Ländern setzt man es dem Trinkwasser zu."
+            },
+            {
+              "text": "Wie heißen die waschaktiven Stoffe in Seife und Spülmittel, die Fett und Wasser verbinden?",
+              "answer": "Tenside",
+              "note": "Ein Ende ihrer Moleküle mag Fett, das andere Wasser. Sie senken auch die Oberflächenspannung – deshalb gelingen damit Blasen."
+            },
+            {
+              "text": "Welcher Stoff im Ei und in der Luft lässt Silberbesteck mit der Zeit schwarz anlaufen?",
+              "answer": "Schwefel",
+              "note": "Die schwarze Schicht ist Silbersulfid. In warmem Salzwasser auf Alufolie verschwindet sie wieder, ohne dass Silber abgeht."
+            }
+          ]
+        },
+        {
+          "name": "Das liegt daran",
+          "questions": [
+            {
+              "text": "Warum ist der Himmel bei klarem Wetter blau?",
+              "answer": "Die Luft streut blaues Licht viel stärker als rotes",
+              "note": "Abends legt das Licht einen längeren Weg durch die Lufthülle zurück. Dann bleibt vor allem Rot übrig."
+            },
+            {
+              "text": "Wie heißt die nach oben gerichtete Kraft, die einen Flugzeugflügel in der Luft hält?",
+              "answer": "Der Auftrieb",
+              "note": "Der Flügel lenkt Luft nach unten ab. Als Gegenkraft wird er selbst nach oben gedrückt – Kraft und Gegenkraft."
+            },
+            {
+              "text": "Warum knallt es im Winter manchmal kurz, wenn man eine Türklinke anfasst?",
+              "answer": "Eine statische Entladung springt über",
+              "note": "Trockene Heizungsluft leitet schlecht. Im Sommer fließt die Ladung unauffällig über die feuchte Luft ab."
+            },
+            {
+              "text": "Wie heißt der Effekt, der ein Martinshorn höher klingen lässt, solange es auf einen zufährt?",
+              "answer": "Der Doppler-Effekt",
+              "note": "Christian Doppler sagte ihn 1842 voraus. Astronomen messen damit, wie schnell sich ferne Sterne entfernen."
+            }
+          ]
+        },
+        {
+          "name": "Alles Welle",
+          "questions": [
+            {
+              "text": "Wie heißt das Verfahren, das mit Funkwellen Entfernung und Richtung von Flugzeugen misst?",
+              "answer": "Das Radar",
+              "note": "Die englische Abkürzung steht für Erkennen und Entfernungsmessung per Funk. Fledermäuse können Ähnliches mit Schall."
+            },
+            {
+              "text": "Welche unsichtbaren Strahlen schickt eine Fernbedienung zum Fernseher?",
+              "answer": "Infrarotlicht",
+              "note": "Mit der Frontkamera eines Handys sieht man es: Richtet man die Fernbedienung darauf, blitzt es beim Drücken im Bild auf."
+            },
+            {
+              "text": "Was genau bringt ein Mikrowellenherd in einer Suppe zum Schwingen?",
+              "answer": "Die Wassermoleküle",
+              "note": "Ein trockener Teller bleibt deshalb kühl. Warm wird er nur von der Speise, die darauf steht."
+            },
+            {
+              "text": "Welcher Deutsche wies in den 1880er Jahren als Erster elektromagnetische Wellen im Labor nach?",
+              "answer": "Heinrich Hertz",
+              "note": "Seine Versuche zogen sich von 1886 bis 1888. Er hielt sie für nutzlos – wenig später baute Marconi daraus die Funktechnik."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

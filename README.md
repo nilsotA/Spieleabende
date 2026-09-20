@@ -655,6 +655,10 @@ wird. Nicht „richtig, weiter“, sondern „Moment mal, warum eigentlich?“:
 | **Groß und Klein** | Tierkinder, Märchen, Wald & Wiese, „Wie heißt das Ding?“, Trickfilm-Helden, Berufe & Werkzeug |
 | **Zugabe** | Instrumente, Klassik, Bandnamen, Filmmusik, Oper & Musical, Rock-Legenden, Eurovision |
 | **Wildnis** | Tierrekorde, Vögel, Unter der Erde, Lebensräume, Spuren im Revier, Bedroht & geschützt |
+| **Querbeet** | Farben, Verkehrsschilder, Erste Hilfe, Post & Adresse, Nachbarn im Weltall, Wortgeschichten |
+| **Kunst & Bücher** | Berühmte Bilder, Bauwerke, Romanfiguren, Epochen & Stile, Museen, Erste Sätze |
+| **Mythen & Legenden** | Olymp, Götter des Nordens, Fabelwesen, Herkules, Troja, Nibelungen, Feiertage |
+| **Wie funktioniert das?** | Kühlschrank, Licht, Küchenphysik, Hebel & Rolle, Chemie im Haushalt, Einheiten |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit
@@ -686,6 +690,23 @@ Für die **Uni-Runde** gibt es „Zahlen & Formen“, „Anpfiff“ und „Schul
 Sie sind so geschrieben, dass Fachwissen hilft, aber nicht Voraussetzung ist:
 Wer Mathe studiert, hat bei den Mathe-Köpfen einen Vorsprung, das Kopfrechnen und
 die Wahrscheinlichkeiten schafft aber auch der Rest des Tisches.
+
+„Querbeet“ ist der Satz für **Allgemeinwissen ohne Schwerpunkt**: zwölf
+Kategorien quer durch alles, von den Farben und den Verkehrsschildern über die
+Erste Hilfe bis zu den Nachbarn im Weltall. Keine Spezialistenfragen – nur das,
+was man sich unter Allgemeinwissen vorstellt.
+
+„Kunst & Bücher“ füllt die größte Lücke, die der Bestand hatte: Wer malte was,
+wer schrieb was, und wo hängt es heute? Runde 1 fragt nach Bildern, Bauwerken
+und Romanfiguren, Runde 2 nach Epochen, Fachwörtern und ersten Sätzen.
+
+„Mythen & Legenden“ holt Götter, Helden und Ungeheuer aus vier Kulturen an den
+Tisch – und die Feste, Sternbilder und Redensarten, die bis heute von ihnen
+erzählen. Warum heißt der Montag Montag, und was ist eine Sisyphusarbeit?
+
+„Wie funktioniert das?“ ist der Satz zum Anfassen: Kühlschrank, Kerze, Seife,
+Flaschenzug. Erklärt wird nichts in der Frage – gefragt ist, was man vom
+eigenen Haushalt her ohnehin ahnt.
 
 Dazu gibt es in der Auswahl **🎲 Zufallsmix aus allen Sätzen** – zwölf Kategorien,
 bei jedem Start neu gewürfelt. So ist kein Abend wie der andere. Gezogen wird reihum

@@ -1,0 +1,314 @@
+{
+  "name": "Kunst & Bücher",
+  "description": "Wer malte was, wer schrieb was, und wo hängt es heute? Für alle, die gern ins Museum gehen und Bücher zu Ende lesen. Runde 1 fragt nach Bildern, Bauwerken und Romanfiguren, Runde 2 nach Epochen, Fachwörtern und Nobelpreisen.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Bilder, die jeder kennt",
+          "questions": [
+            {
+              "text": "Welches Bild von Edvard Munch zeigt eine Figur mit weit aufgerissenem Mund auf einer Brücke?",
+              "answer": "Der Schrei",
+              "note": "Vier Fassungen stammen von seiner Hand, gemalt und gezeichnet. Die bekannteste hängt in Oslo."
+            },
+            {
+              "text": "Welches Wandbild Leonardo da Vincis zeigt Jesus und seine zwölf Jünger an einer langen Tafel?",
+              "answer": "Das (letzte) Abendmahl",
+              "note": "Es befindet sich in einem Kloster in Mailand. Leonardo probierte eine neue Technik aus – das Bild blättert seit Jahrhunderten ab."
+            },
+            {
+              "text": "Welches Gemälde von Johannes Vermeer ist nach dem Schmuckstück am Ohr einer jungen Frau benannt?",
+              "answer": "Das Mädchen mit dem Perlenohrring",
+              "note": "Es misst nur 44 mal 39 Zentimeter und hängt im Mauritshuis in Den Haag."
+            },
+            {
+              "text": "Welches Bild Caspar David Friedrichs zeigt einen Mann von hinten auf einem Felsen über den Wolken?",
+              "answer": "Der Wanderer über dem Nebelmeer",
+              "note": "Entstanden um 1818. Das Original gehört der Hamburger Kunsthalle."
+            }
+          ]
+        },
+        {
+          "name": "Pinsel & Palette",
+          "questions": [
+            {
+              "text": "Welcher Niederländer malte die berühmten Sonnenblumen in der Vase?",
+              "answer": "Vincent van Gogh",
+              "note": "In nur zehn Jahren entstanden rund 900 Gemälde. Zu Lebzeiten verkaufte er fast keines davon."
+            },
+            {
+              "text": "Welcher Spanier entwickelte zusammen mit Georges Braque den Kubismus?",
+              "answer": "Pablo Picasso",
+              "note": "Sein Taufname umfasst über zwanzig Vornamen. Als Künstlername wählte er den Nachnamen seiner Mutter."
+            },
+            {
+              "text": "Welcher Nürnberger Maler schuf den „Feldhasen“ und das Selbstbildnis im Pelzrock?",
+              "answer": "Albrecht Dürer",
+              "note": "Sein Monogramm aus zwei Buchstaben setzte er wie ein Markenzeichen unter seine Blätter."
+            },
+            {
+              "text": "Welcher Wiener Maler war 1897 Mitbegründer und erster Präsident der Secession?",
+              "answer": "Gustav Klimt",
+              "note": "Für sein Bild „Der Kuss“ legte er echtes Blattgold auf die Leinwand. Die Jahre um 1900 heißen seine Goldene Periode."
+            }
+          ]
+        },
+        {
+          "name": "Gebaut für die Ewigkeit",
+          "questions": [
+            {
+              "text": "Welches Bauwerk in China zieht sich über Tausende Kilometer durch Berge und Steppe?",
+              "answer": "Die Chinesische Mauer",
+              "note": "Was heute davon steht, stammt größtenteils aus der Ming-Zeit vom 14. bis zum 17. Jahrhundert."
+            },
+            {
+              "text": "Welche Kirche mit der Kuppel nach Plänen Michelangelos steht im Vatikan?",
+              "answer": "Der Petersdom",
+              "note": "Ihr Innendurchmesser beträgt rund 42 Meter. Zwischen den beiden Schalen führt eine Treppe bis unter die Laterne hinauf."
+            },
+            {
+              "text": "Welche Kirche in Barcelona wurde ab 1883 zum Lebenswerk von Antoni Gaudí?",
+              "answer": "Die Sagrada Família",
+              "note": "Begonnen hatte sie ein Jahr zuvor ein anderer Architekt. Gaudí arbeitete über 40 Jahre daran."
+            },
+            {
+              "text": "Welches antike Bauwerk in Rom hat oben in der Kuppel ein rundes Loch, durch das Regen fällt?",
+              "answer": "Das Pantheon",
+              "note": "Seine Kuppel aus römischem Beton ist bis heute die größte der Welt, die ohne Stahl auskommt."
+            }
+          ]
+        },
+        {
+          "name": "Romanfiguren",
+          "questions": [
+            {
+              "text": "Welcher Zauberschüler wächst bei den Dursleys in einer Kammer unter der Treppe auf?",
+              "answer": "Harry Potter",
+              "note": "Sieben Bände, über 500 Millionen verkaufte Exemplare – die erfolgreichste Buchreihe überhaupt."
+            },
+            {
+              "text": "Welcher Detektiv wohnt in der Baker Street 221b und spielt Geige?",
+              "answer": "Sherlock Holmes",
+              "note": "Arthur Conan Doyle wollte ihn loswerden, doch die Leser protestierten so lange, bis er ihn zurückholte."
+            },
+            {
+              "text": "Wer befehligt in Jules Vernes Roman das Unterseeboot Nautilus?",
+              "answer": "Kapitän Nemo",
+              "note": "Der Name ist Lateinisch und heißt schlicht „niemand“."
+            },
+            {
+              "text": "Wie heißt der Knappe, der Don Quijote auf einem Esel durch La Mancha begleitet?",
+              "answer": "Sancho Pansa (Panza)",
+              "note": "Er redet in Sprichwörtern und darf am Ende zehn Tage lang eine Insel regieren, die in Wahrheit keine ist."
+            }
+          ]
+        },
+        {
+          "name": "Wer schrieb das?",
+          "questions": [
+            {
+              "text": "Welcher Engländer schrieb die Stücke „Hamlet“ und „Romeo und Julia“?",
+              "answer": "William Shakespeare",
+              "note": "Getauft 1564 in Stratford-upon-Avon. Rund 38 Bühnenstücke werden ihm zugeschrieben."
+            },
+            {
+              "text": "Welcher französische Flieger schrieb das Buch über einen Prinzen von einem winzigen Planeten?",
+              "answer": "Antoine de Saint-Exupéry",
+              "note": "Die Zeichnungen darin stammen von ihm selbst, auch die Schlange, die einen Elefanten verschluckt hat."
+            },
+            {
+              "text": "Welche Engländerin erfand die Ermittler Hercule Poirot und Miss Marple?",
+              "answer": "Agatha Christie",
+              "note": "Ihr Stück „Die Mausefalle“ wurde 1952 in Nottingham uraufgeführt und lief in London jahrzehntelang."
+            },
+            {
+              "text": "Wer erzählte vom Verfall einer Lübecker Kaufmannsfamilie über vier Generationen?",
+              "answer": "Thomas Mann",
+              "note": "Er schrieb den Roman mit Mitte zwanzig. 1929 bekam er dafür den Nobelpreis für Literatur."
+            }
+          ]
+        },
+        {
+          "name": "Zwischen zwei Buchdeckeln",
+          "questions": [
+            {
+              "text": "Welches Buch ist das meistverkaufte und meistübersetzte der Welt?",
+              "answer": "Die Bibel",
+              "note": "Vollständig übersetzt liegt sie in mehreren Hundert Sprachen vor, einzelne Teile in über 3000."
+            },
+            {
+              "text": "Welche 13-stellige Nummer kennzeichnet jede Buchausgabe im Handel eindeutig?",
+              "answer": "Die ISBN",
+              "note": "Die Abkürzung steht für Internationale Standardbuchnummer. Bis Ende 2006 war sie nur zehnstellig."
+            },
+            {
+              "text": "Wie heißt der kurze Werbetext auf dem Umschlag eines Buches, der Lust aufs Lesen machen soll?",
+              "answer": "Der Klappentext",
+              "note": "Der Name stammt von der eingeschlagenen Seite des Schutzumschlags, wo er ursprünglich stand."
+            },
+            {
+              "text": "Welche Romangattung begründete Goethe mit „Wilhelm Meisters Lehrjahre“?",
+              "answer": "Der Bildungsroman",
+              "note": "Den Begriff prägte um 1820 der Professor Karl Morgenstern in seinen Vorlesungen."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Epochen & Stile",
+          "questions": [
+            {
+              "text": "Welche Epoche löste in Italien das Mittelalter ab und knüpfte bewusst an die Antike an?",
+              "answer": "Die Renaissance",
+              "note": "Das Wort ist Französisch für „Wiedergeburt“ und setzte sich erst im 19. Jahrhundert durch."
+            },
+            {
+              "text": "Welche Stilrichtung malte flüchtiges Licht in kurzen Pinselstrichen und heißt nach einem Bild Monets?",
+              "answer": "Der Impressionismus",
+              "note": "Ein Kritiker griff 1874 den Titel des Bildes spöttisch auf. Der Spottname blieb hängen."
+            },
+            {
+              "text": "Welcher Stil um 1900 schmückte Häuser und Plakate mit geschwungenen Pflanzenranken?",
+              "answer": "Der Jugendstil (Art nouveau)",
+              "note": "Der deutsche Name stammt von der Münchner Zeitschrift „Jugend“. In Österreich hieß der Stil Sezessionsstil."
+            },
+            {
+              "text": "Wie heißt die Maltechnik von Georges Seurat, die das Bild aus lauter kleinen Farbtupfen aufbaut?",
+              "answer": "Der Pointillismus (Divisionismus)",
+              "note": "Aus der Nähe sieht man nur Tupfen. Erst aus der Ferne mischen sie sich im Auge zu Flächen."
+            }
+          ]
+        },
+        {
+          "name": "Museen der Welt",
+          "questions": [
+            {
+              "text": "Welches Pariser Museum war früher ein Königspalast und hat heute eine Glaspyramide als Eingang?",
+              "answer": "Der Louvre",
+              "note": "Die Glaspyramide des Architekten I. M. Pei öffnete 1989 für das Publikum und war anfangs heftig umstritten."
+            },
+            {
+              "text": "In welcher Hauptstadt steht das Museo del Prado mit den Werken von Velázquez und Goya?",
+              "answer": "Madrid",
+              "note": "Das Haus war als Naturkundemuseum geplant und wurde 1819 als Gemäldegalerie eröffnet."
+            },
+            {
+              "text": "Welches Haus auf der Berliner Museumsinsel zeigt die Büste der Nofretete?",
+              "answer": "Das Neue Museum",
+              "note": "Die Büste ist rund 3300 Jahre alt und kam 1913 nach Berlin. Die ganze Insel gehört seit 1999 zum Welterbe."
+            },
+            {
+              "text": "In welchem Amsterdamer Haus hängt Rembrandts riesiges Gruppenbild „Die Nachtwache“?",
+              "answer": "Im Rijksmuseum",
+              "note": "Das Bild ist über vier Meter breit. Es wurde im 18. Jahrhundert beschnitten, damit es an eine Wand passte."
+            }
+          ]
+        },
+        {
+          "name": "Erste Sätze",
+          "questions": [
+            {
+              "text": "In welcher Erzählung Kafkas erwacht Gregor Samsa als riesiges Ungeziefer in seinem Bett?",
+              "answer": "Die Verwandlung",
+              "note": "Kafka verbot dem Verlag ausdrücklich, das Tier auf dem Umschlag abzubilden."
+            },
+            {
+              "text": "Welcher Roman beginnt mit den Worten „Nennt mich Ismael“?",
+              "answer": "Moby-Dick",
+              "note": "Herman Melville widmete das Buch seinem Nachbarn Nathaniel Hawthorne."
+            },
+            {
+              "text": "Welcher russische Roman beginnt: „Alle glücklichen Familien gleichen einander …“?",
+              "answer": "Anna Karenina",
+              "note": "Lew Tolstoi schrieb ihn zwischen 1873 und 1877. Er erschien zuerst in Fortsetzungen in einer Zeitschrift."
+            },
+            {
+              "text": "In welchem Roman schlagen die Uhren an einem kalten Apriltag dreizehn?",
+              "answer": "1984",
+              "note": "George Orwell schrieb das Buch auf der schottischen Insel Jura. Sein Arbeitstitel lautete „Der letzte Mensch in Europa“."
+            }
+          ]
+        },
+        {
+          "name": "Fachwörter der Kunst",
+          "questions": [
+            {
+              "text": "Wie nennt man ein Gemälde, das nur unbewegte Dinge wie Obst, Krüge und Blumen zeigt?",
+              "answer": "Das Stillleben",
+              "note": "Der Begriff kommt aus dem Niederländischen. Die drei l entstehen erst im deutschen Wort aus still und Leben."
+            },
+            {
+              "text": "Wie nennt man ein dreiteiliges Bild, dessen Seitenflügel sich über die Mitte klappen lassen?",
+              "answer": "Das Triptychon",
+              "note": "Der Name kommt aus dem Griechischen und heißt dreifach gefaltet. Über Altären standen solche Bilder schon im Mittelalter."
+            },
+            {
+              "text": "Wie nennt man Malerei, die direkt auf den noch feuchten Kalkputz einer Wand aufgetragen wird?",
+              "answer": "Das Fresko",
+              "note": "Beim Trocknen verbindet sich die Farbe mit dem Putz. Korrigieren lässt sich danach fast nichts mehr."
+            },
+            {
+              "text": "Wie heißt ein Druck von einer Metallplatte, in die das Bild zuvor mit Säure geätzt wurde?",
+              "answer": "Die Radierung",
+              "note": "Rembrandt schuf neben seinen Gemälden rund 300 solcher Blätter und gilt darin als Meister."
+            }
+          ]
+        },
+        {
+          "name": "Nobelpreis für Literatur",
+          "questions": [
+            {
+              "text": "Welcher deutsche Autor der „Blechtrommel“ bekam 1999 den Literaturnobelpreis?",
+              "answer": "Günter Grass",
+              "note": "Er war gelernter Steinmetz und Bildhauer und gestaltete die Umschläge seiner Bücher selbst."
+            },
+            {
+              "text": "Welcher US-Musiker erhielt 2016 den Literaturnobelpreis?",
+              "answer": "Bob Dylan",
+              "note": "Zur Preisverleihung in Stockholm kam er nicht. Patti Smith sang dort eines seiner Lieder."
+            },
+            {
+              "text": "Welcher Kolumbianer schrieb „Hundert Jahre Einsamkeit“ und wurde 1982 ausgezeichnet?",
+              "answer": "Gabriel García Márquez",
+              "note": "Sein Stil heißt magischer Realismus: Wunderliches wird erzählt, als wäre es ganz gewöhnlich."
+            },
+            {
+              "text": "Welcher Autor von „Siddhartha“ und „Der Steppenwolf“ wurde 1946 geehrt?",
+              "answer": "Hermann Hesse",
+              "note": "Geboren in Calw im Schwarzwald, lebte er ab 1912 in der Schweiz und wurde dort Staatsbürger."
+            }
+          ]
+        },
+        {
+          "name": "Gezeichnet & Gedruckt",
+          "questions": [
+            {
+              "text": "Welches Gallier-Duo erfanden René Goscinny und Albert Uderzo für ihre Comicreihe?",
+              "answer": "Asterix und Obelix",
+              "note": "Fast alle gallischen Namen enden auf ix – nach dem Vorbild des Häuptlings Vercingetorix."
+            },
+            {
+              "text": "Wie heißt die japanische Form des Comics, die man von rechts nach links liest?",
+              "answer": "Manga",
+              "note": "Der Holzschnittkünstler Hokusai benutzte das Wort schon um 1814 für seine Skizzenbände."
+            },
+            {
+              "text": "Welcher US-Zeichner erfand die Peanuts mit Snoopy und Charlie Brown?",
+              "answer": "Charles M. Schulz",
+              "note": "Von 1950 bis 2000 zeichnete er den Streifen selbst – fast 18 000 Folgen, keine davon von fremder Hand."
+            },
+            {
+              "text": "Welches Druckverfahren erfand der Münchner Alois Senefelder um 1798?",
+              "answer": "Die Lithografie (Steindruck)",
+              "note": "Aus dem Griechischen für Stein und Schreiben. Damit wurden Plakate und Notenblätter erstmals billig."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

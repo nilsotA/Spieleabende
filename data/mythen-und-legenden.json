@@ -1,0 +1,314 @@
+{
+  "name": "Mythen & Legenden",
+  "description": "Götter, Helden und Ungeheuer aus vielen Kulturen – dazu die Feste, Sternbilder und Redensarten, die bis heute von ihnen erzählen.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Auf dem Olymp",
+          "questions": [
+            {
+              "text": "Welcher Gott herrschte in der griechischen Sage über alle anderen und schleuderte Blitze?",
+              "answer": "Zeus",
+              "note": "Sein Sitz war der höchste Berg Griechenlands. Die Römer nannten ihn Jupiter."
+            },
+            {
+              "text": "Welcher griechische Gott regierte über das Meer und trug einen Dreizack?",
+              "answer": "Poseidon",
+              "note": "Bei den Römern heißt er Neptun. Seefahrer opferten ihm vor jeder Ausfahrt."
+            },
+            {
+              "text": "Wer war in der griechischen Sage der Bote der Götter, mit Flügeln an den Schuhen?",
+              "answer": "Hermes",
+              "note": "Er galt zugleich als Schutzgott der Reisenden, der Händler – und der Diebe."
+            },
+            {
+              "text": "Welcher hinkende Gott schmiedete in der griechischen Sage die Waffen der Unsterblichen?",
+              "answer": "Hephaistos",
+              "note": "Die Insel Lemnos galt als sein Reich. Bei den Römern hieß er Vulcanus – daher kommt das Wort Vulkan."
+            }
+          ]
+        },
+        {
+          "name": "Götter des Nordens",
+          "questions": [
+            {
+              "text": "Welcher nordische Gott lässt mit seinem Hammer den Donner rollen?",
+              "answer": "Thor",
+              "note": "Sein Hammer heißt Mjölnir und kehrt nach jedem Wurf in seine Hand zurück."
+            },
+            {
+              "text": "Wie heißt der einäugige Göttervater der nordischen Sage, dem zwei Raben zur Seite stehen?",
+              "answer": "Odin (auch Wotan)",
+              "note": "Die Raben heißen Hugin und Munin – Gedanke und Erinnerung. Jeden Morgen fliegen sie über die ganze Welt."
+            },
+            {
+              "text": "Wie heißt der Saal, in dem die gefallenen Helden der nordischen Sage weiterfeiern?",
+              "answer": "Walhall (auch Walhalla)",
+              "note": "Die Walküren suchen die Helden aus und geleiten sie dorthin. Das Dach ist der Sage nach mit Schilden gedeckt."
+            },
+            {
+              "text": "Wie heißt der Weltenbaum, der in der nordischen Sage alle neun Welten trägt?",
+              "answer": "Yggdrasil",
+              "note": "Eine riesige Esche. An ihren Wurzeln nagt ein Drache, in ihrer Krone sitzt ein Adler."
+            }
+          ]
+        },
+        {
+          "name": "Am Ufer des Nils",
+          "questions": [
+            {
+              "text": "Welches Wesen mit Löwenkörper und Menschenkopf bewacht bei Gizeh die Pyramiden?",
+              "answer": "Die Sphinx",
+              "note": "Die große Figur ist rund 20 Meter hoch und aus dem gewachsenen Fels gehauen."
+            },
+            {
+              "text": "Wie heißt der Käfer, den die alten Ägypter als Zeichen der aufgehenden Sonne verehrten?",
+              "answer": "Der Skarabäus",
+              "note": "Als Amulett wurde er tausendfach aus Stein geschnitten und am Körper getragen."
+            },
+            {
+              "text": "Welcher ägyptische Gott mit Schakalkopf geleitete die Verstorbenen ins Jenseits?",
+              "answer": "Anubis",
+              "note": "Er wachte auch über die Waage, auf der das Herz gegen eine Feder gewogen wurde."
+            },
+            {
+              "text": "Wie heißt das ägyptische Zeichen für Leben, eine Schlaufe über einem Kreuzbalken?",
+              "answer": "Das Anch (auch Ankh oder Henkelkreuz)",
+              "note": "Auf Wandbildern halten Götter es den Königen an die Nase – so gaben sie ihnen der Vorstellung nach den Lebensatem."
+            }
+          ]
+        },
+        {
+          "name": "Fabelwesen & Ungeheuer",
+          "questions": [
+            {
+              "text": "Welches weiße Fabeltier gilt als Sinnbild der Reinheit und ließ sich nur von Jungfrauen fangen?",
+              "answer": "Das Einhorn",
+              "note": "Im Mittelalter wurden Narwalzähne als sein gewundenes Horn verkauft – für Unsummen."
+            },
+            {
+              "text": "Welcher Vogel der Sage verbrennt und steigt jung aus der eigenen Asche wieder auf?",
+              "answer": "Der Phönix",
+              "note": "Herodot berichtete von dem Vogel aus Ägypten. Alle 500 Jahre soll er wiederkehren – das Feuer kam erst später dazu."
+            },
+            {
+              "text": "Welche Gorgone der griechischen Sage war sterblich und trug Schlangen statt Haaren?",
+              "answer": "Medusa",
+              "note": "Ihr Blick ließ jeden zu Stein werden. Später zierte ihr Kopf als Schreckbild den Schild der Göttin Athene."
+            },
+            {
+              "text": "Welches Fabelwesen ist vorn ein Adler, hinten ein Löwe und bewacht in Sagen Schätze?",
+              "answer": "Der Greif",
+              "note": "Er steht in vielen Wappen an der Ostsee – Rostock führt ihn, und eine Stadt trägt ihn sogar im Namen."
+            }
+          ]
+        },
+        {
+          "name": "Götter im Kalender",
+          "questions": [
+            {
+              "text": "Nach welchem Himmelskörper ist der Montag benannt?",
+              "answer": "Der Mond",
+              "note": "Auch der Sonntag trägt einen Himmelskörper im Namen. Dienstag und Donnerstag gehen auf germanische Götter zurück."
+            },
+            {
+              "text": "Welche römische Göttin der Ehe und Gattin des Jupiter gab einem Monat ihren Namen?",
+              "answer": "Juno",
+              "note": "Gemeint ist der Juni – bis heute ein beliebter Monat für Hochzeiten. Ihr heiliger Vogel war der Pfau."
+            },
+            {
+              "text": "Welcher römische Gott des Ackerbaus steckt im englischen Namen des Samstags?",
+              "answer": "Saturn",
+              "note": "Auch der Planet mit den Ringen trägt seinen Namen. Sein großes Fest fiel in die dunkelsten Tage des Dezembers."
+            },
+            {
+              "text": "Welcher Göttin war bei den Römern der Tag geweiht, der im Französischen vendredi heißt?",
+              "answer": "Venus",
+              "note": "Die Römer nannten ihn dies Veneris. Die Germanen setzten ihre eigene Göttin Frija an diese Stelle – daher unser Freitag."
+            }
+          ]
+        },
+        {
+          "name": "Redensarten aus der Sagenwelt",
+          "questions": [
+            {
+              "text": "Achilles war der Sage nach unverwundbar – bis auf eine einzige Stelle. Welche war das?",
+              "answer": "Die Ferse",
+              "note": "Bei Homer steht davon noch nichts – die Geschichte von der einen Stelle kam erst Jahrhunderte später dazu."
+            },
+            {
+              "text": "Welche Redewendung steht für eine Mühe, die nie zu Ende kommt – nach einem Sagenkönig?",
+              "answer": "Eine Sisyphusarbeit",
+              "note": "Er musste einen Felsblock bergauf wälzen, der oben jedes Mal wieder hinunterrollte."
+            },
+            {
+              "text": "Wessen Büchse barg in der griechischen Sage alle Übel der Welt – und dazu die Hoffnung?",
+              "answer": "Pandora",
+              "note": "Im Original war es ein Vorratsfass; ein Übersetzungsfehler machte daraus eine Büchse. Die Hoffnung blieb als Einzige darin."
+            },
+            {
+              "text": "Welcher König der Sage verwandelte alles in Gold, was er berührte – und konnte nichts mehr essen?",
+              "answer": "Midas",
+              "note": "Ein Fluss soll ihm die Gabe abgewaschen haben, als er seinen Wunsch bereute."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Die Aufgaben des Herkules",
+          "questions": [
+            {
+              "text": "Welches Tier musste Herkules als erste Aufgabe bezwingen? Sein Fell trug er danach als Umhang.",
+              "answer": "Einen Löwen",
+              "note": "Er kam aus Nemea, und keine Waffe drang durch sein Fell – abziehen ließ es sich nur mit seinen eigenen Krallen."
+            },
+            {
+              "text": "Welchen Stall musste Herkules an einem einzigen Tag von jahrelangem Mist befreien?",
+              "answer": "Den Augiasstall",
+              "note": "Er leitete kurzerhand zwei Flüsse durch den Hof und war vor Sonnenuntergang fertig."
+            },
+            {
+              "text": "Welchem Ungeheuer im Sumpf wuchsen für jeden verlorenen Kopf sofort zwei neue nach?",
+              "answer": "Die Hydra",
+              "note": "Das größte Sternbild des Himmels, die Wasserschlange, trägt bis heute ihren Namen."
+            },
+            {
+              "text": "Welche Früchte musste Herkules aus dem Garten der Hesperiden holen?",
+              "answer": "Goldene Äpfel",
+              "note": "Atlas pflückte sie für ihn – solange hielt Herkules an seiner Stelle das Himmelsgewölbe."
+            }
+          ]
+        },
+        {
+          "name": "Krieg um Troja",
+          "questions": [
+            {
+              "text": "Mit welcher hölzernen List nahmen die Griechen der Sage nach die belagerte Stadt ein?",
+              "answer": "Das Trojanische Pferd",
+              "note": "Heute heißt so auch ein Schadprogramm, das sich als harmlose Datei ausgibt."
+            },
+            {
+              "text": "Welcher König von Ithaka irrte nach dem Krieg zehn Jahre lang über das Meer nach Hause?",
+              "answer": "Odysseus",
+              "note": "Homers Epos über diese Heimfahrt heißt Odyssee – seither trägt jede lange Irrfahrt diesen Namen."
+            },
+            {
+              "text": "Wessen Entführung löste der Sage nach den Krieg zwischen Griechen und Troern aus?",
+              "answer": "Helena",
+              "note": "„Das Gesicht, das tausend Schiffe fahren ließ“ – so dichtete man später über sie."
+            },
+            {
+              "text": "Welche Seherin warnte vergeblich vor dem Untergang ihrer Stadt? Niemand glaubte ihr.",
+              "answer": "Kassandra",
+              "note": "Darum heißen düstere Warnungen, die niemand hören will, bis heute nach ihr."
+            }
+          ]
+        },
+        {
+          "name": "Tafelrunde & Nibelungen",
+          "questions": [
+            {
+              "text": "Wie heißt das berühmte Schwert von König Artus?",
+              "answer": "Excalibur",
+              "note": "Die Herrin vom See reichte es ihm aus dem Wasser; am Ende seines Lebens ließ er es dorthin zurückwerfen."
+            },
+            {
+              "text": "Welchen Gegenstand suchten die Ritter der Tafelrunde jahrelang auf gefährlichen Fahrten?",
+              "answer": "Den Heiligen Gral",
+              "note": "Bei Wolfram von Eschenbach ist er kein Kelch, sondern ein Stein. Nur der reinste Ritter sollte ihn finden."
+            },
+            {
+              "text": "Was machte Siegfried im Nibelungenlied fast unverwundbar?",
+              "answer": "Ein Bad in Drachenblut",
+              "note": "Fast: Ein Lindenblatt fiel ihm zwischen die Schultern und ließ dort eine Stelle frei."
+            },
+            {
+              "text": "Wer versenkte im Nibelungenlied den Schatz im Rhein, damit ihn niemand mehr findet?",
+              "answer": "Hagen (von Tronje)",
+              "note": "Die Könige mussten schwören, die Stelle nie zu verraten. Das Lied nennt sie „bei Lôche“ – gesucht wird bis heute."
+            }
+          ]
+        },
+        {
+          "name": "Die großen Religionen",
+          "questions": [
+            {
+              "text": "Wie heißt die heilige Schrift des Islam?",
+              "answer": "Der Koran",
+              "note": "Er ist in 114 Kapitel gegliedert, die Suren genannt werden."
+            },
+            {
+              "text": "Welcher Ehrenname bedeutet „der Erwachte“ und steht für Siddhartha Gautama?",
+              "answer": "Buddha",
+              "note": "Das Wort stammt aus dem Sanskrit und ist kein Eigenname, sondern ein Titel."
+            },
+            {
+              "text": "Welcher Fluss gilt im Hinduismus als der heiligste und wird selbst als Göttin verehrt?",
+              "answer": "Der Ganges",
+              "note": "In der Stadt Varanasi führen breite Treppen hinunter ans Wasser, die Ghats."
+            },
+            {
+              "text": "Wie heißt der höchste jüdische Feiertag, ein Tag des Fastens und der Versöhnung?",
+              "answer": "Jom Kippur",
+              "note": "In Israel ruht an diesem Tag fast der gesamte Verkehr – viele Menschen sind zu Fuß unterwegs."
+            }
+          ]
+        },
+        {
+          "name": "Sagen am Sternenhimmel",
+          "questions": [
+            {
+              "text": "Zu welchem Sternbild gehört der Große Wagen?",
+              "answer": "Der Große Bär",
+              "note": "Auf der Flagge Alaskas stehen seine sieben hellsten Sterne, dazu der Polarstern."
+            },
+            {
+              "text": "Welches Sternbild zeigt einen Jäger mit einem Gürtel aus drei hellen Sternen?",
+              "answer": "Orion",
+              "note": "Die drei Gürtelsterne heißen Alnitak, Alnilam und Mintaka."
+            },
+            {
+              "text": "Welches Sternbild bildet am Himmel ein auffälliges W und trägt den Namen einer Königin?",
+              "answer": "Kassiopeia",
+              "note": "Für ihre Prahlerei wurde sie an den Himmel gesetzt – einen Teil des Jahres kopfüber."
+            },
+            {
+              "text": "Welcher Sternhaufen im Sternbild Stier heißt nach sieben Schwestern der griechischen Sage?",
+              "answer": "Die Plejaden (das Siebengestirn)",
+              "note": "Mit bloßem Auge sind meist sechs Sterne zu erkennen. In Japan heißen sie Subaru – und stehen so in einem Autologo."
+            }
+          ]
+        },
+        {
+          "name": "Feiertage und ihr Ursprung",
+          "questions": [
+            {
+              "text": "Welches christliche Fest feiert die Auferstehung von Jesus?",
+              "answer": "Ostern",
+              "note": "In vielen Sprachen heißt es nach dem hebräischen Pessach, etwa Pâques im Französischen."
+            },
+            {
+              "text": "In welchem Monat fasten Muslime von Morgengrauen bis Sonnenuntergang?",
+              "answer": "Im Ramadan",
+              "note": "Der islamische Kalender richtet sich nach dem Mond, deshalb wandert er durch das Jahr."
+            },
+            {
+              "text": "Der Name Halloween ist aus dem Englischen zusammengezogen. Welcher Feiertag steckt darin?",
+              "answer": "Allerheiligen",
+              "note": "Im Englischen heißt der Abend davor „All Hallows’ Eve“. Auswanderer aus Irland nahmen den Brauch mit nach Amerika."
+            },
+            {
+              "text": "In welcher Stadt in der heutigen Türkei war Nikolaus Bischof?",
+              "answer": "In Myra",
+              "note": "Als Schutzheiliger der Seefahrer kam sein Ruf über die Häfen bis in den Norden Europas."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
