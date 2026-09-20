@@ -433,6 +433,62 @@ test('keine Frage verrät ihre eigene Lösung', async () => {
   assert.deepEqual(geschenkt, []);
 });
 
+/*
+ * Eine gebeugte Lösung ist dieselbe Lösung.
+ *
+ * Die Prüfung verglich buchstabengleich. Aus „Neue Deutsche Welle“ wird in der
+ * Nachbarfrage „Neuen Deutschen Welle“ – drei andere Wörter, also kein
+ * Treffer. Genau so stand es im ausgelieferten „Zugabe“, Kategorie
+ * „Deutsche Töne“:
+ *
+ *   „Wofür steht die Abkürzung NDW?“              → Neue Deutsche Welle
+ *   „Welche Band der Neuen Deutschen Welle …“      → Trio
+ *
+ * Wer die zweite Frage zuerst spielt, hat die erste geschenkt. Weder der
+ * Editor färbte die Zeile rot noch schlug der Testlauf an.
+ *
+ * Die Gegenrichtung ist dabei das Schwierige: Deutsch baut Wörter zusammen.
+ * Ein simpler Anfangsvergleich meldete über dieselben Sätze neun Fälle, von
+ * denen acht keine waren – Trainer/Trainerstuhl, Pause/Pausenaufsicht,
+ * Winter/Winterschlaf, Telefon/Telefonbuch. Die Stammregel meldet genau den
+ * einen echten.
+ */
+test('eine gebeugte Lösung zählt als dieselbe Lösung', async () => {
+  const { verraeteneLoesungen } = await import('../public/fragenpruefung.js');
+
+  // Der echte Fall aus „Zugabe“.
+  const ndw = verraeteneLoesungen([
+    { text: 'Wofür steht die Abkürzung NDW?', answer: 'Neue Deutsche Welle' },
+    { text: 'Welche Band der Neuen Deutschen Welle hatte einen Welthit mit „Da Da Da“?', answer: 'Trio' },
+  ]);
+  assert.equal(ndw.length, 1, 'die gebeugte Fassung muss auffallen');
+  assert.equal(ndw[0].i, 0);
+  assert.equal(ndw[0].j, 1);
+
+  // Und die Zusammensetzungen, an denen ein gröberer Vergleich scheitert.
+  for (const [a, b] of [
+    [{ text: 'Wo sitzt der Trainer während des Spiels?', answer: 'Der Trainerstuhl' },
+      { text: 'Wie heißt der Trainer, der eine Mannschaft nur kurz übernimmt?', answer: 'Interimstrainer' }],
+    [{ text: 'Worin standen früher alle Rufnummern?', answer: 'Das Telefonbuch' },
+      { text: 'Was musste man bei einem alten Telefon drehen, um zu wählen?', answer: 'Die Wählscheibe' }],
+    [{ text: 'Wie heißt die lange Ruhe mancher Tiere im Winter?', answer: 'Der Winterschlaf' },
+      { text: 'Welches Tier wacht im Winter immer wieder auf?', answer: 'Das Eichhörnchen' }],
+    [{ text: 'Wer passt in der Pause auf dem Hof auf?', answer: 'Die Pausenaufsicht' },
+      { text: 'Welches Signal beendet in vielen Schulen die Pause?', answer: 'Die Klingel' }],
+  ]) {
+    assert.deepEqual(verraeteneLoesungen([a, b]), [],
+      `„${a.answer}“ und „${b.text}“ sind eine Zusammensetzung, kein Verrat`);
+  }
+
+  // Beugung in beide Richtungen, auch wenn der Grundform selbst eine Endung
+  // ähnelt: „wassers“ → „wasser“ → „wass“.
+  const wasser = verraeteneLoesungen([
+    { text: 'Woraus besteht der Mensch zu über der Hälfte?', answer: 'Wasser' },
+    { text: 'Wie hoch ist der Anteil des Wassers an einem Apfel?', answer: 'Rund 85 Prozent' },
+  ]);
+  assert.equal(wasser.length, 1, 'auch der Genitiv zählt');
+});
+
 test('die geteilte Prüfung erkennt einen verratenen Fall und lässt heile Sätze in Ruhe', async () => {
   const { verraeteneLoesungen } = await import('../public/fragenpruefung.js');
 

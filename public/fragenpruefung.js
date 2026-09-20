@@ -44,6 +44,55 @@ function loesungswoerter(text) {
 }
 
 /**
+ * Endungen, die deutsche Wörter beim Beugen anhängen.
+ *
+ * Ohne sie vergleicht die Prüfung buchstabengleich – und aus „Neue Deutsche
+ * Welle“ wird in der Nachbarfrage „Neuen Deutschen Welle“. Drei andere
+ * Wörter, also kein Treffer. Genau so stand es im ausgelieferten „Zugabe“:
+ *
+ *   „Wofür steht die Abkürzung NDW?“                       → Neue Deutsche Welle
+ *   „Welche Band der Neuen Deutschen Welle hatte …“
+ *
+ * Wer die zweite Frage zuerst spielt, bekommt die erste geschenkt.
+ */
+const BEUGUNGSENDUNGEN = ['en', 'em', 'er', 'es', 'e', 'n', 's'];
+
+/**
+ * Ein Wort auf seinen Stamm bringen.
+ *
+ * Abgeschnitten wird nur, solange genug übrig bleibt – und wiederholt, bis
+ * nichts mehr geht: „wassers“ → „wasser“ → „wass“, sonst läge es neben
+ * „wasser“ → „wass“ und die beiden fänden sich nicht.
+ *
+ * Die vier Zeichen Mindestrest sind der Grund, warum deutsche
+ * Zusammensetzungen heil bleiben: „Telefon“ wird zu „telefo“, „Telefonbuch“
+ * bleibt „telefonbuch“ – zwei verschiedene Stämme. Gemessen über alle
+ * mitgelieferten Sätze meldet die Regel genau den einen echten Fall oben und
+ * sonst nichts. Ein einfacher Anfangsvergleich („steckt das eine im anderen?“)
+ * meldete an derselben Stelle neun Fälle, von denen acht keine waren:
+ * Trainer/Trainerstuhl, Pause/Pausenaufsicht, Winter/Winterschlaf …
+ */
+function stamm(wort) {
+  let w = wort;
+  let vorher;
+  do {
+    vorher = w;
+    for (const endung of BEUGUNGSENDUNGEN) {
+      if (w.length - endung.length >= 4 && w.endsWith(endung)) {
+        w = w.slice(0, -endung.length);
+        break;
+      }
+    }
+  } while (w !== vorher);
+  return w;
+}
+
+/** Zwei Wörter, die dasselbe meinen – auch wenn eines gebeugt ist. */
+function gleichesWort(a, b) {
+  return a === b || stamm(a) === stamm(b);
+}
+
+/**
  * Welche Fragen einer Kategorie verraten die Lösung einer anderen?
  *
  * Erwartet eine Liste `{ text, answer }` und liefert Paare zurück:
@@ -68,8 +117,9 @@ export function verraeteneLoesungen(fragen) {
       // Auch hier die kurze Latte, sonst steht „SMS" zwar in der Lösung, aber
       // nicht im Vergleichstext, und das Paar bleibt unsichtbar.
       const anderswo = zerlege(`${andererText} ${andere?.answer ?? ''}`, 2);
-      // Erst wenn die Lösung vollständig anderswo steht, ist sie verraten.
-      if (loesung.every((w) => anderswo.includes(w))) {
+      // Erst wenn die Lösung vollständig anderswo steht, ist sie verraten –
+      // gebeugt zählt dabei mit, siehe stamm().
+      if (loesung.every((w) => anderswo.some((x) => gleichesWort(w, x)))) {
         treffer.push({ i, j, answer: antwort });
       }
     });
