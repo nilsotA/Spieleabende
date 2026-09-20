@@ -722,10 +722,6 @@ async function handleAction(clientId, body) {
     throw new G.GameError('Nur der Host darf das.');
   }
 
-  // Sobald der Host etwas tut, ist der Stand nicht mehr „von letztem Mal",
-  // sondern der laufende Abend.
-  wiederhergestelltAm = null;
-
   // Wertungen, die sich auf eine überholte Lage beziehen, prallen ab. Der
   // Client schickt die Kennung mit, die er auf dem Schirm hatte; passt sie
   // nicht mehr, war der Druck für die vorige Situation gedacht – typischerweise
@@ -1046,6 +1042,24 @@ async function handleAction(clientId, body) {
     rueckWeg.push(schnappschuss);
     if (rueckWeg.length > RUECKWEG_TIEFE) rueckWeg.shift();
   }
+  /*
+   * Erst jetzt ist der Stand nicht mehr „von letztem Mal", sondern der
+   * laufende Abend.
+   *
+   * Der goldene Balken auf der Leinwand („Spielstand von heute, 21:14 Uhr
+   * wiederhergestellt – Rot 500 · Blau 300") ist das Einzige, woran der Host
+   * ablesen kann, ob er weiterspielt oder neu anfängt. Diese Zeile stand
+   * weiter oben – vor der Lage-Prüfung und vor der Aktion selbst, und ohne
+   * Rücksicht darauf, WER da tippt. Gemessen: Ein Gast drückt nach dem
+   * Neustart auf den Buzzer, der Server weist ihn ab („Buzzer ist noch
+   * gesperrt") – und der Balken war trotzdem weg, bevor der Host ihn gelesen
+   * hatte.
+   *
+   * Jetzt: nur nach einem Zug, der durchgegangen ist, und nur wenn er vom Host
+   * kam. Ein Handy, das beitritt oder danebendrückt, ist keine Entscheidung
+   * über den Abend.
+   */
+  if (isHost) wiederhergestelltAm = null;
   merkeBild();
   broadcast();
 }

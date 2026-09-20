@@ -265,6 +265,59 @@ test('Server übersteht Absturz und Neustart mit vollem Spielstand', async (t) =
   assert.match(bild.headers.get('content-type'), /image\/png/);
 });
 
+/*
+ * Der goldene Balken bleibt, bis der HOST etwas entscheidet.
+ *
+ * „Spielstand von heute, 21:14 Uhr wiederhergestellt – Rot 500 · Blau 300" ist
+ * das Einzige, woran der Host nach einem Neustart ablesen kann, ob er
+ * weiterspielt oder neu anfängt. Die Zeile, die ihn löscht, stand vor der
+ * Lage-Prüfung und vor der Aktion – und ohne Rücksicht darauf, wer tippt.
+ * Gemessen: Ein Gast drückt nach dem Neustart auf den Buzzer, der Server weist
+ * ihn ab („Buzzer ist noch gesperrt") – und der Balken war trotzdem weg.
+ */
+test('der Wiederhergestellt-Balken überlebt, was nicht der Host tut', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-balken-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 6300 + Math.floor(Math.random() * 200);
+
+  const ersterLauf = await starteServer(port, stateFile);
+  const host1 = await alsHost(ersterLauf.base, 'balken-host');
+  for (const name of ['Rot', 'Blau']) await host1({ type: 'addTeam', name });
+  await host1({ type: 'startGame', set: SATZ });
+  await host1({ type: 'pick', catIdx: 0, rowIdx: 3 });
+  await host1({ type: 'judge', correct: true });
+  await warte(700); // die Sicherung ist entprellt
+  ersterLauf.proc.kill('SIGKILL');
+  await warte(300);
+
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const balken = async () => (await (await fetch(
+    `${base}/api/state?clientId=balken-host&role=host`,
+  )).json()).wiederhergestellt;
+  assert.ok(await balken(), 'nach dem Neustart steht der Balken da');
+
+  // Ein Gast drückt daneben – der Server weist ab.
+  const gast = await verbinde(base, 'balken-gast', 'player');
+  t.after(() => gast.reader.cancel().catch(() => {}));
+  await warte(150);
+  const daneben = await gast.tu({ type: 'buzz' });
+  assert.equal(daneben.ok, false, 'der Buzz muss in dieser Lage abprallen');
+  assert.ok(await balken(), 'ein abgewiesener Zug eines Handys löscht den Balken nicht');
+
+  // Auch ein Zug des Hosts, der nicht durchgeht, lässt ihn stehen.
+  const host = await alsHost(base, 'balken-host2');
+  const insLeere = await host({ type: 'pick', catIdx: 9, rowIdx: 9 });
+  assert.equal(insLeere.ok, false, 'dieses Feld gibt es nicht');
+  assert.ok(await balken(), 'und ein abgewiesener Zug des Hosts auch nicht');
+
+  // Erst ein Zug, der durchgeht, macht aus „von letztem Mal" den laufenden Abend.
+  const echt = await host({ type: 'close' });
+  assert.equal(echt.ok, true, echt.error || '');
+  assert.ok(!(await balken()), 'jetzt ist der Abend der laufende');
+});
+
 test('Spielstand aus einer älteren Fassung bricht den ersten Buzz nicht', async (t) => {
   // Der Stand auf der Platte kann Felder nicht kennen, die es damals noch nicht
   // gab (state.rekorde, team.serie). Früher starb daran der erste Buzz nach dem

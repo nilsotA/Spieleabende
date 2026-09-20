@@ -904,7 +904,25 @@ export function vibrate(pattern) {
 export function flash(color = 'rgba(224,27,70,.55)') {
   const node = el('div', { class: 'screenflash', style: { background: color } });
   document.body.append(node);
-  setTimeout(() => node.remove(), 500);
+  /*
+   * Weggeräumt wird er, wenn die Animation fertig ist – nicht nach einer fest
+   * eingetippten halben Sekunde.
+   *
+   * Hier stand `setTimeout(…, 500)`, passend zur allgemeinen Regel in
+   * style.css. Bei „Bewegung reduzieren" dauert das Ausblenden dort aber
+   * 0,9 s. Der Knoten flog also bei fünf Neunteln weg, mitten im Verlauf – und
+   * ausgerechnet wer weniger Bewegung eingestellt hat, bekam den härteren
+   * Sprung. Auf einem stummgeschalteten iPhone ist dieser Blitz das einzige
+   * Zeichen, dass der Buzz angekommen ist.
+   */
+  const weg = () => node.remove();
+  node.addEventListener('animationend', weg, { once: true });
+  // Sicherheitsnetz: Feuert das Ereignis nie – Animationen ganz abgeschaltet,
+  // Reiter im Hintergrund –, läge sonst für den Rest des Abends eine
+  // bildschirmfüllende Fläche über der Seite. Sie ist zwar durchsichtig und
+  // lässt Tipps durch (pointer-events: none), aber liegen bleiben soll sie
+  // trotzdem nicht.
+  setTimeout(weg, 1500);
 }
 
 /** Verhindert, dass das Handy mitten im Spiel den Bildschirm abschaltet. */

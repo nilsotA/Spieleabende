@@ -318,11 +318,35 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
  */
 test('nach einem Austausch nennt jeder Schirm die Herkunft der Frage', () => {
   for (const datei of ['host.js', 'player.js', 'remote.js']) {
-    assert.match(
-      ohneKommentare(lies(datei)),
-      /ersatzAus/,
-      `${datei}: die Kategorie über der Frage verschweigt, dass sie ausgetauscht wurde`,
-    );
+    /*
+     * Geprüft wird die Kopfzeile, nicht bloß der Bezeichner.
+     *
+     * Hier stand einmal nur `/ersatzAus/` gegen die ganze Datei. Damit hätte
+     * auch ein `const ersatzAus = q.ersatzAus;` ohne jede Verwendung gereicht,
+     * oder ein Zweig, den nie jemand erreicht – der Test wäre grün geblieben,
+     * während auf dem Handy weiter „Uni-Latein · 500 Punkte" über einer Frage
+     * aus einem ganz anderen Fach stünde.
+     */
+    const js = ohneKommentare(lies(datei));
+    /*
+     * Zeilenweise statt mit einer Klammer-Regex: Die Kopfzeile ist ein
+     * Template-Literal mit verschachtelten Backticks, daran bricht jedes
+     * `[^`]*` ab – und zwar mitten drin, VOR der Stelle, um die es geht.
+     *
+     * Und der Anker muss genau sein. Ein schlichtes `includes('${q.category}')`
+     * trifft in allen drei Dateien zuerst etwas anderes: auf der Leinwand den
+     * Stechen-Zweig, auf dem Handy den Schlüssel des Neuaufbaus, auf der
+     * Fernbedienung die Rückfrage vor dem Austausch. Keine dieser Zeilen
+     * nennt je eine Herkunft – der Wächter hätte also die falsche Zeile
+     * geprüft und wäre auch bei gutem Code rot geworden. Die Kopfzeile ist
+     * der Sonst-Zweig des Stechen-Fragezeichens, und den gibt es genau einmal.
+     */
+    const kandidaten = js.split('\n').filter((z) => z.trim().startsWith(': `${q.category}'));
+    assert.equal(kandidaten.length, 1,
+      `${datei}: die Kopfzeile der Frage sollte genau einmal auffindbar sein`);
+    const kopf = kandidaten[0];
+    assert.match(kopf, /q\.ersatzAus \? ` · Ersatz aus/,
+      `${datei}: die Kategorie über der Frage verschweigt, dass sie ausgetauscht wurde`);
   }
 });
 
