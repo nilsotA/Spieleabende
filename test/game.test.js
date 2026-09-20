@@ -1429,3 +1429,76 @@ test('wer ein verlorenes Feld abräumt, hat geklaut', () => {
   assert.equal(state.teams[1].bilanz.geklaut, 1);
   assert.ok(state.teams[1].bilanz.geklautPunkte > 0);
 });
+
+/*
+ * Wer nach dem Stechen an die Spitze aufschließt, war nicht dabei.
+ *
+ * Eine Punktekorrektur kann das Stechen entwerten – der Fall, dass der Sieger
+ * darunter rutscht, war abgedeckt. Der andere nicht: Steht plötzlich jemand
+ * oben, der gar nicht drücken durfte, hat das Stechen seine Frage nicht
+ * beantwortet.
+ *
+ * Gemessen: Rot und Grün 5000, Blau 4900, das Stechen entscheidet für Rot.
+ * Blau reklamiert eine vergessene Gutschrift, bekommt +100 und steht mit 5000
+ * gleichauf – ohne je gebuzzert zu haben. Oben stand weiter „Rot entscheidet
+ * das Stechen", und ein zweites ließ sich nicht starten: Der Knopf hängt an
+ * `!stechenSieger`. Der Host hatte gar keinen Zug mehr.
+ */
+test('eine Korrektur, die einen Außenstehenden nach oben bringt, hebt das Stechen auf', () => {
+  const state = setup(['Rot', 'Grün', 'Blau']);
+  bisGleichstand(state);
+  G.adjustScore(state, state.teams[2].id, -100);       // Blau bleibt knapp darunter
+  assert.deepEqual(G.spitzenTeams(state).map((t) => t.name), ['Rot', 'Grün']);
+
+  G.startStechen(state, STECHFRAGE);
+  assert.ok(state.current.lockedOut.includes(state.teams[2].id), 'Blau darf nicht drücken');
+  assert.deepEqual(state.stechenDabei, [state.teams[0].id, state.teams[1].id],
+    'wer dabei war, gehört in den Zustand');
+  G.buzzFor(state, state.teams[0].id);
+  G.judge(state, true);
+  G.closeQuestion(state);
+  assert.equal(state.stechenSieger, state.teams[0].id);
+
+  G.adjustScore(state, state.teams[2].id, 100);        // Blau schließt auf
+  assert.equal(state.stechenSieger, null, 'die Entscheidung gilt nicht mehr');
+  assert.deepEqual(state.stechenRaus, [], 'und wer aus ihr ausgeschieden war, auch nicht');
+  assert.match(state.message, /nicht dabei war/);
+  // Und der Host kann wieder handeln.
+  assert.equal(G.spitzenTeams(state).length, 3);
+  G.startStechen(state, { text: 'Noch eine?', answer: 'Ja' });
+  assert.deepEqual(state.current.lockedOut, [], 'diesmal sind alle drei dabei');
+});
+
+/*
+ * Und die vier Fälle, die NICHT aufheben dürfen – sonst wäre jede
+ * Punktekorrektur nach einem Stechen ein Zufallsgenerator.
+ */
+test('eine Korrektur, die die Spitze nicht verändert, lässt das Stechen stehen', () => {
+  const bau = () => {
+    const s = setup(['Rot', 'Grün', 'Blau']);
+    bisGleichstand(s);
+    G.adjustScore(s, s.teams[2].id, -1000);            // Blau weit darunter
+    G.startStechen(s, STECHFRAGE);
+    G.buzzFor(s, s.teams[0].id);
+    G.judge(s, true);
+    G.closeQuestion(s);
+    return s;
+  };
+
+  const a = bau();
+  G.adjustScore(a, a.teams[1].id, 0);
+  assert.equal(a.stechenSieger, a.teams[0].id, 'eine Korrektur um null ändert nichts');
+
+  const b = bau();
+  G.adjustScore(b, b.teams[2].id, 500);                // Blau kommt näher, bleibt unten
+  assert.equal(b.stechenSieger, b.teams[0].id, 'unter der Spitze zählt niemand mit');
+
+  const c = bau();
+  G.adjustScore(c, c.teams[0].id, 300);                // der Sieger legt zu
+  assert.equal(c.stechenSieger, c.teams[0].id);
+
+  const d = bau();
+  G.adjustScore(d, d.teams[1].id, 100);                // der Mitspieler zieht vorbei
+  assert.equal(d.stechenSieger, null, 'das ist der alte Fall und muss weiter greifen');
+  assert.match(d.message, /zählt wieder der Punktestand/);
+});

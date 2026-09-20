@@ -149,6 +149,8 @@ export function createState() {
     stechenSieger: null,
     // Wer im Stechen danebenlag – gilt über die einzelne Frage hinaus.
     stechenRaus: [],
+    // Und wer überhaupt mitspielen durfte – siehe adjustScore.
+    stechenDabei: [],
     // Welche Ersatzfragen heute schon eingewechselt wurden (siehe ersetzeFrage).
     // Sie stehen in keinem Fragensatz dieses Abends und wären sonst die
     // einzigen, die ein zweites Mal gezogen werden können.
@@ -351,13 +353,31 @@ export function adjustScore(state, teamId, delta) {
    * Nur wenn der Sieger UNTER die Spitze rutscht. Gleichauf ist der Normalfall
    * direkt nach einem Stechen – das Stechen ist ja die Antwort auf genau diesen
    * Gleichstand.
+   *
+   * Aber eben nur für die, die dabei waren. Steht plötzlich jemand oben, der
+   * gar nicht drücken durfte, hat das Stechen seine Frage nicht beantwortet.
+   * Gemessen: Rot und Grün 5000, Blau 4900, das Stechen entscheidet für Rot.
+   * Blau reklamiert eine vergessene Gutschrift, bekommt +100 und steht mit
+   * 5000 gleichauf an der Spitze – ohne je gebuzzert zu haben. Die alte
+   * Bedingung griff nicht (5000 < 5000 ist falsch), oben stand weiter „Rot
+   * entscheidet das Stechen", und ein zweites ließ sich nicht starten: Der
+   * Knopf hängt an `!stechenSieger`. Der Host hatte gar keinen Zug mehr.
    */
   if (state.stechenSieger) {
     const best = Math.max(...state.teams.map((t) => t.score));
     const sieger = state.teams.find((t) => t.id === state.stechenSieger);
-    if (!sieger || sieger.score < best) {
+    const dabei = state.stechenDabei || [];
+    const neuOben = state.teams.some((t) => t.score === best && !dabei.includes(t.id));
+    if (!sieger || sieger.score < best || neuOben) {
       state.stechenSieger = null;
-      state.message = 'Die Korrektur hebt das Stechen auf – es zählt wieder der Punktestand.';
+      // Mit der Entscheidung fällt auch, wer aus ihr ausgeschieden war: Das
+      // nächste Stechen wird zwischen anderen Teams ausgetragen.
+      state.stechenRaus = [];
+  state.stechenDabei = [];
+      state.stechenDabei = [];
+      state.message = neuOben
+        ? 'Die Korrektur bringt ein Team an die Spitze, das nicht dabei war – das Stechen gilt nicht mehr.'
+        : 'Die Korrektur hebt das Stechen auf – es zählt wieder der Punktestand.';
     }
   }
   return state;
@@ -1035,6 +1055,7 @@ export function startStechen(state, frage) {
   if (alleRaus) raus = [];
   state.stechenRaus = raus;
 
+  state.stechenDabei = spitze.map((t) => t.id);
   state.stechenLauf = (state.stechenLauf || 0) + 1;
   state.stechenTexte = [...(state.stechenTexte || []), frage.text];
   state.current = {
