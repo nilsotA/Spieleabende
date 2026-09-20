@@ -408,7 +408,13 @@ function fokussiereKategorie(rundenIndex, katIndex) {
 
 $('#btn-download').addEventListener('click', () => {
   const luecken = fehlendeFelder();
-  if (luecken.length && !confirm(`${luecken.length} Felder sind noch leer – trotzdem herunterladen?`)) return;
+  // Genau eine Lücke ist der Normalfall kurz vor dem Fertigwerden – und stand
+  // als „1 Felder sind noch leer“ da. Die Fortschrittszeile derselben Datei
+  // unterscheidet an dieser Stelle seit jeher sauber.
+  const fehlt = luecken.length === 1
+    ? 'Ein Feld ist noch leer – trotzdem herunterladen?'
+    : `${luecken.length} Felder sind noch leer – trotzdem herunterladen?`;
+  if (luecken.length && !confirm(fehlt)) return;
   const blob = new Blob([JSON.stringify(set, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = el('a', { href: url, download: `${slug(set.name)}.json` });
@@ -776,7 +782,11 @@ function zeigeBaukasten(suche = '') {
     .sort((a, b) => (s ? (passt(b) ? 1 : 0) - (passt(a) ? 1 : 0) : 0));
   const saetze = new Set(treffer.map((e) => e.datei)).size;
   setzeText($('#bk-stand'), treffer.length
-    ? `${treffer.length} Kategorien aus ${saetze === 1 ? 'einem Satz' : `${saetze} Sätzen`}`
+    // Singular auf beiden Seiten. Für die Sätze war er schon da („einem Satz“
+    // statt „1 Sätzen“), für die Kategorien nicht – bei genau einem Treffer
+    // stand hier „1 Kategorien aus einem Satz“.
+    ? `${treffer.length === 1 ? 'Eine Kategorie' : `${treffer.length} Kategorien`} `
+      + `aus ${saetze === 1 ? 'einem Satz' : `${saetze} Sätzen`}`
     : 'Nichts gefunden.');
   for (const e of treffer) {
     liste.append(el('button', {

@@ -971,11 +971,15 @@ function renderBuzzer(prev) {
       lock('GESPERRT');
       return;
     }
+    // Dieselbe Anrede in allen drei Zweigen: Das Handy gehört einem Team, und
+    // ein Team ist „ihr“. Hier stand in der letzten Zeile „Deine Frage“ –
+    // dieselbe Statuszeile duzte also mal und ihrzte mal, je nachdem, wie man
+    // aus der Frage geflogen war.
     setzeText(status, eigen < 0
       ? `Daneben – das kostet euch ${-eigen} Punkte. Die anderen sind noch dran.`
       : q.lockedOut.includes(you.teamId)
         ? 'Ihr hattet euren Versuch.'
-        : 'Deine Frage – die anderen sind dran.');
+        : 'Eure Frage – die anderen sind dran.');
     lock('GESPERRT');
     return;
   }

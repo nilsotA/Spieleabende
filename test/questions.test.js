@@ -434,6 +434,37 @@ test('keine Frage verrät ihre eigene Lösung', async () => {
 });
 
 /*
+ * „1 Fragen“ steht auf der Leinwand.
+ *
+ * Die Meldung aus `normalizeSet` ist keine Entwicklermeldung: Sie landet als
+ * Toast auf dem Host-Screen, wenn ein Fragensatz nicht lädt. Dort stand bei
+ * genau einer Frage „hat 1 Fragen“ – und das Zitat um den Kategorienamen war
+ * unten deutsch geöffnet („) und oben gerade geschlossen (").
+ */
+test('die Meldung für einen kaputten Satz ist auf Deutsch', () => {
+  const mit = (anzahl) => {
+    const fragen = Array.from({ length: anzahl }, (_, i) => ({ text: `F${i}`, answer: `A${i}` }));
+    try {
+      normalizeSet({ name: 'T', rounds: [{ categories: [{ name: 'Hauptstädte', questions: fragen }] }] });
+    } catch (err) {
+      return err.message;
+    }
+    return null;
+  };
+
+  const eine = mit(1);
+  assert.ok(eine, 'eine einzige Frage muss abgelehnt werden');
+  assert.match(eine, /hat eine Frage/, 'Singular statt „1 Fragen“');
+  assert.doesNotMatch(eine, /1 Fragen/);
+
+  assert.match(mit(3), /hat 3 Fragen/, 'im Plural bleibt die Zahl');
+
+  // Und das Zitat wird deutsch geschlossen – die Meldung steht auf der Leinwand.
+  assert.match(eine, /„Hauptstädte“/, 'deutsch geöffnet und geschlossen');
+  assert.doesNotMatch(eine, /"/, 'kein gerades Anführungszeichen');
+});
+
+/*
  * Eine gebeugte Lösung ist dieselbe Lösung.
  *
  * Die Prüfung verglich buchstabengleich. Aus „Neue Deutsche Welle“ wird in der

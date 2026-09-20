@@ -28,11 +28,14 @@ export function normalizeSet(raw, fallbackName = 'Fragensatz') {
     if (cats.length > 8) throw new Error(`Runde ${ri + 1} hat ${cats.length} Kategorien – höchstens 8 passen aufs Board.`);
     return {
       categories: cats.map((cat, ci) => {
-        const label = `„${cat?.name || ci + 1}" in Runde ${ri + 1}`;
+        // Deutsch geschlossen: Die Meldung landet als Toast auf der Leinwand,
+        // und dort fällt ein gerades Zeichen hinter einem „ auf.
+        const label = `„${cat?.name || ci + 1}“ in Runde ${ri + 1}`;
         const qs = Array.isArray(cat?.questions) ? cat.questions : [];
         if (qs.length !== QUESTIONS_PER_CATEGORY) {
           throw new Error(
-            `Kategorie ${label} hat ${qs.length} Fragen – es müssen genau ${QUESTIONS_PER_CATEGORY} sein.`,
+            `Kategorie ${label} hat ${qs.length === 1 ? 'eine Frage' : `${qs.length} Fragen`}`
+            + ` – es müssen genau ${QUESTIONS_PER_CATEGORY} sein.`,
           );
         }
         return {
