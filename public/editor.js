@@ -815,7 +815,10 @@ function hole(eintrag) {
     text: q.text || '', answer: q.answer || '', image: q.image || null, note: q.note || null,
   }));
   while (ziel.questions.length < 4) ziel.questions.push({ text: '', answer: '', image: null, note: null });
-  $('#baukasten').hidden = true;
+  // Über dieselbe Stelle wie die anderen beiden Wege: Ein schlichtes
+  // `hidden = true` ließe alles dahinter still‑gelegt zurück, und der Editor
+  // wäre bis zum Neuladen nicht mehr bedienbar.
+  zeigeBaukastenDialog(false);
   persist();
   render();
   updateFortschritt();
@@ -831,7 +834,7 @@ async function oeffneBaukasten(ri, ci) {
   $('#bk-suche').value = '';
   $('#bk-liste').innerHTML = '';
   setzeText($('#bk-stand'), 'Lade Fragensätze …');
-  $('#baukasten').hidden = false;
+  zeigeBaukastenDialog(true);
   $('#bk-suche').focus();
   try {
     await ladeAlleKategorien();
@@ -844,12 +847,38 @@ async function oeffneBaukasten(ri, ci) {
 $('#bk-suche').addEventListener('input', (ev) => {
   if (baukastenDaten) zeigeBaukasten(ev.target.value);
 });
-$('#bk-zu').addEventListener('click', () => { $('#baukasten').hidden = true; });
+/**
+ * Den Baukasten auf- und zumachen – an einer Stelle.
+ *
+ * Er nennt sich `aria-modal`, legte aber nichts dahinter still: Der Tabulator
+ * wanderte hinter den Vorhang, durch 48 Fragefelder, und beim Schließen blieb
+ * der Fokus dort hängen, wo er zuletzt war – nicht bei dem Knopf, der den
+ * Baukasten geöffnet hatte. Wer mit der Tastatur arbeitet, muss sich danach
+ * durch den halben Satz zurückhangeln.
+ *
+ * Der Merker für den auslösenden Knopf: Er wird bei jedem Öffnen neu gesetzt,
+ * denn jede der zwölf Kategorien hat einen eigenen.
+ */
+let baukastenRueckweg = null;
+
+function zeigeBaukastenDialog(an) {
+  if (an) baukastenRueckweg = document.activeElement;
+  $('#baukasten').hidden = !an;
+  // Alles dahinter stilllegen, solange der Vorhang offen ist.
+  const hinten = document.querySelector('main');
+  if (hinten) hinten.inert = an;
+  if (!an) {
+    baukastenRueckweg?.focus?.();
+    baukastenRueckweg = null;
+  }
+}
+
+$('#bk-zu').addEventListener('click', () => zeigeBaukastenDialog(false));
 $('#baukasten').addEventListener('click', (ev) => {
-  if (ev.target.id === 'baukasten') $('#baukasten').hidden = true;
+  if (ev.target.id === 'baukasten') zeigeBaukastenDialog(false);
 });
 addEventListener('keydown', (ev) => {
-  if (ev.key === 'Escape' && !$('#baukasten').hidden) $('#baukasten').hidden = true;
+  if (ev.key === 'Escape' && !$('#baukasten').hidden) zeigeBaukastenDialog(false);
 });
 
 async function loadSetList() {

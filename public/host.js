@@ -2742,14 +2742,33 @@ $('#btn-zusammenfassung').addEventListener('click', async () => {
   } catch {
     const feld = $('#zus-text');
     feld.value = text;
-    $('#zusammenfassung').hidden = false;
+    zeigeZusammenfassung(true);
     feld.focus();
     feld.select();
   }
 });
-$('#btn-zus-zu').addEventListener('click', () => { $('#zusammenfassung').hidden = true; });
+/**
+ * Den Zusammenfassungs-Dialog auf- und zumachen – an einer Stelle.
+ *
+ * Er nennt sich `aria-modal`, legte aber nichts dahinter still: Der Tabulator
+ * wanderte aufs Brett, und Escape war fest als Menü-Umschalter verdrahtet.
+ * Gemessen: Dialog offen, Fokus aus dem Textfeld genommen, Escape – danach
+ * stand das Host-Menü HINTER dem offenen Dialog, und der Fokus lag auf dessen
+ * Schließen-Knopf. Mit der Tastatur kam man aus der Lage nicht mehr heraus.
+ *
+ * `openMenu()` macht es zwei Bildschirme weiter oben richtig; hier fehlte es.
+ */
+function zeigeZusammenfassung(an) {
+  $('#zusammenfassung').hidden = !an;
+  // Alles dahinter stilllegen, sonst wandert der Tabulator aufs Board –
+  // dieselbe Zeile wie in openMenu(), aus demselben Grund.
+  $('#view-game').inert = an;
+  if (!an) $('#btn-zusammenfassung').focus?.();
+}
+
+$('#btn-zus-zu').addEventListener('click', () => zeigeZusammenfassung(false));
 $('#zusammenfassung').addEventListener('click', (ev) => {
-  if (ev.target.id === 'zusammenfassung') $('#zusammenfassung').hidden = true;
+  if (ev.target.id === 'zusammenfassung') zeigeZusammenfassung(false);
 });
 
 $('#btn-new-game').addEventListener('click', () => act('backToLobby'));
@@ -3143,6 +3162,10 @@ document.addEventListener('keydown', (ev) => {
 
   if (key === 'escape') {
     ev.preventDefault();
+    // Der oberste Dialog zuerst. Ohne diesen Zweig öffnete Escape das Menü
+    // HINTER dem offenen Zusammenfassungs-Dialog – gemessen – und der Host
+    // saß in zwei übereinanderliegenden Dialogen fest.
+    if (!$('#zusammenfassung').hidden) return zeigeZusammenfassung(false);
     return menuOpen ? closeMenu() : openMenu();
   }
   // Solange das Menü offen ist, gehören die Tasten dem Menü.

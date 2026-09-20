@@ -308,6 +308,65 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Wer `aria-modal` sagt, muss auch stilllegen – und wieder freigeben.
+ *
+ * Zwei Dialoge nannten sich `role="dialog" aria-modal="true"` und ließen
+ * trotzdem alles dahinter erreichbar:
+ *
+ * Der Zusammenfassungs-Dialog auf der Leinwand war die schlimmere Hälfte.
+ * Escape ist dort fest als Menü-Umschalter verdrahtet, und einen Zweig für
+ * diesen Dialog gab es nicht. Solange der Fokus im Textfeld stand, griff die
+ * Ausnahme für Eingabefelder und Escape tat gar nichts; sobald er woanders
+ * lag, öffnete Escape das Menü HINTER dem Dialog. Gemessen:
+ *
+ *   Dialog offen, Fokus im Textfeld   → Escape: nichts
+ *   Fokus aus dem Textfeld genommen   → Escape: Menü OFFEN, Dialog auch noch
+ *
+ * Zwei übereinanderliegende Dialoge, und mit der Tastatur kam man aus der Lage
+ * nicht mehr heraus.
+ *
+ * Der Baukasten des Editors schloss zwar mit Escape, legte aber nichts still
+ * (der Tabulator wanderte durch 48 Fragefelder dahinter) und gab den Fokus
+ * beim Schließen nirgends zurück.
+ *
+ * `openMenu()` im Host-Screen macht es seit jeher richtig – die Zeile
+ * `$('#view-game').inert = true` mit dem Kommentar „sonst wandert der
+ * Tabulator aufs Board“. Beide Dialoge folgen ihr jetzt.
+ */
+test('die Dialoge legen still, was hinter ihnen liegt', () => {
+  const host = ohneKommentare(lies('host.js'));
+
+  // Escape nimmt sich den obersten Dialog zuerst.
+  const esc = host.slice(host.indexOf("if (key === 'escape')"));
+  assert.ok(esc, 'der Escape-Zweig sollte auffindbar bleiben');
+  const bisMenu = esc.indexOf('menuOpen ?');
+  assert.ok(bisMenu > 0, 'der Menü-Umschalter sollte auffindbar bleiben');
+  assert.match(esc.slice(0, bisMenu), /zusammenfassung/,
+    'sonst öffnet Escape das Menü hinter dem offenen Dialog');
+
+  // Und der Dialog legt dahinter still – dieselbe Zeile wie openMenu().
+  assert.match(host, /function zeigeZusammenfassung\(an\)[\s\S]{0,400}?\$\('#view-game'\)\.inert = an;/,
+    'der Zusammenfassungs-Dialog muss stilllegen, was hinter ihm liegt');
+
+  const editor = ohneKommentare(lies('editor.js'));
+  assert.match(editor, /function zeigeBaukastenDialog\(an\)[\s\S]{0,400}?\.inert = an;/,
+    'der Baukasten muss stilllegen, was hinter ihm liegt');
+
+  /*
+   * Und jeder Weg hinaus muss durch dieselbe Tür.
+   *
+   * Der Baukasten hat drei: Escape, der Schließen-Knopf und das Holen einer
+   * Kategorie. Der dritte setzte `hidden = true` direkt – hätte er das nach
+   * dem Stilllegen weiter getan, wäre der Editor bis zum Neuladen unbedienbar
+   * gewesen. Im Browser nachgemessen: Nach dem Holen lässt sich wieder tippen.
+   */
+  assert.doesNotMatch(editor, /\$\('#baukasten'\)\.hidden = true/,
+    'jeder Weg aus dem Baukasten gehört über zeigeBaukastenDialog()');
+  assert.doesNotMatch(host, /\$\('#zusammenfassung'\)\.hidden = (true|false)/,
+    'jeder Weg aus dem Dialog gehört über zeigeZusammenfassung()');
+});
+
+/*
  * Die Buzzer-Uhr steht nicht im Vorlesebereich.
  *
  * `#p-status` und `#r-phase` tragen `role="status" aria-live="polite"`.
