@@ -400,6 +400,24 @@ $('#btn-add-round').addEventListener('click', () => {
 });
 
 /** Nach dem Neubau den Namen der frisch angelegten Kategorie anspringen. */
+/**
+ * Zurück auf den „⇱ Holen"-Knopf, von dem aus der Baukasten aufging.
+ *
+ * zeigeBaukastenDialog(false) stellt den Fokus für sich genommen richtig
+ * zurück – nur baut render() zwei Zeilen später das ganze Formular neu, und
+ * genau der eben fokussierte Knopf verschwindet dabei aus dem Dokument.
+ * Gemessen fiel der Fokus danach auf <body>: Der nächste Tabulatorschritt
+ * landete bei „Runde entfernen" ganz oben, und bis zurück zum Ausgangsknopf
+ * waren es 22 Schritte – durch Kategoriename, Holen, Entfernen und zwölf
+ * Frage-, Antwort- und Zusatzfelder. Über „Abbrechen" desselben Dialogs
+ * passierte das nie, nur auf dem Weg, den man eigentlich geht.
+ */
+function fokussiereHolen(rundenIndex, katIndex) {
+  const runde = document.querySelectorAll('.round')[rundenIndex];
+  const kopf = runde?.querySelectorAll('.cat-head')[katIndex];
+  kopf?.querySelector('button')?.focus();
+}
+
 function fokussiereKategorie(rundenIndex, katIndex) {
   const runde = document.querySelectorAll('.round')[rundenIndex];
   const feld = runde?.querySelectorAll('.cat-head input')[katIndex];
@@ -850,6 +868,9 @@ function hole(eintrag) {
   zeigeBaukastenDialog(false);
   persist();
   render();
+  // render() hat den Knopf gerade ausgetauscht, auf den zeigeBaukastenDialog
+  // den Fokus zurückgelegt hat – also noch einmal, auf den neuen.
+  fokussiereHolen(baukastenZiel.ri, baukastenZiel.ci);
   updateFortschritt();
   alleLaengenMarkieren();
   toast(`„${ziel.name}“ geholt.`);

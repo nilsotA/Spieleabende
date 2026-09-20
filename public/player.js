@@ -754,10 +754,25 @@ function renderPicker() {
             : el('button', {
               type: 'button',
               class: `${cell.used ? 'used' : ''}${einsatzScharf ? ' doppelt' : ''}`,
+              // Gespielt heißt gespielt – auch für Tastatur und Vorlesehilfe.
+              // Die Farbe allein sagte es nur dem Auge; `.used` und
+              // `:disabled` haben in player.css ohnehin dieselben Farben, die
+              // zweite Regel war nur nie erreichbar.
+              disabled: cell.used,
+              // Ohne Beschriftung liest eine Vorlesehilfe hier vierundzwanzig
+              // Knöpfe mit vier verschiedenen Namen vor: „100", „200", „300",
+              // „500", sechsmal hintereinander. Die Kategorie steht daneben in
+              // einem eigenen <h3> und ist mit nichts verknüpft. Die
+              // Fernbedienung macht es seit jeher richtig (remote.js), das
+              // Handy des Zugteams – das einzige Gerät, an dem wirklich
+              // gewählt wird – nicht.
+              'aria-label': `${cat.name}, ${einsatzScharf ? cell.value * 2 : cell.value} Punkte`
+                + (cell.used ? ' – schon gespielt' : ''),
               onclick: async (ev) => {
                 if (cell.used) return;
                 const knopf = ev.currentTarget;
                 knopf.classList.add('used');
+                knopf.disabled = true;
                 sound('pick');
                 // Der Einsatz reist mit dem Feldaufruf – erst hier wird er
                 // wirklich gesetzt. Der Wert steht fest, sobald der Server
@@ -771,6 +786,7 @@ function renderPicker() {
                 const antwort = await action('pick', { catIdx, rowIdx, einsatz: mitEinsatz, quiet: true });
                 if (antwort && antwort.ok === false) {
                   knopf.classList.remove('used');
+                  knopf.disabled = false;
                   /*
                    * Still bleibt nur, was das Raster ohnehin erklärt.
                    *

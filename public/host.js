@@ -2800,6 +2800,14 @@ $('#btn-zusammenfassung').addEventListener('click', async () => {
  * Schließen-Knopf. Mit der Tastatur kam man aus der Lage nicht mehr heraus.
  *
  * `openMenu()` macht es zwei Bildschirme weiter oben richtig; hier fehlte es.
+ *
+ * Der Satz „Fokus aus dem Textfeld genommen" oben war dabei die blinde Stelle:
+ * Genau dieser Handgriff kommt im Spiel nicht vor. Der Dialog öffnet sich mit
+ * dem Fokus IM Textfeld (die Zeilen darüber), und der Tastenwächter stieg für
+ * Eingabefelder aus, bevor der Escape-Zweig überhaupt erreicht war. Der eigens
+ * dafür gebaute Zweig war damit im Normalfall tot – nachgemessen am Endstand
+ * mit unbrauchbarer Zwischenablage, also in genau der Lage, für die es diesen
+ * Rückfallweg überhaupt gibt. Escape steht jetzt vor dem Feldwächter.
  */
 function zeigeZusammenfassung(an) {
   $('#zusammenfassung').hidden = !an;
@@ -3206,6 +3214,17 @@ document.addEventListener('keydown', (ev) => {
   // Der Browser führt sein Kürzel dabei trotzdem aus – die Wertung passiert
   // also hinter dem Rücken des Hosts, der nur den Tab wechseln wollte.
   if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  // Escape ist die Ausnahme von der Zeile darunter, und zwar eine notwendige:
+  // Der Zusammenfassungs-Dialog öffnet sich mit dem Fokus IM Textfeld, damit
+  // der Text schon markiert ist (zeigeZusammenfassung). Der Wächter für
+  // Eingabefelder stieg deshalb immer aus, bevor der eigens gebaute
+  // Escape-Zweig weiter unten überhaupt erreicht war – gemessen ließ sich der
+  // Dialog mit der Tastatur nie schließen. Ausgerechnet dort: Er ist der
+  // Rückfallweg für den Fall, dass das Kopieren nicht geht.
+  if (ev.key === 'Escape' && !$('#zusammenfassung').hidden) {
+    ev.preventDefault();
+    return zeigeZusammenfassung(false);
+  }
   if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
 
   const key = ev.key.toLowerCase();

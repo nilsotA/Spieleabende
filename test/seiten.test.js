@@ -1942,3 +1942,81 @@ test('die klebende Wertungsleiste lässt die Frage stehen', () => {
     'mit Deckel, aber ohne eigene Scrollfläche wären die hinteren Buzz-Knöpfe nicht mehr erreichbar');
 });
 
+/*
+ * Das Handy des Zugteams ist das einzige Gerät, an dem wirklich ein Feld
+ * gewählt wird – und es war mit einer Vorlesehilfe nicht zu bedienen.
+ *
+ * Gemessener Zugänglichkeitsbaum vorher: vierundzwanzig Knöpfe mit vier
+ * verschiedenen Namen („100“, „200“, „300“, „500“, sechsmal hintereinander).
+ * Die Kategorie stand daneben in einem eigenen <h3> und war mit nichts
+ * verknüpft. Ob ein Feld schon gespielt war, hing allein an der Farbe: kein
+ * `disabled`, kein `aria-disabled`, nur eine Klasse. Der Code belegte die
+ * Absicht selbst – `.picker .pick-values button:disabled` in player.css hat
+ * exakt dieselben Farben wie `.used` und wurde nie erreicht.
+ *
+ * Die Fernbedienung (remote.js) und das Brett auf der Leinwand (host.js)
+ * machen es seit jeher richtig; die Stelle dazwischen fehlte.
+ *
+ * Gemessen danach: „Wie heißt die Hauptstadt?, 100 Punkte – schon gespielt“
+ * [disabled] statt „100“.
+ */
+test('die Feldauswahl auf dem Handy sagt, welches Feld das ist', () => {
+  const player = ohneKommentare(lies('player.js'));
+  const ab = player.indexOf("class: 'pick-values'");
+  assert.ok(ab > 0, 'das Raster sollte auffindbar bleiben');
+  const raster = player.slice(ab, ab + 3000);
+
+  assert.match(raster, /'aria-label':\s*`\$\{cat\.name\}/,
+    'ohne die Kategorie heißen vierundzwanzig Knöpfe viermal dasselbe');
+  assert.match(raster, /schon gespielt/,
+    'dass ein Feld weg ist, darf nicht nur in der Farbe stehen');
+  assert.match(raster, /disabled:\s*cell\.used/,
+    'ein gespieltes Feld gehört auch für Tastatur und Vorlesehilfe zu');
+  assert.match(raster, /knopf\.disabled = true/,
+    'die vorgezogene Färbung beim Antippen muss den Knopf genauso schließen');
+  assert.match(raster, /knopf\.disabled = false/,
+    'und ihn wieder öffnen, wenn der Zug nicht durchkam – sonst ist das Feld für immer weg');
+});
+
+/*
+ * Zwei Stellen, an denen der Fokus verloren ging – beide ausgerechnet auf dem
+ * Weg, den man wirklich geht.
+ *
+ * 1. Escape schloss den Zusammenfassungs-Dialog nie. Der Tastenwächter steigt
+ *    für Eingabefelder aus (damit „2" beim Tippen keine Wertung auslöst), und
+ *    der Dialog öffnet sich mit dem Fokus IM Textfeld. Der eigens gebaute
+ *    Escape-Zweig war damit im Normalfall tot. Gemessen am Endstand mit
+ *    unbrauchbarer Zwischenablage – also in genau der Lage, für die es diesen
+ *    Rückfallweg gibt: Dialog offen, Fokus TEXTAREA, Escape – der Dialog blieb
+ *    offen und das Menü ging dahinter auf. Jetzt schließt er, und das Menü
+ *    bleibt zu.
+ *
+ * 2. Nach „⇱ Holen“ im Editor fiel der Fokus auf <body>. Der Dialog legt ihn
+ *    beim Schließen korrekt zurück – nur baut render() zwei Zeilen später das
+ *    ganze Formular neu und tauscht genau diesen Knopf aus. Gemessen: 22
+ *    Tabulatorschritte zurück; über „Abbrechen“ passierte es nie.
+ */
+test('Escape schließt den Zusammenfassungs-Dialog – auch aus dem Textfeld', () => {
+  const host = ohneKommentare(lies('host.js'));
+  const wachhund = host.slice(host.indexOf("document.addEventListener('keydown'"));
+  const feldWache = wachhund.indexOf("['INPUT', 'SELECT', 'TEXTAREA']");
+  const escZweig = wachhund.indexOf("ev.key === 'Escape'");
+  assert.ok(feldWache > 0, 'der Feldwächter sollte auffindbar bleiben');
+  assert.ok(escZweig > 0 && escZweig < feldWache,
+    'Escape muss VOR dem Feldwächter behandelt werden – sonst ist der Zweig tot, '
+    + 'solange der Dialog den Fokus im Textfeld hat');
+  assert.match(wachhund.slice(escZweig, feldWache), /zeigeZusammenfassung\(false\)/,
+    'und zwar, indem er den obersten Dialog schließt');
+});
+
+test('nach „⇱ Holen" steht der Fokus wieder auf dem Knopf', () => {
+  const editor = ohneKommentare(lies('editor.js'));
+  assert.match(editor, /function fokussiereHolen\(/,
+    'für den Weg zurück auf den Knopf sollte es eine benannte Stelle geben');
+  const hole = editor.slice(editor.indexOf('function hole('), editor.indexOf('async function oeffneBaukasten'));
+  assert.ok(hole, 'holeKategorie sollte auffindbar bleiben');
+  const nachRender = hole.slice(hole.indexOf('render();'));
+  assert.match(nachRender, /fokussiereHolen\(/,
+    'der Fokus muss NACH render() gesetzt werden – vorher setzt ihn der Dialog auf einen Knopf, '
+    + 'den render() gleich darauf austauscht');
+});
