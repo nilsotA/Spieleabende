@@ -52,7 +52,7 @@ let kind = null;
  * Startet den Tunnel und liefert seine Adresse – oder null, wenn daraus nichts
  * wird. Wirft nie: Ein Spieleabend soll nicht an einem Tunnel scheitern.
  */
-export function starteTunnel(port) {
+export function starteTunnel(port, beiVerlust = null) {
   return new Promise((fertig) => {
     let erledigt = false;
     /*
@@ -105,6 +105,17 @@ export function starteTunnel(port) {
 
     kind.on('exit', () => {
       kind = null;
+      /*
+       * Ein Tunnel kann auch mitten am Abend sterben.
+       *
+       * `einmal` steigt hier still aus, sobald die Adresse einmal gemeldet
+       * war – und damit lief der Fall vollständig ins Leere: Die Adresse blieb
+       * in server/index.js stehen, /api/info gab sie weiter aus, der QR-Code
+       * in der Lobby zeigte den ganzen Abend auf eine tote Adresse, und auf
+       * der Leinwand stand weiter „🌍 Über das Internet“. Die Gäste von
+       * auswärts fielen raus, ohne dass irgendetwas es sagte.
+       */
+      if (erledigt) beiVerlust?.();
       einmal(null);
     });
 

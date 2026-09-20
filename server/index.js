@@ -529,6 +529,11 @@ function sichtFuer({ isHost, clientId }) {
     sicht.rueckwegTiefe = rueckWeg.length;
     sicht.wiederhergestellt = wiederhergestelltAm;
     sicht.wartende = warteschlange();
+    // Ob der Tunnel noch steht. Der Host-Screen zeigt danach seine grüne Zeile
+    // und wählt die Adresse für den QR-Code – und muss es deshalb erfahren,
+    // wenn der Tunnel wegbricht. Über den Strom statt über Nachfragen: Der
+    // Screen hört ohnehin zu, und Nachfragen stellt er nach einer Minute ein.
+    sicht.tunnel = ONLINE ? !!tunnelAdresse : null;
   }
   return sicht;
 }
@@ -1732,7 +1737,18 @@ server.listen(PORT, async () => {
   }
   if (ONLINE) {
     console.log('  Tunnel wird aufgebaut – das dauert ein paar Sekunden …\n');
-    tunnelAdresse = await starteTunnel(PORT);
+    tunnelAdresse = await starteTunnel(PORT, () => {
+      // Der Tunnel ist nach dem Start weggebrochen. Die Adresse taugt ab jetzt
+      // nichts mehr: Sie gehört aus /api/info heraus, damit der QR-Code wieder
+      // auf das Heimnetz zeigt, und der Host gehört gewarnt.
+      if (!tunnelAdresse) return;
+      tunnelAdresse = null;
+      console.error('\n  Der Tunnel ist weg. Gäste von außerhalb kommen nicht mehr durch;');
+      console.error('  im Heimnetz läuft alles weiter. Zum Wiederaufbauen den Server neu starten.\n');
+      hostToast('Der Tunnel ist weg – Gäste von außerhalb kommen nicht mehr durch. '
+        + 'Im Heimnetz läuft alles weiter.', 'error');
+      broadcast();
+    });
     if (tunnelAdresse) {
       console.log(`  Der Tunnel steht:         ${tunnelAdresse}`);
       console.log('  Die Mitspieler brauchen jetzt kein gemeinsames WLAN mehr – der QR-Code');

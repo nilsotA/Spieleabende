@@ -2539,6 +2539,58 @@ test('fehlt cloudflared, liefert starteTunnel null statt zu werfen', async () =>
 });
 
 /*
+ * Stirbt der Tunnel mitten am Abend, sagt es jemand.
+ *
+ * `einmal()` steigt still aus, sobald die Adresse einmal gemeldet war – der
+ * Fall „Tunnel bricht NACH dem Start weg“ lief damit vollständig ins Leere.
+ * `tunnelAdresse` wurde genau einmal gesetzt und von keiner Zeile je wieder
+ * geleert: /api/info gab sie weiter aus, der QR-Code in der Lobby zeigte den
+ * ganzen Abend auf eine tote Adresse, und auf der Leinwand stand weiter
+ * „🌍 Über das Internet“. Nachgefragt wird dort nur, SOLANGE kein Tunnel da
+ * ist – „und danach nie wieder“, wie der Kommentar sagt.
+ *
+ * Die Gäste von auswärts fielen also raus, und nichts im Haus sagte warum.
+ */
+test('stirbt der Tunnel mitten am Abend, hängt der Server die Adresse aus', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const pidDatei = path.join(dir, 'tunnel.pid');
+  const { proc, base, host, klagen } = await starteOnline(6700 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {
+    QUIZDUELL_TUNNEL_PIDFILE: pidDatei,
+  });
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  // Warten, bis der Tunnel wirklich steht.
+  let urls = [];
+  for (let i = 0; i < 100; i++) {
+    urls = (await (await fetch(`${base}/api/info?h=${host}`)).json()).urls;
+    if (urls[0]?.startsWith('https://')) break;
+    await warte(100);
+  }
+  assert.match(urls[0], /trycloudflare/, 'erst muss der Tunnel stehen');
+
+  // Und jetzt fällt cloudflared weg.
+  const pid = Number(await readFile(pidDatei, 'utf8'));
+  process.kill(pid, 'SIGKILL');
+
+  for (let i = 0; i < 100; i++) {
+    urls = (await (await fetch(`${base}/api/info?h=${host}`)).json()).urls;
+    if (!urls.some((u) => u.includes('trycloudflare'))) break;
+    await warte(100);
+  }
+  assert.ok(!urls.some((u) => u.includes('trycloudflare')),
+    'die tote Adresse gehört aus /api/info heraus – sonst zeigt der QR-Code dorthin');
+  assert.ok(urls.length > 0, 'im Heimnetz läuft der Abend weiter');
+
+  for (let i = 0; i < 60 && !/Tunnel ist weg/.test(klagen()); i++) await warte(50);
+  assert.match(klagen(), /Tunnel ist weg/, 'und im Fenster steht, was los ist');
+
+  // Der Strom führt die Lage mit, damit die Leinwand ihre grüne Zeile
+  // zurücknehmen kann – ohne dafür nachfragen zu müssen.
+  const sicht = await (await fetch(`${base}/api/state?clientId=${'tunneltod'}&role=host&h=${host}`)).json();
+  assert.equal(sicht.tunnel, false, 'der Host-Screen erfährt es über den Strom');
+});
+
+/*
  * Cloudflares eigene api-Adresse ist nicht der Tunnel.
  *
  * Das Muster nahm die erste beliebige trycloudflare-Adresse aus der Ausgabe,

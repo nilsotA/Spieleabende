@@ -329,6 +329,15 @@ async function loadUrls() {
  * Host sähe eine https-Adresse im Kästchen und wüsste trotzdem nicht, ob sie
  * schon trägt.
  */
+/*
+ * Ein Tunnel, der weg ist, ist nicht dasselbe wie einer, der noch kommt.
+ *
+ * Ohne diese Unterscheidung stand nach dem Wegbrechen „Der Tunnel wird
+ * aufgebaut … der QR-Code stellt sich gleich um“ auf der Leinwand – gemessen.
+ * Der Host hätte gewartet, und es wäre nichts gekommen.
+ */
+let tunnelWarDa = false;
+
 function zeigeTunnel(da) {
   const box = $('#tunnel-lage');
   if (!box) return;
@@ -345,9 +354,13 @@ function zeigeTunnel(da) {
   if (da && !durchDenTunnel) {
     box.textContent = '🌍 Der Tunnel läuft – dieser QR-Code führt aber ins Heimnetz.';
   } else if (da) box.textContent = '🌍 Über das Internet – eure Gäste brauchen kein gemeinsames WLAN.';
-  else if (tunnelFragen >= TUNNEL_FRAGEN_MAX) {
+  else if (tunnelWarDa) {
+    box.textContent = '🌍 Der Tunnel ist weg – Gäste von außerhalb kommen nicht mehr durch. '
+      + 'Im Heimnetz läuft alles weiter.';
+  } else if (tunnelFragen >= TUNNEL_FRAGEN_MAX) {
     box.textContent = '🌍 Kein Tunnel – heute geht es nur im Heimnetz. Fehlt cloudflared?';
   } else box.textContent = '🌍 Der Tunnel wird aufgebaut … der QR-Code stellt sich gleich um.';
+  if (da) tunnelWarDa = true;
 }
 
 /**
@@ -418,6 +431,22 @@ loadUrls();
 
 function render(prev) {
   if (!state) return;
+  /*
+   * Ein Tunnel kann mitten am Abend sterben.
+   *
+   * Der Screen fragt nur nach, SOLANGE kein Tunnel da ist – „und danach nie
+   * wieder“, wie es unten steht. Bricht cloudflared um halb elf weg, stand
+   * hier den ganzen Abend weiter „🌍 Über das Internet“, und der QR-Code
+   * zeigte auf eine tote Adresse. Der Server führt die Lage jetzt im Strom
+   * mit; das kostet keine einzige zusätzliche Anfrage.
+   */
+  if (state.tunnel === false && tunnelVorhanden) {
+    tunnelVorhanden = false;
+    zeigeTunnel(false);
+    // Einmal nachfragen: Der Server hat die tote Adresse ausgehängt, der
+    // QR-Code soll wieder auf das Heimnetz zeigen.
+    loadUrls();
+  }
   const inLobby = state.phase === 'lobby';
   $('#view-lobby').classList.toggle('active', inLobby);
   $('#view-game').classList.toggle('active', !inLobby);
