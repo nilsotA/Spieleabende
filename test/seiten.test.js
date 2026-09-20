@@ -1464,3 +1464,171 @@ test('der Einsatz steht im Schlüssel der Steuerleiste', () => {
   assert.match(key, /einsatzScharf/,
     'ohne den Schalter im Schlüssel behält der Knopf seine Beschriftung');
 });
+
+/*
+ * Deutsche Anführungszeichen – auch im Programmtext, nicht nur in den Sätzen.
+ *
+ * Für die Fragensätze steht das schon fest (questions.test.js, „Anführungs-
+ * zeichen werden deutsch geschlossen"). Die Sätze, die das Spiel selbst sagt,
+ * kamen dabei nie vor – und dort standen zehn Stellen mit einem „ vorn und
+ * einem geraden " hinten:
+ *
+ *   „Erde & Weltall · 500 Punkte" austauschen?          (Host und Fernbedienung)
+ *   „Blitzrunde" wird durch „Hauptstädte" ersetzt.      (Editor, dreimal)
+ *   Doppelte Punkte – und falsch oder „weiß nicht" …    (Handy)
+ *   Erst werten oder über „auflösen" beenden.           (Serverfehler, als Toast)
+ *   „Spiel beenden" im Host-Menü verwirft ihn.          (Terminal)
+ *   … die linke Schaltfläche, „LTS")                    (Terminal)
+ *
+ * Auf dem Beamer steht so ein Satz in 40 Pixeln, und ein gerades Zeichen neben
+ * einem deutschen fällt dort auf wie ein Tippfehler. Der Fragetext daneben
+ * macht es ja richtig.
+ *
+ * Kommentare bleiben ausdrücklich außen vor: In ihnen ist „…" die Hausschrift,
+ * dreihundertfünfzigmal. Geprüft wird nur, was jemand zu sehen bekommt – also
+ * die Zeichenketten. Deshalb liest der Wächter den Quelltext zeichenweise und
+ * nicht mit einem Muster über die ganze Zeile: `'https://nodejs.org'` sieht für
+ * jedes Kommentar-Muster aus wie ein Zeilenkommentar.
+ */
+function zeichenketten(quelle) {
+  const treffer = [];
+  // Oben auf dem Stapel liegt, worin wir gerade stecken. Eine Einsetzung
+  // `${…}` in einem Template ist wieder gewöhnlicher Code – und darin darf ein
+  // weiteres Template stehen. Ohne Stapel fiele der Wächter genau dort heraus.
+  const stapel = [{ art: 'code', klammern: 0 }];
+  const oben = () => stapel[stapel.length - 1];
+  let i = 0;
+  let zeile = 1;
+  while (i < quelle.length) {
+    const c = quelle[i];
+    const s = oben();
+    if (s.art === 'code') {
+      if (c === '\n') { zeile += 1; i += 1; continue; }
+      if (c === '/' && quelle[i + 1] === '/') {
+        while (i < quelle.length && quelle[i] !== '\n') i += 1;
+        continue;
+      }
+      if (c === '/' && quelle[i + 1] === '*') {
+        i += 2;
+        while (i < quelle.length && !(quelle[i] === '*' && quelle[i + 1] === '/')) {
+          if (quelle[i] === '\n') zeile += 1;
+          i += 1;
+        }
+        i += 2;
+        continue;
+      }
+      if (c === "'" || c === '"' || c === '`') { stapel.push({ art: 'text', ende: c, zeile, text: '' }); i += 1; continue; }
+      if (c === '{') { s.klammern += 1; i += 1; continue; }
+      if (c === '}') {
+        if (s.klammern > 0) s.klammern -= 1;
+        else if (stapel.length > 1) stapel.pop(); // Ende der Einsetzung
+        i += 1;
+        continue;
+      }
+      i += 1;
+      continue;
+    }
+    if (c === '\\') {
+      s.text += quelle.slice(i, i + 2);
+      if (quelle[i + 1] === '\n') zeile += 1;
+      i += 2;
+      continue;
+    }
+    if (c === s.ende) { treffer.push({ zeile: s.zeile, text: s.text }); stapel.pop(); i += 1; continue; }
+    if (s.ende === '`' && c === '$' && quelle[i + 1] === '{') {
+      stapel.push({ art: 'code', klammern: 0 });
+      i += 2;
+      continue;
+    }
+    if (c === '\n') zeile += 1;
+    s.text += c;
+    i += 1;
+  }
+  return treffer;
+}
+
+test('was das Spiel selbst sagt, schließt seine Anführungszeichen deutsch', () => {
+  const WURZEL = path.join(PUBLIC, '..');
+  const dateien = [
+    ...fs.readdirSync(PUBLIC).filter((f) => f.endsWith('.js')).map((f) => path.join('public', f)),
+    ...fs.readdirSync(path.join(WURZEL, 'server')).filter((f) => f.endsWith('.js')).map((f) => path.join('server', f)),
+  ].sort();
+  assert.ok(dateien.length >= 10, 'es sollten alle Seiten- und Serverdateien geprüft werden');
+
+  const gemischt = [];
+  for (const datei of dateien) {
+    for (const { zeile, text } of zeichenketten(fs.readFileSync(path.join(WURZEL, datei), 'utf8'))) {
+      // Jedes „ braucht ein “, bevor ein gerades Zeichen kommt.
+      let auf = false;
+      for (const c of text) {
+        if (c === '„') auf = true;
+        else if (c === '“') auf = false;
+        else if (c === '"' && auf) {
+          gemischt.push(`${datei}:${zeile}  ${text.replace(/\s+/g, ' ').trim().slice(0, 80)}`);
+          break;
+        }
+      }
+    }
+  }
+  assert.deepEqual(gemischt, []);
+});
+
+/*
+ * Die kopierte Zusammenfassung und die Bilanz auf dem Handy zählen dasselbe –
+ * also sollen sie es auch gleich nennen.
+ *
+ * Beide lesen `team.bilanz`, und beide rechnen `falsch − gepasst`, damit ein
+ * „weiß nicht" nicht zweimal auftaucht. Nur hießen die Zahlen verschieden: auf
+ * dem Handy „Daneben" und „Geklaut", in der Zusammenfassung „falsch" und
+ * „gebuzzert". Wer abends seine Bilanz gelesen hatte und am nächsten Tag den
+ * kopierten Text im Gruppenchat, verglich zwei Aufstellungen, die dieselben
+ * vier Zahlen anders nannten – und „gebuzzert" ist obendrein falsch: `geklaut`
+ * zählt nur die Buzzer, die getroffen haben.
+ *
+ * `bilanz.daneben` ist die Falle dabei: Das ist der danebengegangene Buzzer
+ * („Verbuzzert"), nicht die daneben gegangene Antwort.
+ */
+test('Zusammenfassung und Handy-Bilanz nennen dieselben Zahlen gleich', () => {
+  const host = ohneKommentare(lies('host.js'));
+  const handy = ohneKommentare(lies('player.js'));
+
+  const block = /zeilen\.push\('', 'Bilanz'\);[\s\S]*?zeilen\.push\(`\$\{t\.wappen\}/.exec(host)?.[0] || '';
+  assert.ok(block, 'der Bilanzblock der Zusammenfassung sollte auffindbar bleiben');
+  for (const wort of ['richtig', 'daneben', 'weiß nicht', 'geklaut', 'verbuzzert']) {
+    assert.ok(block.includes(`} ${wort}\``) || block.includes(`}× ${wort}\``),
+      `die Zusammenfassung sollte die Zahl „${wort}“ nennen`);
+  }
+  assert.ok(!/\bfalsch`/.test(block) && !/× gebuzzert`/.test(block),
+    'die alten Wörter „falsch" und „gebuzzert" gehören nicht mehr in die Zusammenfassung');
+
+  // Und dieselbe Differenz auf beiden Seiten – sonst liefe die eine der
+  // anderen davon, sobald jemand die Rechnung an einer Stelle ändert.
+  assert.match(block, /Math\.max\(0, \(b\.falsch \|\| 0\) - gepasst\)/,
+    'die Zusammenfassung rechnet „daneben" als falsch − gepasst');
+  assert.match(handy, /\['Daneben', Math\.max\(0, zahl\(b\.falsch\) - zahl\(b\.gepasst\)\)\]/,
+    'das Handy rechnet dieselbe Differenz');
+  assert.match(block, /const verbuzzert = b\.daneben \|\| 0;/,
+    '`bilanz.daneben` ist der verbuzzerte Versuch – unter diesem Namen gelesen, nicht als „daneben"');
+});
+
+/*
+ * Zwei Netze, die sich nicht widersprechen dürfen.
+ *
+ * Nach acht Sekunden ohne Lebenszeichen legt die Startwache den Vorhang „Die
+ * Seite konnte nicht starten." über die Seite. Vier Sekunden später prüfte der
+ * zweite Zeitgeber nur `quizduellSpielt` – und schrieb unter den Vorhang einen
+ * Streifen, der mit „Die Seite steht" anfängt. Zwei Diagnosen auf einem Handy,
+ * das jemand dem Gastgeber hinhält, und beide können nicht stimmen.
+ */
+test('der Streifen „Die Seite steht" erscheint nur, wenn sie das tut', () => {
+  const wache = fs.readFileSync(path.join(PUBLIC, 'start-wache.js'), 'utf8');
+  // `lebt()` bringt eigene Klammern mit – deshalb sparsam bis zum `) return;`.
+  const zweiter = /setTimeout\(function \(\) \{\s*if \([\s\S]*?\) return;\s*window\.quizduellPanne\(/.exec(wache)?.[0] || '';
+  assert.ok(zweiter, 'der zweite Zeitgeber sollte auffindbar bleiben');
+  assert.match(zweiter, /gemeldet \|\|/,
+    'hat die Wache die Seite schon für tot erklärt, darf der Streifen nicht mehr kommen');
+  assert.match(zweiter, /!lebt\(\)/,
+    'ohne Lebenszeichen steht die Seite nicht – dann ist der Satz des Streifens falsch');
+  assert.match(zweiter, /window\.quizduellSpielt === true/,
+    'und mit Spielstand braucht es ihn ohnehin nicht');
+});

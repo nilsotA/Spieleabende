@@ -803,7 +803,7 @@ function hole(eintrag) {
   const ziel = set.rounds[baukastenZiel.ri]?.categories[baukastenZiel.ci];
   if (!ziel) return;
   const belegt = ziel.name.trim() || ziel.questions.some((q) => q.text.trim() || q.answer.trim());
-  if (belegt && !confirm(`„${ziel.name || 'Diese Kategorie'}" wird durch „${eintrag.name}" ersetzt. Weiter?`)) {
+  if (belegt && !confirm(`„${ziel.name || 'Diese Kategorie'}“ wird durch „${eintrag.name}“ ersetzt. Weiter?`)) {
     return;
   }
   // Tiefe Kopie: Sonst hinge die eigene Kategorie an denselben Fragen-Objekten
@@ -823,14 +823,14 @@ function hole(eintrag) {
   render();
   updateFortschritt();
   alleLaengenMarkieren();
-  toast(`„${ziel.name}" geholt.`);
+  toast(`„${ziel.name}“ geholt.`);
 }
 
 async function oeffneBaukasten(ri, ci) {
   baukastenZiel = { ri, ci };
   const ziel = set.rounds[ri]?.categories[ci];
   setzeText($('#bk-ziel'),
-    `Kommt nach Runde ${ri + 1}, Platz ${ci + 1}${ziel?.name ? ` – ersetzt „${ziel.name}"` : ''}.`);
+    `Kommt nach Runde ${ri + 1}, Platz ${ci + 1}${ziel?.name ? ` – ersetzt „${ziel.name}“` : ''}.`);
   $('#bk-suche').value = '';
   $('#bk-liste').innerHTML = '';
   setzeText($('#bk-stand'), 'Lade Fragensätze …');

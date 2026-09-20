@@ -99,7 +99,7 @@ $('#r-pause').addEventListener('click', () => act('pause', { an: !state?.pause }
 $('#r-discard').addEventListener('click', () => {
   const q = state?.current;
   if (!q) return;
-  if (!confirm(`„${q.category} · ${q.value} Punkte" austauschen?\n\n`
+  if (!confirm(`„${q.category} · ${q.value} Punkte“ austauschen?\n\n`
     + 'Die Frage zählt nicht, alles was an ihr hing wird zurückgerechnet, und'
     + ' auf dem Feld liegt danach eine andere Frage.')) return;
   act('discard');

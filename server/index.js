@@ -1708,7 +1708,7 @@ server.listen(PORT, async () => {
   if (wiederhergestellt) {
     const teams = state.teams.map((t) => `${t.name} ${t.score}`).join(' · ');
     console.log(`  Letzter Spielstand wiederhergestellt: ${teams || 'Lobby'}`);
-    console.log('  „Spiel beenden" im Host-Menü verwirft ihn.\n');
+    console.log('  „Spiel beenden“ im Host-Menü verwirft ihn.\n');
   }
   console.log(`  Host-Screen (Beamer/TV):  ${hostAdresse()}`);
   // Einmal fragen, zweimal verwenden: Die Liste steht unten noch einmal für die

@@ -45,8 +45,8 @@ export function nodeZuAlt(version) {
   Ein aktuelles Node holen:
 
     macOS    brew install node
-    Windows  https://nodejs.org  (die linke Schaltfläche, „LTS")
-    Linux    https://nodejs.org  – „sudo apt install nodejs" bringt je nach
+    Windows  https://nodejs.org  (die linke Schaltfläche, „LTS“)
+    Linux    https://nodejs.org  – „sudo apt install nodejs“ bringt je nach
              System noch eine ältere Fassung als gebraucht wird.
 
   Danach dieses Fenster schließen und neu starten.

@@ -110,9 +110,16 @@
    * ein Spielstand gezeichnet wurde. Fehlt es nach zwölf Sekunden, sagt die
    * Seite das – als Streifen, nicht als Vorhang: Das Spiel könnte im selben
    * Moment doch noch losgehen.
+   *
+   * Der Streifen sagt „Die Seite steht" – also darf er nur erscheinen, wenn
+   * sie das auch tut. Geprüft wurde bisher allein das zweite Lebenszeichen:
+   * Auf einer Seite, die gar nicht erst hochkam, stand nach acht Sekunden der
+   * Vorhang „Die Seite konnte nicht starten." und vier Sekunden später darunter
+   * ein Streifen, der das Gegenteil behauptete. Wem man das Handy hinhält, der
+   * liest dann zwei Diagnosen und glaubt keiner.
    */
   setTimeout(function () {
-    if (window.quizduellSpielt === true) return;
+    if (gemeldet || !lebt() || window.quizduellSpielt === true) return;
     window.quizduellPanne(
       'Die Seite steht, aber es ist kein Spielstand angekommen. '
       + 'Meist hilft Neuladen; sonst den QR-Code noch einmal scannen.',

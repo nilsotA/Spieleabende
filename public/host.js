@@ -2727,14 +2727,26 @@ function zusammenfassung() {
     // verrechneFalsch), für diese Zeile nicht: Danebenstehend las sich „1
     // richtig, 3 falsch, 2× weiß nicht" wie sechs Fragen, gespielt waren vier.
     // Das Handy rechnet dieselbe Differenz schon lange (player.js, „Daneben").
+    //
+    // Und es nennt sie auch so. Dieselbe Zahl hieß hier „falsch" und auf dem
+    // Handy „Daneben", `b.geklaut` hier „gebuzzert" und dort „Geklaut" – wer
+    // seine Bilanz auf dem Handy gelesen hatte und tags darauf die kopierte
+    // Zusammenfassung sah, verglich zwei Aufstellungen mit verschiedenen
+    // Wörtern für dieselben vier Zahlen. Jetzt stehen überall die Wörter vom
+    // Handy, und „Verbuzzert" fehlt hier nicht mehr ganz.
+    //
+    // Achtung beim Lesen: `b.daneben` ist der danebengegangene Buzzer, nicht
+    // das `daneben` von hier – deshalb steht es unter seinem Anzeigenamen.
     const gepasst = b.gepasst || 0;
     const daneben = Math.max(0, (b.falsch || 0) - gepasst);
+    const verbuzzert = b.daneben || 0;
     const teile = [
       `${b.richtig || 0} richtig`,
-      `${daneben} falsch`,
+      `${daneben} daneben`,
       `${gepasst}× weiß nicht`,
     ];
-    if (b.geklaut) teile.push(`${b.geklaut}× gebuzzert`);
+    if (b.geklaut) teile.push(`${b.geklaut}× geklaut`);
+    if (verbuzzert) teile.push(`${verbuzzert}× verbuzzert`);
     if (t.serieBest >= 3) teile.push(`beste Serie ${t.serieBest}`);
     zeilen.push(`${t.wappen} ${t.name}: ${teile.join(', ')}`);
   }
@@ -2798,7 +2810,7 @@ $('#btn-pause').addEventListener('click', () => {
 $('#btn-discard').addEventListener('click', () => {
   const q = state.current;
   if (!q) return;
-  if (!confirm(`„${q.category} · ${q.value} Punkte" austauschen?\n\n`
+  if (!confirm(`„${q.category} · ${q.value} Punkte“ austauschen?\n\n`
     + 'Die Frage zählt nicht, alles was an ihr hing wird zurückgerechnet, und'
     + ' auf dem Feld liegt danach eine andere Frage.')) return;
   act('discard');

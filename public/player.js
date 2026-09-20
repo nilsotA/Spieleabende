@@ -697,7 +697,7 @@ function renderEinsatz() {
       onclick: () => { einsatzScharf = !einsatzScharf; renderEinsatz(); renderPicker(); },
     }, einsatzScharf ? '✦ Einsatz steht – jetzt Feld wählen' : '✦ Einsatz setzen'),
     el('div', { class: 'muted small' }, einsatzScharf
-      ? 'Doppelte Punkte – und falsch oder „weiß nicht" kostet genauso viel.'
+      ? 'Doppelte Punkte – und falsch oder „weiß nicht“ kostet genauso viel.'
       : 'Einmal pro Runde: doppelte Punkte – ein Fehlgriff kostet sie genauso.'),
   );
 }

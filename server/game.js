@@ -810,7 +810,7 @@ export function judge(state, correct) {
 export function revealAnswer(state) {
   const q = requireQuestion(state);
   if (q.step !== 'result') {
-    throw new GameError('Erst werten oder über „auflösen" beenden.');
+    throw new GameError('Erst werten oder über „auflösen“ beenden.');
   }
   q.revealed = true;
   return state;
