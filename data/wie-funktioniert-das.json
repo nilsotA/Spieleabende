@@ -10,7 +10,7 @@
             {
               "text": "Warum sprengt eine volle Wasserflasche im Gefrierfach ihren Verschluss?",
               "answer": "Weil Eis mehr Platz braucht als Wasser",
-              "note": "Wasser ist bei 4 Grad am dichtesten. Deshalb frieren Seen von der Oberfläche her zu und bleiben am Grund flüssig."
+              "note": "Wasser ist bei 4 Grad am dichtesten – deshalb frieren Seen von oben zu."
             },
             {
               "text": "Welches Heizgerät holt Energie aus der Außenluft ins Haus und braucht dafür nur Strom?",
@@ -83,9 +83,9 @@
           "name": "Kleine Dinge, große Wirkung",
           "questions": [
             {
-              "text": "Welcher Verschluss an Jacken läuft mit einem Schieber über zwei Reihen ineinandergreifender Zähne?",
+              "text": "Welcher Verschluss läuft mit einem Schieber über zwei Reihen ineinandergreifender Zähne?",
               "answer": "Der Reißverschluss",
-              "note": "Zum Erfolg wurde er erst 1923 an Gummistiefeln. Der englische Name „Zipper“ stammt vom Geräusch beim Zuziehen."
+              "note": "Durchgesetzt hat er sich erst 1923 an Gummistiefeln. „Zipper“ kommt vom Geräusch."
             },
             {
               "text": "Auf welche Erfindung kam ein Schweizer beim Blick auf die Widerhaken im Fell seines Hundes?",
@@ -93,9 +93,9 @@
               "note": "Georges de Mestral meldete ihn 1951 an. Der Markenname Velcro steckt die Wörter velours und crochet zusammen."
             },
             {
-              "text": "Welches Ding mit Feder und Bügel hält eine Stoffwindel zusammen, ohne dass die Spitze frei liegt?",
+              "text": "Welches Ding mit Feder und Bügel hält eine Stoffwindel, ohne dass die Spitze frei liegt?",
               "answer": "Die Sicherheitsnadel",
-              "note": "Walter Hunt kam 1849 beim Herumbiegen eines Drahtes darauf und verkaufte das Patent sofort für 400 Dollar."
+              "note": "Walter Hunt kam 1849 beim Biegen eines Drahtes darauf und verkaufte das Patent sofort."
             },
             {
               "text": "Welcher Ungar meldete 1938 den Kugelschreiber an? In England heißt das Ding heute nach ihm.",
@@ -144,8 +144,8 @@
             },
             {
               "text": "Welches Bauteil im Verteilerkasten schaltet ab, wenn auf einer Leitung zu viel Strom fließt?",
-              "answer": "Die Sicherung (Leitungsschutzschalter)",
-              "note": "Früher schmolz dafür ein dünner Draht in einem Schraubstöpsel durch. Heute klickt ein Schalter heraus, den man wieder eindrückt."
+              "answer": "Die Sicherung",
+              "note": "Früher schmolz ein Draht im Schraubstöpsel durch; heute klickt ein Schalter heraus."
             },
             {
               "text": "Wofür sind die Metallbügel oben und unten am Schuko-Stecker da?",
@@ -202,9 +202,9 @@
               "note": "Der „Reitwagen“ hatte Holzräder, Stützräder und lief mit einem Riemen. Schnell war er nicht."
             },
             {
-              "text": "Wer ließ 1903 den Scheibenwischer patentieren, nach einer Fahrt in einer Straßenbahn im Schnee?",
+              "text": "Wer ließ 1903 den Scheibenwischer patentieren, nach einer Fahrt in der Straßenbahn?",
               "answer": "Mary Anderson",
-              "note": "Ihr Hebel saß im Innenraum und musste von Hand bewegt werden. Serienmäßig kam so etwas erst Jahre später."
+              "note": "Ihr Hebel saß im Innenraum und wurde von Hand bewegt. Serienmäßig kam das erst später."
             }
           ]
         },
@@ -222,9 +222,9 @@
               "note": "Vier tragende Seile vierteln die nötige Kraft. Dafür muss man das Seil viermal so weit durchziehen."
             },
             {
-              "text": "Wie nennt man bei einer Fahrradschaltung das Verhältnis der Zähnezahlen vorn zu hinten?",
+              "text": "Wie nennt man bei einer Fahrradschaltung das Verhältnis der Zähnezahlen?",
               "answer": "Die Übersetzung",
-              "note": "Großes Blatt vorn, kleines Ritzel hinten: Eine Kurbelumdrehung treibt das Hinterrad dann mehrfach herum."
+              "note": "Großes Blatt vorn, kleines Ritzel hinten: Eine Kurbelumdrehung treibt das Rad mehrfach."
             },
             {
               "text": "Welche einfache Maschine steckt in einer Schraube, wenn man ihr Gewinde gedanklich abwickelt?",
@@ -249,7 +249,7 @@
             {
               "text": "Wie heißen die waschaktiven Stoffe in Seife und Spülmittel, die Fett und Wasser verbinden?",
               "answer": "Tenside",
-              "note": "Ein Ende ihrer Moleküle mag Fett, das andere Wasser. Sie senken auch die Oberflächenspannung – deshalb gelingen damit Blasen."
+              "note": "Ein Ende ihrer Moleküle mag Fett, das andere Wasser. Deshalb gelingen damit auch Blasen."
             },
             {
               "text": "Welcher Stoff im Ei und in der Luft lässt Silberbesteck mit der Zeit schwarz anlaufen?",
@@ -302,9 +302,9 @@
               "note": "Ein trockener Teller bleibt deshalb kühl. Warm wird er nur von der Speise, die darauf steht."
             },
             {
-              "text": "Welcher Deutsche wies in den 1880er Jahren als Erster elektromagnetische Wellen im Labor nach?",
+              "text": "Welcher Deutsche wies in den 1880er Jahren erstmals elektromagnetische Wellen nach?",
               "answer": "Heinrich Hertz",
-              "note": "Seine Versuche zogen sich von 1886 bis 1888. Er hielt sie für nutzlos – wenig später baute Marconi daraus die Funktechnik."
+              "note": "Seine Versuche liefen 1886 bis 1888. Er hielt sie für nutzlos – Marconi baute den Funk daraus."
             }
           ]
         }

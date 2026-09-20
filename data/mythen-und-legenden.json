@@ -74,8 +74,8 @@
             },
             {
               "text": "Wie heißt das ägyptische Zeichen für Leben, eine Schlaufe über einem Kreuzbalken?",
-              "answer": "Das Anch (auch Ankh oder Henkelkreuz)",
-              "note": "Auf Wandbildern halten Götter es den Königen an die Nase – so gaben sie ihnen der Vorstellung nach den Lebensatem."
+              "answer": "Das Anch (auch Henkelkreuz)",
+              "note": "Auf Wandbildern halten Götter es den Königen an die Nase – als Lebensatem."
             }
           ]
         },
@@ -123,9 +123,9 @@
               "note": "Auch der Planet mit den Ringen trägt seinen Namen. Sein großes Fest fiel in die dunkelsten Tage des Dezembers."
             },
             {
-              "text": "Welcher Göttin war bei den Römern der Tag geweiht, der im Französischen vendredi heißt?",
+              "text": "Welcher Göttin war bei den Römern der Tag geweiht, der französisch vendredi heißt?",
               "answer": "Venus",
-              "note": "Die Römer nannten ihn dies Veneris. Die Germanen setzten ihre eigene Göttin Frija an diese Stelle – daher unser Freitag."
+              "note": "Die Römer nannten ihn dies Veneris; die Germanen setzten ihre Göttin Frija an die Stelle."
             }
           ]
         },
@@ -162,9 +162,9 @@
           "name": "Die Aufgaben des Herkules",
           "questions": [
             {
-              "text": "Welches Tier musste Herkules als erste Aufgabe bezwingen? Sein Fell trug er danach als Umhang.",
+              "text": "Welches Tier musste Herkules als erste Aufgabe bezwingen? Sein Fell trug er danach.",
               "answer": "Einen Löwen",
-              "note": "Er kam aus Nemea, und keine Waffe drang durch sein Fell – abziehen ließ es sich nur mit seinen eigenen Krallen."
+              "note": "Das Untier kam aus Nemea: Keine Waffe drang durch sein Fell, nur seine eigenen Krallen."
             },
             {
               "text": "Welchen Stall musste Herkules an einem einzigen Tag von jahrelangem Mist befreien?",
@@ -297,9 +297,9 @@
               "note": "Der islamische Kalender richtet sich nach dem Mond, deshalb wandert er durch das Jahr."
             },
             {
-              "text": "Der Name Halloween ist aus dem Englischen zusammengezogen. Welcher Feiertag steckt darin?",
+              "text": "Der Name Halloween ist zusammengezogen – welcher Feiertag steckt darin?",
               "answer": "Allerheiligen",
-              "note": "Im Englischen heißt der Abend davor „All Hallows’ Eve“. Auswanderer aus Irland nahmen den Brauch mit nach Amerika."
+              "note": "Englisch „All Hallows’ Eve“, der Abend davor. Auswanderer aus Irland brachten den Brauch mit."
             },
             {
               "text": "In welcher Stadt in der heutigen Türkei war Nikolaus Bischof?",

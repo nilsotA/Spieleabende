@@ -13,9 +13,9 @@
               "note": "Vier Fassungen stammen von seiner Hand, gemalt und gezeichnet. Die bekannteste hängt in Oslo."
             },
             {
-              "text": "Welches Wandbild Leonardo da Vincis zeigt Jesus und seine zwölf Jünger an einer langen Tafel?",
+              "text": "Welches Wandbild Leonardo da Vincis zeigt Jesus und seine zwölf Jünger an einer Tafel?",
               "answer": "Das (letzte) Abendmahl",
-              "note": "Es befindet sich in einem Kloster in Mailand. Leonardo probierte eine neue Technik aus – das Bild blättert seit Jahrhunderten ab."
+              "note": "Es steht in einem Kloster in Mailand und blättert ab – Leonardo probierte eine neue Technik."
             },
             {
               "text": "Welches Gemälde von Johannes Vermeer ist nach dem Schmuckstück am Ohr einer jungen Frau benannt?",
@@ -174,7 +174,7 @@
             {
               "text": "Welcher Stil um 1900 schmückte Häuser und Plakate mit geschwungenen Pflanzenranken?",
               "answer": "Der Jugendstil (Art nouveau)",
-              "note": "Der deutsche Name stammt von der Münchner Zeitschrift „Jugend“. In Österreich hieß der Stil Sezessionsstil."
+              "note": "Der Name stammt von der Münchner Zeitschrift „Jugend“; in Österreich hieß er Sezessionsstil."
             },
             {
               "text": "Wie heißt die Maltechnik von Georges Seurat, die das Bild aus lauter kleinen Farbtupfen aufbaut?",
@@ -187,9 +187,9 @@
           "name": "Museen der Welt",
           "questions": [
             {
-              "text": "Welches Pariser Museum war früher ein Königspalast und hat heute eine Glaspyramide als Eingang?",
+              "text": "Welches Pariser Museum war früher ein Königspalast und hat heute eine Glaspyramide?",
               "answer": "Der Louvre",
-              "note": "Die Glaspyramide des Architekten I. M. Pei öffnete 1989 für das Publikum und war anfangs heftig umstritten."
+              "note": "Die Pyramide von I. M. Pei öffnete 1989 und war anfangs heftig umstritten."
             },
             {
               "text": "In welcher Hauptstadt steht das Museo del Prado mit den Werken von Velázquez und Goya?",
