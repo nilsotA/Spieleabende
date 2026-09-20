@@ -161,14 +161,22 @@
           </select>
         </div>
         <div>
-          <!-- Der Abzug steht ausdrücklich im Text: Der Einsatz ist die einzige
-               Regel, die die Abzugseinstellung darüber überstimmt. Wer ihn
-               einschaltet, soll das hier lesen und nicht erst am Tisch merken. -->
-          <label for="set-einsatz">Einsatz (doppelte Punkte, doppeltes Risiko)</label>
-          <select id="set-einsatz">
+          <!-- Der Abzug MUSS hier stehen: Der Einsatz ist die einzige Regel, die
+               die Abzugseinstellung darüber überstimmt (server/game.js). Hier
+               stand „doppeltes Risiko“ – und das stimmt nur bei „Volle Punkte“.
+               Gemessen an einem 500er-Feld in Runde 1: bei „Halbe Punkte“
+               wächst der Verlust von 250 auf 1000, also auf das Vierfache, und
+               bei „Kein Abzug“ von 0 auf 1000. Wer den Einsatz einschaltet,
+               soll das hier lesen und nicht erst am Tisch merken. -->
+          <label for="set-einsatz">Einsatz (doppelte Punkte)</label>
+          <select id="set-einsatz" aria-describedby="einsatz-hinweis">
             <option value="aus">Aus</option>
             <option value="runde">Einer je Team und Runde</option>
           </select>
+          <p id="einsatz-hinweis" class="muted small feld-hinweis">
+            Falsch oder „weiß nicht“ kostet dann den vollen doppelten Wert –
+            auch wenn oben „Kein Abzug“ steht.
+          </p>
         </div>
         <div>
           <label for="set-buzzuhr">Uhr beim freien Buzzer</label>

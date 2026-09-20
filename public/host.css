@@ -76,7 +76,7 @@ body.host::before {
 /* Auch die Lobby steht auf der Leinwand: Hier liest der ganze Raum mit, wie er
    mitspielen kann. Feste Pixelgrößen sind dafür durchweg zu klein. */
 h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transform: uppercase; color: #9db4d6; margin: 0 0 0.5rem; }
-.small { font-size: clamp(0.85rem, 0.92vw, 1.1rem); }
+/* .small steht in style.css – Handy und Fernbedienung brauchen sie auch. */
 
 /* ------------------------------------------------------------------ Lobby */
 
@@ -153,6 +153,9 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 }
 .settings > div > label { margin: 0; }
 .settings > div > select { min-width: 0; }
+/* Ein Hinweis unter einer Einstellung gehört über die ganze Breite, nicht in
+   die Spalte des Labels – sonst steht er in halber Breite neben dem Nichts. */
+.settings > div > .feld-hinweis { grid-column: 1 / -1; margin: 0.15rem 0 0; }
 /* Bis 1339 px stehen drei Karten nebeneinander, von denen jede rund 400 Pixel
    breit ist – daneben blieben dem Auswahlfeld 132, und „Wer trifft, bleibt
    dran" braucht 160. Erst darüber lohnt die Zeile. */

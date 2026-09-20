@@ -173,6 +173,17 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
 }
 
 .muted { color: var(--muted); }
+/*
+ * Leiser Hinweis statt Ansage.
+ *
+ * Stand nur in host.css – player.html und remote.html laden die nie, benutzen
+ * die Klasse aber (drei Stellen im Markup, dazu mehrere in player.js). Dort
+ * war sie seit jeher wirkungslos: Die Erklärzeile unter „✦ Einsatz setzen“
+ * stand in derselben Größe wie die Frage darüber und las sich als Ansage
+ * statt als Fußnote. Der vw-Anteil trägt den Beamer, die untere Schranke das
+ * Handy.
+ */
+.small { font-size: clamp(0.85rem, 0.92vw, 1.1rem); }
 .row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
 .grow { flex: 1; }
 
