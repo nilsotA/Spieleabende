@@ -308,6 +308,61 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Am Endstand wird in einer bestimmten Reihenfolge nachgegeben.
+ *
+ * host.css gibt die Regel selbst vor – „vom Entbehrlichsten her“, und die
+ * Schrift der Rangliste zuletzt, weil sie „das Einzige ist, was aus vier
+ * Metern wirklich zählt“. `voll` und `sehr-voll` ändern nur Abstände,
+ * `extrem-voll` als Einziges die Schriftgröße. Also: beide Abstandsstufen,
+ * dann das Wegnehmen von Auszeichnungen, dann erst die Schrift.
+ *
+ * `sehr-voll` stand trotzdem NACH dem Wegnehmen. Gemessen im Browser, sechs
+ * Teams, ganzer Abend durchgespielt:
+ *
+ *              vorher     danach
+ *   1280×720    0 von 4    2 von 4
+ *   1366×768    1 von 4    4 von 4
+ *   1280×800    2 von 4    4 von 4
+ *   1024×768    3 von 4    4 von 4
+ *
+ * Auf dem gewöhnlichsten Beamer stand am Ende eines ganzen Abends also keine
+ * einzige Auszeichnung – nur die Zeile, dass es sechs davon gibt. Das ist der
+ * Teil, den man am nächsten Tag noch erzählt.
+ *
+ * Geprüft wird die Reihenfolge in der Quelle: Was sie bewirkt, sieht man nur
+ * in einem echten Browser mit einem zu Ende gespielten Abend – hier steht
+ * dafür fest, dass niemand sie versehentlich zurückdreht.
+ */
+test('der Endstand gibt in der richtigen Reihenfolge nach', () => {
+  const js = ohneKommentare(lies('host.js'));
+  const rumpf = js.slice(js.indexOf('function passeStandEin'));
+  assert.ok(rumpf.startsWith('function passeStandEin'), 'passeStandEin sollte auffindbar bleiben');
+
+  const sehrVoll = rumpf.indexOf("classList.add('sehr-voll')");
+  const wegnehmen = rumpf.indexOf('zeilen[i].hidden = true');
+  const extremVoll = rumpf.indexOf("classList.add('extrem-voll')");
+  for (const [was, wo] of [['sehr-voll', sehrVoll], ['das Wegnehmen', wegnehmen], ['extrem-voll', extremVoll]]) {
+    assert.ok(wo >= 0, `${was} sollte es in passeStandEin weiter geben`);
+  }
+
+  assert.ok(sehrVoll < wegnehmen,
+    'enger stellen kostet nur Luft – das gehört vor das Wegnehmen der Auszeichnungen');
+  assert.ok(wegnehmen < extremVoll,
+    'die Schrift der Rangliste gibt zuletzt nach – sie zählt aus vier Metern als Einzige');
+
+  // Und die Begründung dafür hängt daran, dass `sehr-voll` wirklich nur
+  // Abstände ändert. Käme dort eine Schriftgröße hinzu, wäre die Reihenfolge
+  // falsch herum – ohne dass es jemandem auffällt.
+  const css = fs.readFileSync(path.join(PUBLIC, 'host.css'), 'utf8');
+  const stufe = css.split('\n').filter((z) => z.includes('.scores-panel.sehr-voll'));
+  assert.ok(stufe.length, 'die Stufe sehr-voll sollte es weiter geben');
+  for (const zeile of stufe) {
+    assert.doesNotMatch(zeile, /font-size/,
+      'sehr-voll darf nur Abstände ändern – sonst gehört es nicht vor das Wegnehmen');
+  }
+});
+
+/*
  * Die Herkunft einer Ersatzfrage steht auf allen drei Schirmen.
  *
  * `viewFor` schickt `ersatzAus` ausdrücklich an alle mit – der Kommentar dort

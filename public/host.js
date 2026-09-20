@@ -2059,6 +2059,28 @@ function passeStandEin() {
     if (passt()) return;
 
     panel.classList.add('voll');
+    /*
+     * Reihenfolge: erst Abstände, dann Auszeichnungen, ganz zuletzt Schrift.
+     *
+     * Der Entwurf in host.css gibt die Regel selbst vor – „vom Entbehrlichsten
+     * her“, und die Schrift der Rangliste zuletzt, weil sie „das Einzige ist,
+     * was aus vier Metern wirklich zählt“. `sehr-voll` stand hier trotzdem
+     * NACH dem Wegnehmen, obwohl es wie `voll` nur Abstände ändert und keine
+     * einzige Schriftgröße. Gemessen, sechs Teams, Endstand:
+     *
+     *            vorher          jetzt
+     *   1280×720   0 von 4        2 von 4
+     *   1366×768   1 von 4        4 von 4
+     *   1280×800   2 von 4        4 von 4
+     *   1024×768   3 von 4        4 von 4
+     *   1920×1080  4 von 4        4 von 4
+     *
+     * Auf dem gewöhnlichsten Beamer stand am Ende eines ganzen Abends also
+     * keine einzige Auszeichnung – nur die Zeile, dass es sechs davon gibt.
+     * Und `extrem-voll` wird in keinem dieser Fälle mehr gebraucht: Die
+     * Rangliste und „SIEG FÜR …!“ bleiben in voller Größe.
+     */
+    if (!passt()) panel.classList.add('sehr-voll');
     // Weggenommene Auszeichnungen bekommen eine Zeile, die sagt, wo sie
     // geblieben sind. Ohne die stand am Ende eines Abends auf einem 1024er
     // Schirm gar keine Auszeichnung mehr – und niemand konnte wissen, dass es
@@ -2068,10 +2090,7 @@ function passeStandEin() {
       zeilen[i].hidden = true;
       zeigeRest();
     }
-    // Zuletzt noch zweimal nachgeben – erst enger stellen, dann die Schrift der
-    // Rangliste. Getrennt, weil eine einzige große Stufe bei sechs Teams ein
-    // Drittel des Kastens leer ließ und die Schrift ohne Not schrumpfte.
-    if (!passt()) panel.classList.add('sehr-voll');
+    // Und wenn auch das nicht reicht, gibt zuletzt die Schrift nach.
     if (!passt()) panel.classList.add('extrem-voll');
   });
 }

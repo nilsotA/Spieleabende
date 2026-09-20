@@ -1282,7 +1282,14 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 
    Deshalb wie oben: vom Entbehrlichsten her. Erst nur enger stellen, und erst
    wenn auch das nicht reicht, gibt die Schrift der Rangliste nach. Sie ist das
-   Einzige, was aus vier Metern wirklich zählt. */
+   Einzige, was aus vier Metern wirklich zählt.
+
+   Wichtig dabei, welche Stufe was kostet: `voll` und `sehr-voll` ändern nur
+   Abstände, `extrem-voll` als Einziges die Schriftgröße. Danach richtet sich
+   die Reihenfolge in passeStandEin(): beide Abstandsstufen zuerst, dann erst
+   das Wegnehmen von Auszeichnungen, die Schrift zuletzt. Solange `sehr-voll`
+   erst nach dem Wegnehmen kam, stand auf einem 1280×720-Beamer bei sechs
+   Teams am Ende eines ganzen Abends keine einzige Auszeichnung mehr. */
 .scores-panel.sehr-voll .score-list { gap: 0.15rem; margin-top: 0.25rem; }
 .scores-panel.sehr-voll .score-list li { padding: 0.15rem 0.9rem; }
 .scores-panel.sehr-voll .score-winner { margin-bottom: 0.2rem; }
