@@ -363,7 +363,7 @@ export async function mixSet() {
     // erst wenn die ausgehen, wird nachgelegt.
     // Jeder Kategoriename tritt genau einmal an, egal in wie vielen Sätzen es
     // ihn gibt. Vorher zog jedes Vorkommen mit: „Was ist die Frage?" steht in
-    // acht der vierzehn Sätze und hatte damit achtmal so viele Lose wie eine
+    // acht der damals vierzehn Sätze und hatte damit achtmal so viele Lose wie eine
     // Kategorie, die es nur einmal gibt. Über 4000 gewürfelte Bretter gemessen
     // stand sie auf 45,4 Prozent aller Boards, die seltenste Kategorie auf
     // 6,4 – Faktor 7,1. Für ein Brett, dessen ganzer Zweck „kein Abend ist wie

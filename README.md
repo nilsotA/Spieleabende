@@ -692,9 +692,11 @@ bei jedem Start neu gewürfelt. So ist kein Abend wie der andere. Gezogen wird r
 über die Sätze: Je Runde kommt höchstens eine Kategorie aus derselben Quelle, damit
 sich der Mix auch nach Mischung anfühlt und nicht nach einem Satz mit Beilage. Und
 jeder Kategoriename tritt genau einmal an, egal in wie vielen Sätzen es ihn gibt –
-sonst hätte „Was ist die Frage?“, das in acht der vierzehn Sätze steht, achtmal so
-viele Lose wie eine einmalige Kategorie. Gemessen über 4000 gewürfelte Bretter stand
-sie damit auf 45 Prozent aller Boards; jetzt sind es 13.
+sonst hätte „Was ist die Frage?“, das es in etwa der Hälfte aller Sätze gibt,
+entsprechend viele Lose mehr als eine Kategorie, die nur einmal vorkommt. Gemessen
+über 4000 gewürfelte Bretter stand sie damit auf 45 Prozent aller Boards; jetzt
+sind es 13. Und zwei Kategorien desselben Themas – „Internet“ neben „Internet &
+Trends“ – landen nicht mehr zusammen auf einem Brett; das waren vorher 7 Prozent.
 
 Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
 `Welcher Film?\n🦁 👑` sind die Symbole ja die eigentliche Frage.
