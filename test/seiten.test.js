@@ -308,6 +308,46 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Der Editor warnt bei derselben Länge, die der Testlauf verlangt.
+ *
+ * Es gab zwei Zahlen für dieselbe Sache. Der Testlauf über die mitgelieferten
+ * Sätze lässt 105 Zeichen Fragetext zu; der Editor sagte bis 180 Zeichen
+ * „alles gut“. Die 180 waren an der ZUGEKLAPPTEN Frage gemessen – und das ist
+ * der falsche Moment: Aufgedeckt stehen Lösung und Zusatz im selben Kasten,
+ * und genau dann wird vorgelesen. Neu gemessen, echter Browser, 1280×720,
+ * aufgedeckt:
+ *
+ *   Fragetext:     80    100    120    140    160    180 Zeichen
+ *   Zusatz:      15px   14px   14px   12px   10px    9px
+ *
+ * host.css über den Zusatz: „14px waren dafür aus vier Metern zu wenig.“ Bei
+ * 180 Zeichen steht er auf 9. Die mitgelieferten Sätze merken davon nichts –
+ * ihre längste Frage von 816 hat 100 Zeichen. Wer aber eigene Fragen schreibt,
+ * hat nur den Editor: Für seinen Satz läuft kein Testlauf.
+ *
+ * Deshalb hält dieser Test die beiden Zahlen zusammen. Wer die eine ändert,
+ * muss die andere mitnehmen – oder neu messen.
+ */
+test('Editor und Testlauf meinen dieselbe Fragenlänge', () => {
+  const js = ohneKommentare(lies('editor.js'));
+  const imEditor = Number(/const LEINWAND_GRENZE = (\d+)/.exec(js)?.[1]);
+  assert.ok(Number.isFinite(imEditor), 'die Grenze im Editor sollte auffindbar bleiben');
+
+  const pruefung = fs.readFileSync(path.join(PUBLIC, '..', 'test', 'questions.test.js'), 'utf8');
+  const imTestlauf = Number(/GRENZEN = \{ text: (\d+)/.exec(pruefung)?.[1]);
+  assert.ok(Number.isFinite(imTestlauf), 'die Grenze im Testlauf sollte auffindbar bleiben');
+
+  assert.equal(imEditor, imTestlauf,
+    `Editor warnt ab ${imEditor}, der Testlauf verlangt ${imTestlauf} – zwei Zahlen für dieselbe Leinwand`);
+
+  // Und der Hinweis muss sagen, worum es wirklich geht: Der Kasten schrumpft
+  // erst, wenn Lösung und Zusatz dazukommen. Stand da nur „wird klein“, klang
+  // es nach einer Frage, die man auch einfach lang lassen kann.
+  assert.match(js, /Lösung und Zusatz dazukommen/,
+    'der Hinweis im Editor soll den aufgedeckten Zustand nennen');
+});
+
+/*
  * Am Endstand wird in einer bestimmten Reihenfolge nachgegeben.
  *
  * host.css gibt die Regel selbst vor – „vom Entbehrlichsten her“, und die

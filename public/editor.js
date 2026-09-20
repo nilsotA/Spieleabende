@@ -479,16 +479,37 @@ async function save(overwrite) {
  * Auf der Leinwand wird die Schrift so weit heruntergerechnet, bis alles
  * draufpasst – bei einem ganzen Absatz landet sie dabei bei einem Bruchteil
  * ihrer Größe und ist aus vier Metern nicht mehr zu lesen. Das merkt man beim
- * Tippen nicht, sondern erst am Abend. Die Grenze ist gemessen: Bis etwa 180
- * Zeichen bleibt die Frage auf einem 900px-Screen in voller Größe.
+ * Tippen nicht, sondern erst am Abend.
+ *
+ * Hier stand 180, gemessen an der zugeklappten Frage – und das ist der falsche
+ * Moment. Solange nur der Fragetext steht, bleibt er bis 180 Zeichen tatsächlich
+ * groß. Aufgedeckt kommen aber Lösung UND Zusatz in denselben Kasten, und das
+ * ist der Zustand, in dem am Tisch vorgelesen wird. Neu gemessen, echter
+ * Browser, 1280×720-Beamer, aufgedeckt – Schriftgröße des Zusatzes:
+ *
+ *   Fragetext:     80    100    120    140    160    180 Zeichen
+ *   Zusatz:      15px   14px   14px   12px   10px    9px
+ *   Frage:       40px   37px   37px   30px   27px   24px
+ *
+ * Die Länge des Zusatzes selbst ändert daran fast nichts (60, 100 und 145
+ * Zeichen ergaben dieselben Werte) – es ist der Fragetext, der den Kasten
+ * treibt. host.css sagt über den Zusatz: „14px waren dafür aus vier Metern zu
+ * wenig.“ Bei den 180 Zeichen, die hier als in Ordnung durchgingen, steht er
+ * auf 9.
+ *
+ * 105 ist dieselbe Schranke, die der Testlauf über die mitgelieferten Sätze
+ * zieht. Die halten sie mühelos ein: Die längste Frage von 816 hat 100
+ * Zeichen, keine einzige liegt über 105. Wer eigene Fragen schreibt, hatte
+ * diese Schranke bisher nicht – für seinen Satz läuft kein Testlauf.
  */
-const LEINWAND_GRENZE = 180;
+const LEINWAND_GRENZE = 105;
 
 function laengeMarkieren(feld) {
   const zulang = (feld.value || '').length > LEINWAND_GRENZE;
   feld.classList.toggle('zulang', zulang);
   feld.title = zulang
-    ? `${feld.value.length} Zeichen – das wird auf der Leinwand klein. Unter ${LEINWAND_GRENZE} bleibt es groß.`
+    ? `${feld.value.length} Zeichen – sobald Lösung und Zusatz dazukommen, `
+      + `schrumpft der ganze Kasten. Unter ${LEINWAND_GRENZE} bleibt auch der Zusatz lesbar.`
     : '';
 }
 
@@ -608,8 +629,8 @@ function updateFortschritt() {
   if (hinweis) {
     hinweis.hidden = lange === 0;
     hinweis.textContent = lange === 1
-      ? '1 Frage ist sehr lang – die wird auf der Leinwand klein.'
-      : `${lange} Fragen sind sehr lang – die werden auf der Leinwand klein.`;
+      ? '1 Frage ist lang – aufgedeckt wird ihr Zusatz auf der Leinwand klein.'
+      : `${lange} Fragen sind lang – aufgedeckt werden ihre Zusätze auf der Leinwand klein.`;
   }
 }
 
