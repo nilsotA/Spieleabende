@@ -1,0 +1,314 @@
+{
+  "name": "Tag für Tag",
+  "description": "Das Wissen, an dem man jeden Tag vorbeigeht: Knopfleisten und Waschsymbole, Fahrkarten und Beipackzettel, die kleine Tasche in der Jeans und die Zahl auf dem Ei. Nichts davon muss man lernen – gewusst hat es trotzdem selten jemand.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Aus dem Kleiderschrank",
+          "questions": [
+            {
+              "text": "Auf welcher Seite sitzen die Knöpfe an einem klassischen Herrenhemd?",
+              "answer": "Rechts",
+              "note": "Blusen knöpfen links. Die Sitte stammt aus der Zeit, als Bedienstete ihre Herrschaft ankleideten."
+            },
+            {
+              "text": "Aus welcher Pflanze wird die Faser für Leinen gewonnen?",
+              "answer": "Aus Flachs",
+              "note": "Flachs heißt auch Lein. Aus den Stängeln kommt die Faser, aus den Samen das Leinöl."
+            },
+            {
+              "text": "Welcher Stoff verdankt seinen Namen der französischen Stadt Nîmes?",
+              "answer": "Denim",
+              "note": "Aus „Serge de Nîmes“ wurde Denim. Das Wort Jeans dagegen kommt von Genua, französisch Gênes."
+            },
+            {
+              "text": "Wozu diente ursprünglich die kleine Extratasche vorn an einer Jeans?",
+              "answer": "Für die Taschenuhr",
+              "note": "Levi Strauss nähte sie 1873 mit ein. Die Uhren sind längst weg, die Tasche ist geblieben."
+            }
+          ]
+        },
+        {
+          "name": "Beim Arzt",
+          "questions": [
+            {
+              "text": "Was misst der Arzt, wenn er zwei Zahlen wie 120 zu 80 notiert?",
+              "answer": "Den Blutdruck",
+              "note": "Der obere Wert entsteht, wenn sich das Herz zusammenzieht, der untere in der Pause danach."
+            },
+            {
+              "text": "Welches Organ hat ein Kardiologe im Blick?",
+              "answer": "Das Herz",
+              "note": "Kardia ist griechisch. Dasselbe Wort steckt im Myokardinfarkt, dem Fachwort für den Herzinfarkt."
+            },
+            {
+              "text": "Was bedeutet der Zusatz „retard“ im Namen eines Medikaments?",
+              "answer": "Der Wirkstoff wird verzögert abgegeben",
+              "note": "Vom französischen retard für Verspätung. Die Tablette wirkt über Stunden statt auf einen Schlag."
+            },
+            {
+              "text": "Wie heißt ein Scheinmedikament ohne Wirkstoff im Fachwort?",
+              "answer": "Placebo",
+              "note": "Lateinisch für „ich werde gefallen“. Es wirkt messbar – allein dadurch, dass jemand behandelt wird."
+            }
+          ]
+        },
+        {
+          "name": "Im Supermarkt",
+          "questions": [
+            {
+              "text": "In welcher Reihenfolge stehen die Zutaten auf einer Lebensmittelverpackung?",
+              "answer": "Nach Gewicht, das meiste zuerst",
+              "note": "Steht Zucker an zweiter Stelle, ist davon mehr drin als von allem, was danach aufgezählt wird."
+            },
+            {
+              "text": "Was verrät die erste Ziffer des Stempels auf einem Hühnerei?",
+              "answer": "Die Haltungsform",
+              "note": "0 heißt Bio, 1 Freiland, 2 Boden, 3 Käfig. Danach folgen Länderkürzel und Betriebsnummer."
+            },
+            {
+              "text": "Welche Angabe neben dem Preis lässt verschieden große Packungen vergleichen?",
+              "answer": "Der Grundpreis je Kilo oder Liter",
+              "note": "Er ist Pflicht und der einzige Weg, ein 375-Gramm-Glas gegen ein 500-Gramm-Glas zu rechnen."
+            },
+            {
+              "text": "Was ist auf dem grünen EU-Bio-Siegel abgebildet?",
+              "answer": "Ein Blatt aus Sternen",
+              "note": "Zwölf weiße Sterne in Blattform. Seit 2010 muss es auf jeder verpackten Bio-Ware in der EU stehen."
+            }
+          ]
+        },
+        {
+          "name": "Unterwegs",
+          "questions": [
+            {
+              "text": "Wofür steht das S in S-Bahn?",
+              "answer": "Für Stadtschnellbahn",
+              "note": "Berlin führte den Namen 1930 ein. Das weiße S auf grünem Grund stammt aus derselben Zeit."
+            },
+            {
+              "text": "Was bedeutet das Kürzel ICE bei der Deutschen Bahn?",
+              "answer": "Intercity-Express",
+              "note": "Der erste fuhr 1991. Intern heißt die älteste Baureihe schlicht 401 – Wagen ohne eigenen Antrieb."
+            },
+            {
+              "text": "Warum sollen Reisende am Bahnsteig hinter der weißen Linie bleiben?",
+              "answer": "Wegen des Sogs durchfahrender Züge",
+              "note": "Ein Zug schiebt die Luft vor sich her und reißt sie hinter sich mit. Beides zerrt an allem am Rand."
+            },
+            {
+              "text": "Wie heißt im Amtsdeutsch der Zuschlag für eine Fahrt ohne gültigen Fahrschein?",
+              "answer": "Erhöhtes Beförderungsentgelt",
+              "note": "Seit 2015 sind es 60 Euro. Im Strafgesetzbuch heißt dieselbe Sache Erschleichen von Leistungen."
+            }
+          ]
+        },
+        {
+          "name": "Werkzeugkasten",
+          "questions": [
+            {
+              "text": "In welche Richtung dreht man eine normale Schraube, damit sie fest wird?",
+              "answer": "Im Uhrzeigersinn",
+              "note": "Rechtsgewinde ist die Regel. Das linke Fahrradpedal hat ein Linksgewinde – sonst drehte es sich los."
+            },
+            {
+              "text": "Womit prüft ein Maurer, ob eine Fläche genau waagerecht liegt?",
+              "answer": "Mit der Wasserwaage",
+              "note": "In der Libelle sitzt Flüssigkeit und eine Blase. Die Blase wandert immer zum höchsten Punkt."
+            },
+            {
+              "text": "Wofür steht die Abkürzung HSS auf einem Metallbohrer?",
+              "answer": "Für Schnellarbeitsstahl",
+              "note": "Englisch high speed steel. Er bleibt auch heiß noch hart – deshalb darf er schnell drehen."
+            },
+            {
+              "text": "Welches Maß nennt die Zahl auf einem Maulschlüssel?",
+              "answer": "Die Schlüsselweite in Millimetern",
+              "note": "SW 13 passt auf eine Mutter mit 13 Millimetern zwischen den Flächen – nicht auf ein Gewinde M13."
+            }
+          ]
+        },
+        {
+          "name": "Waschen und Pflegen",
+          "questions": [
+            {
+              "text": "Was bedeutet die Zahl in dem kleinen Bottich auf einem Pflegeetikett?",
+              "answer": "Die höchste Waschtemperatur",
+              "note": "Ein Strich darunter heißt Schonwaschgang, zwei Striche Feinwäsche – also weniger Bewegung im Gerät."
+            },
+            {
+              "text": "Wofür steht der leere Kreis auf einem Pflegeetikett?",
+              "answer": "Für die chemische Reinigung",
+              "note": "Der Buchstabe darin sagt dem Betrieb, welches Lösemittel er nehmen darf, meist P oder F."
+            },
+            {
+              "text": "Warum wird weiße Wäsche auf der Leine in der Sonne heller?",
+              "answer": "Das Sonnenlicht bleicht sie aus",
+              "note": "Ultraviolettes Licht zerlegt die Farbstoffe. Bei Weiß ist das erwünscht, bei Bunt ist es der Schaden."
+            },
+            {
+              "text": "Welches Zeichen auf dem Etikett verbietet den Wäschetrockner?",
+              "answer": "Ein durchgestrichenes Quadrat mit Kreis",
+              "note": "Das Quadrat steht fürs Trocknen, der Kreis darin für die Maschine, Punkte darin für die Hitzestufe."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Post und Papierkram",
+          "questions": [
+            {
+              "text": "An welche Stelle des Umschlags gehört die Briefmarke?",
+              "answer": "Nach oben rechts",
+              "note": "Dort sucht die Maschine den Stempel. Klebt sie anderswo, wird der Brief von Hand sortiert."
+            },
+            {
+              "text": "Was bekommt der Absender bei einem Einschreiben mit Rückschein zurück?",
+              "answer": "Die unterschriebene Empfangsbestätigung",
+              "note": "Der Rückschein trägt die Unterschrift des Empfängers und gilt vor Gericht als Zustellnachweis."
+            },
+            {
+              "text": "Wofür stehen die vier Buchstaben IBAN?",
+              "answer": "International Bank Account Number",
+              "note": "Die deutsche Fassung ist 22 Zeichen lang: DE, zwei Prüfziffern, acht Stellen Bank, zehn Stellen Konto."
+            },
+            {
+              "text": "Was meint die Post, wenn sie von der Freimachung eines Briefes spricht?",
+              "answer": "Das Aufbringen des Portos",
+              "note": "Das Wort stammt aus der Zeit, als der Empfänger zahlte. Ein freigemachter Brief kostete ihn nichts."
+            }
+          ]
+        },
+        {
+          "name": "Uhren und Zeit",
+          "questions": [
+            {
+              "text": "In welche Richtung werden die Uhren zu Beginn der Sommerzeit gestellt?",
+              "answer": "Eine Stunde vor",
+              "note": "Eselsbrücke: Im Frühling stellt man die Gartenmöbel vor die Tür, im Herbst zurück in den Schuppen."
+            },
+            {
+              "text": "In wie viele Zonen ist die Erde rechnerisch eingeteilt?",
+              "answer": "24",
+              "note": "Je 15 Längengrade. In der Praxis sind es mehr, weil einige Länder um halbe Stunden versetzen."
+            },
+            {
+              "text": "Was treibt eine mechanische Armbanduhr an?",
+              "answer": "Eine aufgezogene Feder",
+              "note": "Die Unruh teilt die Kraft in gleiche Schwingungen. Daher das Ticken, meist vier- bis achtmal je Sekunde."
+            },
+            {
+              "text": "Wonach richtet sich die gesetzliche Zeit in Deutschland?",
+              "answer": "Nach den Atomuhren in Braunschweig",
+              "note": "Die Bundesanstalt sendet das Signal über den Langwellensender DCF77 – daher der Name Funkuhr."
+            }
+          ]
+        },
+        {
+          "name": "Haustiere",
+          "questions": [
+            {
+              "text": "Welches Nagetier dreht im Käfig gern sein Laufrad?",
+              "answer": "Der Hamster",
+              "note": "Ein Goldhamster läuft darin nachts mehrere Kilometer. Am Tag schläft er, oft tief in der Streu vergraben."
+            },
+            {
+              "text": "Wie viele Zähne hat ein ausgewachsener Hund?",
+              "answer": "42",
+              "note": "Der Mensch kommt auf 32. Welpen haben 28 Milchzähne und wechseln sie mit vier bis sieben Monaten."
+            },
+            {
+              "text": "Warum darf man Hunden keine Schokolade geben?",
+              "answer": "Sie enthält Theobromin, das sie kaum abbauen",
+              "note": "Je dunkler die Schokolade, desto mehr davon. Katzen vertragen es ebenso schlecht, naschen nur seltener."
+            },
+            {
+              "text": "Wozu dient einer Katze das lange Tasthaar über dem Maul?",
+              "answer": "Zum Messen von Abständen im Dunkeln",
+              "note": "Es sitzt tief in der Haut an Nerven. So prüft eine Katze, ob sie durch eine Lücke passt."
+            }
+          ]
+        },
+        {
+          "name": "Am Spieltisch",
+          "questions": [
+            {
+              "text": "Wie viele Karten hat ein Skatblatt?",
+              "answer": "32",
+              "note": "Vom französischen Blatt mit 52 bleiben ohne die Karten Zwei bis Sechs genau 32 übrig."
+            },
+            {
+              "text": "Welche Figur im Schach darf als einzige über andere Figuren hinweg?",
+              "answer": "Der Springer",
+              "note": "Er zieht zwei Felder gerade und eines quer. Aus der Ecke erreicht er nur zwei Felder, aus der Mitte acht."
+            },
+            {
+              "text": "Wie viele Punkte hat ein Mühlebrett?",
+              "answer": "24",
+              "note": "Drei Quadrate mit je acht Punkten. Jeder setzt neun Steine, und drei in einer Reihe dürfen nehmen."
+            },
+            {
+              "text": "Wie heißt das Skatspiel, bei dem der Alleinspieler keinen Stich machen darf?",
+              "answer": "Null",
+              "note": "Ohne Trumpf, und die Zehn liegt zwischen Neun und Bube. Mit offenen Karten zählt es 46 Punkte."
+            }
+          ]
+        },
+        {
+          "name": "Zeitung und Nachrichten",
+          "questions": [
+            {
+              "text": "Wie heißt der Kasten, in dem Herausgeber und Anschrift eines Blattes stehen?",
+              "answer": "Das Impressum",
+              "note": "In Deutschland Pflicht, auch für Webseiten. Es sagt, wer für den Inhalt geradesteht."
+            },
+            {
+              "text": "Wofür steht die Abkürzung dpa?",
+              "answer": "Deutsche Presse-Agentur",
+              "note": "Steht sie unter einer Meldung, hat die Redaktion den Text übernommen statt selbst recherchiert."
+            },
+            {
+              "text": "Wie nennt man den Beitrag, in dem ein Blatt selbst Stellung bezieht?",
+              "answer": "Der Leitartikel",
+              "note": "Er steht traditionell vorn und meint das ganze Haus. Ein Kommentar daneben ist die Meinung eines Einzelnen."
+            },
+            {
+              "text": "Was ist der Aufmacher einer Zeitung?",
+              "answer": "Die wichtigste Meldung der Titelseite",
+              "note": "Sie steht oben und über mehrere Spalten. Ganz unten folgt oft die leichte Geschichte zum Schluss."
+            }
+          ]
+        },
+        {
+          "name": "Im Lokal",
+          "questions": [
+            {
+              "text": "Wie viel fasst die Stange, aus der man in Köln sein Kölsch trinkt?",
+              "answer": "0,2 Liter",
+              "note": "Die schmale Form hält das Bier frisch. Nachgeschenkt wird, bis der Gast den Deckel aufs Glas legt."
+            },
+            {
+              "text": "Wie heißt der Tisch, an dem sich regelmäßig dieselbe Runde trifft?",
+              "answer": "Der Stammtisch",
+              "note": "Oft mit Wimpel oder Schild. Wer nicht dazugehört, darf dort meist sitzen, bis die Runde eintrifft."
+            },
+            {
+              "text": "Worauf weisen die kleinen Ziffern hinter Gerichten auf der Speisekarte hin?",
+              "answer": "Auf Zusatzstoffe",
+              "note": "Üblich, aber nicht vorgeschrieben: meist 1 Farbstoff, 2 Konservierung, 3 Antioxidation, 4 Geschmack."
+            },
+            {
+              "text": "Was ist gemeint, wenn am Ende des Abends jemand einen Absacker vorschlägt?",
+              "answer": "Das letzte Getränk vor dem Heimweg",
+              "note": "Meist ein Schnaps. In der Gastronomie heißt er auch Digestif, also etwas für die Verdauung."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

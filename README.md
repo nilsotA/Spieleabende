@@ -634,7 +634,7 @@ ausgenommen – dort gehört die Lösung in die Frage.
 
 ### Mitgeliefert
 
-Einundzwanzig fertige Sätze mit je 48 Fragen – zusammen 1008, keine doppelt. Jede einzelne
+Zweiundzwanzig fertige Sätze mit je 48 Fragen – zusammen 1056, keine doppelt. Jede einzelne
 davon hat einen Zusatz unter der Lösung: den Satz, aus dem am Tisch die Anschlussfrage
 wird. Nicht „richtig, weiter“, sondern „Moment mal, warum eigentlich?“:
 
@@ -661,6 +661,7 @@ wird. Nicht „richtig, weiter“, sondern „Moment mal, warum eigentlich?“:
 | **Kunst & Bücher** | Berühmte Bilder, Bauwerke, Romanfiguren, Epochen & Stile, Museen, Erste Sätze |
 | **Mythen & Legenden** | Olymp, Götter des Nordens, Fabelwesen, Herkules, Troja, Nibelungen, Feiertage |
 | **Wie funktioniert das?** | Kühlschrank, Licht, Küchenphysik, Hebel & Rolle, Chemie im Haushalt, Einheiten |
+| **Tag für Tag** | Kleiderschrank, Beim Arzt, Supermarkt, Unterwegs, Werkzeugkasten, Uhren & Zeit, Am Spieltisch |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit
@@ -709,6 +710,12 @@ erzählen. Warum heißt der Montag Montag, und was ist eine Sisyphusarbeit?
 „Wie funktioniert das?“ ist der Satz zum Anfassen: Kühlschrank, Kerze, Seife,
 Flaschenzug. Erklärt wird nichts in der Frage – gefragt ist, was man vom
 eigenen Haushalt her ohnehin ahnt.
+
+„Tag für Tag“ fragt nach dem, woran man jeden Tag vorbeigeht: die Knopfleiste am
+Hemd, die Zahl auf dem Ei, der Kreis auf dem Pflegeetikett, die kleine Tasche in
+der Jeans. Keine Frage braucht Vorwissen, und bei keiner ist es peinlich, sie
+nicht zu wissen – die Antwort ist hinterher meistens die, bei der jemand sagt:
+„Das sehe ich seit dreißig Jahren jeden Tag.“
 
 Dazu gibt es in der Auswahl **🎲 Zufallsmix aus allen Sätzen** – zwölf Kategorien,
 bei jedem Start neu gewürfelt. So ist kein Abend wie der andere. Gezogen wird reihum
