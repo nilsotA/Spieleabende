@@ -289,6 +289,36 @@ export function kategorieMarke(name) {
     .join(' ');
 }
 
+/**
+ * Zwei Kategorien, die nebeneinander wie ein Versehen aussehen.
+ *
+ * `kategorieMarke` fängt dieselbe Kategorie in anderer Wortstellung. Sie fängt
+ * nicht den häufigeren Fall: einen Namen, der im anderen steckt. „Internet“
+ * und „Internet & Trends“, „Städte“ und „Städte der Welt“, „Musik“ neben
+ * „Musik der Eltern“ und „Musik in Zahlen“ – über 800 gewürfelte Bretter
+ * gemessen standen auf 7,1 Prozent zwei solche Kategorien nebeneinander. Zum
+ * Vergleich: Der Fall, den die Marke behebt, kam auf 1,2 Prozent, und schon der
+ * galt als zu viel.
+ *
+ * Das ist ausdrücklich NICHT dasselbe wie eine gemeinsame Marke. Die Sätze
+ * brauchen „Flaggen“ und „Flaggen für Fortgeschrittene“ als zwei
+ * Kategorien – eine leichte und eine schwere, und jede mit eigenem Los. Nur
+ * auf DASSELBE Brett gehören sie nicht. Deshalb steht diese Regel in der
+ * Auswahl der sechs und nicht im Schlüssel.
+ *
+ * Verglichen werden Wörter ab vier Buchstaben: „der“, „und“, „für“ tragen
+ * kein Thema. Bleibt bei einem der beiden nichts übrig, gilt nichts als gleich –
+ * eine leere Menge steckt sonst in jeder anderen.
+ */
+export function themaGleich(a, b) {
+  const woerter = (n) => new Set(kategorieMarke(n).split(' ').filter((w) => w.length >= 4));
+  const wa = woerter(a);
+  const wb = woerter(b);
+  if (!wa.size || !wb.size) return false;
+  const [klein, gross] = wa.size <= wb.size ? [wa, wb] : [wb, wa];
+  return [...klein].every((w) => gross.has(w));
+}
+
 export async function mixSet() {
   const dateien = (await listSets()).filter((s) => !s.error);
   // Nach Ursprungsrunde getrennt sammeln: Runde 2 zählt doppelt, dort gehören
@@ -352,6 +382,18 @@ export async function mixSet() {
 
     const sechs = [];
     const genommen = new Set();
+    /*
+     * Thematische Dopplungen werden zurückgestellt, nicht weggeworfen.
+     *
+     * „Internet“ neben „Internet & Trends“ sieht auf der Leinwand aus wie ein
+     * Fehler (siehe themaGleich). Wer sie aber einfach überspringt, riskiert
+     * ein Brett mit fünf Kategorien – und ein unvollständiges Brett ist
+     * schlimmer als ein doppeltes Thema. Deshalb zweistufig: Im ersten Durchgang
+     * wird ausgewichen, und wenn am Ende sechs nicht zusammenkommen, füllen die
+     * Zurückgestellten auf.
+     */
+    const zurueckgestellt = [];
+    const passtDazu = (k) => !sechs.some((s2) => themaGleich(s2.cat.name, k.cat.name));
     // Mehrere Umläufe: Beim ersten bekommt jeder Satz eine Kategorie, beim
     // zweiten die nächste – so verteilt es sich auch, wenn es weniger als sechs
     // Sätze gibt.
@@ -363,9 +405,17 @@ export async function mixSet() {
         // in zwei Schreibweisen (`name` ist die Marke, nicht der Name).
         while (k && (vergeben.has(k.name) || genommen.has(k.name))) k = liste.pop();
         if (!k) continue;
+        if (!passtDazu(k)) { zurueckgestellt.push(k); continue; }
         genommen.add(k.name);
         sechs.push(k);
       }
+    }
+    // Aufgefüllt wird nur, wenn es sonst nicht reicht.
+    for (const k of zurueckgestellt) {
+      if (sechs.length >= 6) break;
+      if (vergeben.has(k.name) || genommen.has(k.name)) continue;
+      genommen.add(k.name);
+      sechs.push(k);
     }
     for (const k of sechs) vergeben.add(k.name);
     gezogen.push(sechs.map((k) => k.cat));

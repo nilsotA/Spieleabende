@@ -563,6 +563,71 @@ test('ein Satz mit fehlender Bilddatei wird gemeldet statt still gespielt', asyn
  * Geprüft wird die Regel selbst statt hundert Würfe: Welche Namen der echten
  * Sätze fallen zusammen, und fallen die richtigen zusammen?
  */
+/*
+ * Zwei Kategorien desselben Themas gehören nicht auf dasselbe Brett.
+ *
+ * `kategorieMarke` fängt dieselbe Kategorie in anderer Wortstellung – aber
+ * nicht den häufigeren Fall: einen Namen, der im anderen steckt. Gemessen über
+ * 800 gewürfelte Bretter standen auf 7,1 Prozent zwei solche nebeneinander:
+ *
+ *    11×  Internet  +  Internet & Trends
+ *     7×  Städte  +  Städte der Welt
+ *     7×  Sprachen  +  Sprachen der Welt
+ *     6×  Musik  +  Musik der Eltern
+ *     5×  Erde & Weltall  +  Weltall
+ *
+ * Auf der Leinwand sieht das aus wie ein Versehen – dreimal Musik in einer
+ * Runde. Zum Vergleich: Der Fall, den die Marke behebt („Marken & Logos" neben
+ * „Logos & Marken"), kam auf 1,2 Prozent, und schon der galt als zu viel.
+ *
+ * Die Regel sitzt bewusst in der AUSWAHL und nicht im Schlüssel: Die Sätze
+ * brauchen „Flaggen" und „Flaggen für Fortgeschrittene" weiter als zwei
+ * Kategorien mit je eigenem Los – eine leichte und eine schwere. Nur zusammen
+ * auf ein Brett gehören sie nicht.
+ */
+test('der Zufallsmix stellt nicht zwei Kategorien desselben Themas nebeneinander', async () => {
+  const { themaGleich, mixSet } = await import('../server/questions.js');
+
+  // Die Regel selbst – festgehalten, statt sie über gewürfelte Bretter zu erraten.
+  for (const [a, b] of [
+    ['Internet', 'Internet & Trends'],
+    ['Städte', 'Städte der Welt'],
+    ['Musik', 'Musik der Eltern'],
+    ['Weltall', 'Erde & Weltall'],
+    ['Flaggen', 'Flaggen für Fortgeschrittene'],
+  ]) {
+    assert.equal(themaGleich(a, b), true, `„${a}" und „${b}" sind dasselbe Thema`);
+    assert.equal(themaGleich(b, a), true, 'die Regel gilt in beide Richtungen');
+  }
+  for (const [a, b] of [
+    ['Musik', 'Filmmusik'],
+    ['Olympia', 'Wintersport'],
+    ['Der Mensch', 'Der Körper'],
+    ['Zahlenspiele', 'Zahlen mit Charakter'],
+  ]) {
+    assert.equal(themaGleich(a, b), false, `„${a}" und „${b}" sind verschiedene Themen`);
+  }
+  // Leere Wortmengen dürfen nicht in alles hineinpassen.
+  assert.equal(themaGleich('A & B', 'Internet'), false);
+
+  // Und über echte Bretter: keines zeigt zwei davon nebeneinander.
+  const paare = [];
+  for (let i = 0; i < 60; i++) {
+    const mix = await mixSet();
+    assert.equal(mix.rounds.length, 2);
+    for (const runde of mix.rounds) {
+      assert.equal(runde.categories.length, 6, 'ein Brett bleibt vollständig');
+      const namen = runde.categories.map((c) => c.name);
+      for (let a = 0; a < namen.length; a++) {
+        for (let b = a + 1; b < namen.length; b++) {
+          if (themaGleich(namen[a], namen[b])) paare.push(`${namen[a]}  +  ${namen[b]}`);
+        }
+      }
+    }
+  }
+  assert.deepEqual([...new Set(paare)], [], 'zweimal dasselbe Thema auf einem Brett');
+});
+
 test('der Zufallsmix hält zwei Namen für dieselbe Kategorie auseinander', async () => {
   const { kategorieMarke } = await import('../server/questions.js');
 
