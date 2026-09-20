@@ -793,8 +793,26 @@ export function judge(state, correct) {
     team.score += delta;
     bilanz.richtig += 1;
     bilanz.geholt += delta;
-    // Am fremden Feld gepunktet – die Zahl, mit der am Ende geprahlt wird.
-    if (!isPrimary) {
+    /*
+     * Am fremden Feld gepunktet – die Zahl, mit der am Ende geprahlt wird.
+     *
+     * Geklaut ist es aber nur, wenn das Zugteam sein Feld auch verloren hat.
+     * Steht „Buzzer auch nach richtig" an, punktet es voll und der Buzzer geht
+     * trotzdem auf; die halben Punkte danach sind eine Zugabe, kein Diebstahl.
+     * Genau so steht es im Handbuch, und die Leinwand schreibt dort schon
+     * „auch richtig +250" statt „schnappt sich +250 von …" (host.js).
+     *
+     * Nur die Bilanz rechnete anders. Gemessen: Anna trifft ihr 500er-Feld und
+     * behält alle 500, Bea legt +250 nach – und Beas Bilanz trug geklaut=1,
+     * geklautPunkte=250. Diese Zahl fährt unverändert an drei Stellen an den
+     * Tisch: „🥷 Bester Dieb" unter dem Siegertreppchen, „1× geklaut" in der
+     * kopierten Zusammenfassung und „Geklaut 1" auf Beas eigenem Handy. Bea
+     * bekommt die Diebesauszeichnung für Punkte, die niemand verloren hat.
+     *
+     * Dieselbe Regel wie auf der Leinwand: Hat das Zugteam auf dieser Frage
+     * getroffen, war es kein Diebstahl.
+     */
+    if (!isPrimary && !q.log.some((e) => e.result === 'correct' && e.teamId === q.teamId)) {
       bilanz.geklaut += 1;
       bilanz.geklautPunkte += delta;
     }

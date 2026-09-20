@@ -1380,3 +1380,52 @@ test('ein neues Spiel löscht die Stechsperre', () => {
   G.startGame(lobby, SET);
   assert.deepEqual(lobby.stechenRaus, []);
 });
+
+/*
+ * Eine Zugabe ist kein Diebstahl.
+ *
+ * Steht „Buzzer auch nach richtig" an, punktet das Zugteam voll und der Buzzer
+ * geht trotzdem auf. Die Leinwand schreibt dann „auch richtig +250" statt
+ * „schnappt sich +250 von …", und das Handbuch sagt es genauso: „Die halben
+ * Punkte danach sind eine Zugabe, kein Diebstahl."
+ *
+ * Nur die Bilanz rechnete anders: Sie zählte jeden Buzzer-Treffer als
+ * `geklaut`. Gemessen – Anna trifft ihr 500er-Feld und behält alle 500, Bea
+ * legt +250 nach, und Beas Bilanz trug geklaut=1, geklautPunkte=250. Die Zahl
+ * fährt an drei Stellen an den Tisch: „🥷 Bester Dieb" unter dem
+ * Siegertreppchen, „1× geklaut" in der kopierten Zusammenfassung und
+ * „Geklaut 1" auf dem eigenen Handy.
+ */
+test('bei „Buzzer auch nach richtig" ist die Zugabe kein Diebstahl', () => {
+  const state = setup(['Anna', 'Bea']);
+  // Die Einstellung liest judge() erst beim Werten – sie darf also nach dem
+  // Start gesetzt werden, so wie der Host sie mitten im Abend umlegt.
+  state.settings.buzzAfterCorrect = true;
+  G.pickCell(state, 0, 3);
+  G.judge(state, true);                       // Anna trifft und behält alles
+  assert.equal(state.current.step, 'buzz', 'der Buzzer geht trotzdem auf');
+  const vorher = score(state, 0);
+  G.buzzFor(state, state.teams[1].id);
+  G.judge(state, true);                       // Bea legt nach
+
+  assert.equal(score(state, 0), vorher, 'Anna gibt nichts ab');
+  assert.ok(score(state, 1) > 0, 'Bea bekommt ihre halben Punkte');
+  assert.equal(state.teams[1].bilanz.geklaut, 0, 'geklaut hat sie nichts');
+  assert.equal(state.teams[1].bilanz.geklautPunkte, 0);
+  assert.equal(state.teams[1].bilanz.richtig, 1, 'richtig lag sie sehr wohl');
+});
+
+/*
+ * Und die Gegenrichtung bleibt, wie sie war: Verliert das Zugteam sein Feld,
+ * ist der Buzzer-Treffer ein Diebstahl – das ist die Zahl, mit der am Ende
+ * geprahlt wird.
+ */
+test('wer ein verlorenes Feld abräumt, hat geklaut', () => {
+  const state = setup(['Anna', 'Bea']);
+  G.pickCell(state, 0, 3);
+  G.judge(state, false);                      // Anna liegt daneben
+  G.buzzFor(state, state.teams[1].id);
+  G.judge(state, true);
+  assert.equal(state.teams[1].bilanz.geklaut, 1);
+  assert.ok(state.teams[1].bilanz.geklautPunkte > 0);
+});
