@@ -1213,3 +1213,45 @@ test('die Spielersicht kennt den Einsatz – und weiß, wer ihn setzen darf', ()
   state.settings.feldwahl = 'host';
   assert.equal(sicht('g1').you.darfEinsatz, false);
 });
+
+/*
+ * Zwei entgegengesetzte Lagen hatten denselben Satz.
+ *
+ * `buzz()` warf für jeden Schritt außer 'buzz' „Buzzer ist noch gesperrt."
+ * Im Schritt 'primary' stimmt das – der Buzzer geht gleich auf. Im Schritt
+ * 'result' ist es falsch: Der Buzzer ist nicht noch gesperrt, sondern schon
+ * zu, die Frage ist durch und die Lösung steht auf der Leinwand. Das Handy
+ * zeigt den Satz als roten Fehlerkasten – wer nach dem Auflösen noch einmal
+ * drückt, wartet danach auf etwas, das nicht mehr kommt.
+ */
+test('der Buzzer sagt, ob die Frage noch kommt oder schon durch ist', () => {
+  const s = G.createState();
+  G.addTeam(s, 'Rot');
+  G.addTeam(s, 'Blau');
+  G.joinTeam(s, 'c-rot', s.teams[0].id, 'R');
+  G.joinTeam(s, 'c-blau', s.teams[1].id, 'B');
+  G.startGame(s, SET);
+
+  const versuch = () => {
+    try { G.buzz(s, 'c-blau'); return null; } catch (err) { return err.message; }
+  };
+
+  G.pickCell(s, 0, 0);
+  assert.equal(s.current.step, 'primary');
+  assert.match(versuch(), /noch gesperrt/, 'vor der Freigabe stimmt der alte Satz');
+
+  G.judge(s, false);
+  assert.equal(s.current.step, 'buzz');
+  assert.equal(versuch(), null, 'jetzt darf gebuzzert werden');
+
+  // Und weiter bis zur aufgelösten Frage.
+  G.judge(s, false);
+  for (let i = 0; i < 4 && s.current && s.current.step !== 'result'; i++) {
+    try { G.endQuestion(s); } catch { break; }
+  }
+  assert.equal(s.current.step, 'result', 'die Frage sollte durch sein');
+  const durch = versuch();
+  assert.match(durch, /durch/, 'danach ist sie durch, nicht noch gesperrt');
+  assert.doesNotMatch(durch, /noch gesperrt/,
+    '„noch gesperrt" verspricht etwas, das nicht mehr kommt');
+});

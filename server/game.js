@@ -651,6 +651,17 @@ export function openBuzz(state) {
 export function buzz(state, clientId) {
   const q = requireQuestion(state);
   if (state.pause) throw new GameError('Ihr seid gerade in der Pause.');
+  /*
+   * Zwei Lagen, zwei Sätze.
+   *
+   * Hier stand für jeden Schritt außer 'buzz' derselbe Satz. Im Schritt
+   * 'primary' stimmt er – der Buzzer geht gleich auf. Im Schritt 'result' ist
+   * er schlicht falsch: Der Buzzer ist nicht noch gesperrt, sondern schon zu,
+   * die Frage ist durch und die Lösung steht auf der Leinwand. Das Handy
+   * zeigt den Satz als roten Fehlerkasten; wer nach dem Auflösen noch einmal
+   * drückt, wartet danach auf etwas, das nicht mehr kommt.
+   */
+  if (q.step === 'result') throw new GameError('Die Frage ist durch – die Lösung steht schon.');
   if (q.step !== 'buzz') throw new GameError('Buzzer ist noch gesperrt.');
   if (q.buzzedTeamId) throw new GameError('Zu spät – jemand war schneller.');
   const team = teamOfClient(state, clientId);

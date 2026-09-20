@@ -308,6 +308,53 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Drei kleine Sachen, die alle drei am selben Ort sitzen: dort, wo jemand
+ * hinsieht.
+ *
+ * 1. Die Brettfelder hießen für Tastatur und Vorlesehilfe nur „100“, „200“,
+ *    „300“, „500“ – vierundzwanzig Knöpfe mit vier verschiedenen Namen. Die
+ *    Kategorie steht in einem eigenen Kasten daneben, mit nichts verknüpft.
+ *    Gemessen, jetzt: 24 verschiedene Namen von 24 Feldern.
+ *
+ * 2. Die hochlaufende Punktzahl war die einzige Bewegung im Spiel, die sich
+ *    über „Bewegung reduzieren“ hinwegsetzte: Javascript rechnet sie Bild für
+ *    Bild, und die Regel in style.css kappt nur CSS. Konfetti, Blitz, Uhr und
+ *    das Scrollen im Editor fragen die Einstellung ab. Gemessen mit
+ *    reduzierter Bewegung: 120 ms nach der Wertung steht schon die Endzahl;
+ *    ohne sie steht dort 43 von 100.
+ *
+ * 3. Die Startseite zählte unlesbare Fragensätze mit und listete sie als
+ *    spielbar auf – mit dem nackten Dateinamen als Namen. Gemessen mit einem
+ *    absichtlich kaputten Satz: vorher „22 Fragensätze“ und der Dateiname in
+ *    der Liste, jetzt 21 und nicht darin. Der Host-Screen macht es seit jeher
+ *    richtig: Dort steht der Eintrag ausgegraut und ist nicht wählbar.
+ */
+test('drei Stellen sagen jetzt, was sie meinen', () => {
+  const host = ohneKommentare(lies('host.js'));
+
+  // 1. Die Brettfelder tragen die Kategorie im Namen.
+  const kachel = host.slice(host.indexOf("class: 'tile'"));
+  const bis = kachel.indexOf('String(cell.value)');
+  assert.ok(bis > 0, 'der Feldknopf sollte auffindbar bleiben');
+  assert.match(kachel.slice(0, bis), /'aria-label': `\$\{cat\.name\}/,
+    'ohne die Kategorie heißen 24 Knöpfe viermal dasselbe');
+
+  // 2. Beide Zählwerke fragen die Einstellung ab.
+  for (const [datei, fn] of [['host.js', 'function countUp'], ['player.js', 'function punktesprung']]) {
+    const js = ohneKommentare(lies(datei));
+    const ab = js.indexOf(fn);
+    assert.ok(ab > 0, `${datei}: ${fn} sollte auffindbar bleiben`);
+    assert.match(js.slice(ab, ab + 400), /wenigerBewegung\(\)/,
+      `${datei}: Javascript-Bewegung erreicht die Regel in style.css nicht`);
+  }
+
+  // 3. Die Startseite lässt kaputte Sätze draußen.
+  const start = lies('index.html');
+  assert.match(start, /filter\(\(s\) => !s\.error\)/,
+    'ein unlesbarer Satz gehört nicht in die Zählung und nicht in die Liste');
+});
+
+/*
  * Der Tonschalter des Handys sagt, woran man ist.
  *
  * `#btn-ton` trug ein festes `aria-label="Töne auf diesem Handy an oder aus"`.

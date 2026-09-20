@@ -110,8 +110,14 @@
   // Kein Aufbau ohne Inhalt: Schlägt der Abruf fehl, bleibt der Abschnitt weg,
   // statt eine leere Überschrift stehen zu lassen.
   try {
-    const saetze = await fetch('/api/sets').then((r) => r.json());
-    if (Array.isArray(saetze) && saetze.length) {
+    const alle = await fetch('/api/sets').then((r) => r.json());
+    // Ein Satz, der sich nicht einlesen lässt, kommt als Ersatzeintrag mit
+    // `error` und dem nackten Dateinamen als Namen. Der gehört hier nicht in
+    // die Zählung und nicht in die Liste: Auf der Startseite steht, was man
+    // spielen kann. Der Host-Screen macht es genauso – dort ist der Eintrag
+    // ausgegraut und nicht wählbar.
+    const saetze = Array.isArray(alle) ? alle.filter((s) => !s.error) : [];
+    if (saetze.length) {
       const fragen = saetze.reduce((n, s) => n + (Number(s.questions) || 0), 0);
       document.querySelector('#saetze-summe').textContent =
         `${saetze.length} Fragensätze, ${fragen} Fragen – dazu ein Zufallsmix, der bei jedem Start neu zieht.`;

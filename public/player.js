@@ -1,5 +1,5 @@
 import {
-  $, el, connect, action, toast, sound, vibrate, flash,
+  $, el, connect, action, toast, sound, vibrate, flash, wenigerBewegung,
   installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
   istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr, verbergeSchluessel,
   lies, merke, verbindungsLage } from '/common.js';
@@ -399,6 +399,22 @@ addEventListener('resize', zeigeMehr);
 let sprungZeit = null;
 function punktesprung(delta, von, bis) {
   const feld = $('#p-score');
+  /*
+   * Bei „Bewegung reduzieren“ springt die Zahl, statt hochzulaufen.
+   *
+   * Das Hochzählen rechnet Javascript Bild für Bild – die Regel in style.css
+   * kappt nur CSS-Bewegung und kommt daran nicht heran. Damit war das die
+   * einzige Bewegung im ganzen Spiel, die sich über die Einstellung
+   * hinwegsetzte: Konfetti, Blitz, Uhr und selbst das Scrollen im Editor
+   * fragen sie ab.
+   */
+  if (wenigerBewegung()) {
+    feld.textContent = punkte(bis);
+    feld.classList.remove('plus', 'minus');
+    void feld.offsetWidth;
+    feld.classList.add(delta > 0 ? 'plus' : 'minus');
+    return;
+  }
   const start = performance.now();
   const schritt = (jetzt) => {
     const t = Math.min(1, (jetzt - start) / 500);

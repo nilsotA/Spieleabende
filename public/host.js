@@ -1,7 +1,8 @@
 import {
   $, $$, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
   setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
-  punkte, delta as vorzeichen, starteUhr, verbergeSchluessel, lageSeit } from '/common.js';
+  punkte, delta as vorzeichen, starteUhr, verbergeSchluessel, lageSeit,
+  wenigerBewegung } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
@@ -896,6 +897,10 @@ function renderBoard() {
               einsatzFuer = null;
               act('pick', { catIdx, rowIdx, einsatz: mitEinsatz });
             },
+            // Der zugängliche Name war allein die Zahl – vierundzwanzig Knöpfe
+            // mit vier verschiedenen Namen. Die Kategorie steht in einem
+            // eigenen <div> daneben und ist mit nichts verknüpft.
+            'aria-label': `${cat.name}, ${cell.value} Punkte${cell.used ? ' – schon gespielt' : ''}`,
           }, el('span', {}, String(cell.value))),
         );
       });
@@ -1857,6 +1862,12 @@ function hitmark(delta, karte) {
 
 /** Punkte laufen sichtbar hoch statt einfach umzuspringen. */
 function countUp(node, von, bis, dauer = 600) {
+  // Siehe punktesprung() auf dem Handy: Javascript-Bewegung erreicht die
+  // Regel in style.css nicht, also wird hier gefragt.
+  if (wenigerBewegung()) {
+    node.textContent = punkte(bis);
+    return;
+  }
   const start = performance.now();
   const schritt = (jetzt) => {
     const t = Math.min(1, (jetzt - start) / dauer);

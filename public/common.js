@@ -619,9 +619,23 @@ export function hostAction(type, payload = {}) {
  *
  * Gibt eine Funktion zurück, die die Uhr anhält.
  */
+/**
+ * Hat jemand „Bewegung reduzieren“ eingestellt?
+ *
+ * Die Regel in style.css kappt nur `animation-duration` und
+ * `transition-duration` – an Bewegung, die Javascript Bild für Bild rechnet,
+ * kommt sie nicht heran. Wer sie dort will, muss hier fragen.
+ *
+ * Nicht gemerkt, sondern jedes Mal gefragt: Die Einstellung lässt sich mitten
+ * im Abend ändern, und der Host-Screen läuft dabei durch.
+ */
+export function wenigerBewegung() {
+  return matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 export function starteUhr(dauerMs, offenMs, tick) {
   const ende = performance.now() + Math.max(0, dauerMs - (offenMs || 0));
-  const sanft = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sanft = wenigerBewegung();
   let laeuft = true;
   let handle = null;
   const schritt = () => {
