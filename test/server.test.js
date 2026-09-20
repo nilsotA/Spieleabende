@@ -4238,3 +4238,66 @@ test('ein Zurücknehmen mitten im Austausch erfindet keine Punkte', async (t) =>
   assert.equal(ruhig.ok, true, ruhig.error || '');
   assert.equal(await stand(), vorFeld, 'der Austausch nimmt genau die Punkte dieser Frage zurück');
 });
+
+/*
+ * Ein Handy, das über den Notweg weiterspielt, gilt auch als anwesend.
+ *
+ * Der Ereignisstrom ist das Zerbrechlichste am Aufbau; deshalb gibt es den
+ * Notweg über /api/state. Ein Gerät, das einmal darüber kam, danach doch noch
+ * einen Strom bekam und ihn wieder verlor, blieb aber für den Rest des Abends
+ * als „offline" markiert: Das Umschalten hing an `!abfragen.has(clientId)`,
+ * und genau diesen Eintrag frischt jede Abfrage wieder auf.
+ *
+ * Gemessen vor der Änderung: 34 Abfragen über 51 Sekunden – also weit über der
+ * Frist von 40 – durchgehend `online: false`. Hörte dasselbe Gerät 45 Sekunden
+ * lang auf zu fragen, setzte die nächste Abfrage es sofort wieder auf `true`.
+ * Bestraft wurde genau das Handy, das ununterbrochen erreichbar war.
+ *
+ * Am Tisch steht dann „Rot · 1 offline" im Host-Menü, daneben der Knopf
+ * „Offline entfernen" – und der wirft jemanden aus dem Team, der danebensitzt.
+ */
+test('ein Handy am Notweg gilt als anwesend, auch nach einem Stromabriss', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-notweg-'));
+  const { proc, base } = await starteServer(9440 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const host = await alsHost(base, 'notweg_host');
+  await host({ type: 'addTeam', name: 'Rot' });
+  const rot = (await zustand(base)).teams[0].id;
+
+  // Anna kommt über den Notweg: Stand holen – der Nachweis fährt mit.
+  const ID = 'notweg_anna';
+  const erst = await fetch(`${base}/api/state?clientId=${ID}&role=player`).then((r) => r.json());
+  assert.ok(erst.geheim, 'der Nachweis muss denselben Weg nehmen können wie der Stand');
+  const tu = (body) => fetch(`${base}/api/action`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: ID, geheim: erst.geheim, role: 'player', ...body }),
+  }).then((r) => r.json());
+  assert.equal((await tu({ type: 'joinTeam', teamId: rot, name: 'Anna' })).ok, true);
+
+  const annaOnline = async () => {
+    const s = await zustand(base);
+    return s.teams.flatMap((x) => x.members).find((m) => m.name === 'Anna')?.online;
+  };
+  assert.equal(await annaOnline(), true, 'über den Notweg beigetreten heißt anwesend');
+
+  // Jetzt kommt der Strom doch noch – und reißt gleich wieder ab.
+  const strom = await fetch(`${base}/api/events?clientId=${ID}&role=player`);
+  await warte(300);
+  assert.equal(await annaOnline(), true);
+  await strom.body.cancel().catch(() => {});
+  await warte(400);
+  assert.equal(await annaOnline(), false, 'im Moment des Abrisses ist sie weg – das stimmt ja');
+
+  // Und das Handy fragt weiter. Genau das ist das Lebenszeichen.
+  await fetch(`${base}/api/state?clientId=${ID}&role=player`);
+  await warte(200);
+  assert.equal(await annaOnline(), true, 'die erste Abfrage danach holt sie zurück');
+
+  // Gegenprobe: Ein Gerät, das schon als anwesend gilt, löst keinen Rundruf
+  // aus – sonst ginge bei jedem Takt jedes Handys ein Rundruf an alle.
+  const vorher = (await zustand(base)).lage;
+  for (let i = 0; i < 5; i++) await fetch(`${base}/api/state?clientId=${ID}&role=player`);
+  await warte(200);
+  assert.equal((await zustand(base)).lage, vorher, 'Abfragen allein ändern den Stand nicht');
+});

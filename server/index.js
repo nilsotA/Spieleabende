@@ -390,6 +390,12 @@ function connectionsOf(clientId) {
    siehe /api/state. Wer sich länger nicht meldet, gilt als weg; ohne offene
    Verbindung gibt es ja kein Auflegen, das man mitbekäme. */
 const abfragen = new Map(); // clientId -> { zeit, isHost }
+
+/** Steht dieses Gerät in einem Team und gilt dort gerade als weg? */
+function giltAlsWeg(clientId) {
+  return state.teams.some((t) => t.members.some(
+    (m) => m.clientId === clientId && m.online === false));
+}
 /* Länger als der Warteraum hält (HALTE_ZEIT): Ein Handy, dessen Anfrage
    gerade offen liegt, meldet sich in dieser Zeit ja gerade nicht – es wartet.
    Dass jemand wirklich weg ist, merkt der Server schneller und genauer daran,
@@ -1403,8 +1409,34 @@ async function apiHandler(req, res, url, pathname, rolle) {
   if (pathname === '/api/state' && req.method === 'GET') {
     const clientId = url.searchParams.get('clientId') || '';
     const isHost = url.searchParams.get('role') === 'host' && rolle === 'host';
-    if (clientId && !abfragen.has(clientId) && connectionsOf(clientId).length === 0) {
-      // Erst beim Umschalten melden – nicht bei jeder Abfrage.
+    /*
+     * Auch der Notweg ist ein Lebenszeichen – und zwar jedes Mal.
+     *
+     * „Erst beim Umschalten melden" war richtig gedacht und falsch geprüft:
+     * Als Umschalter diente `!abfragen.has(clientId)`, und genau diesen
+     * Eintrag frischt die vorletzte Zeile bei JEDER Abfrage wieder auf. Wer
+     * durchgehend abfragt, kommt also nie wieder durch diese Bedingung.
+     *
+     * Das trifft ein Handy, das einmal über den Notweg kam, danach doch noch
+     * einen Ereignisstrom bekam und den wieder verlor – der Normalfall hinter
+     * einem Vermittler, der lange Antworten kappt. Der Strom meldet beim
+     * Schließen offline und räumt `abfragen` nicht ab; die Abfragen danach
+     * können es nicht zurücknehmen.
+     *
+     * Gemessen: 34 Abfragen über 51 Sekunden, also weit über der Frist von
+     * 40 – durchgehend `online: false`. Hört dasselbe Gerät 45 Sekunden lang
+     * auf zu fragen, räumt der Kehrbesen den Eintrag weg, und die nächste
+     * Abfrage setzt es sofort wieder auf `true`. Bestraft wurde also genau
+     * das Handy, das ununterbrochen erreichbar war.
+     *
+     * Am Tisch steht dann in der Teamzeile „Anna ⚪", im Host-Menü „Rot · 1
+     * offline" und daneben der Knopf „Offline entfernen" – und der Host wirft
+     * damit jemanden aus dem Team, der neben ihm sitzt und dessen Buzzer geht.
+     *
+     * Gefragt wird deshalb nach dem, was gemeint war: Gilt das Gerät gerade
+     * als weg? Nur dann wird umgeschaltet, und nur dann geht ein Rundruf raus.
+     */
+    if (clientId && connectionsOf(clientId).length === 0 && giltAlsWeg(clientId)) {
       G.setMemberOnline(state, clientId, true);
       broadcast();
     }
