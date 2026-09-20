@@ -226,11 +226,33 @@ for (const evt of ['pointerup', 'pointercancel', 'pointerleave']) {
 }
 document.addEventListener('keydown', (ev) => {
   if (ev.key !== ' ' || ev.repeat) return;
-  if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+  const fokus = document.activeElement;
+  if (['INPUT', 'TEXTAREA'].includes(fokus?.tagName)) return;
   // Vor dem Beitreten gehört die Leertaste der Anmeldung: Sonst schluckt das
   // preventDefault das Aktivieren der Team-Kacheln, und am Laptop kommt man
   // mit der Tastatur nicht mehr ins Spiel.
   if (!state?.you?.teamId) return;
+  /*
+   * Und danach gilt dasselbe für jeden anderen Knopf der Seite.
+   *
+   * Die Regel darüber endete beim Beitreten – ab da nahm der Buzzer die
+   * Leertaste für sich, egal worauf der Fokus stand. Gemessen mit einem Laptop
+   * als Buzzer: Fokus auf dem Tonschalter, Leertaste – nichts. Fokus auf
+   * „Team wechseln“, Leertaste – nichts. Beide Knöpfe waren mit der Tastatur
+   * nicht mehr erreichbar, und das ohne jede Rückmeldung.
+   *
+   * Steht der Fokus auf einem Bedienelement, gehört die Leertaste ihm – mit
+   * einer Ausnahme: dem Buzzer selbst. Der hängt an `pointerdown` auf
+   * #buzz-zone, nicht an `click`; der Klick, den der Browser aus der
+   * Leertaste macht, läuft bei ihm ins Leere. Gemessen: Ohne diese Ausnahme
+   * buzzte die Leertaste nicht mehr, sobald der Fokus auf dem Buzzer stand –
+   * genau die Lage, in die man am Laptop nach einem Tabulator gerät.
+   *
+   * Nur wenn nirgends ein Fokus sitzt – der Normalfall auf dem Handy – oder
+   * wenn er auf dem Buzzer steht, ist die Leertaste der Buzzer.
+   */
+  if (fokus && fokus !== document.body && !buzzer.contains(fokus)
+    && fokus.closest('button, a[href], select, summary, [role=\"button\"]')) return;
   ev.preventDefault();
   pressBuzzer();
 });

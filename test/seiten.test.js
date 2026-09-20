@@ -308,6 +308,44 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Die Leertaste gehört dem Knopf, auf dem der Fokus steht.
+ *
+ * Der Buzzer nimmt die Leertaste für sich, sobald jemand beigetreten ist –
+ * samt `preventDefault`. Damit aktivierte sie keinen anderen Knopf der Seite
+ * mehr. Gemessen mit einem Laptop als Buzzer: Fokus auf dem Tonschalter,
+ * Leertaste – nichts. Fokus auf „Team wechseln“, Leertaste – nichts. Beide
+ * mit der Tastatur unerreichbar, ohne jede Rückmeldung.
+ *
+ * Der Code kannte das Problem schon: Die Zeile darüber hält die Leertaste vor
+ * dem Beitreten frei, „sonst schluckt das preventDefault das Aktivieren der
+ * Team-Kacheln, und am Laptop kommt man mit der Tastatur nicht mehr ins
+ * Spiel“. Nach dem Beitreten galt dieselbe Überlegung – nur die Regel nicht.
+ *
+ * Die Ausnahme für den Buzzer selbst ist gemessen nötig, nicht vorsorglich:
+ * Er hängt an `pointerdown` auf #buzz-zone, nicht an `click`. Der Klick, den
+ * der Browser aus der Leertaste macht, läuft bei ihm ins Leere – ohne die
+ * Ausnahme buzzte die Leertaste nicht mehr, sobald der Fokus auf dem Buzzer
+ * stand. Genau dort landet man am Laptop nach einem Tabulator.
+ */
+test('die Leertaste lässt andere Knöpfe des Handys in Ruhe', () => {
+  const js = ohneKommentare(lies('player.js'));
+  const handler = js.slice(js.indexOf("addEventListener('keydown'"));
+  const bis = handler.indexOf('pressBuzzer();');
+  assert.ok(bis > 0, 'der Leertasten-Handler sollte auffindbar bleiben');
+  const rumpf = handler.slice(0, bis);
+
+  // Eingabefelder waren schon vorher ausgenommen – das muss so bleiben.
+  assert.match(rumpf, /INPUT/, 'Eingabefelder behalten die Leertaste');
+  // Und jetzt auch jedes andere Bedienelement.
+  assert.match(rumpf, /closest\(/,
+    'steht der Fokus auf einem Bedienelement, gehört ihm die Leertaste');
+  assert.match(rumpf, /button/, 'Köpfe wie <button> gehören in die Liste');
+  // Der Buzzer ist die Ausnahme von der Ausnahme.
+  assert.match(rumpf, /buzzer\.contains\(/,
+    'der Buzzer selbst muss die Leertaste behalten – er hört auf pointerdown, nicht auf click');
+});
+
+/*
  * Jede Seite muss die Farben kennen, die ihr Stylesheet benutzt.
  *
  * Eine ungültige `var()` ist in CSS keine Kleinigkeit: Die ganze Deklaration
