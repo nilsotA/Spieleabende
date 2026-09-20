@@ -979,3 +979,132 @@ test('in Anagramm-Kategorien passen die Buchstaben aller genannten Wörter', asy
   }
   assert.deepEqual(fehler, [], `keine Umstellung: \n${fehler.join('\n')}`);
 });
+
+/*
+ * Zahlen sind das, was eine Frage ausmacht – und fielen aus der Prüfung.
+ *
+ * `loesungswoerter` sortiert Wörter unter vier Zeichen aus, damit „der“ und
+ * „mit“ nicht mitvergleichen. Die Latte traf aber auch die Ziffern: Von
+ * „399 Euro“ blieb „euro“ übrig, von „3 Euro“ ebenfalls – und schon meldete
+ * die Prüfung zwei völlig gesunde Nachbarfragen als Verrat. Gemessen an fünf
+ * selbstgetippten Kategorien mit 20 heilen Fragen: sechs Meldungen vorher,
+ * keine nachher, bei gleich gefundenen echten Fällen.
+ *
+ * Die Gegenrichtung ist die einzelne Ziffer: Eine 1 oder 6 steht in jeder
+ * Zahlenkategorie irgendwo, und genau zwei mitgelieferte Sätze stolperten
+ * darüber, als die Ziffern anfingen mitzuzählen.
+ */
+test('eine Zahl in der Lösung zählt mit – eine einzelne Ziffer allein nicht', async () => {
+  const { verraeteneLoesungen } = await import('../public/fragenpruefung.js');
+
+  // Gleiche Einheit, verschiedene Zahlen: kein Verrat.
+  assert.deepEqual(verraeteneLoesungen([
+    { text: 'Wie viel Euro kostete der erste iPod bei seinem Start?', answer: '399 Euro' },
+    { text: 'Was zahlt man in Hamburg für eine Einzelfahrt im Bus?', answer: '3 Euro' },
+  ]), [], 'die Einheit allein ist nicht die Lösung');
+  assert.deepEqual(verraeteneLoesungen([
+    { text: 'Wie lange dauert ein Fußballspiel ohne Nachspielzeit?', answer: '90 Minuten' },
+    { text: 'Wie lange braucht das Licht von der Sonne zur Erde?', answer: '8 Minuten' },
+  ]), [], 'dasselbe mit Minuten');
+
+  // Gleiche Zahl UND gleiche Einheit: sehr wohl ein Verrat.
+  const porto = verraeteneLoesungen([
+    { text: 'Was kostet eine Erstklassbriefmarke in Deutschland?', answer: '95 Cent' },
+    { text: 'Warum stieg das Porto zuletzt auf 95 Cent?', answer: 'Wegen der Personalkosten' },
+  ]);
+  assert.equal(porto.length, 1, 'die Zahl steht in der Nachbarfrage');
+  assert.equal(porto[0].i, 0);
+
+  // Und die Jahreszahl, die vorher durchs Raster fiel, weil sie zu kurz war.
+  const mauer = verraeteneLoesungen([
+    { text: 'In welchem Jahr fiel die Berliner Mauer?', answer: '1989' },
+    { text: 'Wer war 1989 Bundeskanzler, als die Mauer fiel?', answer: 'Helmut Kohl' },
+  ]);
+  assert.equal(mauer.length, 1, 'die Jahreszahl steht wörtlich in der Nachbarfrage');
+
+  // Eine nackte einzelne Ziffer kann die Prüfung nicht beurteilen – genau so
+  // stehen zwei mitgelieferte Kategorien da.
+  assert.deepEqual(verraeteneLoesungen([
+    { text: 'Wie viele Zahlen kreuzt man beim deutschen Lotto auf einem Tippfeld an?', answer: '6' },
+    { text: 'Wie groß ist die Chance, mit einem Würfel eine Sechs zu werfen?', answer: '1 zu 6' },
+  ]), [], 'dieselbe Ziffer, zweimal Zufall');
+  assert.deepEqual(verraeteneLoesungen([
+    { text: 'Welche Schulnote ist in Deutschland die beste?', answer: 'Die 1' },
+    { text: 'Welchen Notenschnitt hat ein Abitur mit der Bestnote?', answer: '1,0' },
+  ]), [], 'die 1 aus 1,0 ist kein Verrat');
+});
+
+/*
+ * Ein Wort, das durch die halbe Kategorie läuft, verrät nichts.
+ *
+ * Wer eine Kategorie „Fußball“ schreibt und als Lösung einmal schlicht
+ * „Fußball“ hat, bekam zwei der drei Nachbarfragen als Verrat gemeldet –
+ * beide völlig in Ordnung, sie hatten nur dasselbe Wort im Text. Dasselbe mit
+ * einer Berlin-Kategorie, in der „Berlin“ die Lösung einer Frage ist: drei
+ * Meldungen, gemessen.
+ *
+ * Das Gegenstück: Ein Wort, das nur in einer anderen Frage steht, ist sehr
+ * wohl ein Verrat – dort weiß man danach genau, welche Frage gemeint ist.
+ */
+test('ein Wort, das durch die halbe Kategorie läuft, ist kein Verrat', async () => {
+  const { verraeteneLoesungen } = await import('../public/fragenpruefung.js');
+
+  const fussball = [
+    { text: 'Welcher Verein gewann 2020 die Champions League?', answer: 'FC Bayern München' },
+    { text: 'Wie viele Spieler stehen beim Fußball je Team auf dem Platz?', answer: 'Elf' },
+    { text: 'Welcher Sport wird im Maracanã-Stadion gespielt?', answer: 'Fußball' },
+    { text: 'In welchem Land fand die Fußball-WM 2014 statt?', answer: 'Brasilien' },
+  ];
+  assert.deepEqual(verraeteneLoesungen(fussball), [],
+    '„Fußball“ steht in der halben Kategorie – das zeigt auf keine Frage');
+
+  const berlin = [
+    { text: 'Wie viele Einwohner hat Berlin ungefähr?', answer: '3,7 Millionen' },
+    { text: 'Welche deutsche Stadt hat als einzige über 3,7 Millionen Einwohner?', answer: 'Berlin' },
+    { text: 'Welcher Fluss fließt durch Berlin?', answer: 'Die Spree' },
+    { text: 'Wie heißt der Flughafen Berlins?', answer: 'BER' },
+  ];
+  const treffer = verraeteneLoesungen(berlin);
+  // Die Einwohnerzahl bleibt ein Verrat – sie steht wörtlich in Frage 2.
+  assert.deepEqual(treffer.map((t) => `${t.i}←${t.j}`), ['0←1'],
+    '„Berlin“ selbst läuft durch die Kategorie, „3,7 Millionen“ nicht');
+
+  // Bei zwei Fragen kann nichts „durchgängig“ sein: Es gibt nur eine andere.
+  assert.equal(verraeteneLoesungen([
+    { text: 'Welcher Sport wird im Maracanã-Stadion gespielt?', answer: 'Fußball' },
+    { text: 'Wie viele Spieler stehen beim Fußball je Team auf dem Platz?', answer: 'Elf' },
+  ]).length, 1, 'zu zweit bleibt jede Übereinstimmung ein Fund');
+});
+
+/*
+ * Die eigene Lösung muss an einem Wortanfang stehen, nicht irgendwo.
+ *
+ * `selbstverraeter` wirft Leerzeichen und Bindestriche weg und sucht dann am
+ * Stück – das muss es, sonst fände es „Siebenmeter“ nicht in
+ * „Sieben-Meter-Linie“. Ohne Bedingung entstehen dabei aber Nahtstellen, die
+ * im Text nicht existieren: „auf eine“ enthält „feine“, „Spanier entwickelte“
+ * enthält „nieren“. Über alle 1008 mitgelieferten Fragen gezählt: 94 solche
+ * Funde quer über eine Wortgrenze.
+ */
+test('der Selbstverräter liest keine Wörter zusammen, die keine sind', async () => {
+  const { selbstverraeter } = await import('../public/fragenpruefung.js');
+
+  // Gebaute Fälle – die Lösung steckt nur quer über einer Grenze im Text.
+  for (const f of [
+    { text: 'Welcher Spanier entwickelte zusammen mit Georges Braque den Kubismus?', answer: 'Die Nieren' },
+    { text: 'Welcher Käse gehört klassisch auf eine Pizza Margherita?', answer: 'Feine' },
+    { text: 'Welcher lebende Zusatz lässt einen Brotteig aufgehen?', answer: 'Steinen' },
+  ]) {
+    assert.deepEqual(selbstverraeter([f]), [],
+      `„${f.answer}“ steht nur quer über einer Wortgrenze in „${f.text}“`);
+  }
+
+  // Und die beiden echten Fälle, wegen derer es die Prüfung überhaupt gibt.
+  for (const f of [
+    { text: 'Wie nennt man den Wurf von der Sieben-Meter-Linie?', answer: 'Der Siebenmeter' },
+    { text: 'Welche Sendung mit der Maus erklärt sonntags die Welt?', answer: 'Die Sendung mit der Maus' },
+  ]) {
+    assert.equal(selbstverraeter([f]).length, 1,
+      `„${f.answer}“ steht am Stück und an einem Wortanfang in der eigenen Frage`);
+  }
+});
