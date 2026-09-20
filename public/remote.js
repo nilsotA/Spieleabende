@@ -17,24 +17,21 @@ let state = null;
    Wer ansagt und dann abgibt, hat nicht angesagt. */
 let einsatzFuer = null;
 /**
- * Die Uhr beim freien Buzzer – hier als Sekundenzahl in der Lagezeile.
+ * Die Uhr beim freien Buzzer – hier als Sekundenzahl neben der Lagezeile.
  *
  * Der Host sieht den Balken auf der Leinwand; auf diesem Gerät geht es darum,
  * wann er auflösen kann. Gewertet wird nichts, entschieden wird am Tisch.
+ *
+ * Sie hat einen eigenen Knoten (#r-uhr), und das ist der Grund: starteUhr()
+ * hört bei null auf zu ticken – „⏱ Zeit ist um" wird also genau einmal
+ * geschrieben. Solange Zeile und Uhr derselbe Knoten waren, baute der nächste
+ * beliebige Rundruf (ein Handy wacht auf) die Lagezeile neu und übermalte es;
+ * danach stand dort wieder „Buzzer ist frei", als liefe die Uhr noch, und sie
+ * kam nie wieder. Der Buzzer bleibt ja offen – die abgelaufene Uhr ist genau
+ * der Hinweis, dass jetzt aufgelöst werden darf.
  */
 let uhrStopp = null;
 let uhrSchluessel = null;
-let uhrText = '';
-/*
- * Was die Uhr zuletzt an die Lagezeile gehängt hat.
- *
- * starteUhr() hört bei null auf zu ticken – „⏱ Zeit ist um" wird also genau
- * einmal geschrieben. Der nächste beliebige Rundruf (ein Handy wacht auf) baute
- * die Lagezeile neu und übermalte es; danach stand dort wieder „Buzzer ist
- * frei", als liefe die Uhr noch, und sie kam nie wieder. Der Buzzer bleibt ja
- * offen – die abgelaufene Uhr ist genau der Hinweis, dass jetzt aufgelöst
- * werden darf.
- */
 
 function renderUhr() {
   const q = state.current;
@@ -304,10 +301,9 @@ function render() {
           big('Weiß nicht → Buzzer frei', 'btn-ghost', () => act('pass'), seit),
         );
       } else if (q.step === 'buzz' && !q.buzzedTeamId) {
-        uhrText = q.stechen
+        setzeText(phase, q.stechen
           ? 'Stechen – wer zuerst drückt, antwortet.'
-          : `Buzzer ist frei · ${q.halfValue} Punkte`;
-        setzeText(phase, uhrText);
+          : `Buzzer ist frei · ${q.halfValue} Punkte`);
         // „Keiner weiß es" zuerst: Das ist der Knopf, der die Frage beendet,
         // und bei acht Teams stand er vorher unter sieben Vertreterknöpfen –
         // also außerhalb des Bildschirms, obwohl der Tisch längst wartet.

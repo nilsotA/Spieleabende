@@ -808,28 +808,21 @@ function renderPicker() {
  */
 let uhrStopp = null;
 let uhrSchluessel = null;
-/*
- * Der Grundtext der Lagezeile – ohne Uhr.
- *
- * „⏱ Zeit ist um" wird genau einmal geschrieben: starteUhr() hört bei null
- * auf zu ticken. Solange Zeile und Uhr derselbe Knoten waren, übermalte der
- * nächste beliebige Rundruf (ein Handy wacht auf) den Satz, und danach stand
- * dort wieder „Buzzer ist frei", als liefe die Uhr noch. Dagegen wurde der
- * Anhang bei jedem Neuaufbau wieder angeklebt.
- *
- * Seit die Uhr ein eigenes Feld hat (#p-uhr, siehe player.html), kann der
- * Neuaufbau sie gar nicht mehr treffen – der Anhang als Gedächtnis ist damit
- * überflüssig geworden. Der Buzzer bleibt übrigens offen; die abgelaufene Uhr
- * ist genau der Hinweis, dass jetzt aufgelöst werden darf.
- */
-let uhrText = '';
 
+/*
+ * Warum die Uhr einen eigenen Knoten hat (#p-uhr, siehe player.html).
+ *
+ * „⏱ Zeit ist um" wird genau einmal geschrieben: starteUhr() hört bei null auf
+ * zu ticken. Solange Zeile und Uhr derselbe Knoten waren, übermalte der nächste
+ * beliebige Rundruf (ein Handy wacht auf) den Satz, und danach stand dort
+ * wieder „Buzzer ist frei", als liefe die Uhr noch. Mit eigenem Knoten kann der
+ * Neuaufbau sie gar nicht mehr treffen.
+ */
 function renderUhr() {
   const q = state.current;
   const dauer = (state.settings?.buzzUhr || 0) * 1000;
   const laeuft = !!q && q.step === 'buzz' && !q.buzzedTeamId && dauer > 0
     && !state.pause && state.you?.canBuzz;
-  const status = $('#p-status');
   const schluessel = laeuft ? `${q.catIdx}:${q.rowIdx}:${(q.lockedOut || []).length}` : null;
   if (!laeuft) {
     uhrStopp?.();
@@ -945,7 +938,6 @@ function renderBuzzer(prev) {
     const grundtext = q.stechen
       ? 'Stechen! Wer zuerst drückt und richtig liegt, gewinnt.'
       : `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`;
-    uhrText = grundtext;
     setzeText(status, grundtext);
     status.classList.add('you');
     // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst

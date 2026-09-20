@@ -51,9 +51,6 @@ function rsRemainder(data, n) {
 
 /* ------------------------------------------------------------- Kapazitäten */
 
-// Gesamtzahl Codewörter je Version (1–10).
-const TOTAL = [26, 44, 70, 100, 134, 172, 196, 242, 292, 346];
-
 // Je Version: [EC-Codewörter pro Block, Blöcke Gruppe 1, Daten je Block G1,
 //              Blöcke Gruppe 2, Daten je Block G2]
 const BLOCKS = {

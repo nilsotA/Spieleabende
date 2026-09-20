@@ -1672,3 +1672,53 @@ test('das Fragepanel misst sich, bevor es sich bewegt', () => {
   assert.match(abbruch, /panel\.style\.animation = '';/,
     'auch beim Abbruch muss die Bewegung wieder freigegeben werden');
 });
+
+/*
+ * Werte, die beschrieben und nie gelesen werden.
+ *
+ * Sie entstehen nicht beim Schreiben, sondern beim Umbauen: Die Uhr auf Handy
+ * und Fernbedienung hängte ihre Sekunden früher an die Lagezeile, und damit
+ * dort „⏱ Zeit ist um" einen Rundruf überlebte, merkte sich `uhrText` den
+ * Grundtext. Seit die Uhr einen eigenen Knoten hat, kann ein Neuaufbau sie gar
+ * nicht mehr treffen – das Gedächtnis war überflüssig, blieb aber stehen und
+ * wurde weiter befüllt. In qr.js stand daneben eine zweite Kapazitätstabelle,
+ * die niemand mit der ersten verglich.
+ *
+ * Beides ist harmlos und trotzdem schlecht: Wer die Datei liest, hält so einen
+ * Wert für einen Teil der Mechanik und sucht, wo er wirkt.
+ *
+ * Geprüft werden nur Modulwerte – am Zeilenanfang deklariert, ohne `export`.
+ * Ein Fund heißt nicht „weg damit", sondern „nachsehen": Entweder fehlt der
+ * Gebrauch, oder der Wert ist ein Rest.
+ */
+test('kein Modulwert wird beschrieben, ohne je gelesen zu werden', () => {
+  const WURZEL = path.join(PUBLIC, '..');
+  const dateien = [
+    ...fs.readdirSync(PUBLIC).filter((f) => f.endsWith('.js')).map((f) => path.join('public', f)),
+    ...fs.readdirSync(path.join(WURZEL, 'server')).filter((f) => f.endsWith('.js')).map((f) => path.join('server', f)),
+  ].sort();
+
+  const tot = [];
+  for (const datei of dateien) {
+    const zeilen = fs.readFileSync(path.join(WURZEL, datei), 'utf8').split('\n');
+    const namen = [];
+    zeilen.forEach((z, i) => {
+      const m = /^(let|const|var)\s+([A-Za-z_$][\w$]*)\s*=/.exec(z);
+      if (m) namen.push([m[2], i + 1]);
+    });
+    for (const [name, zeile] of namen) {
+      const muster = new RegExp(`\\b${name}\\b`, 'g');
+      let gelesen = 0;
+      zeilen.forEach((z, i) => {
+        if (i + 1 === zeile) return;                       // die Deklaration selbst
+        if (!muster.test(z)) return;
+        muster.lastIndex = 0;
+        if (/^\s*(\/\/|\*|\/\*)/.test(z)) return;          // im Kommentar steht er absichtlich
+        if (new RegExp(`^\\s*${name}\\s*=[^=]`).test(z)) return; // reine Zuweisung
+        gelesen += 1;
+      });
+      if (!gelesen) tot.push(`${datei}:${zeile}  ${name}`);
+    }
+  }
+  assert.deepEqual(tot, []);
+});
