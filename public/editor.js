@@ -176,7 +176,7 @@ function render() {
               'aria-label': `Frage – ${wo}`,
               oninput: (ev) => {
                 q.text = ev.target.value;
-                laengeMarkieren(ev.target);
+                laengeMarkieren(ev.target, 'frage');
                 hoeheAnpassen(ev.target);
                 verraeterMarkieren();
                 persistSoon();
@@ -188,6 +188,7 @@ function render() {
                 'aria-label': `Antwort – ${wo}`,
                 oninput: (ev) => {
                   q.answer = ev.target.value;
+                  laengeMarkieren(ev.target, 'antwort');
                   hoeheAnpassen(ev.target);
                   verraeterMarkieren();
                   persistSoon();
@@ -208,6 +209,7 @@ function render() {
                 rows: 1,
                 oninput: (ev) => {
                   q.note = ev.target.value.trim() || null;
+                  laengeMarkieren(ev.target, 'zusatz');
                   hoeheAnpassen(ev.target);
                   persistSoon();
                 },
@@ -510,17 +512,44 @@ async function save(overwrite) {
  */
 const LEINWAND_GRENZE = 105;
 
-function laengeMarkieren(feld) {
-  const zulang = (feld.value || '').length > LEINWAND_GRENZE;
+/*
+ * Und dieselbe Schranke für die beiden anderen Felder.
+ *
+ * Markiert wurde bisher nur die Frage. Das Handbuch sagt aber „Frage bis 105,
+ * Lösung bis 70, Zusatz bis 145 Zeichen – darüber sagt es der Editor", und der
+ * Testlauf über die mitgelieferten Sätze prüft genau diese drei Zahlen. Wer
+ * einen eigenen Satz schreibt, hat nur den Editor: Eine Lösung mit 95 Zeichen
+ * und ein Zusatz mit 190 gingen glatt durch, nichts wurde rot, und am Abend
+ * stand beim Auflösen alles drei gleichzeitig im Kasten.
+ *
+ * Gesperrt wird weiterhin nichts – geschrieben ist geschrieben, so steht es
+ * auch über dem Zähler im Fortschrittsbalken. Markiert wird schon.
+ */
+const GRENZEN = { frage: LEINWAND_GRENZE, antwort: 70, zusatz: 145 };
+const GRENZ_TEXT = {
+  frage: 'sobald Lösung und Zusatz dazukommen, schrumpft der ganze Kasten',
+  antwort: 'die Lösung steht beim Auflösen groß unter der Frage',
+  zusatz: 'der Zusatz steht ganz unten und ist die kleinste Schrift im Kasten',
+};
+
+function laengeMarkieren(feld, art = 'frage') {
+  const grenze = GRENZEN[art] || LEINWAND_GRENZE;
+  const zulang = (feld.value || '').length > grenze;
   feld.classList.toggle('zulang', zulang);
   feld.title = zulang
-    ? `${feld.value.length} Zeichen – sobald Lösung und Zusatz dazukommen, `
-      + `schrumpft der ganze Kasten. Unter ${LEINWAND_GRENZE} bleibt auch der Zusatz lesbar.`
+    ? `${feld.value.length} Zeichen – ${GRENZ_TEXT[art]}. Unter ${grenze} bleibt auf der Leinwand alles lesbar.`
     : '';
 }
 
 function alleLaengenMarkieren() {
-  for (const feld of document.querySelectorAll('.qrow > textarea')) laengeMarkieren(feld);
+  for (const zeile of document.querySelectorAll('.qrow')) {
+    const frage = zeile.querySelector(':scope > textarea');
+    if (frage) laengeMarkieren(frage, 'frage');
+    const antwort = zeile.querySelector('.antwort > textarea:not(.notiz)');
+    if (antwort) laengeMarkieren(antwort, 'antwort');
+    const zusatz = zeile.querySelector('.antwort > textarea.notiz');
+    if (zusatz) laengeMarkieren(zusatz, 'zusatz');
+  }
   verraeterMarkieren();
 }
 

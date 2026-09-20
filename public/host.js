@@ -2814,7 +2814,21 @@ $('#zusammenfassung').addEventListener('click', (ev) => {
   if (ev.target.id === 'zusammenfassung') zeigeZusammenfassung(false);
 });
 
-$('#btn-new-game').addEventListener('click', () => act('backToLobby'));
+/*
+ * „Neues Spiel" ist der einzige Zug des Abends, der sich nicht zurücknehmen
+ * lässt: Er räumt Punkte, Bilanzen, Auszeichnungen, den Rückweg und die
+ * Sicherung ab. Und er steht am Endstand direkt neben „📋 Zusammenfassung"
+ * (host.html), also genau neben dem Knopf, den der Host in dem Moment wirklich
+ * sucht – der Text für den Gruppenchat ist danach nicht mehr zu holen.
+ *
+ * Das Handbuch sagt seit jeher, der Knopf frage nach. Er tat es nicht.
+ */
+$('#btn-new-game').addEventListener('click', () => {
+  if (!confirm('Neues Spiel starten?\n\n'
+    + 'Endstand, Auszeichnungen und Bilanzen sind dann weg, und die '
+    + 'Zusammenfassung lässt sich danach nicht mehr kopieren.')) return;
+  act('backToLobby');
+});
 $('#btn-menu').addEventListener('click', openMenu);
 $('#btn-close-menu').addEventListener('click', closeMenu);
 $('#menu').addEventListener('click', (ev) => {

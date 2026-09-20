@@ -1768,3 +1768,67 @@ test('der Bezugspunkt der Vertreterknöpfe läuft außerhalb des Buzzer-Zweigs m
   assert.match(liste, /q\.lockedOut \|\| \[\]/,
     'und sie darf sich nicht auf ein Feld verlassen, das es dort nicht gibt');
 });
+
+/*
+ * Was der Editor markiert, und was das Handbuch darüber sagt.
+ *
+ * „Als Faustzahl: Frage bis 105, Lösung bis 70, Zusatz bis 145 Zeichen –
+ * darüber sagt es der Editor." Gesagt hat er es nur zur Frage: Die Lösung war
+ * ohne jede Grenze, der Zusatz lief bis zum maxlength von 200, und rot wurde
+ * nie etwas. Wer einen eigenen Satz schreibt, hat aber nur den Editor – für
+ * seinen Satz läuft kein Testlauf.
+ *
+ * Im Browser nachgemessen, dieselbe Zeile mit drei Belegungen:
+ *
+ *   Frage 120 ROT  · Lösung 4        · Zusatz 5
+ *   Frage 12       · Lösung 95 ROT   · Zusatz 5
+ *   Frage 12       · Lösung 4        · Zusatz 190 ROT
+ *
+ * Gesperrt wird weiterhin nichts – geschrieben ist geschrieben.
+ */
+test('der Editor misst alle drei Felder an denselben Zahlen wie der Testlauf', () => {
+  const js = ohneKommentare(lies('editor.js'));
+  const tabelle = /const GRENZEN = \{[^}]*\}/.exec(js)?.[0] || '';
+  assert.ok(tabelle, 'die Grenzen des Editors sollten auffindbar bleiben');
+  assert.match(tabelle, /frage: LEINWAND_GRENZE/);
+  assert.match(tabelle, /antwort: 70/);
+  assert.match(tabelle, /zusatz: 145/);
+
+  // Und dieselben Zahlen im Testlauf über die mitgelieferten Sätze.
+  const pruefung = fs.readFileSync(path.join(PUBLIC, '..', 'test', 'questions.test.js'), 'utf8');
+  const bar = /GRENZEN = \{ text: (\d+), answer: (\d+), note: (\d+) \}/.exec(pruefung);
+  assert.ok(bar, 'die Schranken des Testlaufs sollten auffindbar bleiben');
+  assert.deepEqual(bar.slice(1, 4).map(Number), [105, 70, 145],
+    'Editor und Testlauf messen dieselbe Leinwand – die Zahlen gehören zusammen');
+
+  // Alle drei Felder müssen auch wirklich markiert werden.
+  for (const art of ['frage', 'antwort', 'zusatz']) {
+    assert.ok(js.includes(`laengeMarkieren(ev.target, '${art}')`),
+      `das Feld „${art}" muss beim Tippen gemessen werden`);
+  }
+});
+
+/*
+ * „Neues Spiel" fragt nach – auf beiden Geräten.
+ *
+ * Es ist der einzige Zug des Abends, der sich nicht zurücknehmen lässt: Er
+ * räumt Punkte, Bilanzen, Auszeichnungen, den Rückweg und die Sicherung ab.
+ * Auf der Leinwand steht er am Endstand direkt neben „📋 Zusammenfassung"
+ * (host.html) – also neben dem Knopf, den der Host in dem Moment wirklich
+ * sucht; der Text für den Gruppenchat ist danach nicht mehr zu holen. Auf der
+ * Fernbedienung liegt er einen Daumenbreit neben „⚡ Stechen starten".
+ *
+ * Das Handbuch sagt seit jeher, der Knopf frage nach. Er tat es nicht.
+ */
+test('„Neues Spiel" fragt auf Leinwand und Fernbedienung nach', () => {
+  const host = ohneKommentare(lies('host.js'));
+  const neu = /\$\('#btn-new-game'\)\.addEventListener\('click', \(\) => \{[\s\S]*?\n\}\);/.exec(host)?.[0] || '';
+  assert.ok(neu, 'der Knopf sollte auffindbar bleiben');
+  assert.match(neu, /confirm\(/, 'ohne Rückfrage ist der Abend einen Fehlgriff entfernt');
+  assert.match(neu, /if \(!confirm[\s\S]*?\) return;/, 'und bei „Abbrechen" muss er wirklich nichts tun');
+
+  const fern = ohneKommentare(lies('remote.js'));
+  const fernNeu = /big\('Neues Spiel',[\s\S]*?\}, seit\)\)/.exec(fern)?.[0] || '';
+  assert.ok(fernNeu, 'auch auf der Fernbedienung sollte er auffindbar bleiben');
+  assert.match(fernNeu, /if \(!confirm[\s\S]*?\) return;/);
+});

@@ -239,8 +239,11 @@ inzwischen geändert, prallt sie ab, statt dem falschen Team Punkte zu geben.
 Das greift auch dann, wenn Leinwand und Fernbedienung kurz auseinanderlaufen.
 
 Einen Satz starten geht nur aus der Lobby. Mitten in einer Runde würde das alle
-Punkte löschen, und zurücknehmen ließe sich davon nichts – wer neu anfangen will,
-geht über „Neues Spiel" zurück, und der Knopf fragt dort nach.
+Punkte löschen, und zurücknehmen ließe sich davon nichts. Zurück in die Lobby
+kommt man über „Spiel beenden" im Host-Menü – und am Ende des Abends über
+„Neues Spiel", auf der Leinwand wie auf der Fernbedienung. Alle drei fragen
+vorher nach: Es ist der einzige Zug des Abends, der sich nicht zurücknehmen
+lässt.
 
 ### Wenn etwas abstürzt
 
@@ -547,8 +550,8 @@ in die Datei eingebettet). Speichern geht auf den Server (landet in `data/`) ode
 Download – zwischendurch merkt sich der Browser den Stand automatisch.
 
 **Nicht alles selbst tippen:** Jede Kategorie hat den Knopf **⇱ Holen**. Der zeigt alle
-Kategorien aus allen vorhandenen Sätzen – bei den mitgelieferten sind das 204 – mit Suche
-über Kategorie- und Satznamen. Ein Tipp holt eine davon samt ihren vier Fragen, Antworten,
+Kategorien aus allen vorhandenen Sätzen – wie viele es gerade sind, steht oben im
+Dialog – mit Suche über Kategorie- und Satznamen. Ein Tipp holt eine davon samt ihren vier Fragen, Antworten,
 Bildern und Zusätzen an diesen Platz; danach lässt sie sich normal weiterbearbeiten. Der
 Ursprungssatz bleibt unberührt. Das ist der Zufallsmix von Hand: sechs Kategorien selbst
 aussuchen, statt sie zu erwürfeln.
@@ -572,7 +575,19 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
         }
       ]
     },
-    { "categories": [] }
+    {
+      "categories": [
+        {
+          "name": "Musik",
+          "questions": [
+            { "text": "…", "answer": "…" },
+            { "text": "…", "answer": "…" },
+            { "text": "…", "answer": "…" },
+            { "text": "…", "answer": "…" }
+          ]
+        }
+      ]
+    }
   ]
 }
 ```

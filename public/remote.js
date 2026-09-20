@@ -317,7 +317,15 @@ function render() {
       // die sich nicht zurücknehmen lässt, sieht dann kaputt aus – und wer
       // nachdrückt, hat die Sperre schon überstanden.
       if (offen) setz(big('⚡ Stechen starten', 'btn-primary', () => act('stechen'), seit));
-      setz(big('Neues Spiel', 'btn-ghost', () => act('backToLobby'), seit));
+      // Derselbe Riegel wie auf der Leinwand: Der Zug lässt sich nicht
+      // zurücknehmen, und auf einem Handy, das herumgereicht wird, ist er
+      // einen Daumenbreit von „⚡ Stechen starten" entfernt.
+      setz(big('Neues Spiel', 'btn-ghost', () => {
+        if (!confirm('Neues Spiel starten?\n\n'
+          + 'Endstand, Auszeichnungen und Bilanzen sind dann weg – und '
+          + 'zurückholen lässt sich das nicht.')) return;
+        act('backToLobby');
+      }, seit));
       break;
     }
     case 'question':

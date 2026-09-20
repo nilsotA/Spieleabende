@@ -1189,3 +1189,73 @@ test('das Handbuch zählt den Bestand richtig', async () => {
     [laengsten.text, laengsten.answer, laengsten.note],
     'das Handbuch nennt andere Längste, als im Bestand stehen');
 });
+
+/*
+ * Die Vorlage im Handbuch muss sich laden lassen.
+ *
+ * Sie steht dort zum Abtippen: „Fragensätze sind schlichtes JSON und lassen
+ * sich auch von Hand schreiben" – und dann ein vollständiger Block. Wer ihn
+ * kopierte und seinen Satz daraus baute, bekam beim Laden „Runde 2 hat keine
+ * Kategorien.": Die zweite Runde stand als `{ "categories": [] }` da, gedacht
+ * als Platzhalter.
+ *
+ * Eine Vorlage, die nicht lädt, ist schlimmer als keine: Der Fehler steckt
+ * dann in der Anleitung, und gesucht wird er im eigenen Satz.
+ */
+test('die JSON-Vorlage aus dem Handbuch lädt', async () => {
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  const block = /```json\n([\s\S]*?)```/.exec(readme)?.[1];
+  assert.ok(block, 'die Vorlage sollte im Handbuch weiter stehen');
+
+  let roh;
+  assert.doesNotThrow(() => { roh = JSON.parse(block); }, 'die Vorlage muss gültiges JSON sein');
+  const satz = normalizeSet(roh);
+  assert.equal(satz.rounds.length, 2, 'zwei Runden – Runde 2 verdoppelt, das gehört in die Vorlage');
+  for (const [i, runde] of satz.rounds.entries()) {
+    assert.ok(runde.categories.length >= 1, `Runde ${i + 1} braucht mindestens eine Kategorie`);
+    for (const cat of runde.categories) {
+      assert.equal(cat.questions.length, 4, 'genau vier Fragen je Kategorie – so sagt es der Text daneben');
+    }
+  }
+});
+
+/*
+ * Ein Fragensatz mit Byte-Order-Mark lädt trotzdem.
+ *
+ * Das Handbuch lädt ausdrücklich dazu ein, Sätze von Hand zu schreiben. Wer
+ * das unter Windows im Editor tut, bekommt die Datei oft als „UTF-8 mit BOM"
+ * gespeichert – drei unsichtbare Bytes vor der ersten Klammer. In der
+ * Fragensatz-Auswahl stand dann die Rohmeldung des Parsers, auf Englisch und
+ * mit einem unsichtbaren Zeichen im Zitat:
+ *
+ *   Unexpected token '﻿', "﻿{ "name"... is not valid JSON
+ *
+ * Im eigenen Editor sieht der Satz dabei völlig in Ordnung aus.
+ */
+test('ein Fragensatz mit Byte-Order-Mark lädt', async () => {
+  const { loadSet, listSets, DATA_DIR } = await import('../server/questions.js');
+  const { writeFile, unlink, readFile: lies } = await import('node:fs/promises');
+  const path = await import('node:path');
+  const name = 'test-bom.json';
+  const ziel = path.join(DATA_DIR, name);
+  const vorlage = await lies(path.join(DATA_DIR, 'der-klassiker.json'), 'utf8');
+  await writeFile(ziel, `﻿${vorlage}`, 'utf8');
+  try {
+    const satz = await loadSet(name);
+    assert.equal(satz.rounds.length, 2, 'der Satz muss ganz ankommen');
+    const inListe = (await listSets()).find((s) => s.file === name);
+    assert.ok(inListe, 'und in der Auswahl auftauchen');
+    assert.equal(inListe.error, undefined, inListe.error || '');
+  } finally {
+    await unlink(ziel).catch(() => {});
+  }
+
+  // Kaputtes JSON bleibt kaputt – abgestrichen wird nur das BOM.
+  const kaputt = path.join(DATA_DIR, 'test-kaputt.json');
+  await writeFile(kaputt, '﻿{ "name": "X", ', 'utf8');
+  try {
+    await assert.rejects(() => loadSet('test-kaputt.json'));
+  } finally {
+    await unlink(kaputt).catch(() => {});
+  }
+});

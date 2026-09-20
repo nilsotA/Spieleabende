@@ -17,6 +17,24 @@ const MAX_TEXT = 2000;
  * Wirft bei allem, was das Board verziehen oder Inhalte verlieren würde – lieber eine
  * klare Meldung im Fragensatz-Menü als ein verrutschtes Board am Beamer.
  */
+/**
+ * JSON lesen – und die Byte-Order-Mark abstreifen, die Windows davorsetzt.
+ *
+ * Das Handbuch lädt ausdrücklich dazu ein, Fragensätze von Hand zu schreiben.
+ * Wer das unter Windows im Editor tut, bekommt die Datei oft als „UTF-8 mit
+ * BOM" gespeichert – drei unsichtbare Bytes vor der ersten Klammer. `JSON.parse`
+ * wirft daran, und in der Fragensatz-Auswahl stand dann die Rohmeldung des
+ * Parsers: `Unexpected token '﻿', "﻿{ "name"... is not valid JSON`. Auf Englisch,
+ * mit einem unsichtbaren Zeichen im Zitat, und ohne jeden Hinweis darauf, was
+ * zu tun ist. Der Satz sieht im eigenen Editor völlig in Ordnung aus.
+ *
+ * Abgestrichen wird nur das BOM. Alles andere bleibt ein Fehler – ein kaputtes
+ * JSON soll auffallen.
+ */
+function liesJson(text) {
+  return JSON.parse(String(text).replace(/^﻿/, ''));
+}
+
 export function normalizeSet(raw, fallbackName = 'Fragensatz') {
   if (!raw || typeof raw !== 'object') throw new Error('Fragensatz ist kein Objekt.');
   const rounds = Array.isArray(raw.rounds) ? raw.rounds : null;
@@ -91,7 +109,7 @@ export async function listSets() {
         out.push(hit.info);
         continue;
       }
-      const set = normalizeSet(JSON.parse(await readFile(full, 'utf8')), file.replace(/\.json$/, ''));
+      const set = normalizeSet(liesJson(await readFile(full, 'utf8')), file.replace(/\.json$/, ''));
       await pruefeBilder(set, file);
       const entry = {
         file,
@@ -151,7 +169,7 @@ export async function loadSet(file) {
   const roh = await readFile(path.join(DATA_DIR, safe), 'utf8').catch(() => {
     throw new Error(`Den Fragensatz „${safe}“ gibt es nicht (mehr).`);
   });
-  const raw = JSON.parse(roh);
+  const raw = liesJson(roh);
   const set = normalizeSet(raw, safe.replace(/\.json$/, ''));
   await pruefeBilder(set, safe);
   return set;
