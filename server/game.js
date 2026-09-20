@@ -147,6 +147,8 @@ export function createState() {
     stechenLauf: 0,
     stechenTexte: [],
     stechenSieger: null,
+    // Wer im Stechen danebenlag – gilt über die einzelne Frage hinaus.
+    stechenRaus: [],
     // Welche Ersatzfragen heute schon eingewechselt wurden (siehe ersetzeFrage).
     // Sie stehen in keinem Fragensatz dieses Abends und wären sonst die
     // einzigen, die ein zweites Mal gezogen werden können.
@@ -401,6 +403,7 @@ export function startGame(state, questionSet) {
   state.stechenLauf = 0;
   state.stechenTexte = [];
   state.stechenSieger = null;
+  state.stechenRaus = [];
   state.ersatzTexte = [];
   return startRound(state, 1);
 }
@@ -760,7 +763,17 @@ export function judge(state, correct) {
     // Falsch heißt hier raus – und die Übrigen dürfen wieder drücken. Ist
     // keiner mehr da, löst openBuzz die Frage auf und der Host stellt die
     // nächste.
+    //
+    // Raus heißt dabei raus aus dem STECHEN, nicht aus dieser einen Frage.
+    // `q.lockedOut` gehört der Frage und ist mit ihr vorbei; deshalb steht es
+    // zusätzlich im Zustand. Ohne diese Zeile baute startStechen die Sperre
+    // bei jeder neuen Entscheidungsfrage aus dem Punktestand neu auf – und der
+    // ändert sich im Stechen nie. Gemessen: Rot liegt daneben, niemand weiß
+    // es, der Host stellt die nächste Frage, Rot drückt wieder und gewinnt den
+    // Abend. Leinwand, Fernbedienung, Handy und Handbuch sagen alle vier das
+    // Gegenteil („richtig gewinnt, falsch ist raus").
     q.lockedOut.push(team.id);
+    state.stechenRaus = [...(state.stechenRaus || []), team.id];
     return openBuzz(state);
   }
 
@@ -839,11 +852,17 @@ export function closeQuestion(state) {
   // Eine Stechfrage gehört zu keinem Brett: Danach geht es zurück in den
   // Endstand – entweder mit Sieger oder für die nächste Entscheidungsfrage.
   if (q.stechen) {
+    // „Das wusste keiner" stimmt nur, wenn wirklich keiner geantwortet hat.
+    // Hat jemand gedrückt und danebengelegen, stand dieser Satz trotzdem da –
+    // und verschwieg damit genau das, was für die nächste Frage zählt: dass
+    // einer jetzt draußen ist.
+    const gedrueckt = (q.log || []).length > 0;
     state.current = null;
     state.phase = 'gameOver';
     state.message = state.stechenSieger
       ? `${findTeam(state, state.stechenSieger).name} entscheidet das Stechen!`
-      : 'Das wusste keiner – noch eine Frage?';
+      : gedrueckt ? 'Daneben – die Übrigen bekommen die nächste Frage.'
+        : 'Das wusste keiner – noch eine Frage?';
     return state;
   }
 
@@ -982,6 +1001,22 @@ export function startStechen(state, frage) {
   if (spitze.length < 2) throw new GameError('Es steht schon ein Sieger fest.');
   if (!frage || !frage.text) throw new GameError('Es ist keine Frage mehr übrig.');
 
+  /*
+   * Wer schon danebenlag, bleibt draußen – über die einzelne Frage hinaus.
+   *
+   * Gefiltert gegen die aktuelle Spitze: Hat der Host zwischendurch Punkte
+   * korrigiert, kann ein Team die Spitze verlassen haben; dann trägt es seine
+   * alte Sperre nicht mit zurück, falls es später wieder aufschließt.
+   *
+   * Liegen alle daneben, kann niemand mehr drücken – dann fängt das Stechen
+   * von vorn an. Das ist kein Sonderfall, sondern der Normalfall bei einer
+   * schweren Frage: zwei Teams, beide raten, beide falsch.
+   */
+  let raus = (state.stechenRaus || []).filter((id) => spitze.some((t) => t.id === id));
+  const alleRaus = raus.length >= spitze.length;
+  if (alleRaus) raus = [];
+  state.stechenRaus = raus;
+
   state.stechenLauf = (state.stechenLauf || 0) + 1;
   state.stechenTexte = [...(state.stechenTexte || []), frage.text];
   state.current = {
@@ -1004,13 +1039,17 @@ export function startStechen(state, frage) {
     teamId: null,
     onTheHook: null,
     buzzedTeamId: null,
-    lockedOut: state.teams.filter((t) => !spitze.includes(t)).map((t) => t.id),
+    lockedOut: [
+      ...state.teams.filter((t) => !spitze.includes(t)).map((t) => t.id),
+      ...raus,
+    ],
     revealed: false,
     buzzOpenedAt: Date.now(),
     log: [],
   };
   state.phase = 'question';
-  state.message = state.stechenLauf > 1 ? 'Noch eine Entscheidungsfrage!' : 'Stechen!';
+  state.message = alleRaus ? 'Alle lagen daneben – neue Frage, und alle sind wieder dabei!'
+    : state.stechenLauf > 1 ? 'Noch eine Entscheidungsfrage!' : 'Stechen!';
   return state;
 }
 

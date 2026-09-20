@@ -1255,3 +1255,128 @@ test('der Buzzer sagt, ob die Frage noch kommt oder schon durch ist', () => {
   assert.doesNotMatch(durch, /noch gesperrt/,
     '„noch gesperrt" verspricht etwas, das nicht mehr kommt');
 });
+
+/*
+ * Raus aus dem Stechen heißt raus – nicht nur aus dieser einen Frage.
+ *
+ * Alle vier Stellen, die es dem Tisch sagen, meinen das Stechen als Ganzes:
+ * die Leinwand („richtig gewinnt, falsch ist raus“), die Fernbedienung
+ * („falsch – raus“), das Handy („Daneben – ihr seid raus aus dem Stechen.“)
+ * und das Handbuch. Der Code hielt die Sperre aber auf `q.lockedOut`, und die
+ * ist mit der Frage vorbei: `startStechen` baute sie für jede neue
+ * Entscheidungsfrage aus dem Punktestand neu auf – und der ändert sich im
+ * Stechen nie.
+ *
+ * Nachgestellt mit zwei Teams auf 0:0: Rot liegt daneben, keiner weiß es, der
+ * Host stellt die nächste Frage – Rot durfte wieder drücken und gewann den
+ * Abend. Blau hatte sich nichts zuschulden kommen lassen.
+ */
+test('wer im Stechen danebenliegt, bleibt auch bei der nächsten Frage draußen', () => {
+  const state = setup(['Rot', 'Blau']);
+  bisGleichstand(state);
+  G.startStechen(state, STECHFRAGE);
+  G.buzzFor(state, state.teams[0].id);
+  G.judge(state, false);
+  assert.deepEqual(state.stechenRaus, [state.teams[0].id],
+    'der Fehlversuch gehört in den Zustand, nicht nur an die Frage');
+  G.endQuestion(state);
+  G.closeQuestion(state);
+
+  G.startStechen(state, { text: 'Und noch eine?', answer: 'Ja' });
+  assert.ok(state.current.lockedOut.includes(state.teams[0].id),
+    'Rot ist auch bei der zweiten Entscheidungsfrage gesperrt');
+  assert.throws(() => G.buzzFor(state, state.teams[0].id), /schon versucht/);
+  G.buzzFor(state, state.teams[1].id);
+  G.judge(state, true);
+  assert.equal(state.stechenSieger, state.teams[1].id);
+});
+
+/*
+ * Wenn aber ALLE danebenlagen, kann niemand mehr drücken.
+ *
+ * Das ist kein Sonderfall, sondern der Normalfall bei einer schweren Frage:
+ * zwei Teams, beide raten, beide falsch. Dann fängt das Stechen von vorn an –
+ * sonst stünde der Abend still, und der Host hätte keinen Knopf mehr.
+ */
+test('liegen alle daneben, sind bei der nächsten Frage wieder alle dabei', () => {
+  const state = setup(['Rot', 'Blau']);
+  bisGleichstand(state);
+  G.startStechen(state, STECHFRAGE);
+  for (const team of state.teams) {
+    G.buzzFor(state, team.id);
+    G.judge(state, false);
+  }
+  G.closeQuestion(state);
+  G.startStechen(state, { text: 'Und noch eine?', answer: 'Ja' });
+  assert.deepEqual(state.current.lockedOut, [], 'alle dürfen wieder drücken');
+  assert.deepEqual(state.stechenRaus, []);
+  assert.match(state.message, /alle sind wieder dabei/);
+});
+
+/*
+ * Und der Satz danach muss sagen, was wirklich passiert ist.
+ *
+ * „Das wusste keiner – noch eine Frage?“ stand auch dann da, wenn jemand sehr
+ * wohl gedrückt und danebengelegen hatte. Er verschwieg damit genau das, was
+ * für die nächste Frage zählt: dass einer jetzt draußen ist.
+ */
+test('nach einer Stechfrage steht da, ob jemand geantwortet hat', () => {
+  const ohne = setup(['Rot', 'Blau']);
+  bisGleichstand(ohne);
+  G.startStechen(ohne, STECHFRAGE);
+  G.endQuestion(ohne);
+  G.closeQuestion(ohne);
+  assert.match(ohne.message, /Das wusste keiner/);
+
+  const mit = setup(['Rot', 'Blau']);
+  bisGleichstand(mit);
+  G.startStechen(mit, STECHFRAGE);
+  G.buzzFor(mit, mit.teams[0].id);
+  G.judge(mit, false);
+  G.endQuestion(mit);
+  G.closeQuestion(mit);
+  assert.match(mit.message, /Daneben/);
+});
+
+/*
+ * Ein Neustart mitten im Stechen darf die Sperre nicht vergessen.
+ *
+ * Der Spielstand wird als Ganzes geschrieben und beim Start über
+ * `{ ...createState(), ...gespeichert }` zurückgeholt – ein neues Feld muss
+ * deshalb in createState stehen, sonst ist es nach einem Neustart `undefined`.
+ */
+test('die Sperre im Stechen überlebt einen Neustart', () => {
+  const state = setup(['Rot', 'Blau']);
+  bisGleichstand(state);
+  G.startStechen(state, STECHFRAGE);
+  G.buzzFor(state, state.teams[0].id);
+  G.judge(state, false);
+  G.endQuestion(state);
+  G.closeQuestion(state);
+
+  const wieder = { ...G.createState(), ...JSON.parse(JSON.stringify(state)) };
+  G.startStechen(wieder, { text: 'Und noch eine?', answer: 'Ja' });
+  assert.ok(wieder.current.lockedOut.includes(wieder.teams[0].id),
+    'nach dem Neustart ist Rot immer noch draußen');
+});
+
+/*
+ * Und ein neues Spiel weiß nichts mehr davon.
+ */
+test('ein neues Spiel löscht die Stechsperre', () => {
+  const state = setup(['Rot', 'Blau']);
+  bisGleichstand(state);
+  G.startStechen(state, STECHFRAGE);
+  G.buzzFor(state, state.teams[0].id);
+  G.judge(state, false);
+  G.endQuestion(state);
+  G.closeQuestion(state);
+  assert.equal(state.stechenRaus.length, 1);
+
+  // Der Weg, den der Host wirklich geht: „Neues Spiel" führt in die Lobby,
+  // von dort startet der nächste Satz.
+  const lobby = G.backToLobby(state);
+  assert.deepEqual(lobby.stechenRaus, [], 'schon die Lobby weiß nichts mehr davon');
+  G.startGame(lobby, SET);
+  assert.deepEqual(lobby.stechenRaus, []);
+});
