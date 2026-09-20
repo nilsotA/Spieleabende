@@ -26,11 +26,8 @@
   --neon-2: #8b0b27;
   --neon-3: #5c0518;
 
-  /* Ereignisfarben – jede hat genau eine Bedeutung. */
-  --gold: #ffc531;
-  --gold-hell: #ffe9a0;
-  --richtig: #25c97d;
-  --falsch: #ff3b5c;
+  /* Die Ereignisfarben (--gold, --richtig, --falsch …) stehen in style.css:
+     Handy und Fernbedienung laden host.css nicht und brauchen sie trotzdem. */
 
   /* Eine Kurve für alles: genau das lässt Sendungsgrafik teuer wirken. */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);

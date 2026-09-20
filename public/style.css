@@ -12,6 +12,24 @@
   --blue-glow: rgba(70, 150, 240, 0.55);
   --green: #2fae63;
 
+  /*
+   * Ereignisfarben – jede hat genau eine Bedeutung.
+   *
+   * Sie standen in host.css, und host.css lädt nur der Host-Screen. Die
+   * Fernbedienung benutzte `var(--gold-hell)` für ihren Pausenknopf: Beim
+   * Berechnen war die Eigenschaft dort ungültig, und eine ungültige
+   * Eigenschaft macht die ganze Deklaration zu `unset` – sie fällt NICHT auf
+   * die `.btn`-Regel zurück, denn die Kaskade hatte sie längst überstimmt.
+   * Gemessen: In der Pause hatte „▶ Weiterspielen“ background-image: none,
+   * durchsichtigen Rahmen und die Schriftfarbe #3a2a00 auf fast schwarzem
+   * Grund. Ausgerechnet der Knopf, der die Pause beendet, sah aus wie eine
+   * Bildunterschrift.
+   */
+  --gold: #ffc531;
+  --gold-hell: #ffe9a0;
+  --richtig: #25c97d;
+  --falsch: #ff3b5c;
+
   --tile-radius: 12px;
   --font: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --font-num: 'Arial Black', 'Segoe UI Black', 'Helvetica Neue', system-ui, sans-serif;

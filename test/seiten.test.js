@@ -308,6 +308,69 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Jede Seite muss die Farben kennen, die ihr Stylesheet benutzt.
+ *
+ * Eine ungültige `var()` ist in CSS keine Kleinigkeit: Die ganze Deklaration
+ * wird zu `unset` – und sie fällt NICHT auf die allgemeinere Regel zurück, die
+ * sie überstimmt hat, sondern auf den Anfangswert. Aus einem Knopf wird dann
+ * Text ohne Fläche.
+ *
+ * Genau das stand in remote.css: Der Pausenknopf holte sich seinen goldenen
+ * Verlauf aus `--gold-hell` und `--gold`, und die beiden standen nur in
+ * host.css – die lädt remote.html nie. Gemessen im Browser: In der Pause hatte
+ * „▶ Weiterspielen“ background-image: none, durchsichtigen Rahmen und die
+ * Schriftfarbe #3a2a00 auf fast schwarzem Grund. Der Knopf, mit dem der Host
+ * die Pause beendet, sah aus wie eine Bildunterschrift.
+ *
+ * Geprüft wird je Seite gegen die Stylesheets, die SIE lädt – nicht gegen
+ * alle. Ein Rückfallwert (`var(--x, gelb)`) zählt als in Ordnung, den setzt
+ * jemand bewusst.
+ *
+ * Kommentare werden vorher entfernt. Ohne das meldete der Wächter prompt eine
+ * Farbe, die nur im Kommentar über diesem Fund vorkam – gemessen beim ersten
+ * Lauf.
+ */
+test('jede Seite kennt die Farben, die ihr Stylesheet benutzt', () => {
+  const ohneCssKommentare = (t) => t.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const seiten = ['index.html', 'host.html', 'player.html', 'remote.html', 'editor.html'];
+  const klagen = [];
+
+  for (const seite of seiten) {
+    const html = lies(seite);
+    const stylesheets = [...html.matchAll(/<link[^>]+href="\/([^"]+\.css)"/g)].map((m) => m[1]);
+    assert.ok(stylesheets.length, `${seite}: kein Stylesheet gefunden – stimmt das Muster noch?`);
+
+    let css = '';
+    for (const datei of stylesheets) css += ohneCssKommentare(lies(datei));
+
+    // Alles, was irgendwo in diesen Dateien gesetzt wird – auch auf anderen
+    // Selektoren als :root, etwa `--bildhoehe` am Fragekasten.
+    const gesetzt = new Set([...css.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1]));
+
+    // Und was die Seite selbst aus Javascript setzt.
+    const skripte = [...html.matchAll(/<script[^>]+src="\/([^"]+\.js)"/g)].map((m) => m[1]);
+    let js = '';
+    for (const datei of skripte) {
+      js += lies(datei);
+      // Module, die von dort aus geladen werden, gehören dazu.
+      for (const m of js.matchAll(/from\s+['"]\/([^'"]+\.js)['"]/g)) {
+        try { js += lies(m[1]); } catch { /* gibt es nicht, dann eben nicht */ }
+      }
+    }
+    for (const m of js.matchAll(/setProperty\(\s*['"](--[a-z0-9-]+)/g)) gesetzt.add(m[1]);
+
+    // Nur var() OHNE Rückfallwert: ein Komma in der Klammer heißt, jemand hat
+    // an den Fall gedacht.
+    for (const m of css.matchAll(/var\(\s*(--[a-z0-9-]+)\s*\)/g)) {
+      if (!gesetzt.has(m[1])) {
+        klagen.push(`${seite} (lädt ${stylesheets.join(', ')}): ${m[1]} wird benutzt, aber nirgends gesetzt`);
+      }
+    }
+  }
+  assert.deepEqual([...new Set(klagen)], []);
+});
+
+/*
  * Der Editor warnt bei derselben Länge, die der Testlauf verlangt.
  *
  * Es gab zwei Zahlen für dieselbe Sache. Der Testlauf über die mitgelieferten
