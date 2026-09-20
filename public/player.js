@@ -740,6 +740,21 @@ function renderPicker() {
                 const antwort = await action('pick', { catIdx, rowIdx, einsatz: mitEinsatz, quiet: true });
                 if (antwort && antwort.ok === false) {
                   knopf.classList.remove('used');
+                  /*
+                   * Still bleibt nur, was das Raster ohnehin erklärt.
+                   *
+                   * Die Absagen des Servers fängt die Oberfläche vorher ab: In
+                   * der Pause und wenn ein anderes Team dran ist, gibt es gar
+                   * kein Raster, und bei „nur Host“ steht es ohne Knöpfe da
+                   * (siehe renderPicker). Was übrig bleibt, sind Wettläufe –
+                   * jemand war eine Zehntelsekunde schneller –, und die sieht
+                   * man am Brett.
+                   *
+                   * Ein Funkloch sieht man dort nicht. Der Knopf würde einfach
+                   * wieder hell, als hätte man danebengetippt, und beim zweiten
+                   * Versuch passierte dasselbe. Das gehört gesagt.
+                   */
+                  if (antwort.offline) toast(antwort.error, 'error');
                 } else {
                   einsatzScharf = false;
                 }

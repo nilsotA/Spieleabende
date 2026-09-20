@@ -308,6 +308,36 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Ein Funkloch bei der Feldwahl bleibt nicht stumm.
+ *
+ * Das Handy schickt die Feldwahl mit `quiet: true` – und das war richtig: Die
+ * Absagen des Servers fängt die Oberfläche vorher ab. In der Pause und wenn
+ * ein anderes Team dran ist, gibt es gar kein Raster; bei „nur Host“ steht es
+ * ohne Knöpfe da. Beides steht so in den Kommentaren von renderPicker, und
+ * gemessen stimmt es. Übrig bleiben Wettläufe – jemand war eine
+ * Zehntelsekunde schneller –, und die sieht man am Brett.
+ *
+ * Ein Funkloch sieht man dort nicht. `quiet: true` verschluckte auch
+ * „Keine Verbindung zum Server“: Der Knopf wurde einfach wieder hell, als
+ * hätte man danebengetippt, und beim zweiten Versuch passierte dasselbe.
+ * Gemessen im Browser mit blockierter Verbindung – vorher: keine Meldung,
+ * jetzt: „Keine Verbindung zum Server“.
+ */
+test('eine Feldwahl ohne Verbindung sagt es dem Handy', () => {
+  const js = ohneKommentare(lies('player.js'));
+  const ab = js.indexOf("action('pick'");
+  assert.ok(ab > 0, 'die Feldwahl sollte auffindbar bleiben');
+  const stelle = js.slice(ab, ab + 400);
+
+  // Die Absagen bleiben still – dafür sorgt die Oberfläche, nicht ein Toast.
+  assert.match(stelle, /quiet: true/,
+    'die abgefangenen Absagen gehören weiter nicht auf den Schirm');
+  // Das Funkloch aber nicht.
+  assert.match(stelle, /antwort\.offline/,
+    'ohne Verbindung muss das Handy es sagen – sonst sieht es aus wie danebengetippt');
+});
+
+/*
  * Wer `aria-modal` sagt, muss auch stilllegen – und wieder freigeben.
  *
  * Zwei Dialoge nannten sich `role="dialog" aria-modal="true"` und ließen
