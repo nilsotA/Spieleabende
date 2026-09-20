@@ -22,7 +22,29 @@ const PROGRAMM = process.env.QUIZDUELL_TUNNEL_BIN || 'cloudflared';
 // So lange darf der Tunnel brauchen, bis er seine Adresse nennt. Danach spielen
 // wir ohne ihn weiter, statt die Lobby warten zu lassen.
 const GEDULD_MS = Number(process.env.QUIZDUELL_TUNNEL_TIMEOUT || 25000);
-const ADRESSE = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/i;
+const ADRESSE = /https:\/\/([a-z0-9-]+)\.trycloudflare\.com/gi;
+/*
+ * Cloudflares eigene Adressen unter derselben Domain – sie sind nie der Tunnel.
+ *
+ * `api.trycloudflare.com` ist die Stelle, bei der cloudflared den Quick Tunnel
+ * überhaupt erst anfordert. Geht das schief, steht sie samt `https://` mitten
+ * in der Fehlermeldung, die cloudflared nach stderr schreibt – und ein Muster,
+ * das jede trycloudflare-Adresse nimmt, hält genau diese für den Tunnel.
+ * Im Fenster stünde dann „Der Tunnel steht: https://api.trycloudflare.com“,
+ * der QR-Code in der Lobby zeigte dorthin, und jeder Gast, der scannt, landet
+ * auf einer Cloudflare-Fehlerseite statt im Spiel.
+ */
+const NICHT_DER_TUNNEL = new Set(['api', 'update', 'www']);
+
+/** Die erste Adresse in einem Ausgabestück, die wirklich ein Tunnel sein kann. */
+function adresseAus(text) {
+  ADRESSE.lastIndex = 0; // ein globales Muster merkt sich sonst die letzte Stelle
+  let treffer;
+  while ((treffer = ADRESSE.exec(text))) {
+    if (!NICHT_DER_TUNNEL.has(treffer[1].toLowerCase())) return treffer[0];
+  }
+  return null;
+}
 
 let kind = null;
 
@@ -33,6 +55,20 @@ let kind = null;
 export function starteTunnel(port) {
   return new Promise((fertig) => {
     let erledigt = false;
+    /*
+     * `uhr` gehört vor `einmal`, nicht darunter.
+     *
+     * Die Konstante stand am Ende der Funktion, `einmal` räumt sie aber gleich
+     * in der ersten Zeile weg. Auf dem gewöhnlichen Weg fällt das nie auf: Da
+     * läuft `einmal` erst aus einem Ereignis heraus, lange nach der Zuweisung.
+     * Der eine Weg, der sie davor nimmt, ist der Notausgang – `spawn` wirft
+     * sofort, der Fang ruft `einmal(null)`. Dort war `uhr` noch gar nicht da,
+     * und statt „läuft eben im Heimnetz weiter“ kam ein ReferenceError. Der
+     * wiederum wird in `server/index.js` nicht gefangen: `starteTunnel` wird
+     * im listen-Rückruf awaitet. Eine abgelehnte Zusage dort reißt den ganzen
+     * Server mit – einen Server, dessen Lobby schon offen steht.
+     */
+    let uhr = null;
     const einmal = (wert) => {
       if (erledigt) return;
       erledigt = true;
@@ -59,8 +95,10 @@ export function starteTunnel(port) {
     // cloudflared schreibt seine Adresse mal nach stdout, mal nach stderr –
     // je nach Version. Deshalb hören wir auf beiden Leitungen.
     const lausche = (d) => {
-      const treffer = ADRESSE.exec(String(d));
-      if (treffer) einmal(treffer[0]);
+      // Nichts Passendes dabei? Dann weiterhören – nicht auf einen Treffer
+      // festnageln, der gar keiner ist.
+      const adresse = adresseAus(String(d));
+      if (adresse) einmal(adresse);
     };
     kind.stdout.on('data', lausche);
     kind.stderr.on('data', lausche);
@@ -70,8 +108,19 @@ export function starteTunnel(port) {
       einmal(null);
     });
 
-    const uhr = setTimeout(() => {
+    uhr = setTimeout(() => {
       console.error('\n  Der Tunnel meldet sich nicht. Der Abend läuft im Heimnetz weiter.\n');
+      /*
+       * Und cloudflared geht mit.
+       *
+       * Hier stand nur `einmal(null)`. Der Kindprozess lief weiter, baute
+       * seinen Tunnel in aller Ruhe fertig und veröffentlichte eine
+       * https-Adresse auf denselben Port. Die kam zwar noch über `lausche`
+       * herein, wurde aber von `if (erledigt) return` verworfen – das Spiel
+       * stand also offen im Netz, während im Fenster geschrieben stand, der
+       * Abend laufe im Heimnetz weiter. Wer aufhört zu warten, macht auch zu.
+       */
+      stoppeTunnel();
       einmal(null);
     }, GEDULD_MS);
     // Ein wartender Tunnel soll den Server nicht am Beenden hindern.

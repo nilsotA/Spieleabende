@@ -89,8 +89,14 @@ async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
     let belegt = false;
     let beendet = false;
     let ausgabe = '';
+    // Der Server redet auf beiden Leitungen: Die Begrüßung und die Adressen
+    // gehen nach stdout, jede Klage („Der Tunnel meldet sich nicht“, „Port
+    // belegt“) nach stderr. Wer nur stdout mitschreibt, kann über die eine
+    // Hälfte nichts behaupten.
+    let klagen = '';
     proc.on('exit', () => { beendet = true; });
     proc.stdout.on('data', (d) => { ausgabe += String(d); });
+    proc.stderr.on('data', (d) => { klagen += String(d); });
     // Auch die deutsche Meldung zählt: Den rohen Fehlernamen sieht man nur,
     // solange niemand ihn abfängt – der Server fängt ihn ab und schreibt
     // stattdessen „Port … ist schon belegt". Ohne diese zweite Fassung endete
@@ -135,7 +141,7 @@ async function starteServer(port, stateFile, versuche = 5, extraEnv = {}) {
     }
     if (oben) {
       proc.stderr.off('data', lauscher);
-      return { proc, base, ausgabe: () => ausgabe };
+      return { proc, base, ausgabe: () => ausgabe, klagen: () => klagen };
     }
     proc.kill('SIGKILL');
     if (!belegt) throw new Error(`Server startet nicht (Port ${dieserPort})`);
@@ -2155,6 +2161,156 @@ test('cloudflared darf seine Adresse auch nach stderr schreiben', async (t) => {
     await warte(50);
   }
   assert.match(urls[0], /trycloudflare\.com$/);
+});
+
+/*
+ * Der Notausgang muss selbst heil sein.
+ *
+ * `starteTunnel` verspricht in seinem eigenen Kommentar: „Wirft nie: Ein
+ * Spieleabend soll nicht an einem Tunnel scheitern." Genau der Weg, der das
+ * halten sollte – `spawn` wirft sofort, der Fang ruft `einmal(null)` – lief
+ * in einen ReferenceError: `clearTimeout(uhr)` griff auf eine Konstante zu,
+ * die erst am Ende der Funktion deklariert wird. Gefangen wird diese Ablehnung
+ * nirgends: In server/index.js steht `await starteTunnel(PORT)` im
+ * listen-Rückruf. Mitgerissen wäre ein Server, dessen Lobby schon offen steht.
+ *
+ * Geprüft wird das an der Quelle, nicht am Verhalten – und zwar bewusst:
+ * `spawn` synchron zum Werfen zu bringen, braucht ein Nullbyte im
+ * Programmnamen, und genau das überlebt den Weg durch `process.env` nicht
+ * (dort wird abgeschnitten). Es gibt von außen keinen Hebel auf diesen Zweig.
+ * Das ist der Grund, warum der Fehler so lange stehen konnte, und der Grund,
+ * warum hier die Reihenfolge selbst festgehalten wird.
+ */
+test('die Uhr des Tunnels steht, bevor jemand sie wegräumen kann', async () => {
+  const quelle = await readFile(new URL('../server/tunnel.js', import.meta.url), 'utf8');
+  const rumpf = quelle.slice(quelle.indexOf('export function starteTunnel'));
+  const deklaration = rumpf.search(/\b(let|const|var) uhr\b/);
+  const wegraeumen = rumpf.indexOf('clearTimeout(uhr)');
+  assert.ok(deklaration >= 0, '`uhr` sollte in starteTunnel deklariert sein');
+  assert.ok(wegraeumen >= 0, '`clearTimeout(uhr)` sollte es weiter geben');
+  assert.ok(
+    deklaration < wegraeumen,
+    '`uhr` wird weggeräumt, bevor es sie gibt – der Notausgang endet dann im ReferenceError',
+  );
+});
+
+/*
+ * Der häufigste Fall überhaupt: cloudflared ist gar nicht installiert.
+ *
+ * Dann soll das Fenster sagen, wo es herkommt, und der Abend im Heimnetz
+ * weiterlaufen – `starteTunnel` liefert null und wirft nicht.
+ */
+test('fehlt cloudflared, liefert starteTunnel null statt zu werfen', async () => {
+  const vorher = process.env.QUIZDUELL_TUNNEL_BIN;
+  process.env.QUIZDUELL_TUNNEL_BIN = path.join(tmpdir(), 'gibt-es-nicht-quizduell-cloudflared');
+  try {
+    // Frisch laden: Den Programmnamen liest das Modul beim Laden.
+    const frisch = await import(`../server/tunnel.js?fehlt=${process.pid}`);
+    assert.equal(await frisch.starteTunnel(12345), null, 'null heißt: ohne Tunnel weiterspielen');
+  } finally {
+    if (vorher === undefined) delete process.env.QUIZDUELL_TUNNEL_BIN;
+    else process.env.QUIZDUELL_TUNNEL_BIN = vorher;
+  }
+});
+
+/*
+ * Cloudflares eigene api-Adresse ist nicht der Tunnel.
+ *
+ * Das Muster nahm die erste beliebige trycloudflare-Adresse aus der Ausgabe,
+ * und der erste Treffer entschied endgültig. Scheitert cloudflared beim
+ * Anfordern des Quick Tunnels, steht seine eigene `api.trycloudflare.com`
+ * samt `https://` in der Fehlerzeile – und die ist ein vollwertiger Treffer.
+ * Im Fenster stünde „Der Tunnel steht“, der QR-Code in der Lobby zeigte auf
+ * eine Cloudflare-Fehlerseite, und der Host hätte es schriftlich, dass alles
+ * läuft.
+ */
+test('eine Fehlerzeile von cloudflared ist keine Tunneladresse', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host, ausgabe, klagen } = await starteOnline(5300 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {
+    QUIZDUELL_TUNNEL_ATTRAPPE: 'api-fehler',
+    QUIZDUELL_TUNNEL_TIMEOUT: '1200',
+  });
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  /*
+   * Erst ein Urteil abwarten, dann behaupten.
+   *
+   * `starteOnline` kommt zurück, sobald der Hostschlüssel im Fenster steht –
+   * und das ist, bevor der Tunnel irgendetwas gemeldet hat. Wer hier sofort
+   * hinsieht, findet in beiden Welten noch nichts und hält den Test für grün.
+   * Gegengeprüft: mit dem alten, gierigen Muster blieb genau diese Fassung
+   * grün, während der Server danach „Der Tunnel steht“ schrieb.
+   */
+  for (let i = 0; i < 80; i++) {
+    if (/Der Tunnel steht/.test(ausgabe()) || /meldet sich nicht/.test(klagen())) break;
+    await warte(50);
+  }
+  assert.doesNotMatch(ausgabe(), /Der Tunnel steht/, 'nichts steht, also sagt das Fenster das auch nicht');
+  assert.match(klagen(), /meldet sich nicht/, 'stattdessen gibt der Server auf');
+
+  const info = await (await fetch(`${base}/api/info?h=${host}`)).json();
+  assert.ok(!info.urls.some((u) => /trycloudflare/.test(u)),
+    'und der QR-Code in der Lobby zeigt erst recht nicht auf eine Fehlerseite');
+  // Der Abend läuft trotzdem – im Heimnetz.
+  assert.ok(info.urls.length > 0);
+  assert.equal((await fetch(`${base}/host?h=${host}`)).status, 200);
+});
+
+/*
+ * Und wenn hinter der Fehlerzeile doch noch die richtige Adresse kommt, zählt
+ * die. Der alte Weg hatte sich da längst festgelegt: `einmal()` setzte beim
+ * ersten Treffer `erledigt = true`, alles danach fiel unter den Tisch.
+ */
+test('nach einem Fehlversuch zählt die Adresse, die wirklich kommt', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host } = await starteOnline(5500 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {
+    QUIZDUELL_TUNNEL_ATTRAPPE: 'erst-fehler',
+    QUIZDUELL_TUNNEL_TIMEOUT: '8000',
+  });
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  let urls = [];
+  for (let i = 0; i < 100; i++) {
+    urls = (await (await fetch(`${base}/api/info?h=${host}`)).json()).urls;
+    if (urls[0]?.startsWith('https://')) break;
+    await warte(100);
+  }
+  assert.match(urls[0], /^https:\/\/leise-nacht-quiz\.trycloudflare\.com$/);
+});
+
+/*
+ * Wer aufhört zu warten, macht auch zu.
+ *
+ * Der Zeitgeber rief nur `einmal(null)` – cloudflared lief weiter, baute
+ * seinen Tunnel fertig und veröffentlichte eine Adresse auf denselben Port.
+ * Der Server verwarf sie (`if (erledigt) return`) und schrieb ins Fenster, der
+ * Abend laufe im Heimnetz weiter. Das Spiel stand derweil offen im Netz.
+ */
+test('gibt der Server den Tunnel auf, nimmt er cloudflared mit', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const pidDatei = path.join(dir, 'tunnel.pid');
+  const { proc, base, host, klagen } = await starteOnline(5700 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {
+    QUIZDUELL_TUNNEL_ATTRAPPE: 'stumm',
+    QUIZDUELL_TUNNEL_TIMEOUT: '500',
+    QUIZDUELL_TUNNEL_PIDFILE: pidDatei,
+  });
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  // Auf das Aufgeben warten: `starteOnline` kommt zurück, sobald der
+  // Hostschlüssel im Fenster steht – und das ist vor Ablauf der Geduld.
+  for (let i = 0; i < 60 && !/meldet sich nicht/.test(klagen()); i++) await warte(50);
+  assert.match(klagen(), /meldet sich nicht/, 'der Server hat aufgegeben');
+  const pid = Number(await readFile(pidDatei, 'utf8'));
+  assert.ok(pid > 0, 'die Attrappe hat ihre Prozessnummer hinterlegt');
+
+  // Prozess 0 zu signalisieren fragt nur nach, ob es ihn noch gibt.
+  let lebt = true;
+  for (let i = 0; i < 40 && lebt; i++) {
+    try { process.kill(pid, 0); await warte(50); } catch { lebt = false; }
+  }
+  assert.equal(lebt, false, 'cloudflared darf nicht weiterlaufen und still einen Tunnel aufmachen');
+  // Und der Abend läuft im Heimnetz weiter.
+  assert.equal((await fetch(`${base}/host?h=${host}`)).status, 200);
 });
 
 test('der Bildschirm geht auf, bevor der Tunnel antwortet', async (t) => {
