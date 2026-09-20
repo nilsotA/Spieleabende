@@ -163,6 +163,34 @@ function render() {
    * Frage und Brett neu gezählt.
    */
   const zugSeit = lageSeit('zug', `${state.phase}#${state.turnIndex}`);
+  /*
+   * Und aus demselben Grund auch der Bezugspunkt der Vertreterknöpfe.
+   *
+   * Er stand unten im Buzzer-Zweig und wurde damit nur dort gelesen. Zwischen
+   * zwei Fragen lief er nicht mit: Seine Signatur kennt Phase, Schritt und die
+   * vertretenen Teams – und die sind bei der nächsten Frage dieselben, sobald
+   * ein Team ohne Handy dabei ist und der Zug zwischen zwei Teams MIT Handy
+   * wechselt. `lageSeit` gab dann den Zeitpunkt der ersten Frage zurück, und
+   * der lag längst über den 400 ms.
+   *
+   * Nachgestellt, drei Teams, Grün ohne Handy, jedes Mal 120 ms nach dem
+   * Erscheinen getippt:
+   *
+   *   Frage 1  nichts passiert (Anlaufsperre)
+   *   Frage 2  gebuzzert für Grün
+   *
+   * Hier oben läuft die Signatur bei jedem Rundruf mit: Auf dem Brett steht
+   * dort keine Frage, die Liste ist leer, und die nächste Frage zählt damit
+   * neu. Innerhalb einer Frage bleibt alles wie gehabt – wacht ein Handy auf
+   * oder fällt weg, ändert sich die Liste, und der neue Knopf ist kurz taub.
+   */
+  const vertreten = (q && q.step === 'buzz' && !q.buzzedTeamId)
+    ? state.teams.filter((team) => team.id !== q.teamId
+      && !(q.lockedOut || []).includes(team.id)
+      && !team.members.some((m) => m.online !== false))
+    : [];
+  const vertreterSeit = lageSeit('vertreter',
+    `${state.phase}#${q?.step}#${vertreten.map((t) => t.id).join(',')}`);
   const setz = (...knoepfe) => { if (neueLeiste) bar.append(...knoepfe); };
 
   renderFeldwahl();
@@ -310,17 +338,7 @@ function render() {
         setz(big(q.stechen ? 'Keiner weiß es → nächste Frage' : 'Keiner weiß es → auflösen',
           'btn-primary', () => act('endQuestion'), seit));
         // Vertreten wird nur, wer keinen eigenen Buzzer in der Hand hat.
-        //
-        // Eigener Bezugspunkt: Diese Knöpfe kommen und gehen mit der
-        // Online-Lage, und genau dann sollen sie kurz taub sein. Die Geburt des
-        // Knotens reicht dafür nicht – die Leiste baut sich schon neu, wenn
-        // irgendein anderes Handy aufwacht, und dann standen unveränderte
-        // Vertreterknöpfe 400 ms taub da.
-        const vertreten = state.teams.filter((team) => team.id !== q.teamId
-          && !q.lockedOut.includes(team.id)
-          && !team.members.some((m) => m.online !== false));
-        const vertreterSeit = lageSeit('vertreter',
-          `${state.phase}#${q.step}#${vertreten.map((t) => t.id).join(',')}`);
+        // Die Liste und ihr Bezugspunkt stehen oben – siehe vertreterSeit.
         for (const team of vertreten) {
           setz(big(`Buzz: ${team.wappen} ${team.name}`, 'btn-ghost',
             () => act('buzzFor', { teamId: team.id }), vertreterSeit));

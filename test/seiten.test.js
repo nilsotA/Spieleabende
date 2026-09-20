@@ -1722,3 +1722,49 @@ test('kein Modulwert wird beschrieben, ohne je gelesen zu werden', () => {
   }
   assert.deepEqual(tot, []);
 });
+
+/*
+ * Die Vertreter-Buzzknöpfe brauchen ihre Anlaufsperre bei JEDER Frage.
+ *
+ * Jeder Knopf der Fernbedienung ist nach dem Erscheinen 400 ms taub – gegen
+ * den Daumen, der schon auf dem Weg war, als der Knopf noch etwas anderes
+ * bedeutete. Als Bezugspunkt diente für die Vertreterknöpfe eine Signatur aus
+ * Phase, Schritt und den vertretenen Teams; berechnet wurde sie aber NUR im
+ * Buzzer-Zweig. Zwischen zwei Fragen lief sie damit nicht mit, und bei der
+ * nächsten Frage war sie unverändert – sobald ein Team ohne Handy dabei ist
+ * und der Zug zwischen zwei Teams MIT Handy wechselt.
+ *
+ * Im Browser nachgestellt, drei Teams, Grün ohne Handy, jedes Mal 120 ms nach
+ * dem Erscheinen getippt:
+ *
+ *   vorher   Frage 1  nichts passiert · Frage 2  gebuzzert für Grün
+ *   nachher  Frage 1  nichts passiert · Frage 2  nichts passiert
+ *
+ * und der bewusste Tipp nach 1,2 s geht beide Male durch.
+ *
+ * Genau dieselbe Lehre steht zwei Zeilen darüber schon bei `zugSeit`: Ein
+ * Bezugspunkt, der nur in einem Zweig gelesen wird, läuft zwischen den Zweigen
+ * nicht mit. Deshalb stehen jetzt beide oben.
+ */
+test('der Bezugspunkt der Vertreterknöpfe läuft außerhalb des Buzzer-Zweigs mit', () => {
+  const js = ohneKommentare(lies('remote.js'));
+  const zug = js.indexOf("lageSeit('zug'");
+  const vertreter = js.indexOf("lageSeit('vertreter'");
+  // Die Schleife, die die Knöpfe baut – die steht im Buzzer-Zweig.
+  const knoepfe = js.indexOf('for (const team of vertreten)');
+  assert.ok(zug > 0 && vertreter > 0 && knoepfe > 0,
+    'alle drei Stellen sollten auffindbar bleiben');
+  assert.ok(vertreter < knoepfe,
+    'der Bezugspunkt gehört vor die Knöpfe, nicht mitten zwischen sie');
+  assert.ok(vertreter > zug && vertreter - zug < 1600,
+    'er gehört zu den anderen Bezugspunkten nach oben – dort läuft er bei jedem Rundruf mit');
+
+  // Und die Liste, aus der die Signatur entsteht, muss dort auch ohne Frage
+  // etwas Sinnvolles ergeben – sonst wirft der Aufbau auf dem Brett.
+  const liste = /const vertreten = [\s\S]*?;\n/.exec(js)?.[0] || '';
+  assert.ok(liste, 'die Liste der vertretenen Teams sollte auffindbar bleiben');
+  assert.match(liste, /q && q\.step === 'buzz'/,
+    'ohne offene Frage ist niemand zu vertreten – das muss die Liste selbst wissen');
+  assert.match(liste, /q\.lockedOut \|\| \[\]/,
+    'und sie darf sich nicht auf ein Feld verlassen, das es dort nicht gibt');
+});
