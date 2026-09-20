@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import { createServer as createHttpServer } from 'node:http';
-import { rm, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { rm, mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -4350,4 +4350,127 @@ test('erst ohne Teams ist der gesicherte Stand wirklich weg', async (t) => {
   for (const team of nachEnde.teams) await tu({ type: 'removeTeam', teamId: team.id });
   await warte(900);
   assert.equal(await liesDatei(), null, 'ohne Teams in der Lobby gehört auf die Platte nichts mehr');
+});
+
+/*
+ * Wenn der Spielstand nicht auf die Platte kommt, muss es der Host erfahren.
+ *
+ * Der einzige Kanal war `console.error` – und das Terminal ist beim
+ * Spieleabend minimiert oder steht auf einem anderen Rechner. Der Fall ist
+ * keine Theorie: Gestartet wird per Doppelklick aus dem entpackten Ordner, und
+ * aus einem gemounteten Disk-Image, von einem schreibgeschützten Stick oder
+ * bei vollgelaufener Platte ist genau dieser Ordner nicht beschreibbar.
+ *
+ * Nachgestellt lief der Abend vollständig normal weiter – Teams traten bei,
+ * Fragen wurden gewertet, Punkte standen auf der Leinwand –, und gesichert
+ * wurde ab der ersten Aktion nichts mehr. Kippt der Laptop zwei Stunden später
+ * in den Ruhezustand, ist der Abend weg; genau dafür ist die Sicherung gebaut.
+ *
+ * Erzwungen wird der Fehler hier, indem die Zwischendatei als VERZEICHNIS
+ * angelegt wird: `writeFile` scheitert dann mit EISDIR – derselbe Rückweg wie
+ * bei ENOSPC oder EACCES.
+ */
+test('ein Spielstand, der nicht geschrieben werden kann, steht auf der Leinwand', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-sicherung-'));
+  const stateFile = path.join(dir, 'stand.json');
+  // Das Hindernis: Die Zwischendatei ist ein Verzeichnis.
+  await mkdir(`${stateFile}.tmp`);
+
+  const { proc, base } = await starteServer(6900 + Math.floor(Math.random() * 200), stateFile);
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const hostSicht = async () => (await (await fetch(
+    `${base}/api/state?clientId=sich-host&role=host`,
+  )).json());
+  const host = await alsHost(base, 'sich-host');
+
+  assert.equal((await hostSicht()).sicherungFehler ?? null, null,
+    'solange nichts gesichert wurde, ist auch nichts kaputt');
+
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  let fehler = null;
+  for (let i = 0; i < 40 && !fehler; i++) { await warte(100); fehler = (await hostSicht()).sicherungFehler; }
+  assert.equal(fehler, 'EISDIR', 'der Host muss erfahren, dass nichts gesichert wird');
+
+  // Und die Handys nicht: Dort stünde eine Meldung über etwas, das die
+  // Mitspieler weder entschieden haben noch ändern können.
+  const spieler = await (await fetch(`${base}/api/state?clientId=sich-gast&role=player`)).json();
+  assert.equal(spieler.sicherungFehler ?? null, null, 'das geht nur den Host etwas an');
+
+  // Das Spiel läuft weiter – die kaputte Sicherung darf keinen Zug blockieren.
+  const start = await host({ type: 'startGame', set: SATZ });
+  assert.equal(start.ok, true, start.error || '');
+
+  // Hindernis weg: Der nächste Zug sichert wieder, und der Balken geht aus.
+  await rm(`${stateFile}.tmp`, { recursive: true, force: true });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 });
+  let wiederOk = false;
+  for (let i = 0; i < 40 && !wiederOk; i++) {
+    await warte(100);
+    wiederOk = ((await hostSicht()).sicherungFehler ?? null) === null;
+  }
+  assert.ok(wiederOk, 'geht es wieder, muss der Hinweis auch wieder verschwinden');
+  const gespeichert = JSON.parse(await readFile(stateFile, 'utf8'));
+  assert.equal(gespeichert.state.teams.length, 2, 'und der Stand liegt wirklich auf der Platte');
+});
+
+/*
+ * „↩ Wertung für Rot zurücknehmen" nahm den Buzz zurück, der dazwischenkam.
+ *
+ * Der Knopf ist der einzige im Haus, der seinen Inhalt nennt. Geschickt hat er
+ * trotzdem nur `undo`, und der Server nahm stur das oberste Element vom
+ * Rückweg – dort landet auch ein Buzz (RUECKNEHMBAR). Ein Handy, das in
+ * derselben Sekunde drückt, schiebt sich also zwischen Versprechen und
+ * Einlösung: zurückgenommen wird der Buzz, die Fehlwertung bleibt auf der
+ * Leinwand stehen, und der Knopf heißt danach wieder so wie vorhin.
+ *
+ * Denselben Weg wie bei den Wertungen (`lage`): Der Absender schickt mit, was
+ * er zurückzunehmen glaubte.
+ */
+test('Zurücknehmen nimmt das zurück, was auf dem Knopf steht', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-undo-'));
+  const { proc, base } = await starteServer(6700 + Math.floor(Math.random() * 200), path.join(dir, 'stand.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const host = await alsHost(base, 'undo-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  const teams = (await zustand(base)).teams;
+  const gast = await verbinde(base, 'undo-gast', 'player');
+  t.after(() => gast.reader.cancel().catch(() => {}));
+  // Der Gast gehört NICHT zum Zugteam – sonst darf er gar nicht buzzern.
+  await gast.tu({ type: 'joinTeam', teamId: teams[1].id, name: 'Ben' });
+  await host({ type: 'startGame', set: SATZ });
+  await host({ type: 'setTurn', teamId: teams[0].id });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 3 });
+
+  // Die Fehlwertung: Das Zugteam bekommt fälschlich „falsch" – danach ist der
+  // Buzzer für die Übrigen offen, und genau dort passt der Unfall hinein.
+  await host({ type: 'judge', correct: false });
+  const nachWertung = await zustand(base);
+  assert.match(nachWertung.rueckgaengig, /Wertung/, 'der Knopf verspricht jetzt die Wertung');
+  const versprochen = nachWertung.rueckgaengig;
+  const standVorher = nachWertung.teams[0].score;
+
+  // Dazwischen kommt ein Buzz – auch der steht im Rückweg.
+  const gebuzzert = await gast.tu({ type: 'buzz' });
+  assert.equal(gebuzzert.ok, true, gebuzzert.error || '');
+  assert.equal((await zustand(base)).rueckgaengig, 'Buzz', 'obenauf liegt jetzt der Buzz');
+
+  // Der Tipp, der für die Wertung gedacht war, prallt ab.
+  const daneben = await host({ type: 'undo', was: versprochen });
+  assert.equal(daneben.ok, false, 'er darf nicht den Buzz treffen');
+  assert.match(daneben.error, /dazwischengekommen/);
+  const stand = await zustand(base);
+  assert.equal(stand.current?.buzzedTeamId, teams[1].id, 'der Buzz steht noch');
+  assert.equal(stand.teams[0].score, standVorher, 'und die Punkte auch');
+
+  // Ohne Angabe bleibt alles wie bisher – eine ältere Seite darf nicht aussperren.
+  const blind = await host({ type: 'undo' });
+  assert.equal(blind.ok, true, blind.error || '');
+  assert.equal((await zustand(base)).current?.buzzedTeamId ?? null, null, 'der Buzz ist zurückgenommen');
+
+  // Und jetzt trifft der Knopf das, was er verspricht.
+  const jetzt = await zustand(base);
+  const echt = await host({ type: 'undo', was: jetzt.rueckgaengig });
+  assert.equal(echt.ok, true, echt.error || '');
 });

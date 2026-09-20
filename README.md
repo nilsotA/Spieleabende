@@ -792,7 +792,10 @@ aus, hat aber fünf Zacken statt neun.
   gegen eine unabhängige Implementierung geprüft und bis auf die Maskenwahl in
   3 Fällen bitgenau identisch – die Maske beeinflusst nur die Robustheit.
 - **Spielstand:** liegt in `data/.spielstand.json` (eingebettete Bilder daneben) und
-  wird beim Start zurückgeholt. Über `QUIZDUELL_STATE_FILE` umlenkbar.
+  wird beim Start zurückgeholt. Über `QUIZDUELL_STATE_FILE` umlenkbar. Lässt er sich
+  nicht schreiben – schreibgeschützter Ordner, volle Platte –, steht das als roter
+  Balken auf der Leinwand, solange es so ist. Vorher stand es nur im Terminal, und
+  das ist beim Spieleabend minimiert.
 - **Bewegung reduzieren:** Wer die Einstellung gesetzt hat, bekommt keine Bewegung –
   aber alles, was eine Auskunft trägt, bleibt sichtbar: Rundenansage, fliegende Punkte
   und der Buzz-Blitz blenden dann nur ein und aus, statt zu wandern.

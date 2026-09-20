@@ -104,7 +104,9 @@ $('#r-discard').addEventListener('click', () => {
 
 $('#r-undo').addEventListener('click', () => {
   if (performance.now() - rueckSeitWann < 400) return;
-  act('undo');
+  // Wie auf der Leinwand: Der Knopf nennt seinen Inhalt, also schickt er ihn
+  // auch mit. Sonst trifft der Tipp, was inzwischen obenauf liegt.
+  act('undo', { was: state?.rueckgaengig });
 });
 
 function render() {

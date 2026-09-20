@@ -2020,3 +2020,52 @@ test('nach „⇱ Holen" steht der Fokus wieder auf dem Knopf', () => {
     'der Fokus muss NACH render() gesetzt werden – vorher setzt ihn der Dialog auf einen Knopf, '
     + 'den render() gleich darauf austauscht');
 });
+
+/*
+ * In der Lobby warf jeder Broadcast den Tastaturfokus aus der Teamliste – und
+ * ein Broadcast genügt schon, wenn ein Gast /play überhaupt öffnet; allein das
+ * zählt als wartendes Gerät.
+ *
+ * Gemessen: Fokus auf „Team „Gelb“ umbenennen“, ein Gast öffnet /play, Fokus
+ * auf <body>; fünf Tabulatorschritte zurück zum selben Knopf. Bei sechs
+ * nacheinander eintreffenden Gästen passiert das in genau der Minute, in der
+ * der Host die Teams sortiert, immer wieder. Dasselbe direkt nach dem
+ * Umbenennen. Wer den Beamer-Rechner ohne Maus bedient, fängt jedes Mal von
+ * vorn an.
+ *
+ * Elf Bildschirme weiter unten steht dieselbe Gefahr im Kommentar und die
+ * dortige Liste ist dagegen geschützt (fillMenu). Hier fehlte es.
+ *
+ * Der Schlüssel ist hier sogar nur die Mannschaft selbst – der Name gehört
+ * ausdrücklich zum Nachgetragenen, denn Umbenennen ist der eine Handgriff, bei
+ * dem der Host mit Sicherheit gerade auf dem Knopf dieser Zeile steht.
+ * Gemessen danach: Fokus bleibt über zwei ankommende Gäste, über das
+ * Umbenennen eines anderen Teams und über das Umbenennen des eigenen stehen –
+ * im letzten Fall mit mitgewanderter Beschriftung („Team „Sonnengelb“
+ * umbenennen“).
+ */
+test('die Lobbyliste lässt den Tastaturfokus stehen', () => {
+  const host = ohneKommentare(lies('host.js'));
+  const lobby = host.slice(host.indexOf('function renderLobby'), host.indexOf('function fuelleLobbyTeams'));
+  assert.ok(lobby, 'renderLobby sollte auffindbar bleiben');
+
+  assert.match(lobby, /list\.dataset\.key !== key/,
+    'ohne Schlüsselvergleich baut jeder Broadcast die Liste neu');
+  assert.match(lobby, /const key = state\.teams\.map\(\(t\) => t\.id\)/,
+    'im Schlüssel darf nur stehen, was die Zeile nicht nachtragen kann');
+  for (const [was, muster] of [
+    ['Name', /setzeText\(zeile\.querySelector\('\.tname'\)/],
+    ['Mitglieder', /setzeText\(zeile\.querySelector\('\.tmembers'\)/],
+    ['Beschriftung', /\.tumbenennen'\)\?\.setAttribute\('aria-label'/],
+  ]) {
+    assert.match(lobby, muster, `${was} muss nachgetragen werden, sonst steht dort der Stand von vorhin`);
+  }
+
+  // Der Umbenennen-Knopf darf den Namen nicht mehr einschließen: Seine Zeile
+  // bleibt jetzt stehen, der eingeschlossene Wert wäre der von damals.
+  const zeilen = host.slice(host.indexOf('function fuelleLobbyTeams'));
+  const knopf = zeilen.slice(zeilen.indexOf('tumbenennen'), zeilen.indexOf("'✎'"));
+  assert.match(knopf, /state\.teams\.find\(\(t\) => t\.id === team\.id\)/,
+    'der Knopf muss den Namen beim Klicken frisch holen');
+});
+

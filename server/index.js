@@ -119,13 +119,55 @@ const SAVE_FILE = process.env.QUIZDUELL_STATE_FILE || path.join(DATA_DIR, '.spie
 const SAVE_IMAGES = `${SAVE_FILE.replace(/\.json$/, '')}-bilder.json`;
 const SAVE_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 let saveTimer = null;
+let sicherungFehler = null;
 
 function saveSoon() {
   if (saveTimer) return;
   saveTimer = setTimeout(() => {
     saveTimer = null;
-    saveNow().catch((err) => console.error('Spielstand konnte nicht gesichert werden:', err.message));
+    saveNow().then(() => meldeSicherung(null), (err) => meldeSicherung(err));
   }, 400);
+}
+
+/**
+ * Wenn der Stand nicht auf die Platte kommt, muss es der Host erfahren.
+ *
+ * Der einzige Kanal war `console.error` – und das Terminal ist beim
+ * Spieleabend minimiert oder steht auf einem anderen Rechner. Dass das kein
+ * Kanal zum Host ist, hält dieselbe Datei achtzig Zeilen weiter oben selbst
+ * fest, im Kommentar zum goldenen Balken.
+ *
+ * Der Fall ist keine Theorie: Gestartet wird per Doppelklick aus dem
+ * entpackten Ordner – aus einem gemounteten Disk-Image, von einem
+ * schreibgeschützten Stick oder bei vollgelaufener Platte ist genau dieser
+ * Ordner nicht beschreibbar. Nachgestellt (EISDIR auf der Zwischendatei) lief
+ * der Abend vollständig normal weiter: Teams traten bei, Fragen wurden
+ * gewertet, Punkte standen auf der Leinwand – und gesichert wurde ab der
+ * ersten Aktion nichts mehr. Genau dafür ist die Sicherung gebaut.
+ *
+ * Gemeldet wird beim Wechsel, nicht bei jedem Versuch: einmal, wenn es
+ * anfängt, und einmal, wenn es wieder geht. Dazwischen steht es als roter
+ * Balken auf der Leinwand – der geht nicht weg, solange es nicht geht.
+ */
+function meldeSicherung(err) {
+  if (!err) {
+    if (!sicherungFehler) return;
+    sicherungFehler = null;
+    hostToast('Der Spielstand wird wieder gesichert.');
+    broadcast();
+    return;
+  }
+  console.error('Spielstand konnte nicht gesichert werden:', err.message);
+  const grund = err.code || err.message;
+  if (sicherungFehler === grund) return;
+  const erste = !sicherungFehler;
+  sicherungFehler = grund;
+  if (erste) {
+    hostToast('Der Spielstand lässt sich nicht sichern – ein Absturz wäre jetzt das Ende des Abends.', 'error');
+  }
+  // Der Rundruf zeigt den Balken und stößt nebenbei den nächsten Versuch an.
+  // Er läuft nicht im Kreis: Bleibt der Grund derselbe, ist oben Schluss.
+  broadcast();
 }
 
 async function saveNow() {
@@ -553,6 +595,8 @@ function sichtFuer({ isHost, clientId }) {
     // ins Leere und weiß nicht, ob er am Ende des Weges ist.
     sicht.rueckwegTiefe = rueckWeg.length;
     sicht.wiederhergestellt = wiederhergestelltAm;
+    // Solange hier etwas steht, kommt der Spielstand nicht auf die Platte.
+    sicht.sicherungFehler = sicherungFehler;
     sicht.wartende = warteschlange();
     // Ob der Tunnel noch steht. Der Host-Screen zeigt danach seine grüne Zeile
     // und wählt die Adresse für den QR-Code – und muss es deshalb erfahren,
@@ -804,8 +848,30 @@ async function handleAction(clientId, body) {
     : null;
 
   switch (type) {
+    /**
+     * Zurücknehmen – aber das, was auf dem Knopf steht.
+     *
+     * Der Knopf ist der einzige im Haus, der seinen Inhalt nennt: „↩ Wertung
+     * für Rot zurücknehmen". Geschickt hat er trotzdem nur `undo`, und der
+     * Server nahm stur das oberste Element. Dazwischen passt ein Buzz – auch
+     * der steht im Rückweg (RUECKNEHMBAR). Gemessen: Host tippt auf
+     * „↩ Wertung für Rot zurücknehmen", ein Handy buzzert in derselben
+     * Sekunde, und zurückgenommen wird der Buzz. Die Fehlwertung steht weiter
+     * auf der Leinwand, und der Knopf heißt jetzt wieder so wie vorhin.
+     *
+     * Also denselben Weg wie bei den Wertungen (`lage` weiter oben): Der
+     * Absender schickt mit, was er zurückzunehmen glaubte. Passt es nicht mehr,
+     * prallt der Zug ab, statt etwas anderes zu treffen. Ohne die Angabe – eine
+     * ältere, im Browser hängengebliebene Seite – bleibt alles wie bisher.
+     */
     case 'undo': {
       if (!rueckWeg.length) throw new G.GameError('Es gibt nichts zurückzunehmen.');
+      const oben = rueckWeg.at(-1);
+      if (typeof body.was === 'string' && body.was !== oben.was) {
+        throw new G.GameError(
+          `Inzwischen ist etwas dazwischengekommen (${oben.was}) – schau kurz auf den Screen.`,
+        );
+      }
       state = uebernimm(rueckWeg.pop().state, state);
       break;
     }

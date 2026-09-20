@@ -475,6 +475,7 @@ function render(prev) {
     // dem Punktestand des gerade verworfenen Spiels blieb als feste Pille quer
     // über dem Logo hängen, bis jemand die Seite neu lud.
     renderWiederhergestellt();
+    renderSicherung();
     return renderLobby();
   }
 
@@ -501,6 +502,7 @@ function render(prev) {
   renderUhr();
   renderControls();
   renderWiederhergestellt();
+  renderSicherung();
   if (!$('#menu').hidden) fillMenu();
 }
 
@@ -576,59 +578,44 @@ function renderPause() {
 
 function renderLobby() {
   const list = $('#lobby-teams');
-  list.innerHTML = '';
-  if (!state.teams.length) {
-    list.append(el('li', { class: 'muted' },
-      'Noch keine Teams. Sie erscheinen hier, sobald die Handys eins anlegen – oder du legst sie oben selbst an.'));
+  // Die Liste wurde bei jedem Broadcast vollständig neu gebaut – und ein
+  // Broadcast genügt schon, wenn ein Gast /play überhaupt öffnet; allein das
+  // zählt als wartendes Gerät. Gemessen: Fokus auf „Team „Gelb" umbenennen",
+  // Gast öffnet /play, Fokus auf <body>, fünf Tabulatorschritte zurück zum
+  // selben Knopf. Dasselbe direkt nach dem Umbenennen. Wer den
+  // Beamer-Rechner ohne Maus bedient und in der Lobby die Teams sortiert,
+  // fängt in genau dieser Minute immer wieder von vorn an.
+  //
+  // Also derselbe Schlüssel wie im Menü (fillMenu, elf Bildschirme weiter
+  // unten, mit derselben Begründung) – hier sogar nur die Mannschaft selbst:
+  // Neu gebaut wird die Liste, wenn ein Team dazukommt, wegfällt oder die
+  // Reihenfolge wechselt. Alles andere, was in der Zeile steht, wird
+  // nachgetragen. Der Name gehört ausdrücklich dazu: Umbenennen ist der eine
+  // Handgriff, bei dem der Host mit Sicherheit gerade auf dem Knopf dieser
+  // Zeile steht.
+  const key = state.teams.map((t) => t.id).join('|');
+  if (list.dataset.key !== key) {
+    list.dataset.key = key;
+    list.innerHTML = '';
+    if (!state.teams.length) {
+      list.append(el('li', { class: 'muted' },
+        'Noch keine Teams. Sie erscheinen hier, sobald die Handys eins anlegen – oder du legst sie oben selbst an.'));
+    }
+    fuelleLobbyTeams(list);
   }
-  for (const team of state.teams) {
-    list.append(
-      el('li', {},
-        // color mitsetzen: Der Schein um den Punkt kommt aus currentColor.
-        el('span', { class: 'dot', style: { background: team.color, color: team.color } }),
-        el('span', { class: 'grow' },
-          el('div', { class: 'tname' }, `${team.wappen} ${team.name}`),
-          el('div', { class: 'tmembers' },
-            team.members.length
-              ? team.members.map((m) => (m.online ? m.name : `${m.name} (offline)`)).join(', ')
-              : 'kein Handy verbunden'),
-        ),
-        /*
-         * Umbenennen – der Knopf, den es nie gab.
-         *
-         * Direkt darüber steht in der Lobby „Hier kannst du sie genauso
-         * anlegen, umbenennen und entfernen", und das Handbuch verspricht
-         * dasselbe. `renameTeam` gibt es im Server seit jeher und ist
-         * host-only – abgeschickt hat die Aktion aber keine einzige Seite.
-         * Wer sein Team „Sarah" genannt hat und es „Die Grübelmeister" nennen
-         * wollte, hatte nur einen Weg: Team entfernen (geht ohnehin nur in der
-         * Lobby) und neu anlegen lassen – dabei verliert das Handy seine
-         * Teamzugehörigkeit, und das Team bekommt neue Farbe und neues Wappen.
-         *
-         * `prompt` statt eines eigenen Feldes: Dieselbe Stelle benutzt schon
-         * `confirm` fürs Entfernen, und ein Eingabefeld in jeder Zeile wäre in
-         * der Lobby acht Felder, die niemand braucht.
-         */
-        el('button', {
-          class: 'btn btn-sm btn-ghost',
-          'aria-label': `Team „${team.name}“ umbenennen`,
-          title: 'Team umbenennen',
-          onclick: () => {
-            const eingabe = prompt(`Wie soll „${team.name}“ heißen?`, team.name);
-            if (eingabe === null) return;
-            const neuerName = eingabe.trim();
-            if (!neuerName || neuerName === team.name) return;
-            act('renameTeam', { teamId: team.id, name: neuerName });
-          },
-        }, '✎'),
-        el('button', {
-          class: 'btn btn-sm btn-ghost',
-          'aria-label': `Team „${team.name}“ entfernen`,
-          title: 'Team entfernen',
-          onclick: () => act('removeTeam', { teamId: team.id }),
-        }, '✕'),
-      ),
-    );
+  // Name, Wappen, Farbe und wer gerade verbunden ist – nachtragen, ohne die
+  // Knöpfe anzufassen.
+  for (const zeile of list.children) {
+    const team = state.teams.find((t) => t.id === zeile.dataset.team);
+    if (!team) continue;
+    const punkt = zeile.querySelector('.dot');
+    if (punkt) { punkt.style.background = team.color; punkt.style.color = team.color; }
+    setzeText(zeile.querySelector('.tname'), `${team.wappen} ${team.name}`);
+    setzeText(zeile.querySelector('.tmembers'), team.members.length
+      ? team.members.map((m) => (m.online ? m.name : `${m.name} (offline)`)).join(', ')
+      : 'kein Handy verbunden');
+    zeile.querySelector('.tumbenennen')?.setAttribute('aria-label', `Team „${team.name}“ umbenennen`);
+    zeile.querySelector('.tentfernen')?.setAttribute('aria-label', `Team „${team.name}“ entfernen`);
   }
   $('#set-turnmode').value = state.settings.turnMode;
   $('#set-penalty').value = state.settings.wrongPenalty;
@@ -664,6 +651,65 @@ function renderLobby() {
         });
       }
     }
+  }
+}
+
+/** Die Teamzeilen der Lobby – aus renderLobby herausgezogen, damit dort der
+ *  Schlüsselvergleich lesbar bleibt. */
+function fuelleLobbyTeams(list) {
+  for (const team of state.teams) {
+    list.append(
+      el('li', { 'data-team': team.id },
+        // color mitsetzen: Der Schein um den Punkt kommt aus currentColor.
+        el('span', { class: 'dot', style: { background: team.color, color: team.color } }),
+        el('span', { class: 'grow' },
+          el('div', { class: 'tname' }, `${team.wappen} ${team.name}`),
+          el('div', { class: 'tmembers' },
+            team.members.length
+              ? team.members.map((m) => (m.online ? m.name : `${m.name} (offline)`)).join(', ')
+              : 'kein Handy verbunden'),
+        ),
+        /*
+         * Umbenennen – der Knopf, den es nie gab.
+         *
+         * Direkt darüber steht in der Lobby „Hier kannst du sie genauso
+         * anlegen, umbenennen und entfernen", und das Handbuch verspricht
+         * dasselbe. `renameTeam` gibt es im Server seit jeher und ist
+         * host-only – abgeschickt hat die Aktion aber keine einzige Seite.
+         * Wer sein Team „Sarah" genannt hat und es „Die Grübelmeister" nennen
+         * wollte, hatte nur einen Weg: Team entfernen (geht ohnehin nur in der
+         * Lobby) und neu anlegen lassen – dabei verliert das Handy seine
+         * Teamzugehörigkeit, und das Team bekommt neue Farbe und neues Wappen.
+         *
+         * `prompt` statt eines eigenen Feldes: Dieselbe Stelle benutzt schon
+         * `confirm` fürs Entfernen, und ein Eingabefeld in jeder Zeile wäre in
+         * der Lobby acht Felder, die niemand braucht.
+         */
+        el('button', {
+          class: 'btn btn-sm btn-ghost tumbenennen',
+          'aria-label': `Team „${team.name}“ umbenennen`,
+          title: 'Team umbenennen',
+          // Der Name wird beim Klicken frisch geholt, nicht aus dem Zustand
+          // von damals: Die Zeile bleibt jetzt stehen, wenn sich ein Name
+          // ändert – der eingeschlossene Wert wäre sonst der von vorhin.
+          onclick: () => {
+            const jetzt = state.teams.find((t) => t.id === team.id);
+            if (!jetzt) return;
+            const eingabe = prompt(`Wie soll „${jetzt.name}“ heißen?`, jetzt.name);
+            if (eingabe === null) return;
+            const neuerName = eingabe.trim();
+            if (!neuerName || neuerName === jetzt.name) return;
+            act('renameTeam', { teamId: team.id, name: neuerName });
+          },
+        }, '✎'),
+        el('button', {
+          class: 'btn btn-sm btn-ghost tentfernen',
+          'aria-label': `Team „${team.name}“ entfernen`,
+          title: 'Team entfernen',
+          onclick: () => act('removeTeam', { teamId: team.id }),
+        }, '✕'),
+      ),
+    );
   }
 }
 
@@ -2381,7 +2427,9 @@ function renderUndo() {
 
 $('#btn-undo').addEventListener('click', () => {
   if (performance.now() - undoSeitWann < 400) return;
-  act('undo');
+  // Mitschicken, was der Knopf gerade verspricht: Kommt in derselben Sekunde
+  // ein Buzz herein, soll der Zug abprallen statt den Buzz zurückzunehmen.
+  act('undo', { was: state?.rueckgaengig });
 });
 
 function renderControls() {
@@ -3122,6 +3170,30 @@ function renderWiederhergestellt() {
   const punkte = state.teams.map((t) => `${t.name} ${t.score}`).join(' · ');
   setzeText($('#wieder-text'),
     `Spielstand ${zeitwort(wann)} wiederhergestellt${punkte ? ` – ${punkte}` : ''}`);
+}
+
+/**
+ * Der rote Balken: Der Spielstand kommt nicht auf die Platte.
+ *
+ * Ohne Wegklicken – anders als beim goldenen. Der goldene sagt, was passiert
+ * ist, und ist danach erledigt; dieser sagt, was gerade nicht passiert, und
+ * das gilt bis auf Weiteres. Der Server meldet es beim Wechsel zusätzlich als
+ * Hinweis, aber ein Hinweis ist nach vier Sekunden weg, und der Host schaut
+ * in dem Moment vielleicht gerade auf sein Handy.
+ */
+function renderSicherung() {
+  const balken = $('#sicherung-weg');
+  const fehler = state.sicherungFehler;
+  balken.hidden = !fehler;
+  if (balken.hidden) return;
+  setzeText($('#sicherung-text'), fehler === 'EACCES' || fehler === 'EROFS'
+    ? 'Der Spielstand lässt sich nicht sichern: Der Ordner ist schreibgeschützt. '
+      + 'Bis dahin wäre ein Absturz das Ende des Abends.'
+    : fehler === 'ENOSPC'
+      ? 'Der Spielstand lässt sich nicht sichern: Die Platte ist voll. '
+        + 'Bis dahin wäre ein Absturz das Ende des Abends.'
+      : `Der Spielstand lässt sich nicht sichern (${fehler}). `
+        + 'Bis dahin wäre ein Absturz das Ende des Abends.');
 }
 
 $('#btn-wieder-zu').addEventListener('click', () => {

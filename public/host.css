@@ -1930,6 +1930,17 @@ body.host.flat .tile {
 .wiederbanner[hidden] { display: none; }
 .wiederbanner .btn { white-space: nowrap; }
 
+/* Dieselbe Leiste in Rot: Der Spielstand kommt nicht auf die Platte. Rot,
+   weil hier nichts wiederhergestellt wurde, sondern etwas fehlt – und ohne
+   Knöpfe, weil es nichts zu entscheiden gibt. Beide Leisten gleichzeitig gibt
+   es nur in der einen Sekunde zwischen Wiederherstellen und erstem Zug;
+   dafür rutscht die rote darunter, statt sich zu überlagern. */
+.wiederbanner.rot {
+  box-shadow: 0 0 0 1px rgba(255, 130, 140, 0.6), 0 12px 34px -10px #000;
+  color: #ffd2d6;
+}
+#wiederhergestellt:not([hidden]) ~ .wiederbanner.rot { top: 3.4rem; }
+
 /* Beitreten per Scan – eine IP abzutippen ist der lästigste Teil des Abends. */
 .join-box { display: grid; justify-items: center; gap: 0.7rem; margin: 0.8rem 0; }
 
