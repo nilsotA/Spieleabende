@@ -30,17 +30,23 @@ body.remote #app {
   padding: 0.2rem 0.7rem;
 }
 
-.r-phase {
+/* Zeile und Uhr sind zwei Elemente – nur die Zeile wird vorgelesen. */
+.r-phasezeile {
   text-align: center;
+  min-height: 1.3rem;
+}
+.r-phase,
+.r-uhr {
   font-weight: 700;
   color: #9fd4ff;
   font-size: 0.95rem;
-  min-height: 1.3rem;
-  /* In der Lobby stehen hier zwei Sätze untereinander: der Anschlussstand und
-     der Hinweis, wo angelegt und gestartet wird. */
-  white-space: pre-line;
 }
+/* In der Lobby stehen hier zwei Sätze untereinander: der Anschlussstand und
+   der Hinweis, wo angelegt und gestartet wird. */
+.r-phase { white-space: pre-line; }
+.r-uhr { white-space: pre; }
 .r-phase.bereit { color: #7ff0b8; }
+.r-phase.bereit + .r-uhr { color: #7ff0b8; }
 
 .r-card {
   border: 1px solid var(--line);

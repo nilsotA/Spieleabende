@@ -762,18 +762,21 @@ function renderPicker() {
  */
 let uhrStopp = null;
 let uhrSchluessel = null;
-let uhrText = '';
 /*
- * Was die Uhr zuletzt an die Lagezeile gehängt hat.
+ * Der Grundtext der Lagezeile – ohne Uhr.
  *
- * starteUhr() hört bei null auf zu ticken – „⏱ Zeit ist um" wird also genau
- * einmal geschrieben. Der nächste beliebige Rundruf (ein Handy wacht auf) baute
- * die Lagezeile neu und übermalte es; danach stand dort wieder „Buzzer ist
- * frei", als liefe die Uhr noch, und sie kam nie wieder. Der Buzzer bleibt ja
- * offen – die abgelaufene Uhr ist genau der Hinweis, dass jetzt aufgelöst
- * werden darf.
+ * „⏱ Zeit ist um" wird genau einmal geschrieben: starteUhr() hört bei null
+ * auf zu ticken. Solange Zeile und Uhr derselbe Knoten waren, übermalte der
+ * nächste beliebige Rundruf (ein Handy wacht auf) den Satz, und danach stand
+ * dort wieder „Buzzer ist frei", als liefe die Uhr noch. Dagegen wurde der
+ * Anhang bei jedem Neuaufbau wieder angeklebt.
+ *
+ * Seit die Uhr ein eigenes Feld hat (#p-uhr, siehe player.html), kann der
+ * Neuaufbau sie gar nicht mehr treffen – der Anhang als Gedächtnis ist damit
+ * überflüssig geworden. Der Buzzer bleibt übrigens offen; die abgelaufene Uhr
+ * ist genau der Hinweis, dass jetzt aufgelöst werden darf.
  */
-let uhrSuffix = '';
+let uhrText = '';
 
 function renderUhr() {
   const q = state.current;
@@ -786,7 +789,7 @@ function renderUhr() {
     uhrStopp?.();
     uhrStopp = null;
     uhrSchluessel = null;
-    uhrSuffix = '';
+    setzeText($('#p-uhr'), '');
     return;
   }
   if (schluessel === uhrSchluessel) return;
@@ -794,8 +797,9 @@ function renderUhr() {
   uhrSchluessel = schluessel;
   uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
     const sek = Math.ceil(rest / 1000);
-    uhrSuffix = rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um';
-    setzeText(status, uhrText + uhrSuffix);
+    // Nur in die Uhr schreiben, nicht in die Lagezeile: Die wird vorgelesen,
+    // und zwar bei jeder Änderung vollständig.
+    setzeText($('#p-uhr'), rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um');
   });
 }
 
@@ -896,7 +900,7 @@ function renderBuzzer(prev) {
       ? 'Stechen! Wer zuerst drückt und richtig liegt, gewinnt.'
       : `Buzzer frei! ${q.halfValue} Punkte – oder ${q.halfValue} Abzug.`;
     uhrText = grundtext;
-    setzeText(status, grundtext + uhrSuffix);
+    setzeText(status, grundtext);
     status.classList.add('you');
     // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst
     // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.

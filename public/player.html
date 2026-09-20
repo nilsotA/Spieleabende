@@ -76,7 +76,13 @@
          siehe schlafHinweis() in player.js. -->
     <p id="p-schlaf" class="p-schlaf" hidden></p>
 
-    <div id="p-status" class="p-status" role="status" aria-live="polite">Warte auf den Host …</div>
+    <!-- Die Uhr steht NEBEN der Lagezeile, nicht darin.
+         role="status" liest bei jeder Änderung den ganzen Bereich neu vor –
+         der Sekundentakt hätte denselben Satz dreißigmal hintereinander
+         vorgelesen und die Ansage, wer gebuzzert hat, dahinter gestaut. -->
+    <div class="p-statuszeile">
+      <span id="p-status" class="p-status" role="status" aria-live="polite">Warte auf den Host …</span><span id="p-uhr" class="p-uhr" aria-hidden="true"></span>
+    </div>
 
     <!-- Der Einsatz. Bewusst ÜBER dem Raster und nicht darin: renderPicker()
          leert #p-picker bei jedem Schlüsselwechsel, der Schalter läge sonst

@@ -1975,12 +1975,27 @@ function renderScoreboard() {
         el('li', { class: raenge[i] === 0 ? 'first' : '', style: { '--i': stufe, '--team': team.color } },
           el('span', { class: 'rank' }, `${platz(i)}`),
           el('span', { class: 'sname' }, `${team.wappen} ${team.name}`),
-          // Nur wer sich bewegt hat, bekommt einen Pfeil. Vier Punkte für „nichts
-          // passiert" wären bloß Rauschen in der wichtigsten Tabelle des Abends.
-          sprung !== 0
-            ? el('span', { class: `sprung ${sprung > 0 ? 'hoch' : 'runter'}` },
-              sprung > 0 ? `▲ ${sprung}` : `▼ ${-sprung}`)
-            : null,
+          /*
+           * Nur wer sich bewegt hat, bekommt einen Pfeil. Vier Punkte für
+           * „nichts passiert" wären bloß Rauschen in der wichtigsten Tabelle
+           * des Abends.
+           *
+           * Die Spalte bleibt trotzdem stehen. Das Raster erklärt vier Spalten
+           * (host.css), und wer das Feld ganz weglässt, schiebt die Punktzahl
+           * eine Spalte nach links – samt der Fuge zur leeren vierten. Gemessen
+           * auf 1280×720 mit sechs Teams, von denen drei den Platz gewechselt
+           * hatten: Zeilen mit Pfeil endeten bei 1134, die ohne bei 1120. Die
+           * Zahlenspalte, die am Ende der ganze Raum vergleicht, zickzackte um
+           * 14 Pixel.
+           *
+           * Leer statt mit einem Strich: Die Spalte hält sich über
+           * `min-width: 3.2ch` selbst offen, und sichtbar steht dort nichts –
+           * genau wie es oben gemeint war.
+           */
+          el('span', {
+            class: `sprung ${sprung > 0 ? 'hoch' : sprung < 0 ? 'runter' : 'gleich'}`,
+            'aria-hidden': sprung === 0 ? 'true' : null,
+          }, sprung > 0 ? `▲ ${sprung}` : sprung < 0 ? `▼ ${-sprung}` : ''),
           el('span', { class: 'pts' }, punkte(team.score)),
         ),
       );

@@ -308,6 +308,100 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Die Buzzer-Uhr steht nicht im Vorlesebereich.
+ *
+ * `#p-status` und `#r-phase` tragen `role="status" aria-live="polite"`.
+ * role="status" heißt implizit aria-atomic: Eine Vorlesehilfe liest bei jeder
+ * Änderung den GANZEN Bereich neu vor. Genau dorthin schrieb der Uhr-Tick
+ * jede Sekunde – bei der größten einstellbaren Uhr dreißig vollständige
+ * Vorlesevorgänge desselben Satzes hintereinander. Weil `polite` sich staut
+ * statt zu unterbrechen, hängt die Ansage, wer tatsächlich gebuzzert hat,
+ * dahinter.
+ *
+ * Gemessen im Browser: Die Lagezeile las sich als
+ * „Buzzer frei! 50 Punkte – oder 50 Abzug.  ⏱ 30“, dann „… 29“, dann „… 27“.
+ * Jetzt steht dort unverändert „Buzzer frei! 50 Punkte – oder 50 Abzug.“,
+ * während die Uhr daneben weiterläuft.
+ *
+ * Nebenbei sieht es besser aus: Vorher brach die Zeile auf dem Handy mitten in
+ * der Uhr um („… Abzug. ⏱“ / „27“), jetzt bleibt „⏱ 27“ zusammen.
+ */
+test('die Buzzer-Uhr tickt neben der Lagezeile, nicht darin', () => {
+  for (const [seite, zeile, uhr] of [
+    ['player.html', 'p-status', 'p-uhr'],
+    ['remote.html', 'r-phase', 'r-uhr'],
+  ]) {
+    const html = lies(seite);
+    // Die Lagezeile bleibt ein Vorlesebereich – sie soll ja angesagt werden.
+    assert.match(html, new RegExp(`id="${zeile}"[^>]*aria-live="polite"`),
+      `${seite}: die Lagezeile bleibt ein Vorlesebereich`);
+    // Die Uhr ist ein eigenes Element daneben, und zwar ein stummes.
+    assert.match(html, new RegExp(`id="${uhr}"[^>]*aria-hidden="true"`),
+      `${seite}: die Uhr gehört aus dem Vorlesebereich heraus`);
+    // Und sie steht NICHT innerhalb der Lagezeile.
+    const ab = html.indexOf(`id="${zeile}"`);
+    const zu = html.indexOf('</span>', ab);
+    assert.ok(zu > ab, `${seite}: die Lagezeile sollte ein span mit Ende sein`);
+    assert.ok(html.indexOf(`id="${uhr}"`) > zu,
+      `${seite}: die Uhr steht sonst doch wieder im Vorlesebereich`);
+  }
+
+  // Und das Javascript schreibt den Takt auch wirklich dorthin.
+  for (const [datei, uhr] of [['player.js', 'p-uhr'], ['remote.js', 'r-uhr']]) {
+    const js = ohneKommentare(lies(datei));
+    const ab = js.indexOf('const sek = Math.ceil');
+    assert.ok(ab > 0, `${datei}: der Uhr-Tick sollte auffindbar bleiben`);
+    assert.match(js.slice(ab, ab + 300), new RegExp(`#${uhr}`),
+      `${datei}: der Takt gehört in die Uhr`);
+  }
+});
+
+/*
+ * Im Endstand stehen die Punktzahlen auf einer Linie.
+ *
+ * Das Raster der Endstandszeile erklärt vier Spalten. Den Platzsprung hängte
+ * host.js aber nur an, wenn sich wirklich etwas bewegt hatte – Zeilen ohne
+ * Pfeil hatten also drei Kinder in einem Vier-Spalten-Raster. Die Punktzahl
+ * rutschte eine Spalte nach links, samt der Fuge zur leeren vierten.
+ *
+ * Gemessen auf 1280×720 mit sechs Teams, drei davon mit Platzwechsel:
+ *
+ *   mit Pfeil   Punktzahl endet bei 1134
+ *   ohne Pfeil  Punktzahl endet bei 1120
+ *
+ * 14 Pixel Zickzack in der Zahlenspalte, die am Ende der ganze Raum
+ * vergleicht – und der Sieger ist besonders oft betroffen, denn wer schon nach
+ * Runde 1 führte, hat keinen Sprung.
+ *
+ * Die Spalte bleibt jetzt immer stehen, sichtbar aber leer: `min-width: 3.2ch`
+ * hält sie offen, und ein Pfeil für „nichts passiert" wäre nach dem Kommentar
+ * an der Stelle bloß Rauschen. Dass die Klasse `gleich` im Stylesheet seit
+ * jeher steht, zeigt, dass es so gemeint war.
+ */
+test('der Endstand hält die Spalte für den Platzsprung immer frei', () => {
+  const js = ohneKommentare(lies('host.js'));
+
+  // Der Platzsprung darf nicht mehr an einer Bedingung hängen, die ihn ganz
+  // weglässt – genau daran hing der Versatz.
+  assert.doesNotMatch(js, /sprung !== 0\s*\?[\s\S]{0,200}?:\s*null/,
+    'ein weggelassenes Feld verschiebt die Punktzahl um eine Spalte');
+
+  // Stattdessen: immer ein Element, mit drei möglichen Zuständen.
+  const stelle = js.slice(js.indexOf("class: `sprung"));
+  assert.ok(stelle.startsWith('class: `sprung'), 'das Sprung-Element sollte auffindbar bleiben');
+  assert.match(stelle.slice(0, 120), /gleich/,
+    'ohne Platzwechsel gehört die Klasse `gleich` dorthin – sie steht seit jeher im Stylesheet');
+
+  // Und das Stylesheet erklärt weiterhin vier Spalten – sonst trüge die
+  // Behauptung oben ins Leere.
+  const css = fs.readFileSync(path.join(PUBLIC, 'host.css'), 'utf8');
+  assert.match(css, /\.scores-panel\.final \.score-list li \{ grid-template-columns: [^;]*auto auto;/,
+    'vier Spalten, und die letzte ist die Punktzahl');
+  assert.match(css, /\.score-list \.sprung\.gleich/,
+    'den Zustand `gleich` gibt es im Stylesheet');
+});
+
+/*
  * Die Leertaste gehört dem Knopf, auf dem der Fokus steht.
  *
  * Der Buzzer nimmt die Leertaste für sich, sobald jemand beigetreten ist –
@@ -859,22 +953,39 @@ test('der Warnbalken des Editors steht in der klebenden Leiste', () => {
  * „⏱ Zeit ist um" bleibt stehen, bis die Frage vorbei ist.
  *
  * starteUhr() hört bei null auf zu ticken – der Satz wird genau einmal
- * geschrieben. Der nächste beliebige Rundruf baute die Lagezeile neu und
- * übermalte ihn; danach stand dort wieder „Buzzer ist frei · 50 Punkte", als
- * liefe die Uhr noch, und er kam nie wieder. Gemessen auf Fernbedienung und
- * Handy. Der Buzzer bleibt dabei offen – die abgelaufene Uhr ist genau der
- * Hinweis an den Host, dass er jetzt auflösen darf.
+ * geschrieben. Solange Lagezeile und Uhr derselbe Knoten waren, übermalte ihn
+ * der nächste beliebige Rundruf; danach stand dort wieder „Buzzer ist frei ·
+ * 50 Punkte", als liefe die Uhr noch, und er kam nie wieder. Gemessen auf
+ * Fernbedienung und Handy. Der Buzzer bleibt dabei offen – die abgelaufene Uhr
+ * ist genau der Hinweis an den Host, dass er jetzt auflösen darf.
+ *
+ * Dagegen stand früher ein Gedächtnis (`uhrSuffix`), das bei jedem Neuaufbau
+ * der Zeile wieder angeklebt wurde. Seit die Uhr ein eigenes Feld hat, kann der
+ * Neuaufbau sie gar nicht mehr treffen: Er schreibt in einen anderen Knoten.
+ * Im Browser nachgemessen – Uhr abgelaufen, dann tritt ein drittes Handy bei:
+ * Auf Handy und Fernbedienung stand danach weiterhin „⏱ Zeit ist um".
  */
-test('die abgelaufene Buzzer-Uhr bleibt in der Lagezeile stehen', () => {
-  for (const [datei, knoten] of [['remote.js', 'phase'], ['player.js', 'status']]) {
+test('die abgelaufene Buzzer-Uhr bleibt stehen', () => {
+  for (const [datei, uhr] of [['remote.js', 'r-uhr'], ['player.js', 'p-uhr']]) {
     const js = ohneKommentare(lies(datei));
-    assert.match(js, /let uhrSuffix = '';/, `${datei}: der Anhang braucht ein Gedächtnis`);
-    assert.match(js, /uhrSuffix = rest > 0 \? `  ⏱ \$\{sek\}` : '  ⏱ Zeit ist um';/,
-      `${datei}: die Uhr muss ihn füllen`);
-    assert.match(js, new RegExp(`setzeText\\(${knoten}, (uhrText|grundtext) \\+ uhrSuffix\\)`),
-      `${datei}: und die Lagezeile muss ihn wieder anhängen`);
-    assert.match(js, /uhrSchluessel = null;\s*\n\s*uhrSuffix = '';/,
-      `${datei}: beim Abschalten der Uhr gehört er weg`);
+    assert.match(js, /\u23f1 Zeit ist um/, `${datei}: den Satz muss es geben`);
+
+    // Der Takt schreibt ausschließlich in die Uhr – nur deshalb hält der Satz.
+    const tick = js.slice(js.indexOf('const sek = Math.ceil'));
+    const bis = tick.indexOf('});');
+    assert.ok(bis > 0, `${datei}: der Uhr-Tick sollte auffindbar bleiben`);
+    assert.match(tick.slice(0, bis), new RegExp(`setzeText\\(\\$\\('#${uhr}'\\)`),
+      `${datei}: der Takt gehört in die Uhr, nicht in die Lagezeile`);
+
+    // Und beim Abschalten wird sie geleert – sonst bliebe „Zeit ist um" auch
+    // dann stehen, wenn die Frage längst vorbei ist.
+    assert.match(js, new RegExp(`uhrSchluessel = null;\\s*\\n\\s*setzeText\\(\\$\\('#${uhr}'\\), ''\\);`),
+      `${datei}: beim Abschalten der Uhr gehört ihr Feld geleert`);
+
+    // Das Gedächtnis von früher darf nicht zurückkommen: Es las nur noch sich
+    // selbst und würde beim nächsten Leser wie ein lebender Zustand aussehen.
+    assert.doesNotMatch(js, /uhrSuffix/,
+      `${datei}: der Anhang ist seit dem eigenen Uhrfeld überflüssig`);
   }
 });
 

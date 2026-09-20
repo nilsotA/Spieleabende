@@ -180,14 +180,24 @@ body {
   }
 }
 
-.p-status {
+/* Zeile und Uhr sind zwei Elemente – nur die Zeile wird vorgelesen. Die Maße
+   der alten .p-status stehen deshalb jetzt am Rahmen darum. */
+.p-statuszeile {
   text-align: center;
+  min-height: 1.4rem;
+}
+.p-status,
+.p-uhr {
   font-weight: 700;
   font-size: 0.95rem;
   color: #9fd4ff;
-  min-height: 1.4rem;
 }
+/* Die Uhr hängt direkt an der Zeile; ihre führenden Leerzeichen tragen den
+   Abstand, deshalb dürfen sie nicht zusammenfallen. */
+.p-uhr { white-space: pre; }
 .p-status.you { color: #f8d548; }
+/* Gelb wird die ganze Zeile, nicht nur ihr erster Teil. */
+.p-status.you + .p-uhr { color: #f8d548; }
 
 /* Wappenwahl in der Lobby. Die Knöpfe sind bewusst groß: Sie stehen in der
    Zeit, in der ohnehin gewartet wird, und werden mit dem Daumen bedient. */

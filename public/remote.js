@@ -35,7 +35,6 @@ let uhrText = '';
  * offen – die abgelaufene Uhr ist genau der Hinweis, dass jetzt aufgelöst
  * werden darf.
  */
-let uhrSuffix = '';
 
 function renderUhr() {
   const q = state.current;
@@ -46,7 +45,7 @@ function renderUhr() {
     uhrStopp?.();
     uhrStopp = null;
     uhrSchluessel = null;
-    uhrSuffix = '';
+    setzeText($('#r-uhr'), '');
     return;
   }
   if (schluessel === uhrSchluessel) return;
@@ -54,8 +53,8 @@ function renderUhr() {
   uhrSchluessel = schluessel;
   uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
     const sek = Math.ceil(rest / 1000);
-    uhrSuffix = rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um';
-    setzeText($('#r-phase'), uhrText + uhrSuffix);
+    // Nur in die Uhr, nicht in die Lagezeile – siehe player.js.
+    setzeText($('#r-uhr'), rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um');
   });
 }
 
@@ -308,7 +307,7 @@ function render() {
         uhrText = q.stechen
           ? 'Stechen – wer zuerst drückt, antwortet.'
           : `Buzzer ist frei · ${q.halfValue} Punkte`;
-        setzeText(phase, uhrText + uhrSuffix);
+        setzeText(phase, uhrText);
         // „Keiner weiß es" zuerst: Das ist der Knopf, der die Frage beendet,
         // und bei acht Teams stand er vorher unter sieben Vertreterknöpfen –
         // also außerhalb des Bildschirms, obwohl der Tisch längst wartet.

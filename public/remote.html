@@ -22,7 +22,10 @@
     <span class="rtag">Fernbedienung</span>
   </header>
 
-  <div id="r-phase" class="r-phase" role="status" aria-live="polite">Verbinde …</div>
+  <!-- Uhr neben der Lagezeile, nicht darin – siehe player.html. -->
+  <div class="r-phasezeile">
+    <span id="r-phase" class="r-phase" role="status" aria-live="polite">Verbinde …</span><span id="r-uhr" class="r-uhr" aria-hidden="true"></span>
+  </div>
 
   <!-- Pause: oben, weil sie zwischen zwei Fragen gedrückt wird und nicht in der
        Hektik einer Wertung. In der Pause wird sie zum Hauptknopf – dann ist sie
