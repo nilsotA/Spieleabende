@@ -133,8 +133,23 @@ async function eigenesTeam() {
    nicht doppelt – und das Handy vibriert ja ohnehin. */
 const tonKnopf = $('#btn-ton');
 function zeigeTon() {
-  tonKnopf.textContent = istStumm() ? '🔇' : '🔊';
-  tonKnopf.title = istStumm() ? 'Töne sind aus' : 'Töne sind an';
+  const stumm = istStumm();
+  tonKnopf.textContent = stumm ? '🔇' : '🔊';
+  tonKnopf.title = stumm ? 'Töne sind aus' : 'Töne sind an';
+  /*
+   * Der Zustand gehört auch in den Namen.
+   *
+   * Im Markup stand ein festes `aria-label="Töne auf diesem Handy an oder
+   * aus"`, und ein aria-label schlägt sowohl den Inhalt als auch den Titel.
+   * Eine Vorlesehilfe las vor und nach dem Antippen wortgleich dasselbe vor –
+   * der einzige Zustandsträger war das Emoji, und das erreichte sie gar nicht.
+   * Auf dem Host-Screen ist dieselbe Schaltfläche richtig gebaut: Dort steht
+   * der Zustand im Text.
+   */
+  tonKnopf.setAttribute('aria-label', stumm
+    ? 'Töne auf diesem Handy sind aus – zum Einschalten antippen'
+    : 'Töne auf diesem Handy sind an – zum Ausschalten antippen');
+  tonKnopf.setAttribute('aria-pressed', String(stumm));
 }
 tonKnopf.addEventListener('click', () => {
   unlockAudio(); // echte Nutzergeste – sonst bleibt es auf iOS stumm

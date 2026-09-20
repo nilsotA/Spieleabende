@@ -308,6 +308,56 @@ test('mit einem Team meldet die Lobby nicht „alles bereit"', async () => {
 });
 
 /*
+ * Der Tonschalter des Handys sagt, woran man ist.
+ *
+ * `#btn-ton` trug ein festes `aria-label="Töne auf diesem Handy an oder aus"`.
+ * Umgeschaltet wurden nur Emoji und Titel – und ein aria-label schlägt beides.
+ * Eine Vorlesehilfe las vor und nach dem Antippen wortgleich dasselbe vor; der
+ * einzige Zustandsträger erreichte sie gar nicht.
+ *
+ * Auf dem Host-Screen ist dieselbe Schaltfläche seit jeher richtig gebaut:
+ * kein aria-label, der Zustand steht im Text („🔇 Ton aus“ / „🔊 Ton an“).
+ *
+ * Gemessen im Browser – jetzt:
+ *   vorher:  🔊  „Töne auf diesem Handy sind an – zum Ausschalten antippen“
+ *   nachher: 🔇  „Töne auf diesem Handy sind aus – zum Einschalten antippen“
+ */
+test('der Tonschalter des Handys nennt seinen Zustand', () => {
+  const js = ohneKommentare(lies('player.js'));
+  const ab = js.indexOf('function zeigeTon()');
+  assert.ok(ab > 0, 'zeigeTon sollte auffindbar bleiben');
+  const rumpf = js.slice(ab, ab + 700);
+  assert.match(rumpf, /setAttribute\('aria-label'/,
+    'der Name muss mit dem Zustand wechseln – sonst hört eine Vorlesehilfe zweimal dasselbe');
+  assert.match(rumpf, /aria-pressed/, 'und der Schalter sagt, ob er gedrückt ist');
+});
+
+/*
+ * Die Tür-Seite bestreitet keinen Weg, den das Spiel selbst anbietet.
+ *
+ * Sie schloss mit „Eine Adresse zum Abtippen gibt es bewusst nicht." Das
+ * stimmt nicht: Beim Spiel über den Tunnel zeigt der Host-Screen genau dafür
+ * die vollständige Zeile samt Schlüssel und schreibt dazu „Öffnet das Handy
+ * nichts, tippt genau diese Zeile ab". Wer an der Kamera scheitert, wurde von
+ * der Tür-Seite also zurück zum QR-Code geschickt – zu dem, an dem er gerade
+ * gescheitert war.
+ */
+test('die Tür-Seite und der Host-Screen sagen dasselbe', () => {
+  const zugang = fs.readFileSync(path.join(PUBLIC, '..', 'server', 'zugang.js'), 'utf8');
+  const tuer = zugang.slice(zugang.indexOf('Diese Runde ist privat'));
+  assert.ok(tuer, 'die Tür-Seite sollte auffindbar bleiben');
+  assert.doesNotMatch(tuer.slice(0, 600), /gibt es bewusst nicht/,
+    'der Host-Screen bietet diese Adresse an – die Tür darf sie nicht bestreiten');
+  assert.match(tuer.slice(0, 600), /Abtippen/,
+    'der Ausweichweg gehört genannt');
+
+  // Und der Host-Screen bietet ihn wirklich an – sonst trüge die Behauptung
+  // oben ins Leere.
+  assert.match(ohneKommentare(lies('host.js')), /tippt genau diese Zeile ab/,
+    'der Host-Screen sollte den Ausweichweg weiter anbieten');
+});
+
+/*
  * Ein Funkloch bei der Feldwahl bleibt nicht stumm.
  *
  * Das Handy schickt die Feldwahl mit `quiet: true` – und das war richtig: Die

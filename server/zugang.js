@@ -147,6 +147,13 @@ function keks(name, wert, sicher) {
 /**
  * Die Seite für alle, die keinen Schlüssel haben.
  *
+ * Hier stand einmal „Eine Adresse zum Abtippen gibt es bewusst nicht.“ – und
+ * das stimmt nicht: Beim Spiel über den Tunnel zeigt der Host-Screen genau
+ * dafür die vollständige Zeile samt Schlüssel und schreibt dazu „Öffnet das
+ * Handy nichts, tippt genau diese Zeile ab“. Die Tür-Seite bestritt also den
+ * Weg, den das Spiel selbst als Ausweichweg vorsieht, und schickte den Gast
+ * zurück zu dem QR-Code, an dem er gerade gescheitert war.
+ *
  * Bewusst ohne Stylesheet und ohne Skript: Beides liegt hinter derselben Tür,
  * eine Fehlerseite, die selbst nachlädt, stünde nackt da. Und bewusst ohne
  * Formular – es gibt nichts einzutippen, der QR-Code ist der Weg hinein.
@@ -164,5 +171,6 @@ export const TUER_ZU = `<!doctype html>
 <body><div>
 <b>Diese Runde ist privat.</b>
 Scann den QR-Code, der auf der Leinwand steht – er bringt dich direkt hinein.
-Eine Adresse zum Abtippen gibt es bewusst nicht.
+Wenn die Kamera zickt: Unter dem QR-Code steht die vollständige Zeile zum
+Abtippen. Die kurze Adresse allein reicht nicht, der Schlüssel gehört dazu.
 </div></body></html>`;
