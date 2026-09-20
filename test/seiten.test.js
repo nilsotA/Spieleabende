@@ -1294,7 +1294,9 @@ test('die Zusammenfassung zählt „weiß nicht" nicht doppelt', () => {
 test('der Notweg hängt daran, ob der Strom gerade trägt', () => {
   const js = ohneKommentare(lies('common.js'));
   assert.match(js, /let stromLaeuft = false;/, 'die zweite Frage braucht eine eigene Antwort');
-  assert.match(js, /while \(notwegLaeuft && !stromLaeuft\)/,
+  // Die Bedingung darf wachsen (die Schleifennummer kam später dazu) – nur
+  // diese beiden Glieder müssen darin stehen.
+  assert.match(js, /while \(notwegLaeuft && !stromLaeuft[ &\w=!]*\)/,
     'die Schleife darf nicht an „je gelaufen" hängen');
   assert.match(js, /if \(notwegLaeuft \|\| stromLaeuft\) return;/,
     'und das Aufmachen auch nicht');
@@ -2105,4 +2107,30 @@ test('der Notweg hält den Warteraum nicht für einen Server ohne Warteraum', ()
     + 'aus der Haltefrist nicht von einem Server ohne Warteraum zu unterscheiden');
   assert.match(ohneKommentare(common), /const kamSofort = Date\.now\(\) - losGeschickt < \d+;/,
     'gemessen wird die Zeit bis zur Antwort, nicht geraten');
+});
+
+/*
+ * Nur die neueste Notweg-Schleife läuft.
+ *
+ * `notwegZu()` setzt bloß ein Flag. Eine Schleife, die gerade an einer
+ * Warteabfrage hängt, merkt das erst, wenn die Abfrage zurückkommt – das kann
+ * bis zur Haltefrist dauern. Reißt der Strom in dieser Zeit erneut ab, sieht
+ * `notwegAuf()` das Flag auf false, hält sich für die erste und startet eine
+ * zweite; kommt danach die alte Abfrage zurück, steht das Flag wieder auf
+ * true, und beide laufen weiter.
+ *
+ * Diese Verschränkung steht im Code; nachgestellt wurde sie nicht. Drei
+ * Anläufe im Browser – Strom abgewürgt, Strom als sofort endender Datenstrom
+ * untergeschoben, Server mitten in einer festgehaltenen Warteabfrage neu
+ * gestartet – zeigten nie mehr als eine offene Abfrage. Die Nummer kostet drei
+ * Zeilen und macht die Frage gegenstandslos.
+ */
+test('nur die neueste Notweg-Schleife läuft', () => {
+  const common = ohneKommentare(lies('common.js'));
+  assert.match(common, /async function notwegSchleife\(meiner\)/,
+    'die Schleife sollte ihre Nummer kennen');
+  assert.match(common, /while \(notwegLaeuft && !stromLaeuft && meiner === notwegLauf\)/,
+    'und bei jedem Umlauf prüfen, ob sie noch die neueste ist');
+  assert.match(common, /notwegSchleife\(\+\+notwegLauf\)/,
+    'jede neu geöffnete Schleife zieht eine neue Nummer');
 });

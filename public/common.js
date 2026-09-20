@@ -443,6 +443,25 @@ export function connect({ role, onState, onEvent, onStatus }) {
 
   const schlaf = (ms) => new Promise((r) => setTimeout(r, ms));
 
+  /*
+   * Jede Schleife trägt ihre Nummer, und nur die neueste läuft.
+   *
+   * `notwegZu()` setzt bloß das Flag – eine Schleife, die gerade an einer
+   * Warteabfrage hängt, merkt das erst, wenn die Abfrage zurückkommt. Das kann
+   * bis zur Haltefrist dauern. Reißt der Strom in dieser Zeit erneut ab, sieht
+   * `notwegAuf()` das Flag auf false, hält sich für die erste und startet eine
+   * zweite; kommt danach die alte Abfrage zurück, steht das Flag wieder auf
+   * true, und beide laufen weiter. Im Funkloch, wo Strom-tot und Strom-da im
+   * Takt wechseln, käme bei jedem Wechsel eine dazu.
+   *
+   * Ehrlich dazu: Diese Verschränkung steht im Code, nachgestellt wurde sie
+   * nicht. Drei Anläufe im Browser – Strom abgewürgt, Strom als sofort
+   * endender Datenstrom untergeschoben, Server mitten in einer festgehaltenen
+   * Warteabfrage neu gestartet – zeigten nie mehr als eine offene Abfrage. Die
+   * Nummer kostet drei Zeilen und macht die Frage gegenstandslos.
+   */
+  let notwegLauf = 0;
+
   /**
    * Der Notweg als Schleife statt als Wecker.
    *
@@ -451,9 +470,9 @@ export function connect({ role, onState, onEvent, onStatus }) {
    * Kennt der Server das nicht (ältere Fassung, kein `nummer` in der Antwort),
    * fällt die Schleife von selbst auf den alten Takt zurück.
    */
-  async function notwegSchleife() {
+  async function notwegSchleife(meiner) {
     let erstes = true;
-    while (notwegLaeuft && !stromLaeuft) {
+    while (notwegLaeuft && !stromLaeuft && meiner === notwegLauf) {
       const ok = await hole(!erstes);
       erstes = false;
       if (!ok) await schlaf(ABFRAGE_TAKT); // nicht in einer Endlosschleife hämmern
@@ -465,7 +484,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
     if (notwegLaeuft || stromLaeuft) return;
     melde(grund);
     notwegLaeuft = true;
-    notwegSchleife();
+    notwegSchleife(++notwegLauf);
   }
 
   function notwegZu() {
