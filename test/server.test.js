@@ -4178,3 +4178,63 @@ test('eine gestrichene Frage gibt den Einsatz zurück', async (t) => {
   assert.equal(zweiter.ok, true, zweiter.error);
   assert.equal((await zustand(base)).current.value, 1000);
 });
+
+/*
+ * Zwei Host-Geräte, zwei Züge, wenige Millisekunden auseinander.
+ *
+ * „Frage austauschen" muss erst einen Ersatz von der Platte holen – gemessen
+ * zehn bis vierzig Millisekunden, weil dafür alle Sätze gelesen werden. In
+ * genau diesem Fenster kann von der Fernbedienung ein „Zurücknehmen"
+ * eintreffen; über den Tunnel reicht dafür kein gleichzeitiger Tastendruck.
+ *
+ * Danach prüfte der Austausch nur, ob `catIdx` und `rowIdx` noch dieselben
+ * sind – und genau die überstehen ein `undo`: Der zurückgeholte Zustand steht
+ * auf demselben Feld, nur mit einem kürzeren Protokoll. Weitergerechnet wurde
+ * mit dem Protokoll des abgehängten Objekts, und heraus kam eine „Korrektur
+ * von Hand" über den vollen Feldwert. Gemessen, dreimal von dreimal: Rot hatte
+ * 500 und stand danach auf −500. Beide Züge meldeten ok.
+ */
+test('ein Zurücknehmen mitten im Austausch erfindet keine Punkte', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-wettlauf-'));
+  const { proc, base } = await starteServer(9410 + Math.floor(Math.random() * 30), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'wettlauf_host');
+  await tu({ type: 'addTeam', name: 'Rot' });
+  await tu({ type: 'addTeam', name: 'Blau' });
+  await tu({ type: 'startGame', file: 'der-klassiker.json' });
+  await tu({ type: 'pick', catIdx: 1, rowIdx: 3 });
+  await tu({ type: 'judge', correct: true });
+
+  const vorher = (await zustand(base)).teams.find((x) => x.name === 'Rot').score;
+  assert.ok(vorher > 0, 'ohne Punkte auf dem Konto zeigt der Fall nichts');
+
+  // Beide Züge anstoßen, ohne auf den ersten zu warten.
+  const austausch = tu({ type: 'discard' });
+  await new Promise((f) => setTimeout(f, 2));
+  const zurueck = tu({ type: 'undo' });
+  const [a, z] = await Promise.all([austausch, zurueck]);
+
+  const nachher = await zustand(base);
+  const rot = nachher.teams.find((x) => x.name === 'Rot').score;
+  assert.ok(rot >= 0, `Rot steht auf ${rot} – eine erfundene Korrektur (vorher ${vorher})`);
+  // Einer der beiden Züge muss abgelehnt worden sein; welcher, entscheidet das
+  // Rennen. Abgelehnt wird mit einem Satz, der zum Nachsehen auffordert.
+  if (!a.ok) assert.match(a.error, /inzwischen eine andere/);
+  else assert.equal(z.ok, true, 'geht der Austausch durch, darf das Zurücknehmen nicht kaputtgehen');
+
+  // Und mit Abstand läuft beides wie gewohnt: Der Austausch geht durch und
+  // nimmt genau die Punkte dieser einen Frage zurück. Der Feldwert wird
+  // abgelesen, nicht angenommen – wie hoch Rot davor steht, entscheidet das
+  // Rennen oben.
+  const stand = async () => (await zustand(base)).teams.find((x) => x.name === 'Rot').score;
+  if ((await zustand(base)).phase === 'question') await tu({ type: 'undo' });
+  const vorFeld = await stand();
+  await tu({ type: 'pick', catIdx: 2, rowIdx: 0 });
+  const wert = (await zustand(base)).current.value;
+  await tu({ type: 'judge', correct: true });
+  assert.equal(await stand(), vorFeld + wert, 'die richtige Antwort bringt den Feldwert');
+  const ruhig = await tu({ type: 'discard' });
+  assert.equal(ruhig.ok, true, ruhig.error || '');
+  assert.equal(await stand(), vorFeld, 'der Austausch nimmt genau die Punkte dieser Frage zurück');
+});

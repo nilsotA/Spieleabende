@@ -827,7 +827,27 @@ async function handleAction(clientId, body) {
       }
       const ersatz = await ersatzFrage(q.category,
         [...aufDemBrett, ...(state.stechenTexte || []), ...(state.ersatzTexte || [])]);
-      if (!state.current || state.current.catIdx !== q.catIdx || state.current.rowIdx !== q.rowIdx) {
+      /*
+       * Verglichen wird das Objekt, nicht das Feld.
+       *
+       * Hier standen `catIdx` und `rowIdx`, und genau die überstehen ein
+       * `undo`: Der zurückgeholte Zustand steht auf demselben Feld, nur mit
+       * einem kürzeren `log`. Die Prüfung winkte durch, und die Rechnung
+       * weiter unten nahm `q.log` – das Protokoll des abgehängten Objekts.
+       *
+       * Gemessen, dreimal von dreimal: Rot hat 500 für ein richtig
+       * beantwortetes Feld. Der Host tippt auf dem Screen „Frage
+       * austauschen", zwei Millisekunden später die Fernbedienung
+       * „Zurücknehmen" (über den Tunnel reicht dafür kein gleichzeitiger
+       * Tastendruck). Beide Züge melden ok, und Rot steht danach auf −500 –
+       * eine erfundene Korrektur „von Hand" über den vollen Feldwert. Mit
+       * 300 ms Abstand passiert nichts dergleichen.
+       *
+       * `state.current !== q` fängt jede Neuzuweisung: undo, ein zweites
+       * discard, „Neues Spiel". Ein `judge` dazwischen ändert dasselbe Objekt
+       * und ist damit in `q.log` schon enthalten – das ist richtig so.
+       */
+      if (state.current !== q) {
         throw new G.GameError('Die Frage ist inzwischen eine andere – bitte noch einmal ansehen.');
       }
 
