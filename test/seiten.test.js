@@ -1878,3 +1878,67 @@ test('„Bewegung reduzieren" schaltet Übergänge ab, statt sie zu kürzen', ()
   assert.equal(gesehen, 1, 'die Regel für „Bewegung reduzieren" sollte auffindbar bleiben');
 });
 
+/*
+ * „SIEG FÜR …!“ stand am Ende des Abends in Fußnotengröße da.
+ *
+ * Die letzte Sparstufe am Endstand hieß `font-size: 0.86em` – und `em` misst
+ * an der Schrift des Elternelements, nicht an der eigenen. Der Kasten steht
+ * auf den geerbten 16px, die Siegerzeile auf `clamp(1.6rem, 3.6vw, 3.4rem)`.
+ * Gemessen auf 1280×720 mit acht Teams: aus 46,1px wurden nicht die gemeinten
+ * 39,6px, sondern 13,8px; die Ranglistenzeile fiel von 24px auf 14,1px statt
+ * auf 21,1px. Ein Siebtel der Größe dessen, was direkt danebensteht.
+ *
+ * Jetzt wie bei der Frage über eine Variable, die die Grundgröße
+ * multipliziert. Nachgemessen mit acht Teams und vollem Endstand passt der
+ * Kasten weiter auf 1920×1080, 1366×768, 1280×800, 1280×720 und 1024×768 –
+ * auf dem 720er sogar fünf Pixel knapper als vorher, weil jetzt auch die
+ * erste Ranglistenzeile mitgeht.
+ */
+test('die letzte Stufe am Endstand rechnet an der eigenen Schrift', () => {
+  const css = lies('host.css').replace(/\/\*[\s\S]*?\*\//g, '');
+
+  for (const regel of css.match(/\.scores-panel[^{}]*\{[^{}]*\}/g) || []) {
+    assert.doesNotMatch(regel, /font-size:\s*[\d.]+em/,
+      'am Endstand darf keine Stufe die Schrift mit einem nackten em kleiner '
+      + `machen – em misst am Elternwert: ${regel.replace(/\s+/g, ' ')}`);
+  }
+
+  assert.match(css, /\.scores-panel\.extrem-voll\s*\{[^{}]*--standskala:\s*0?\.\d+/,
+    'die letzte Stufe sollte die Variable setzen');
+
+  for (const [name, muster] of [
+    ['Siegerzeile', /\.score-winner\s*\{[^{}]*font-size:\s*calc\([^{}]*var\(--standskala/],
+    ['Ranglistenzeile', /\.score-list li\s*\{[^{}]*font-size:\s*calc\([^{}]*var\(--standskala/],
+    ['erster Platz', /li\.first \{ font-size: calc\([^)]*\) \* var\(--standskala/],
+  ]) {
+    assert.match(css, muster, `${name}: ohne die Variable geht die Stufe an ihr vorbei`);
+  }
+});
+
+/*
+ * Die Wertungsleiste der Fernbedienung klebt am unteren Rand – und ihre Höhe
+ * hängt nicht am Fenster, sondern an der Zahl der Teams: Geht der Buzzer frei,
+ * bekommt jedes wartende Team einen eigenen Knopf.
+ *
+ * Gemessen mit acht Teams auf einem 360x640-Handy, Buzzer offen: Der Fuß war
+ * 561 Pixel hoch. Übrig blieben 79 – und die Frage, die der Host in genau
+ * diesem Moment vorlesen will, ist 91 hoch. Weil die Leiste klebt und
+ * mitwandert, war die Frage an keiner einzigen Scrollposition ganz zu sehen.
+ * Die Regel darunter kennt den Schaden, behebt ihn aber nur für das quer
+ * gehaltene Handy (`max-height: 520px`); hochkant greift sie nicht.
+ *
+ * Mit Deckel und eigener Scrollfläche: Fuß 384px, Frage 91 von 91 frei, und
+ * der letzte der acht Knöpfe bleibt durch Scrollen in der Leiste erreichbar –
+ * nachgemessen auf 360x640, 360x740, 390x750, 740x360, 820x375 und 1024x768.
+ */
+test('die klebende Wertungsleiste lässt die Frage stehen', () => {
+  const css = lies('remote.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const fuss = /\.r-foot\s*\{[^{}]*\}/.exec(css)?.[0] || '';
+  assert.ok(fuss, '.r-foot sollte auffindbar bleiben');
+  assert.match(fuss, /position:\s*sticky/, 'die Leiste klebt – darum geht es');
+  assert.match(fuss, /max-height:\s*\d+vh/,
+    'ohne Deckel wächst die klebende Leiste mit der Teamzahl über das ganze Fenster');
+  assert.match(fuss, /overflow-y:\s*auto/,
+    'mit Deckel, aber ohne eigene Scrollfläche wären die hinteren Buzz-Knöpfe nicht mehr erreichbar');
+});
+

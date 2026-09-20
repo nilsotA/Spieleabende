@@ -1055,7 +1055,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   border-radius: 12px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
   padding: 0.65rem 1.1rem;
-  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-size: calc(clamp(1rem, 2vw, 1.5rem) * var(--standskala, 1));
   font-weight: 800;
   animation: rankIn 0.35s both;
   animation-delay: calc(var(--i, 0) * 90ms);
@@ -1088,7 +1088,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   text-transform: uppercase;
   letter-spacing: 0.02em;
   line-height: 1.1;
-  font-size: clamp(1.6rem, 3.6vw, 3.4rem);
+  font-size: calc(clamp(1.6rem, 3.6vw, 3.4rem) * var(--standskala, 1));
   color: var(--gold-hell);
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
   animation: siegerIn 0.5s var(--ease-snap) both;
@@ -1158,7 +1158,7 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   font-size: clamp(1.3rem, 2.4vw, 2.2rem);
   line-height: 1;
 }
-.scores-panel.final .score-list li.first { font-size: clamp(1.2rem, 2.6vw, 2rem); }
+.scores-panel.final .score-list li.first { font-size: calc(clamp(1.2rem, 2.6vw, 2rem) * var(--standskala, 1)); }
 
 /* ------------------------------------------------------------ Rundenansage
 
@@ -1296,8 +1296,21 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 .scores-panel.sehr-voll .rekorde { margin-top: 0.4rem; padding-top: 0.35rem; }
 .scores-panel.sehr-voll .endstand-aktionen { margin-top: 0.6rem; }
 
-.scores-panel.extrem-voll .score-list li { font-size: 0.88em; }
-.scores-panel.extrem-voll .score-winner { font-size: 0.86em; }
+/* Und die letzte Stufe über eine Variable statt über `em`.
+
+   `em` misst an der Schrift des ELTERNELEMENTS, nicht an der eigenen. Der
+   Kasten selbst steht auf den geerbten 16px, die Siegerzeile auf
+   `clamp(1.6rem, 3.6vw, 3.4rem)`. Gemessen auf 1280×720 wurde aus
+   „SIEG FÜR …!“ damit nicht 0,86 × 46,1 = 39,6px, sondern 0,86 × 16 =
+   13,8px – der Höhepunkt des Abends in Fußnotengröße, ein Siebtel dessen,
+   was danebensteht. Die Ranglistenzeile fiel genauso von 24px auf 14,1px
+   statt auf 21,1px.
+
+   Deshalb dasselbe Muster wie bei der Frage (`--frageskala`): Die Grundgröße
+   steht einmal da, die Stufe multipliziert sie. Beide Zeilen teilen sich
+   jetzt einen Faktor – die 0,88 der Rangliste und die 0,86 der Siegerzeile
+   lagen ohnehin zwei Prozent auseinander. */
+.scores-panel.extrem-voll { --standskala: 0.86; }
 
 /* ----------------------------------------------------------- Studioblitz */
 
