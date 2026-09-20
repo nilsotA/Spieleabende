@@ -2069,3 +2069,40 @@ test('die Lobbyliste lässt den Tastaturfokus stehen', () => {
     'der Knopf muss den Namen beim Klicken frisch holen');
 });
 
+/*
+ * Der Notweg legte sich alle 25 Sekunden für anderthalb taub.
+ *
+ * Er hält seine Anfrage beim Server liegen, bis sich etwas ändert. Passiert
+ * 25 s lang nichts – der Host holt Nachschub, der Tisch redet –, läuft sie in
+ * die Haltefrist und kommt mit derselben Standnummer zurück. Der Code las das
+ * als „dieser Server hält gar nichts" und schlief ABFRAGE_TAKT.
+ *
+ * Im Kommentar stand die richtige Bedingung schon: „sofort UND unverändert".
+ * Nur die erste Hälfte fehlte im Code.
+ *
+ * Gemessen mit kurzer Haltefrist (1200 ms): Abstände zwischen den Abfragen
+ * 2710 ms statt 1210 – also 1500 ms in jedem Umlauf, in denen gar keine
+ * Anfrage offen stand. Dieselbe Änderung, zehnmal in wachsendem Abstand zur
+ * letzten Antwort ausgelöst, brauchte bis zur Anzeige:
+ *
+ *      Abstand      vorher    danach
+ *      +   0 ms    1520 ms     40 ms
+ *      + 450 ms    1053 ms     18 ms
+ *      + 900 ms     600 ms     21 ms
+ *      +1350 ms     144 ms     17 ms
+ *
+ * Die Reihe fällt linear – das Kennzeichen eines festen Schlaffensters, nicht
+ * einer langsamen Leitung. Während einer Frage trifft dieselbe Lücke die
+ * Buzzer-Freigabe auf den Handys der Mitspieler: genau das, was der Kommentar
+ * zu ABFRAGE_TAKT_HEISS verhindern will.
+ */
+test('der Notweg hält den Warteraum nicht für einen Server ohne Warteraum', () => {
+  const common = lies('common.js');
+  const zeile = (ohneKommentare(common).match(/haeltNichts = [^;]*;/g) || []).pop() || '';
+  assert.ok(zeile, 'die Bedingung sollte auffindbar bleiben');
+  assert.match(zeile, /letzteNummer === vorher/, 'unverändert – die eine Hälfte');
+  assert.match(zeile, /kamSofort/, 'und sofort – die andere; ohne sie ist die Antwort '
+    + 'aus der Haltefrist nicht von einem Server ohne Warteraum zu unterscheiden');
+  assert.match(ohneKommentare(common), /const kamSofort = Date\.now\(\) - losGeschickt < \d+;/,
+    'gemessen wird die Zeit bis zur Antwort, nicht geraten');
+});

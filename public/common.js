@@ -386,6 +386,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
    * gleich weiterfragt oder erst einmal Luft holt.
    */
   async function hole(warten = false) {
+    const losGeschickt = Date.now();
     try {
       const seit = warten && letzteNummer != null ? `&seit=${letzteNummer}` : '';
       const res = await fetch(
@@ -410,7 +411,23 @@ export function connect({ role, onState, onEvent, onStatus }) {
       // nichts – dann darf die Schleife nicht sofort wieder fragen, sonst
       // hämmert sie so schnell, wie die Leitung hergibt. Gemessen, als eine
       // Gegenprobe genau das ausgelöst hat.
-      haeltNichts = warten && letzteNummer != null && letzteNummer === vorher;
+      //
+      // „Sofort" stand nur im Kommentar, nicht in der Bedingung – und genau
+      // daran hing der Fehler: Läuft die Anfrage beim Server in ihre Haltefrist
+      // (25 s ohne Änderung), antwortet er mit derselben Standnummer. Das sah
+      // aus wie ein Server, der nichts hält, und die Schleife legte sich
+      // ABFRAGE_TAKT schlafen. Gemessen mit kurzer Frist: Antwort nach 1205 ms,
+      // danach 1501 ms Pause – eine Aktion in dieser Lücke stand erst 1159 ms
+      // später auf der Fernbedienung. Alle 25 Sekunden aufs Neue, solange am
+      // Tisch geredet wird. Während einer Frage trifft dieselbe Lücke die
+      // Buzzer-Freigabe auf den Handys.
+      //
+      // Eine Sekunde trennt die beiden Fälle mit großem Abstand: Ein Server
+      // ohne Warteraum antwortet in Millisekunden, ein haltender frühestens
+      // nach seiner Frist. Und wurde er von einer echten Änderung geweckt,
+      // stimmt schon die Nummer nicht mehr überein.
+      const kamSofort = Date.now() - losGeschickt < 1000;
+      haeltNichts = warten && letzteNummer != null && letzteNummer === vorher && kamSofort;
       nimm(sicht, letzteNummer == null ? 'Notweg (im Takt)' : 'Notweg (wartend)');
       melde(letzteNummer == null
         ? `Notweg: Der Spielstand wird alle ${(takt() / 1000).toLocaleString('de-DE')} s abgeholt.`
