@@ -1259,3 +1259,49 @@ test('ein Fragensatz mit Byte-Order-Mark lädt', async () => {
     await unlink(kaputt).catch(() => {});
   }
 });
+
+/*
+ * Ein zu langer Kategoriename wurde stumm abgeschnitten.
+ *
+ * Mitten im Wort, bei einem Emoji mitten im Zeichen – und auf der Leinwand
+ * stand dann ein Kästchen. Gemessen über normalizeSet():
+ *   „Woran erkennt man einen echten Norddeutschen?" (45)
+ *     → „Woran erkennt man einen echten Norddeuts" (40)
+ *   „Welche Serie steckt hinter den Bildern 🎬🍿" (43 Codeeinheiten)
+ *     → endete auf einer halben Ersatzzeichenfolge
+ *
+ * Der Kopfkommentar der Funktion sagt seit jeher das Gegenteil: „Wirft bei
+ * allem, was das Board verziehen oder Inhalte verlieren würde – lieber eine
+ * klare Meldung im Fragensatz-Menü als ein verrutschtes Board am Beamer."
+ * Frage und Antwort halten sich daran, der Kategoriename hielt sich nicht.
+ *
+ * Der längste Name im mitgelieferten Bestand hat 32 Zeichen, und der Editor
+ * lässt ohnehin nur 40 zu – betroffen war allein, wer den Satz von Hand
+ * schreibt. Genau dazu lädt das Handbuch ein.
+ */
+test('ein zu langer Kategoriename sagt es, statt sich abschneiden zu lassen', () => {
+  const bau = (name) => ({
+    name: 'Prüfsatz',
+    rounds: [{
+      categories: [{
+        name,
+        questions: Array.from({ length: 4 }, (_, i) => ({ text: `Frage ${i}`, answer: `Antwort ${i}` })),
+      }],
+    }],
+  });
+
+  // Vierzig gehen – das ist die Grenze, nicht der Fehler.
+  const gerade = 'x'.repeat(40);
+  assert.equal(normalizeSet(bau(gerade)).rounds[0].categories[0].name, gerade);
+
+  for (const zuLang of [
+    'Woran erkennt man einen echten Norddeutschen?',
+    'Welche Serie steckt hinter den Bildern 🎬🍿',
+  ]) {
+    assert.throws(() => normalizeSet(bau(zuLang)), (err) => {
+      assert.match(err.message, /Zeichen/);
+      assert.match(err.message, /höchstens 40/);
+      return true;
+    }, `„${zuLang}" sollte auffallen, nicht abgeschnitten werden`);
+  }
+});

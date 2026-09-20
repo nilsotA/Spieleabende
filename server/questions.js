@@ -9,6 +9,9 @@ export const DATA_DIR = path.join(__dirname, '..', 'data');
 /** Anzahl Fragen je Kategorie – entspricht den Punktereihen 100/200/300/500. */
 export const QUESTIONS_PER_CATEGORY = 4;
 const MAX_TEXT = 2000;
+// Was auf das Schild über einer Spalte passt. Derselbe Wert steht im Editor
+// als `maxlength` – dort als Bremse, hier als Prüfung.
+const MAX_KATEGORIE = 40;
 
 /**
  * Validiert und normalisiert einen Fragensatz.
@@ -49,6 +52,27 @@ export function normalizeSet(raw, fallbackName = 'Fragensatz') {
         // Deutsch geschlossen: Die Meldung landet als Toast auf der Leinwand,
         // und dort fällt ein gerades Zeichen hinter einem „ auf.
         const label = `„${cat?.name || ci + 1}“ in Runde ${ri + 1}`;
+        /*
+         * Ein zu langer Kategoriename wurde stumm abgeschnitten – mitten im
+         * Wort, bei einem Emoji mitten im Zeichen, und auf der Leinwand stand
+         * dann ein Kästchen. Gemessen: „Woran erkennt man einen echten
+         * Norddeutschen?" kam als „Woran erkennt man einen echten Norddeuts"
+         * aufs Brett, und „… hinter den Bildern 🎬🍿" endete auf einer halben
+         * Ersatzzeichenfolge.
+         *
+         * Der Kopfkommentar dieser Funktion sagt seit jeher das Gegenteil
+         * („Wirft bei allem, was das Board verziehen oder Inhalte verlieren
+         * würde"), und Frage und Antwort halten sich auch daran. Der Editor
+         * lässt ohnehin nur 40 Zeichen zu; betroffen war nur, wer den Satz von
+         * Hand schreibt – und genau dazu lädt das Handbuch ein.
+         */
+        const name = String(cat?.name || `Kategorie ${ci + 1}`);
+        if (name.length > MAX_KATEGORIE) {
+          throw new Error(
+            `Kategorie ${label} hat ${name.length} Zeichen`
+            + ` – höchstens ${MAX_KATEGORIE} passen auf das Schild über der Spalte.`,
+          );
+        }
         const qs = Array.isArray(cat?.questions) ? cat.questions : [];
         if (qs.length !== QUESTIONS_PER_CATEGORY) {
           throw new Error(
@@ -57,7 +81,7 @@ export function normalizeSet(raw, fallbackName = 'Fragensatz') {
           );
         }
         return {
-          name: String(cat.name || `Kategorie ${ci + 1}`).slice(0, 40),
+          name,
           questions: qs.map((q, qi) => {
             const text = String(q?.text ?? '');
             const answer = String(q?.answer ?? '');
