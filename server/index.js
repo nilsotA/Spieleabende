@@ -550,6 +550,18 @@ function broadcastEvent(name, payload) {
   for (const conn of connections.values()) write(conn, name, payload);
 }
 
+/**
+ * Dasselbe, aber nur an die Geräte des Hosts: Leinwand und Fernbedienung.
+ *
+ * Manches geht nur den Host etwas an – dass eine Frage ausgetauscht wurde etwa,
+ * oder dass es keine Ersatzfrage mehr gab. Auf die Handys gehört das nicht:
+ * Dort stünde mitten im Spiel eine Meldung über etwas, das die Mitspieler gar
+ * nicht entschieden haben.
+ */
+function hostToast(text, level = 'ok') {
+  for (const conn of connections.values()) if (conn.isHost) write(conn, 'toast', { level, text });
+}
+
 /* ---------------------------------------------------------------- Aktionen */
 
 const HOST_ACTIONS = new Set([
@@ -880,14 +892,23 @@ async function handleAction(clientId, body) {
       for (const k of korrekturen) {
         if (state.teams.some((t) => t.id === k.teamId)) G.adjustScore(state, k.teamId, k.delta);
       }
+      /*
+       * Gesagt wird es über den toast-Kanal, nicht über `state.message`.
+       *
+       * Der Satz stand hier vorher nur in `state.message` – und den liest kein
+       * einziges Gerät (siehe die Anmerkung bei `message` in viewFor). Die
+       * Rückfrage davor verspricht aber ohne Vorbehalt: „auf dem Feld liegt
+       * danach eine andere Frage.“ Blieb der Austausch aus, stand der Host vor
+       * demselben Brett und derselben Frage, ohne zu wissen, warum.
+       */
       if (ersatz) {
         G.ersetzeFrage(state, q.catIdx, q.rowIdx, ersatz);
-        state.message = 'Frage ausgetauscht – auf dem Feld liegt jetzt eine andere.';
+        hostToast('Frage ausgetauscht – auf dem Feld liegt jetzt eine andere.');
       } else {
         // Kann passieren, wenn nur ein einziger Fragensatz installiert ist:
         // Dann steht jede Frage daraus schon auf dem Brett. Lieber ehrlich
         // sagen als so tun, als wäre etwas passiert.
-        state.message = 'Frage gestrichen – es war keine Ersatzfrage übrig, das Feld bleibt wie es war.';
+        hostToast('Es war keine Ersatzfrage übrig – auf dem Feld steht noch dieselbe Frage.', 'error');
       }
       rueckWeg.push(vorher);
       // Auch hier den Deckel halten: Der Anker bleibt liegen, und ohne diese

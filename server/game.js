@@ -1086,6 +1086,16 @@ export function viewFor(state, { isHost, clientId }) {
     roundCount: state.roundCount,
     setName: state.setName,
     turnIndex: state.turnIndex,
+    /*
+     * Achtung: Dieses Feld liest zurzeit kein einziges Gerät.
+     *
+     * Der Server schreibt an neun Stellen hinein, in public/ greift niemand
+     * darauf zu. Die meisten dieser Sätze sagt die Oberfläche ohnehin selbst
+     * (die Rundenansage auf der Leinwand, das Pausenbild, der Stechen-Hinweis
+     * auf dem Handy) – wer aber etwas Neues hier hineinschreibt und erwartet,
+     * dass es jemand sieht, wartet vergeblich. Für eine Meldung an den Host
+     * gibt es `hostToast()` in server/index.js.
+     */
     message: state.message,
     pause: !!state.pause,
     settings: state.settings,

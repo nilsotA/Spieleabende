@@ -2260,6 +2260,82 @@ test('cloudflared darf seine Adresse auch nach stderr schreiben', async (t) => {
 });
 
 /*
+ * Ein Austausch meldet sich beim Host – und nicht auf den Handys.
+ *
+ * Der Server schrieb den Satz „Frage ausgetauscht …“ nur nach `state.message`,
+ * und den liest kein einziges Gerät: In public/ greift niemand darauf zu. Die
+ * Rückfrage vor dem Austausch verspricht aber ohne Vorbehalt „auf dem Feld
+ * liegt danach eine andere Frage“. Blieb der Austausch aus – es gibt einen
+ * Zweig dafür –, stand der Host vor demselben Brett und derselben Frage, ohne
+ * zu wissen, warum.
+ *
+ * Der toast-Kanal dafür lag schon bereit: common.js hört seit jeher darauf,
+ * der Server hat nur nie gesendet. Und er sendet gezielt: Auf den Handys hätte
+ * mitten im Spiel eine Meldung über etwas gestanden, das die Mitspieler gar
+ * nicht entschieden haben.
+ */
+test('ein Austausch meldet sich beim Host – und nicht auf den Handys', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-austausch-'));
+  const { proc, base } = await starteServer(6900 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  // Einen Strom mitschreiben statt ihn nur offen zu halten.
+  const lauscher = async (id, rolle) => {
+    const res = await fetch(`${base}/api/events?clientId=${id}&role=${rolle}`);
+    const reader = res.body.getReader();
+    const ereignisse = [];
+    let geheim = null;
+    (async () => {
+      let puffer = '';
+      try {
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          puffer += new TextDecoder().decode(value);
+          let treffer;
+          while ((treffer = /event: ([a-z]+)\ndata: (.*)\n\n/.exec(puffer))) {
+            if (treffer[1] === 'hello') geheim = JSON.parse(treffer[2]).geheim || geheim;
+            ereignisse.push({ name: treffer[1], daten: treffer[2] });
+            puffer = puffer.slice(treffer.index + treffer[0].length);
+          }
+        }
+      } catch { /* Server beendet – das ist am Testende der Normalfall */ }
+    })();
+    for (let i = 0; i < 80 && !geheim; i++) await warte(50);
+    assert.ok(geheim, `${id}: kein Nachweis im hello`);
+    return {
+      ereignisse,
+      reader,
+      tu: (body) => fetch(`${base}/api/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: id, geheim, role: rolle, ...body }),
+      }).then((r) => r.json()),
+    };
+  };
+
+  const host = await lauscher('austausch-host', 'host');
+  const handy = await lauscher('austausch-handy', 'player');
+  t.after(() => { host.reader.cancel().catch(() => {}); handy.reader.cancel().catch(() => {}); });
+
+  for (const name of ['Rot', 'Blau']) await host.tu({ type: 'addTeam', name });
+  assert.equal((await host.tu({ type: 'startGame', set: SATZ })).ok, true);
+  assert.equal((await host.tu({ type: 'pick', catIdx: 0, rowIdx: 0 })).ok, true);
+
+  const vorher = host.ereignisse.filter((e) => e.name === 'toast').length;
+  assert.equal((await host.tu({ type: 'discard' })).ok, true);
+  for (let i = 0; i < 40 && host.ereignisse.filter((e) => e.name === 'toast').length === vorher; i++) await warte(50);
+
+  const beimHost = host.ereignisse.filter((e) => e.name === 'toast');
+  assert.equal(beimHost.length, vorher + 1, 'der Host bekommt genau eine Meldung');
+  assert.match(beimHost.at(-1).daten, /ausgetauscht|Ersatzfrage/,
+    'und zwar die über den Austausch');
+
+  assert.deepEqual(handy.ereignisse.filter((e) => e.name === 'toast'), [],
+    'auf dem Handy steht nichts über eine Entscheidung des Hosts');
+});
+
+/*
  * Ein zweiter Doppelklick ist kein zweites Spiel.
  *
  * Wer die Startdatei zweimal anklickt – weil beim ersten Mal scheinbar nichts
