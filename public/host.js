@@ -1204,17 +1204,37 @@ function renderQuestion(prev) {
 /**
  * Die Frage kommt sichtbar aus dem Feld, das gewählt wurde: Panel von der
  * Position und Größe der Kachel auf Endgröße fahren.
+ *
+ * Die Reihenfolge ist der ganze Trick: erst die alte Bewegung wegnehmen, dann
+ * messen. `.q-panel` trägt `animation: panelOpen … both`, und `both` heißt,
+ * dass die Anfangslage schon vor dem ersten Bild gilt – in dem Moment, in dem
+ * das Panel sichtbar wird, steht es also zusammengeschrumpft auf der Kachel
+ * der VORIGEN Frage, weil `--fx/--fy/--fs` noch deren Werte tragen. Wer dort
+ * misst, misst diese Kachel: gemessen 229 × 76 px statt der 1233 px, die das
+ * Panel in Ruhe breit ist. Aus einer so schmalen „Ruhelage“ rechnete sich ein
+ * --fs von 1,0 und ein --fx von 730 px – die Frage schob sich von rechts ins
+ * Bild, statt aus ihrem Feld zu wachsen. Jede Frage außer der ersten.
+ *
+ * Beim zügigen Weiterspielen kam es noch dicker: Wird das nächste Feld noch
+ * während der 320 ms Zuklappen gewählt, steht das Panel beim Messen mitten in
+ * der Rückwärtsbewegung, und der Startpunkt lag irgendwo außerhalb des Bildes.
  */
 function openFromTile(panel, q) {
   const tile = $(`[data-cell="${q.catIdx}-${q.rowIdx}"]`);
+  // Ohne Bewegung und ohne die alten Eckwerte steht das Panel da, wo es
+  // hingehört – erst dieser Zustand ist messbar.
+  panel.style.animation = 'none';
+  for (const eck of ['--fx', '--fy', '--fs']) panel.style.removeProperty(eck);
   const p = panel.getBoundingClientRect();
-  if (!tile || !p.width) return;
+  if (!tile || !p.width) {
+    panel.style.animation = '';
+    return;
+  }
   const t = tile.getBoundingClientRect();
   panel.style.setProperty('--fx', `${t.left + t.width / 2 - (p.left + p.width / 2)}px`);
   panel.style.setProperty('--fy', `${t.top + t.height / 2 - (p.top + p.height / 2)}px`);
   panel.style.setProperty('--fs', (t.width / p.width).toFixed(3));
   // Animation neu anstoßen
-  panel.style.animation = 'none';
   void panel.offsetWidth;
   panel.style.animation = '';
 }

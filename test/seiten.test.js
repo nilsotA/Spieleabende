@@ -1632,3 +1632,43 @@ test('der Streifen „Die Seite steht" erscheint nur, wenn sie das tut', () => {
   assert.match(zweiter, /window\.quizduellSpielt === true/,
     'und mit Spielstand braucht es ihn ohnehin nicht');
 });
+
+/*
+ * Die Frage muss aus ihrem eigenen Feld aufklappen – nicht aus dem vorigen.
+ *
+ * `.q-panel` trägt `animation: panelOpen … both`. Das `both` legt die
+ * Anfangslage schon an, bevor das erste Bild läuft: Sobald das Panel sichtbar
+ * wird, steht es zusammengeschrumpft auf der Kachel, die in `--fx/--fy/--fs`
+ * steht – und das sind noch die Werte der Vorfrage, die `schliesseFrage`
+ * hineingeschrieben hat. Wer in diesem Moment misst, misst die alte Kachel.
+ *
+ * Im Browser nachgestellt, 1600 × 900, Feld 0-0 spielen und danach 3-2 wählen:
+ * Das Panel wurde mit 229 × 76 px gemessen statt mit seinen 1233 px Ruhebreite,
+ * daraus wurde --fs 1,0 und --fx 730 px, und die Frage schob sich von rechts
+ * ins Bild – der erste Bildausschnitt lag 613 px neben der gewählten Kachel und
+ * ragte aus dem Bild heraus. Nach dem Richten: 10 px neben der Kachelmitte.
+ *
+ * Deshalb steht hier die Reihenfolge fest: `animation = 'none'` und die alten
+ * Eckwerte weg, erst dann messen.
+ */
+test('das Fragepanel misst sich, bevor es sich bewegt', () => {
+  const js = lies('host.js');
+  const fn = /function openFromTile\(panel, q\) \{[\s\S]*?\n\}/.exec(js)?.[0] || '';
+  assert.ok(fn, 'openFromTile sollte auffindbar bleiben');
+
+  const anim = fn.indexOf("panel.style.animation = 'none'");
+  const messung = fn.indexOf('panel.getBoundingClientRect()');
+  assert.ok(anim >= 0, 'die laufende Bewegung muss abgestellt werden');
+  assert.ok(messung >= 0, 'das Panel muss gemessen werden');
+  assert.ok(anim < messung,
+    'erst die Bewegung abstellen, dann messen – sonst misst man die Kachel der Vorfrage');
+
+  const eckwerte = fn.indexOf("removeProperty");
+  assert.ok(eckwerte >= 0 && eckwerte < messung,
+    'auch --fx/--fy/--fs gehören vor der Messung weg, sonst hält `both` die alte Anfangslage');
+
+  // Und der Rückweg ohne Kachel darf das Panel nicht bewegungslos zurücklassen.
+  const abbruch = /if \(!tile \|\| !p\.width\) \{[\s\S]*?\}/.exec(fn)?.[0] || '';
+  assert.match(abbruch, /panel\.style\.animation = '';/,
+    'auch beim Abbruch muss die Bewegung wieder freigegeben werden');
+});
