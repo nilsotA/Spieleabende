@@ -11,6 +11,21 @@ import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, 
 import { oeffne as oeffneImBrowser } from './browser.js';
 import { starteTunnel, stoppeTunnel } from './tunnel.js';
 import { neuerZugang, pruefeZugang, cookieKoepfe, TUER_ZU } from './zugang.js';
+import { nodeZuAlt } from './node-version.js';
+
+/*
+ * Vor allem anderen: Läuft das Spiel auf diesem Node überhaupt?
+ *
+ * Auf einem zu alten startet der Server, die Lobby geht auf, Teams legen sich
+ * an – und beim ersten Feld, das jemand aufruft, ist Schluss (`structuredClone`
+ * ab Node 17, `findLastIndex` ab 18, beide in `handleAction`). Lieber hier
+ * aufhören, wo noch niemand im Raum sitzt.
+ */
+const zuAlt = nodeZuAlt(process.versions.node);
+if (zuAlt) {
+  console.error(zuAlt);
+  process.exit(1);
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');

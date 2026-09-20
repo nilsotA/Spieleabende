@@ -19,7 +19,9 @@ Keine Datenbank, keine Abhängigkeiten, kein Build. Node installieren, starten, 
 | Linux | `start-quizduell.sh` |
 
 Das Fenster bleibt offen, solange gespielt wird, und der Host-Screen geht von
-selbst im Browser auf. Fehlt Node.js noch, sagt das Fenster, wo es herkommt.
+selbst im Browser auf. Fehlt Node.js noch, sagt das Fenster, wo es herkommt –
+und ist es zu alt (gebraucht wird **Node 18 oder neuer**), sagt es auch das,
+bevor die Lobby aufgeht statt mitten im Spiel.
 
 ### Beim allerersten Start auf dem Mac
 

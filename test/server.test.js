@@ -2164,6 +2164,91 @@ test('cloudflared darf seine Adresse auch nach stderr schreiben', async (t) => {
 });
 
 /*
+ * Ein zu altes Node fällt vorne auf, nicht bei Frage eins.
+ *
+ * Die Startskripte fragten nur, OB Node da ist. Auf einem älteren startet der
+ * Server aber, die Lobby geht auf, Teams legen sich an – und beim ersten Feld,
+ * das jemand aufruft, ist Schluss: `handleAction` legt mit `structuredClone`
+ * (ab Node 17) eine Sicherung an, und „Frage verworfen" sucht mit
+ * `findLastIndex` (ab Node 18) zurück. Das fällt genau dann auf, wenn alle
+ * schon im Raum sitzen.
+ *
+ * Geprüft wird die Entscheidung, nicht ein zweites Node: `nodeZuAlt` nimmt die
+ * Version als Text, damit beide Seiten überhaupt prüfbar sind.
+ */
+test('ein zu altes Node kommt gar nicht erst bis zur Lobby', async () => {
+  const { nodeZuAlt, MINDEST_NODE } = await import('../server/node-version.js');
+
+  for (const alt of ['16.20.2', '14.21.3', '12.22.12', '17.9.1']) {
+    const meldung = nodeZuAlt(alt);
+    assert.ok(meldung, `Node ${alt} sollte abgewiesen werden`);
+    assert.match(meldung, new RegExp(`Node ${alt.replace(/\./g, '\\.')}`), 'die Meldung nennt, was installiert ist');
+    assert.match(meldung, new RegExp(`Node ${MINDEST_NODE}`), 'und was gebraucht wird');
+    assert.match(meldung, /nodejs\.org/, 'und wo es herkommt');
+  }
+
+  for (const neu of ['18.0.0', '18.19.1', '20.11.0', '22.14.0', '24.0.0']) {
+    assert.equal(nodeZuAlt(neu), null, `Node ${neu} soll durchgehen`);
+  }
+
+  // Eine Angabe, die wir nicht verstehen, darf keinen Abend kosten.
+  for (const seltsam of ['', 'irgendwas', undefined, null, 'v18']) {
+    assert.equal(nodeZuAlt(seltsam), null, `„${seltsam}" soll nicht im Weg stehen`);
+  }
+
+  // Und die Fassung, auf der dieser Testlauf selbst läuft, muss durchgehen –
+  // sonst wäre der Torwächter in server/index.js gerade das Tor.
+  assert.equal(nodeZuAlt(process.versions.node), null);
+});
+
+/*
+ * Und der Torwächter muss auch verdrahtet sein.
+ *
+ * Dass `nodeZuAlt` richtig rechnet, sagt noch nichts darüber, ob server/index.js
+ * ihn überhaupt fragt. Hier läuft deshalb der echte Server – mit einem
+ * Vorschalter, der ihm ein älteres Node vorspielt.
+ */
+test('mit zu altem Node startet der Server gar nicht', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-altes-node-'));
+  const port = 6800 + Math.floor(Math.random() * 200);
+  const vorschalter = fileURLToPath(new URL('./hilfe/altes-node.js', import.meta.url));
+  const proc = spawn(process.execPath, ['--import', vorschalter, SERVER], {
+    env: {
+      ...process.env,
+      PORT: String(port),
+      QUIZDUELL_STATE_FILE: path.join(dir, 's.json'),
+      QUIZDUELL_ALTES_NODE: '16.20.2',
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let klage = '';
+  let gruss = '';
+  proc.stderr.on('data', (d) => { klage += String(d); });
+  proc.stdout.on('data', (d) => { gruss += String(d); });
+
+  /*
+   * Mit Frist warten, nicht auf gut Glück.
+   *
+   * Ohne sie hängt dieser Test endlos, sobald der Torwächter fehlt – der
+   * Server läuft dann ja einfach. Gegengeprüft: genau das ist passiert, der
+   * Testlauf blieb stehen statt rot zu werden. Ein Test, der hängt statt zu
+   * scheitern, sagt niemandem, was los ist.
+   */
+  const ende = await new Promise((fertig) => {
+    const frist = setTimeout(() => { proc.kill('SIGKILL'); fertig('läuft immer noch'); }, 15000);
+    proc.on('exit', (code) => { clearTimeout(frist); fertig(code); });
+  });
+  assert.equal(ende, 1, 'der Server soll mit einem Fehler enden, nicht laufen');
+  assert.match(klage, /zu alt für das Spiel/);
+  assert.match(klage, /Node 16\.20\.2/, 'die Meldung nennt, was installiert ist');
+  assert.doesNotMatch(gruss, /Quizduell für Spieleabende läuft/, 'und grüßt nicht erst noch');
+
+  // Und der Port bleibt frei – es steht wirklich nichts.
+  await assert.rejects(fetch(`http://127.0.0.1:${port}/api/info`));
+  await rm(dir, { recursive: true, force: true });
+});
+
+/*
  * Der Notausgang muss selbst heil sein.
  *
  * `starteTunnel` verspricht in seinem eigenen Kommentar: „Wirft nie: Ein

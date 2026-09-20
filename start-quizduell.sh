@@ -11,10 +11,11 @@ if ! command -v node > /dev/null 2>&1; then
   echo ""
   echo "  Node.js fehlt noch."
   echo ""
-  echo "  Über die Paketverwaltung installieren, zum Beispiel:"
-  echo "    sudo apt install nodejs      (Debian, Ubuntu, Mint)"
-  echo "    sudo dnf install nodejs      (Fedora)"
-  echo "  Oder von https://nodejs.org"
+  echo "  Gebraucht wird Node 18 oder neuer."
+  echo ""
+  echo "  Am sichersten von https://nodejs.org – die Fassung aus der"
+  echo "  Paketverwaltung (sudo apt install nodejs) ist je nach System"
+  echo "  noch älter und reicht dann nicht."
   echo ""
   read -r -p "  Mit Eingabetaste schließen … " _
   exit 1
@@ -26,3 +27,13 @@ echo "  Zum Beenden Strg+C drücken."
 echo ""
 
 QUIZDUELL_BROWSER=1 node server/index.js
+
+# Stürzt der Server ab oder startet er gar nicht erst, soll die Meldung lesbar
+# bleiben. Ein Dateimanager schließt das Fenster sonst in derselben Sekunde,
+# in der die Erklärung darin erscheint – und der Host steht ohne Auskunft da.
+ende=$?
+# 130 und 143 sind Strg+C und „Fenster zu“ – der ganz normale Feierabend.
+if [ $ende -ne 0 ] && [ $ende -ne 130 ] && [ $ende -ne 143 ]; then
+  echo ""
+  read -r -p "  Mit Eingabetaste schließen … " _
+fi
