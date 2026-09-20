@@ -703,7 +703,7 @@ test('jede Seite kennt die Farben, die ihr Stylesheet benutzt', () => {
  *
  * host.css über den Zusatz: „14px waren dafür aus vier Metern zu wenig.“ Bei
  * 180 Zeichen steht er auf 9. Die mitgelieferten Sätze merken davon nichts –
- * ihre längste Frage von 816 hat 100 Zeichen. Wer aber eigene Fragen schreibt,
+ * ihre längste Frage der 1008 hat 101 Zeichen. Wer aber eigene Fragen schreibt,
  * hat nur den Editor: Für seinen Satz läuft kein Testlauf.
  *
  * Deshalb hält dieser Test die beiden Zahlen zusammen. Wer die eine ändert,

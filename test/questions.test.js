@@ -899,18 +899,29 @@ test('keine Frage verrät ihre eigene Lösung', async () => {
 
 test('kein Text sprengt den Kasten auf der Leinwand', async () => {
   /*
-   * Gemessen mit einem echten Browser über alle 816 Fragen: Wird der Kasten zu
-   * hoch, rechnet passeFrageEin ihn kleiner – und der Zusatz landet bei 12 bis
-   * 14 Pixeln. Genau dagegen steht die Begründung im host.css: 14 Pixel sind
-   * aus vier Metern zu wenig. Auf 1920×1080 wird nach den Kürzungen keine
-   * einzige Frage mehr verkleinert, auf einem 1280×720-Beamer noch fünf, und
-   * die auf der mildesten Stufe.
+   * Gemessen mit einem echten Browser über alle 1008 Fragen, jede mit Lösung
+   * und Zusatz gleichzeitig im Kasten: Wird der Kasten zu hoch, rechnet
+   * passeFrageEin ihn kleiner – und der Zusatz landet bei 12 bis 14 Pixeln.
+   * Genau dagegen steht die Begründung im host.css: 14 Pixel sind aus vier
+   * Metern zu wenig. Auf 1920×1080, auf 1440×900 und auf einem 1280×720-Beamer
+   * wird keine einzige verkleinert; der 720er ist der engste der drei, weil der
+   * Kasten überall gleich breit ist und unten am wenigsten Platz bleibt.
+   *
+   * Zweimal messen lohnt sich hier: Ein erster Durchgang meldete 19 bis 22
+   * Fragen als verkleinert, und zwar bei jedem Lauf andere. Der Fehler lag in
+   * der Messung. `passeFrageEin` geht die Stufenleiter einmal ohne Wortumbruch
+   * durch und, wenn keine Stufe passt, ein zweites Mal mit – wer zu früh
+   * abliest, erwischt den Zwischenstand der ersten Runde (0,44) statt des
+   * Ergebnisses. Erst wenn sich der Wert zwei Bilder lang nicht mehr bewegt,
+   * ist er das Ergebnis.
    *
    * Der Test kann diese Rechnung nicht nachstellen – hier läuft kein Browser,
    * und maßgeblich ist ohnehin nicht die Zeichenzahl, sondern wo die Zeilen
-   * umbrechen. Die Schranken sind deshalb eine Stolperschnur, kein Beweis: Sie
-   * liegen knapp über dem längsten Text, der die Messung bestanden hat. Wer
-   * sie reißt, soll nachmessen, statt die Zahl hochzusetzen.
+   * umbrechen. Ein Gegenbeweis dazu aus derselben Messung: 191 Fragen tragen
+   * mehr Zeichen als die längste, die je knapp wurde. Die Schranken sind
+   * deshalb eine Stolperschnur, kein Beweis: Sie liegen knapp über dem
+   * längsten Text, der die Messung bestanden hat – 101, 67 und 143 Zeichen.
+   * Wer sie reißt, soll nachmessen, statt die Zahl hochzusetzen.
    */
   const GRENZEN = { text: 105, answer: 70, note: 145 };
   const zulang = [];
@@ -1107,4 +1118,74 @@ test('der Selbstverräter liest keine Wörter zusammen, die keine sind', async (
     assert.equal(selbstverraeter([f]).length, 1,
       `„${f.answer}“ steht am Stück und an einem Wortanfang in der eigenen Frage`);
   }
+});
+
+/*
+ * Die Zahlen im Handbuch über den Bestand – und was wirklich dasteht.
+ *
+ * Die Satz-Tabelle weiter oben hat schon ihren Wächter. Der Fließtext daneben
+ * hatte keinen, und genau dort standen zwei Zahlen aus einer Zeit mit vier
+ * Sätzen weniger: „Siebzehn fertige Sätze mit je 48 Fragen – zusammen 816".
+ * Dieselbe 816 stand in zwei Testkommentaren und im Editor. Vier Stellen, die
+ * mit jedem neuen Satz falscher werden, und keine einzige davon fällt beim
+ * Spielen auf – sie fallen erst auf, wenn jemand nachrechnet.
+ *
+ * Dazu die Faustzahlen für die Textlängen: Wenn das Handbuch andere nennt als
+ * der Testlauf durchlässt, glaubt man dem Handbuch und wundert sich über die
+ * rote Markierung im Editor.
+ */
+test('das Handbuch zählt den Bestand richtig', async () => {
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+
+  let saetze = 0;
+  let fragen = 0;
+  const laengsten = { text: 0, answer: 0, note: 0 };
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    saetze += 1;
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) {
+          fragen += 1;
+          for (const feld of Object.keys(laengsten)) {
+            laengsten[feld] = Math.max(laengsten[feld], String(q[feld] || '').length);
+          }
+        }
+      }
+    }
+  }
+
+  // Ausgeschrieben, wie es im Fließtext steht. Bewusst nur der Bereich, in dem
+  // sich der Bestand bewegt – eine allgemeine Zahlwort-Maschine wäre mehr Code
+  // als Nutzen, und wer den Bereich sprengt, bekommt hier eine klare Ansage.
+  const AUSGESCHRIEBEN = {
+    14: 'Vierzehn', 15: 'Fünfzehn', 16: 'Sechzehn', 17: 'Siebzehn', 18: 'Achtzehn',
+    19: 'Neunzehn', 20: 'Zwanzig', 21: 'Einundzwanzig', 22: 'Zweiundzwanzig',
+    23: 'Dreiundzwanzig', 24: 'Vierundzwanzig', 25: 'Fünfundzwanzig',
+    26: 'Sechsundzwanzig', 27: 'Siebenundzwanzig', 28: 'Achtundzwanzig',
+    29: 'Neunundzwanzig', 30: 'Dreißig',
+  };
+  const wort = AUSGESCHRIEBEN[saetze];
+  assert.ok(wort, `${saetze} Sätze – die Zahlwortliste in diesem Test reicht nicht mehr so weit`);
+
+  const zeile = readme.split('\n').find((z) => /fertige Sätze mit je 48 Fragen/.test(z));
+  assert.ok(zeile, 'der Satz über den Bestand sollte im Handbuch weiter vorkommen');
+  assert.match(zeile, new RegExp(`^${wort} fertige Sätze mit je 48 Fragen – zusammen ${fragen},`),
+    `es sind ${saetze} Sätze mit ${fragen} Fragen – das Handbuch sagt: ${zeile.slice(0, 70)}`);
+
+  // Und die Faustzahlen: Sie dürfen nicht unter dem liegen, was der Testlauf
+  // oben durchlässt, und die genannten Längsten müssen stimmen.
+  // Über den Zeilenumbrüchen des Handbuchs: Die Sätze werden umbrochen, wenn
+  // sich ein Wort davor ändert – das Muster darf daran nicht hängen.
+  const fliesstext = readme.replace(/\s+/g, ' ');
+  const faust = /Frage bis (\d+), Lösung bis (\d+), Zusatz bis (\d+) Zeichen/.exec(fliesstext);
+  assert.ok(faust, 'die Faustzahlen sollten im Handbuch weiter auffindbar sein');
+  assert.deepEqual(faust.slice(1, 4).map(Number), [105, 70, 145],
+    'die Faustzahlen im Handbuch und die Schranken im Testlauf sind zwei Zahlen für dieselbe Leinwand');
+
+  const genannt = /die längsten im Bestand liegen bei (\d+), (\d+) und (\d+)/.exec(fliesstext);
+  assert.ok(genannt, 'die gemessenen Längsten sollten im Handbuch weiter stehen');
+  assert.deepEqual(genannt.slice(1, 4).map(Number),
+    [laengsten.text, laengsten.answer, laengsten.note],
+    'das Handbuch nennt andere Längste, als im Bestand stehen');
 });

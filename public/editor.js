@@ -504,7 +504,7 @@ async function save(overwrite) {
  * auf 9.
  *
  * 105 ist dieselbe Schranke, die der Testlauf über die mitgelieferten Sätze
- * zieht. Die halten sie mühelos ein: Die längste Frage von 816 hat 100
+ * zieht. Die halten sie mühelos ein: Die längste Frage der 1008 hat 101
  * Zeichen, keine einzige liegt über 105. Wer eigene Fragen schreibt, hatte
  * diese Schranke bisher nicht – für seinen Satz läuft kein Testlauf.
  */
