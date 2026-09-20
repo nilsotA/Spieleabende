@@ -101,22 +101,47 @@ function gleich(a, b) {
  * `HttpOnly`, weil keine Seite die Schlüssel im Javascript braucht – der
  * Host-Screen bekommt seine über /api/info, und der bleibt hinter derselben
  * Tür. `SameSite=Lax`, damit der Klick aus einer Chat-App heraus noch
- * funktioniert; ohne `Secure`, weil derselbe Server auch im Heimnetz per
- * http erreichbar bleiben soll.
+ * funktioniert.
+ *
+ * `Secure` hängt daran, wie die Anfrage hereinkam – nicht daran, ob ein Tunnel
+ * läuft. Beides gleichzeitig ist der Normalfall: Die Gäste kommen über die
+ * https-Adresse des Tunnels, der Host selbst hat die Fernbedienung per http
+ * auf dem eigenen Handy (so steht sie im Fenster). Ein festes `Secure` würde
+ * dem Host den Keks wegnehmen und die Fernbedienung nach der ersten Seite
+ * zerlegen; gar keins gibt den Schlüssel über den Tunnel im Klartext heraus,
+ * sobald irgendetwas das Handy zu einer http-Anfrage an dieselbe Adresse
+ * bringt. Also: pro Anfrage entscheiden.
  */
-export function cookieKoepfe(url, zugang) {
+export function cookieKoepfe(url, zugang, sicher = false) {
   if (!zugang || !url) return [];
   const out = [];
   const h = url.searchParams.get('h');
   const k = url.searchParams.get('k');
-  if (h && gleich(h, zugang.host)) out.push(keks(COOKIE_HOST, h));
-  if (k && gleich(k, zugang.spiel)) out.push(keks(COOKIE_SPIEL, k));
+  if (h && gleich(h, zugang.host)) out.push(keks(COOKIE_HOST, h, sicher));
+  if (k && gleich(k, zugang.spiel)) out.push(keks(COOKIE_SPIEL, k, sicher));
   return out;
 }
 
-function keks(name, wert) {
+/**
+ * Kam diese Anfrage über https herein?
+ *
+ * Der Server selbst spricht immer http – das https liegt im Tunnel davor, und
+ * cloudflared sagt im `X-Forwarded-Proto`, was es auf der anderen Seite war.
+ * Der Kopf ist frei erfindbar, aber gefährlich ist das nicht: Wer ihn fälscht,
+ * bekommt einen Keks, den sein eigener Browser über http wegwirft – mehr
+ * Sicherheit für andere, weniger Bequemlichkeit für ihn.
+ */
+export function ueberHttps(req) {
+  const kopf = req?.headers?.['x-forwarded-proto'];
+  if (!kopf) return false;
+  // Mehrere Zwischenstationen schreiben eine Liste: die erste ist der Anfang.
+  return String(kopf).split(',')[0].trim().toLowerCase() === 'https';
+}
+
+function keks(name, wert, sicher) {
   // 12 Stunden: länger als jeder Spieleabend, kürzer als das Vergessen.
-  return `${name}=${encodeURIComponent(wert)}; Path=/; Max-Age=43200; HttpOnly; SameSite=Lax`;
+  return `${name}=${encodeURIComponent(wert)}; Path=/; Max-Age=43200; HttpOnly; SameSite=Lax`
+    + (sicher ? '; Secure' : '');
 }
 
 /**

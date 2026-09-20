@@ -2131,6 +2131,86 @@ test('die Tunneladresse steht vorn – der QR-Code nimmt die erste', async (t) =
   assert.match(urls[0], /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/);
 });
 
+/*
+ * Der Schlüssel im Keks geht nur über https hinaus – aber nur dann.
+ *
+ * Ohne `Secure` gibt das Handy den Schlüssel bei jeder http-Anfrage an
+ * dieselbe Adresse im Klartext heraus; ein eingeschleustes
+ * `<img src="http://…trycloudflare.com/x">` genügt. Mit festem `Secure`
+ * wäre dafür die Fernbedienung des Hosts kaputt: Die läuft per http über das
+ * Heimnetz, genau so steht sie im Fenster – der Browser würfe den Keks weg
+ * und jede Datei nach der ersten Seite bekäme eine Absage. Beides ist
+ * derselbe Server, also entscheidet die einzelne Anfrage.
+ */
+test('der Keks trägt Secure genau dann, wenn er über https kam', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host, spiel } = await starteOnline(6500 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  const keks = async (weg, koepfe) => (await fetch(base + weg, { headers: koepfe })).headers.getSetCookie().join(' | ');
+
+  // Über das Heimnetz: ohne Secure, sonst wäre die Fernbedienung des Hosts hin.
+  const daheim = await keks(`/host?h=${host}`);
+  assert.match(daheim, /qd_host=/);
+  assert.doesNotMatch(daheim, /Secure/, 'im Heimnetz würde der Browser ihn wegwerfen');
+
+  // Durch den Tunnel: cloudflared sagt, was auf der anderen Seite war.
+  const draussen = await keks(`/host?h=${host}`, { 'X-Forwarded-Proto': 'https' });
+  assert.match(draussen, /Secure/, 'über https gehört er festgenagelt');
+  // Auch für das Handy des Gastes.
+  assert.match(await keks(`/play?k=${spiel}`, { 'X-Forwarded-Proto': 'https' }), /qd_spiel=[^|]*Secure/);
+
+  // Mehrere Zwischenstationen schreiben eine Liste – die erste ist der Anfang.
+  assert.match(await keks(`/host?h=${host}`, { 'X-Forwarded-Proto': 'https, http' }), /Secure/);
+  assert.doesNotMatch(await keks(`/host?h=${host}`, { 'X-Forwarded-Proto': 'http, https' }), /Secure/);
+
+  // Und was immer gilt: kein Javascript kommt an den Schlüssel.
+  for (const gesehen of [daheim, draussen]) {
+    assert.match(gesehen, /HttpOnly/);
+    assert.match(gesehen, /SameSite=Lax/);
+  }
+});
+
+/*
+ * Die Tür kennt die Hostseiten – auch buchstabiert.
+ *
+ * `url.pathname` ist schon aufgeräumt, aber das `decodeURIComponent` danach
+ * macht Zeichen wieder zu Trennern, die beim Aufräumen noch keine waren.
+ * Gemessen: `/%2fhost.html` kam als `//host.html` heraus, stand in keiner
+ * Liste der Hostseiten – und `path.join` weiter unten zog die doppelten
+ * Striche wieder zusammen und lieferte host.html aus. Mit dem Gästeschlüssel,
+ * 200. Dasselbe galt für editor.html und remote.html; auf der Fernbedienung
+ * steht die Lösung.
+ */
+test('die Hostseiten bleiben zu, wie man sie auch buchstabiert', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
+  const { proc, base, host, spiel } = await starteOnline(6100 + Math.floor(Math.random() * 200), path.join(dir, 's.json'));
+  t.after(async () => { proc.kill(); await rm(dir, { recursive: true, force: true }); });
+
+  const zu = [
+    '/host', '/host.html', '/remote', '/remote.html', '/editor', '/editor.html',
+    '/%2fhost.html', '/%2f%2fhost.html', '/%2feditor.html', '/%2fremote.html',
+    '/%5chost.html', '/.%2fhost.html', '/spiel%2f..%2fhost.html',
+  ];
+  for (const weg of zu) {
+    assert.equal((await fetch(`${base}${weg}?k=${spiel}`)).status, 403,
+      `${weg} darf mit dem Gästeschlüssel nicht aufgehen`);
+  }
+
+  // Und der Host kommt weiter überall hin – sonst wäre die Tür nur zugenagelt.
+  for (const weg of ['/host', '/host.html', '/remote', '/editor', '/play', '/style.css']) {
+    assert.equal((await fetch(`${base}${weg}?h=${host}`)).status, 200, `${weg} gehört dem Host offen`);
+  }
+  // Und der Gast bekommt, was er braucht.
+  for (const weg of ['/play', '/style.css', '/common.js', '/player.js']) {
+    assert.equal((await fetch(`${base}${weg}?k=${spiel}`)).status, 200, `${weg} braucht das Handy`);
+  }
+  // Nach draußen führt keiner dieser Wege.
+  for (const weg of ['/%2e%2e%2f%2e%2e%2fserver/index.js', '/..%2f..%2fpackage.json']) {
+    assert.equal((await fetch(`${base}${weg}?h=${host}`)).status, 404, `${weg} liegt nicht in public/`);
+  }
+});
+
 test('kommt der Tunnel nicht hoch, läuft der Abend im Heimnetz weiter', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-'));
   const { proc, base, host } = await starteOnline(4700 + Math.floor(Math.random() * 200), path.join(dir, 's.json'), {

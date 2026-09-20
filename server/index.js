@@ -10,7 +10,7 @@ import * as G from './game.js';
 import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, ersatzFrage, DATA_DIR } from './questions.js';
 import { oeffne as oeffneImBrowser } from './browser.js';
 import { starteTunnel, stoppeTunnel } from './tunnel.js';
-import { neuerZugang, pruefeZugang, cookieKoepfe, TUER_ZU } from './zugang.js';
+import { neuerZugang, pruefeZugang, cookieKoepfe, ueberHttps, TUER_ZU } from './zugang.js';
 import { nodeZuAlt } from './node-version.js';
 
 /*
@@ -1164,7 +1164,28 @@ const server = http.createServer(async (req, res) => {
   let url;
   try {
     url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-    pathname = decodeURIComponent(url.pathname);
+    /*
+     * Erst dekodieren, dann gerade ziehen – und zwar bevor irgendjemand
+     * hinsieht.
+     *
+     * `url.pathname` ist schon aufgeräumt (`/a/../host` wird zu `/host`), aber
+     * `decodeURIComponent` danach macht Zeichen wieder zu Trennern, die beim
+     * Aufräumen noch keine waren. Gemessen: `/%2fhost.html` kommt als
+     * `//host.html` heraus. Das steht in keiner Liste der Hostseiten, die Tür
+     * winkt es mit dem Gästeschlüssel durch – und `path.join` weiter unten
+     * zieht die doppelten Striche wieder zusammen und liefert host.html aus.
+     * Dasselbe galt für `/%2feditor.html` und `/%2fremote.html`.
+     *
+     * Backslashes werden mitgeradezogen: Unter Windows ist auch `\` ein
+     * Trenner für `path.join`, unter Linux nicht – sonst hängt es vom
+     * Betriebssystem des Hosts ab, wer durch die Tür kommt.
+     *
+     * Was hier herauskommt, gilt für alles Weitere: Tür und Auslieferung
+     * sehen denselben Weg. Auseinanderlaufen konnten sie genau deshalb.
+     */
+    pathname = decodeURIComponent(url.pathname).replace(/\\/g, '/');
+    pathname = path.posix.normalize(pathname);
+    if (!pathname.startsWith('/')) pathname = `/${pathname}`;
   } catch {
     // Eine einzige kaputt kodierte Adresse darf nicht den ganzen Abend beenden.
     return send(res, 400, 'text/plain; charset=utf-8', 'Ungültige Adresse');
@@ -1181,7 +1202,7 @@ const server = http.createServer(async (req, res) => {
   try {
     rolle = pruefeZugang(req, url, zugang);
     if (zugang) {
-      const kekse = cookieKoepfe(url, zugang);
+      const kekse = cookieKoepfe(url, zugang, ueberHttps(req));
       if (kekse.length) res.setHeader('Set-Cookie', kekse);
       if (!rolle || (hostNoetig(pathname) && rolle !== 'host')) {
         if (pathname.startsWith('/api/')) return sendJson(res, 403, { error: 'Kein Zugang.' });
