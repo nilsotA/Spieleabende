@@ -129,7 +129,26 @@ function saveSoon() {
 }
 
 async function saveNow() {
-  if (state.phase === 'lobby' && state.teams.length === 0) return;
+  /*
+   * Eine leere Lobby ist nichts, was man wiederherstellen möchte – und der
+   * Stand soll dann auch weg sein, nicht bloß nicht überschrieben.
+   *
+   * Hier stand `return`. Das hielt die Datei fest: Der Host beendete das Spiel,
+   * räumte die Teams weg, und auf der Platte lagen sie weiter. Gemessen –
+   * Server-Lobby `[]`, Datei `[Rot, Blau]`. Über die Oberfläche gab es keinen
+   * Weg mehr, den Stand loszuwerden; beim nächsten Start stand der goldene
+   * Balken wieder da.
+   *
+   * „Spiel beenden" allein löscht ihn übrigens nicht, auch wenn es die Datei
+   * kurz wegnimmt: Der Rundruf danach sichert die Lobby 400 ms später wieder,
+   * diesmal mit den Teams. Das ist gewollt – wer am selben Abend einen zweiten
+   * Satz spielt, soll die Namen nicht neu tippen –, und Handbuch und Terminal
+   * sagen es jetzt auch so.
+   */
+  if (state.phase === 'lobby' && state.teams.length === 0) {
+    await forgetSave();
+    return;
+  }
   const tmp = `${SAVE_FILE}.tmp`;
   await writeFile(tmp, JSON.stringify({ gespeichert: Date.now(), state }), 'utf8');
   await rename(tmp, SAVE_FILE);
@@ -1760,7 +1779,8 @@ server.listen(PORT, async () => {
   if (wiederhergestellt) {
     const teams = state.teams.map((t) => `${t.name} ${t.score}`).join(' · ');
     console.log(`  Letzter Spielstand wiederhergestellt: ${teams || 'Lobby'}`);
-    console.log('  „Spiel beenden“ im Host-Menü verwirft ihn.\n');
+    console.log('  „Spiel beenden“ im Host-Menü macht daraus wieder eine Lobby.');
+    console.log('  Wer auch die Teams entfernt, ist ihn ganz los.\n');
   }
   console.log(`  Host-Screen (Beamer/TV):  ${hostAdresse()}`);
   // Einmal fragen, zweimal verwenden: Die Liste steht unten noch einmal für die

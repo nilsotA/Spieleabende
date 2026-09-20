@@ -4301,3 +4301,53 @@ test('ein Handy am Notweg gilt als anwesend, auch nach einem Stromabriss', async
   await warte(200);
   assert.equal((await zustand(base)).lage, vorher, 'Abfragen allein ändern den Stand nicht');
 });
+
+/*
+ * Eine leere Lobby soll den Stand nicht nur nicht überschreiben, sondern
+ * löschen.
+ *
+ * `saveNow` sprang für „Lobby ohne Teams" mit einem schlichten `return` heraus.
+ * Damit hielt die Datei fest, was einmal darin stand: Der Host beendete das
+ * Spiel, räumte im Menü die Teams weg – und auf der Platte lagen sie weiter.
+ * Gemessen: Server-Lobby `[]`, Datei `[Rot, Blau]`. Über die Oberfläche gab es
+ * keinen Weg mehr, den Stand loszuwerden; beim nächsten Start stand der goldene
+ * Balken wieder da.
+ *
+ * „Spiel beenden" allein löscht ihn nicht, auch wenn es die Datei kurz
+ * wegnimmt: Der Rundruf danach sichert 400 ms später die Lobby, diesmal mit den
+ * Teams. Das ist gewollt – wer am selben Abend einen zweiten Satz spielt, soll
+ * acht Namen nicht neu tippen. Handbuch und Terminal sagen es jetzt auch so.
+ */
+test('erst ohne Teams ist der gesicherte Stand wirklich weg', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-verwerfen-'));
+  const datei = path.join(dir, 's.json');
+  const { proc, base } = await starteServer(9470 + Math.floor(Math.random() * 30), datei);
+  t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
+
+  const tu = await alsHost(base, 'verwerfen_host');
+  const liesDatei = async () => {
+    try { return JSON.parse(await readFile(datei, 'utf8')).state; } catch { return null; }
+  };
+
+  await tu({ type: 'addTeam', name: 'Rot' });
+  await tu({ type: 'addTeam', name: 'Blau' });
+  await tu({ type: 'startGame', file: 'der-klassiker.json' });
+  await tu({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await tu({ type: 'judge', correct: true });
+  await warte(800);
+  assert.equal((await liesDatei())?.phase, 'question', 'das laufende Spiel liegt auf der Platte');
+
+  // „Spiel beenden": das Spiel ist weg, die Teams bleiben – und werden auch
+  // wieder gesichert.
+  await tu({ type: 'backToLobby' });
+  await warte(900);
+  const nachEnde = await liesDatei();
+  assert.equal(nachEnde?.phase, 'lobby');
+  assert.deepEqual(nachEnde.teams.map((x) => x.name), ['Rot', 'Blau'],
+    'die Namen sollen einen zweiten Satz am selben Abend überleben');
+
+  // Und jetzt die Teams weg: Damit ist auch die Datei weg.
+  for (const team of nachEnde.teams) await tu({ type: 'removeTeam', teamId: team.id });
+  await warte(900);
+  assert.equal(await liesDatei(), null, 'ohne Teams in der Lobby gehört auf die Platte nichts mehr');
+});

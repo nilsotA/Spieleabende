@@ -248,8 +248,10 @@ Der Spielstand liegt nicht nur im Speicher: Punkte, Teams, das halb gespielte Bo
 und sogar eine offen stehende Frage werden laufend gesichert und beim Start wieder
 hergestellt. Der Host-Screen sagt dann oben, von wann der Stand ist, und bietet
 „Neues Spiel“ gleich daneben an – der Hinweis verschwindet beim ersten Zug. Ein versehentlich geschlossenes Terminal oder ein abgestürzter Rechner
-kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand,
-und „Spiel beenden“ im Host-Menü verwirft ihn sofort.
+kostet euch also höchstens ein paar Sekunden. Nach 12 Stunden verfällt der Stand.
+„Spiel beenden“ im Host-Menü macht daraus sofort wieder eine Lobby – die Teams
+bleiben stehen, damit ihr für einen zweiten Satz am selben Abend nicht acht
+Namen neu tippen müsst. Wer auch die Teams entfernt, ist den Stand ganz los.
 
 ### Ein Handy zeigt keine Teams
 
