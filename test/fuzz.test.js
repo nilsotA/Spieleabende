@@ -77,6 +77,39 @@ function pruefeZustand(state, spur) {
       `turnIndex ${state.turnIndex} bei ${state.teams.length} Teams ${wo()}`);
   }
 
+  /*
+   * Die drei Stechfelder dürfen nur auf Teams zeigen, die es noch gibt.
+   *
+   * Sie sind die jüngsten Felder im Zustand, und sie hängen an drei Stellen
+   * zusammen: `startStechen` friert ein, wer mitspielen darf, `judge` merkt
+   * sich, wer danebenlag, und `adjustScore` hebt beides wieder auf, wenn eine
+   * Korrektur die Spitze verschiebt. Ein Zeiger auf ein Team, das es nicht
+   * mehr gibt, würde auf der Leinwand als „Sieg im Stechen: ?" enden, und die
+   * Korrekturrechnung verglich gegen einen Geist.
+   *
+   * Nachweisen statt vermuten: Dass `removeTeam` nur in der Lobby geht und die
+   * Lobby diese Felder immer leer hat, ist eine Kette über drei Funktionen.
+   * Dieser Test hält sie fest, statt sie jedem Leser aufs Neue zuzumuten.
+   */
+  for (const [feld, liste] of [['stechenRaus', state.stechenRaus], ['stechenDabei', state.stechenDabei]]) {
+    assert.ok(Array.isArray(liste), `${feld} ist keine Liste, sondern ${typeof liste} ${wo()}`);
+    for (const id of liste) {
+      assert.ok(ids.has(id), `${feld} nennt Team ${id}, das es nicht gibt ${wo()}`);
+    }
+    assert.equal(new Set(liste).size, liste.length, `${feld} nennt ein Team doppelt ${wo()}`);
+  }
+  if (state.stechenSieger) {
+    assert.ok(ids.has(state.stechenSieger),
+      `stechenSieger zeigt auf Team ${state.stechenSieger}, das es nicht gibt ${wo()}`);
+  }
+  // Und in der Lobby ist von einem Stechen nichts übrig: Von dort aus wird ein
+  // neues Spiel gestartet, und in das gehört nichts vom letzten.
+  if (state.phase === 'lobby') {
+    assert.equal(state.stechenSieger ?? null, null, `Stechsieger in der Lobby ${wo()}`);
+    assert.equal((state.stechenRaus || []).length, 0, `stechenRaus in der Lobby ${wo()}`);
+    assert.equal((state.stechenDabei || []).length, 0, `stechenDabei in der Lobby ${wo()}`);
+  }
+
   assert.equal(state.phase === 'question', !!state.current,
     `Phase „${state.phase}" und current passen nicht zusammen ${wo()}`);
 

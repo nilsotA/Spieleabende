@@ -373,7 +373,6 @@ export function adjustScore(state, teamId, delta) {
       // Mit der Entscheidung fällt auch, wer aus ihr ausgeschieden war: Das
       // nächste Stechen wird zwischen anderen Teams ausgetragen.
       state.stechenRaus = [];
-  state.stechenDabei = [];
       state.stechenDabei = [];
       state.message = neuOben
         ? 'Die Korrektur bringt ein Team an die Spitze, das nicht dabei war – das Stechen gilt nicht mehr.'
@@ -424,6 +423,11 @@ export function startGame(state, questionSet) {
   state.stechenTexte = [];
   state.stechenSieger = null;
   state.stechenRaus = [];
+  // Vollständig, auch wenn der Weg hierher schon aufräumt: `startGame` geht
+  // nur aus der Lobby, und in die kommt man nur über backToLobby, das einen
+  // frischen Zustand baut. Eine Liste, die einen von fünf Werten auslässt,
+  // zwingt den nächsten Leser trotzdem dazu, sich das erst zu beweisen.
+  state.stechenDabei = [];
   state.ersatzTexte = [];
   return startRound(state, 1);
 }
