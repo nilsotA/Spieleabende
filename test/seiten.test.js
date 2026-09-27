@@ -2134,3 +2134,59 @@ test('nur die neueste Notweg-Schleife läuft', () => {
   assert.match(common, /notwegSchleife\(\+\+notwegLauf\)/,
     'jede neu geöffnete Schleife zieht eine neue Nummer');
 });
+
+/*
+ * Die drei Längengrenzen im Editor sind kein Konto, aus dem man dreimal
+ * schöpfen darf.
+ *
+ * „Frage bis 105, Lösung bis 70, Zusatz bis 145" liest sich wie drei getrennte
+ * Budgets, und der Editor prüfte sie auch so – jedes Feld für sich. Auf der
+ * Bühne ist es aber eines: Beim Auflösen stehen Frage, Lösung und Zusatz
+ * gleichzeitig im Kasten.
+ *
+ * Nachgemessen auf einem 1280×720-Beamer mit echten Fragen, Lösungen und
+ * Zusätzen aus dem Bestand, 210 Kombinationen: Verkleinert wird genau eine
+ * Ecke – langer Zusatz UND lange Lösung UND lange Frage. Eine Kombination
+ * genau an den drei Faustzahlen (101/67/143) fällt dort eine Stufe, obwohl
+ * jedes Feld unter seiner Grenze bleibt. Auf 1920×1080 passiert das nicht.
+ *
+ * Die Schwelle ist die sparsamste, die alle 24 gemessenen Fälle fängt und über
+ * alle 1056 mitgelieferten Fragen keinen einzigen Fehlalarm auslöst; der
+ * Bestand kommt ihr mit 90/32/114 am nächsten. Gegengeprüft im Browser: Bei
+ * 70/35/115 schlägt sie an, ein Zeichen weniger in irgendeinem der drei Felder
+ * und sie schweigt.
+ */
+test('der Editor warnt auch vor der engen Kombination, nicht nur je Feld', () => {
+  const editor = ohneKommentare(lies('editor.js'));
+
+  const ecke = /const ECKE = \{([^}]*)\}/.exec(editor)?.[1] || '';
+  assert.ok(ecke, 'die Schwelle sollte an einer benannten Stelle stehen');
+  for (const [feld, wert] of [['zusatz', 115], ['antwort', 35], ['frage', 70]]) {
+    assert.match(ecke, new RegExp(`${feld}:\\s*${wert}\\b`),
+      `die gemessene Schwelle für ${feld} ist ${wert}`);
+  }
+  assert.match(editor, /function engZusammen\(q\)/, 'die Prüfung sollte einen Namen haben');
+  // Und sie muss UND sein, nicht ODER: Jedes Feld allein ist harmlos. Gezählt
+  // werden die Verknüpfungen, nicht die Zeichen – die `|| ''` in den drei
+  // Längenzugriffen sind Vorgabewerte und keine Logik.
+  const pruef = /function engZusammen\(q\) \{[\s\S]*?\n\}/.exec(editor)?.[0] || '';
+  assert.ok(pruef, 'engZusammen sollte auffindbar bleiben');
+  assert.equal((pruef.match(/&&/g) || []).length, 2,
+    'genau drei Bedingungen, mit UND verbunden – ein ODER würde bei jedem langen Feld allein anschlagen');
+  assert.equal((pruef.match(/\|\| ''/g) || []).length, 3,
+    'die drei Längenzugriffe halten fehlende Felder ab');
+
+  // Sie muss auch anschlagen, während getippt wird – nicht erst beim nächsten
+  // vollständigen Neuzeichnen. Der Zusatz gehört ausdrücklich dazu: Er löst die
+  // Ecke am häufigsten aus und ist das einzige Feld, das die verratene Lösung
+  // nicht betrifft.
+  const rufe = (editor.match(/engeMarkieren\(\)/g) || []).length;
+  assert.ok(rufe >= 4, `engeMarkieren() sollte aus allen drei Eingabefeldern und `
+    + `dem vollständigen Durchgang gerufen werden – gefunden: ${rufe}`);
+  for (const feld of ['frage', 'antwort', 'zusatz']) {
+    const ab = editor.indexOf(`laengeMarkieren(ev.target, '${feld}')`);
+    assert.ok(ab > 0, `das Feld „${feld}" sollte auffindbar bleiben`);
+    assert.match(editor.slice(ab, ab + 400), /engeMarkieren\(\)/,
+      `beim Tippen in „${feld}" muss die Ecke nachgezogen werden`);
+  }
+});

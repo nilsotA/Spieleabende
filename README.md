@@ -618,7 +618,17 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   die am Ende wirklich dasteht, und zwar in beiden Bewegungs-Einstellungen –
   bei „Bewegung reduzieren" hat die Leiter lange etwas anderes getan als sonst.
   Als Faustzahl: Frage bis 105, Lösung bis 70, Zusatz bis 145 Zeichen – die
-  längsten im Bestand liegen bei 101, 67 und 143. Darüber sagt es der Editor.
+  längsten im Bestand liegen bei 101, 67 und 143. Das sind aber keine drei
+  Konten, aus denen man gleichzeitig schöpfen darf. Nachgemessen mit echten
+  Fragen, Lösungen und Zusätzen aus dem Bestand in 210 Kombinationen: Auf dem
+  720er fällt der Kasten eine Stufe, sobald ein Zusatz ab 115 Zeichen mit einer
+  Lösung ab 35 und einer Frage ab 70 zusammensteht – jedes Feld für sich unter
+  seiner Grenze. Genau an den drei Faustzahlen (101/67/143) ist das also schon
+  der Fall. Der Bestand kommt dieser Ecke nie nahe, weil dort zu einem langen
+  Zusatz immer eine kurze Lösung gehört; am nächsten liegt „Sagen am
+  Sternenhimmel" mit 90/32/114. Auf 1920×1080 und 1440×900 tritt die Ecke in
+  denselben 210 Kombinationen überhaupt nicht auf – sie ist ein 720p-Fall. Der
+  Editor sagt beides: das einzelne zu lange Feld und die enge Kombination.
   Reicht auch die kleinste Stufe nicht, rückt beim Auflösen wenigstens die
   Lösung ins Bild – die Frage hat der Host ohnehin vorgelesen.
 - Mehr als zwei Runden gehen auch – jede weitere zählt ebenfalls doppelt.

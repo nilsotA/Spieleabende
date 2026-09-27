@@ -178,6 +178,8 @@ function render() {
                 q.text = ev.target.value;
                 laengeMarkieren(ev.target, 'frage');
                 hoeheAnpassen(ev.target);
+                // Alle drei Felder zählen zusammen – siehe engZusammen().
+                engeMarkieren();
                 verraeterMarkieren();
                 persistSoon();
               },
@@ -190,6 +192,7 @@ function render() {
                   q.answer = ev.target.value;
                   laengeMarkieren(ev.target, 'antwort');
                   hoeheAnpassen(ev.target);
+                  engeMarkieren();
                   verraeterMarkieren();
                   persistSoon();
                 },
@@ -211,6 +214,10 @@ function render() {
                   q.note = ev.target.value.trim() || null;
                   laengeMarkieren(ev.target, 'zusatz');
                   hoeheAnpassen(ev.target);
+                  // Der Zusatz ist das Feld, das die Ecke am häufigsten
+                  // auslöst – und das einzige, das die verratene Lösung nicht
+                  // betrifft. Also hier nur die Ecke nachziehen.
+                  engeMarkieren();
                   persistSoon();
                 },
               }, q.note || ''),
@@ -568,7 +575,69 @@ function alleLaengenMarkieren() {
     const zusatz = zeile.querySelector('.antwort > textarea.notiz');
     if (zusatz) laengeMarkieren(zusatz, 'zusatz');
   }
+  // Vor verraeterMarkieren(): Die verratene Lösung ist der schwerere Fehler und
+  // darf den Hinweistext am Lösungsfeld überschreiben.
+  engeMarkieren();
   verraeterMarkieren();
+}
+
+/*
+ * Die drei Grenzen sind kein Konto, aus dem man dreimal schöpfen darf.
+ *
+ * „Frage bis 105, Lösung bis 70, Zusatz bis 145" liest sich wie drei getrennte
+ * Budgets. Auf der Bühne ist es eines: Beim Auflösen stehen Frage, Lösung und
+ * Zusatz gleichzeitig im Kasten.
+ *
+ * Nachgemessen auf einem 1280×720-Beamer mit echten Fragen, Lösungen und
+ * Zusätzen aus dem Bestand, 210 Kombinationen: Verkleinert wird genau eine
+ * Ecke – langer Zusatz UND lange Lösung UND lange Frage. Eine Kombination
+ * genau an den drei Faustzahlen (101/67/143) fällt dort eine Stufe (39,7 →
+ * 36,5 px), obwohl jedes einzelne Feld unter seiner Grenze bleibt. Der
+ * Bestand entkommt dem nur, weil zu einem langen Zusatz dort immer eine kurze
+ * Lösung gehört; am nächsten kommt „Sagen am Sternenhimmel" mit 90/32/114.
+ *
+ * Die Schwelle unten ist die sparsamste, die alle 24 gemessenen Fälle fängt
+ * und über alle 1056 mitgelieferten Fragen keinen einzigen Fehlalarm auslöst.
+ * Ein Zeichen weniger irgendwo genügt, um wieder in voller Größe zu landen –
+ * deshalb ein Hinweis und kein Hindernis.
+ */
+const ECKE = { zusatz: 115, antwort: 35, frage: 70 };
+
+function engZusammen(q) {
+  return (q?.note || '').length >= ECKE.zusatz
+    && (q?.answer || '').length >= ECKE.antwort
+    && (q?.text || '').length >= ECKE.frage;
+}
+
+/** Zählt, wie viele Fragen in dieser Ecke liegen – und markiert ihre Zeilen. */
+function engeMarkieren() {
+  const zeilen = [...document.querySelectorAll('.qrow')];
+  let index = 0;
+  let eng = 0;
+  for (const runde of set.rounds) {
+    for (const cat of runde.categories) {
+      cat.questions.forEach((q, i) => {
+        const zeile = zeilen[index + i];
+        if (!zeile) return;
+        const trifft = engZusammen(q);
+        zeile.classList.toggle('engzusammen', trifft);
+        if (!trifft) return;
+        eng += 1;
+        const satz = 'Jedes Feld bleibt unter seiner Grenze – zusammen wird es trotzdem '
+          + `kleiner gerechnet: ${(q.text || '').length} + ${(q.answer || '').length} + `
+          + `${(q.note || '').length} Zeichen stehen beim Auflösen gleichzeitig im Kasten. `
+          + 'Am leichtesten gibt der Zusatz nach.';
+        // Einen vorhandenen Hinweis nicht überschreiben: Ein Feld, das schon
+        // für sich zu lang ist, hat das gröbere Problem, und „unter 105
+        // bleiben" ist der handfestere Rat.
+        for (const feld of zeile.querySelectorAll('textarea')) {
+          if (!feld.title) feld.title = satz;
+        }
+      });
+      index += cat.questions.length;
+    }
+  }
+  return eng;
 }
 
 /**
@@ -675,15 +744,28 @@ function updateFortschritt() {
   // Nebenbei: Wie viele Fragen sind zu lang für eine Leinwand? Das steht hier
   // und nicht als Hindernis beim Speichern – geschrieben ist geschrieben, und
   // manchmal muss eine Frage eben lang sein.
-  const lange = set.rounds.flatMap((r) => r.categories)
-    .flatMap((c) => c.questions)
-    .filter((q) => (q.text || '').length > LEINWAND_GRENZE).length;
+  const alleFragen = set.rounds.flatMap((r) => r.categories).flatMap((c) => c.questions);
+  const lange = alleFragen.filter((q) => (q.text || '').length > LEINWAND_GRENZE).length;
+  // Und die, bei denen jedes Feld für sich unter seiner Grenze bleibt und nur
+  // die drei zusammen nicht mehr passen – siehe engZusammen(). Ohne diese
+  // Zeile stand hier „alles gut", während der Kasten auf der Leinwand eine
+  // Stufe kleiner gerechnet wurde.
+  const eng = alleFragen.filter((q) => engZusammen(q)).length;
   const hinweis = $('#fortschritt-lang');
   if (hinweis) {
-    hinweis.hidden = lange === 0;
-    hinweis.textContent = lange === 1
-      ? '1 Frage ist lang – aufgedeckt wird ihr Zusatz auf der Leinwand klein.'
-      : `${lange} Fragen sind lang – aufgedeckt werden ihre Zusätze auf der Leinwand klein.`;
+    const teile = [];
+    if (lange) {
+      teile.push(lange === 1
+        ? '1 Frage ist lang – aufgedeckt wird ihr Zusatz auf der Leinwand klein'
+        : `${lange} Fragen sind lang – aufgedeckt werden ihre Zusätze auf der Leinwand klein`);
+    }
+    if (eng) {
+      teile.push(eng === 1
+        ? '1 Frage bleibt in jedem Feld unter der Grenze und wird zusammen doch kleiner'
+        : `${eng} Fragen bleiben in jedem Feld unter der Grenze und werden zusammen doch kleiner`);
+    }
+    hinweis.hidden = teile.length === 0;
+    hinweis.textContent = teile.length ? `${teile.join(' · ')}.` : '';
   }
 }
 

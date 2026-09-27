@@ -75,6 +75,11 @@
   /* Sehr lange Frage: nur ein warmer Rand, kein Fehler – manchmal muss eine
      Frage eben lang sein. */
   .qrow > textarea.zulang { border-color: rgba(240, 198, 90, .55); }
+  /* Jedes Feld unter seiner Grenze, zusammen trotzdem zu viel. Eine Kante wie
+     bei der verratenen Lösung, nur in derselben warmen Farbe wie der Rand
+     darüber: Es ist derselbe Hinweis, nur über drei Felder verteilt. */
+  .qrow.engzusammen { box-shadow: inset 3px 0 0 rgba(240, 198, 90, .7); }
+  .qrow.verraet.engzusammen { box-shadow: inset 3px 0 0 rgba(242,109,132,.85); }
   /* Die Kopfleiste klebt oben und ist rund 10rem hoch – ohne dieses Polster
      springt „Zur nächsten Lücke" genau dahinter. */
   html { scroll-padding-top: 11rem; }
