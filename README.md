@@ -611,7 +611,7 @@ Fragensätze sind schlichtes JSON und lassen sich auch von Hand schreiben:
   bei einem Bruchteil ihrer Größe und ist aus vier Metern nicht mehr zu lesen.
   Maßgeblich ist dabei nicht die Frage allein, sondern Frage plus Lösung plus
   Zusatz zusammen: Beim Auflösen steht alles drei gleichzeitig im Kasten.
-  Nachgemessen über alle 1104 mitgelieferten Fragen wird auf 1920×1080, auf
+  Nachgemessen über alle 1152 mitgelieferten Fragen wird auf 1920×1080, auf
   1440×900 und auf einem 1280×720-Beamer keine einzige verkleinert. Der 720er
   ist dabei der engste der drei: Der Kasten ist auf allen dreien gleich breit,
   unten bleibt aber am wenigsten Platz übrig. Gemessen wird die Schriftgröße,
@@ -663,7 +663,7 @@ ausgenommen – dort gehört die Lösung in die Frage.
 
 ### Mitgeliefert
 
-Dreiundzwanzig fertige Sätze mit je 48 Fragen – zusammen 1104, keine doppelt. Jede einzelne
+Vierundzwanzig fertige Sätze mit je 48 Fragen – zusammen 1152, keine doppelt. Jede einzelne
 davon hat einen Zusatz unter der Lösung: den Satz, aus dem am Tisch die Anschlussfrage
 wird. Nicht „richtig, weiter“, sondern „Moment mal, warum eigentlich?“:
 
@@ -692,6 +692,7 @@ wird. Nicht „richtig, weiter“, sondern „Moment mal, warum eigentlich?“:
 | **Wie funktioniert das?** | Kühlschrank, Licht, Küchenphysik, Hebel & Rolle, Chemie im Haushalt, Einheiten |
 | **Tag für Tag** | Kleiderschrank, Beim Arzt, Supermarkt, Unterwegs, Werkzeugkasten, Uhren & Zeit, Am Spieltisch |
 | **Sprachgefühl** | Redensarten, Wortherkunft, falsche Freunde, Abkürzungen, Satzzeichen, Wörter des Jahres, Grammatik-Fallen, Teekesselchen |
+| **Aufwärmrunde** | Farben, Gegenteile, berühmte Paare, Monate, Tierlaute, Messgeräte, Rätsel, Figuren, Länderkürzel |
 
 „Kopfnuss“ ist der Satz für gemischte Runden: Anagramme und Logikrätsel kann man
 knacken, ohne irgendetwas auswendig zu wissen. „Neunziger & Nuller“ ist der mit

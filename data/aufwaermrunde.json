@@ -1,0 +1,314 @@
+{
+  "name": "Aufwärmrunde",
+  "description": "Der leichte Satz für den Anfang des Abends: Farben, Gegenteile, berühmte Paare und ein paar Rätsel. Kinder können mitspielen, und wer zum ersten Mal Quizduell spielt, hat sofort Punkte.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Welche Farbe hat …?",
+          "questions": [
+            {
+              "text": "Welche Farbe hat ein Feuerwehrauto in Deutschland?",
+              "answer": "Rot",
+              "note": "Der Farbton heißt passenderweise Feuerrot. Die Streifen leuchten weiß oder gelb, damit man sie nachts sieht."
+            },
+            {
+              "text": "Welche Farbe haben die Sterne auf der Flagge der Europäischen Union?",
+              "answer": "Gelb",
+              "note": "Es sind zwölf – eine feste Zahl, die nichts mit der Zahl der Mitgliedsländer zu tun hat."
+            },
+            {
+              "text": "Welche Farbe hat das Blut eines Tintenfischs?",
+              "answer": "Blau",
+              "note": "Statt Eisen trägt bei ihm das kupferhaltige Hämocyanin den Sauerstoff."
+            },
+            {
+              "text": "Welche Farbe hat die „Black Box“ eines Flugzeugs in Wirklichkeit?",
+              "answer": "Orange",
+              "note": "Leuchtorange mit reflektierenden Streifen – damit man sie nach einem Absturz im Gelände wiederfindet."
+            }
+          ]
+        },
+        {
+          "name": "Gegenteile",
+          "questions": [
+            {
+              "text": "Was ist das Gegenteil von „Ebbe“?",
+              "answer": "Flut",
+              "note": "Zwischen zwei Hochwassern vergehen an der Nordsee gut zwölf Stunden."
+            },
+            {
+              "text": "Was ist auf einem Schiff das Gegenteil von „Steuerbord“?",
+              "answer": "Backbord",
+              "note": "Steuerbord ist rechts: Dort saß früher das Steuerruder – daher der Name."
+            },
+            {
+              "text": "Was ist das Gegenteil von „Synonym“?",
+              "answer": "Antonym",
+              "note": "Passend zur Kategorie: Jedes Paar in dieser Spalte ist ein Antonym."
+            },
+            {
+              "text": "Was ist das Gegenteil von „Zenit“?",
+              "answer": "Nadir",
+              "note": "Der Zenit liegt senkrecht über dem Kopf, der Nadir senkrecht unter den Füßen."
+            }
+          ]
+        },
+        {
+          "name": "Was gehört zusammen?",
+          "questions": [
+            {
+              "text": "„Max und …“?",
+              "answer": "Moritz",
+              "note": "Wilhelm Busch veröffentlichte die Geschichte der beiden Lausbuben 1865."
+            },
+            {
+              "text": "„Asterix und …“?",
+              "answer": "Obelix",
+              "note": "Seit 1959 erleben die beiden Gallier ihre Abenteuer. Obelix fiel als Kind in den Zaubertrank."
+            },
+            {
+              "text": "„Dick und …“?",
+              "answer": "Doof",
+              "note": "Im Original heißen sie Laurel und Hardy. Den deutschen Namen bekamen Stan und Ollie erst im Verleih."
+            },
+            {
+              "text": "„Bonnie und …“?",
+              "answer": "Clyde",
+              "note": "Das Gangsterpaar wurde 1934 in Louisiana von der Polizei erschossen."
+            }
+          ]
+        },
+        {
+          "name": "Monate",
+          "questions": [
+            {
+              "text": "Welcher Monat ist nach Julius Caesar benannt?",
+              "answer": "Juli",
+              "note": "Den August benannte man nach seinem Nachfolger, Kaiser Augustus."
+            },
+            {
+              "text": "In welchem Monat feiert man Halloween?",
+              "answer": "Oktober",
+              "note": "Am 31. Oktober, dem Abend vor Allerheiligen. Daher der englische Name: All Hallows’ Eve."
+            },
+            {
+              "text": "In welchem Monat beginnt der astronomische Herbst?",
+              "answer": "September",
+              "note": "Um den 22. oder 23. September sind Tag und Nacht ungefähr gleich lang."
+            },
+            {
+              "text": "Welcher Monat war im alten römischen Kalender der zehnte?",
+              "answer": "Dezember",
+              "note": "„Decem“ heißt zehn. Das römische Jahr begann ursprünglich im März."
+            }
+          ]
+        },
+        {
+          "name": "Wer macht dieses Geräusch?",
+          "questions": [
+            {
+              "text": "Welches Tier wiehert?",
+              "answer": "Das Pferd",
+              "note": "Neben dem Wiehern gibt es das leise Brummeln, mit dem eine Stute ihr Fohlen ruft."
+            },
+            {
+              "text": "Welches Tier blökt?",
+              "answer": "Das Schaf",
+              "note": "Lämmer erkennen ihre Mutter in einer ganzen Herde an der Stimme."
+            },
+            {
+              "text": "Welches Tier röhrt im Herbst durch den Wald?",
+              "answer": "Der Rothirsch",
+              "note": "Je tiefer das Röhren, desto größer meist der Hirsch – die Hirschkühe hören genau hin."
+            },
+            {
+              "text": "Welcher Vogel ruft seinen eigenen Namen?",
+              "answer": "Der Kuckuck",
+              "note": "Nur das Männchen ruft so. Das Weibchen klingt eher wie ein trillerndes Kichern."
+            }
+          ]
+        },
+        {
+          "name": "Womit misst man das?",
+          "questions": [
+            {
+              "text": "Womit misst man die Temperatur?",
+              "answer": "Mit einem Thermometer",
+              "note": "Daniel Gabriel Fahrenheit baute 1714 das erste zuverlässige Quecksilberthermometer."
+            },
+            {
+              "text": "Womit misst man die Länge eines Zimmers, wenn kein Laser zur Hand ist?",
+              "answer": "Mit einem Zollstock",
+              "note": "Offiziell heißt er Gliedermaßstab. Ein „Zoll“ steckt trotzdem nicht darin – er misst in Zentimetern."
+            },
+            {
+              "text": "Womit misst man den Luftdruck?",
+              "answer": "Mit einem Barometer",
+              "note": "Fällt er schnell, kommt oft schlechtes Wetter. Deshalb hing früher in vielen Fluren eines."
+            },
+            {
+              "text": "Womit zeichnet man Erdbeben auf?",
+              "answer": "Mit einem Seismografen",
+              "note": "Die Stärke gibt man heute meist mit der Momenten-Magnitude an, nicht mehr nach Richter."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Farben mischen",
+          "questions": [
+            {
+              "text": "Welche Farbe entsteht aus Schwarz und Weiß?",
+              "answer": "Grau",
+              "note": "Mit mehr Weiß wird es heller, mit mehr Schwarz dunkler – Grau hat unzählige Stufen."
+            },
+            {
+              "text": "Welche Farbe entsteht im Malkasten aus Gelb und Rot?",
+              "answer": "Orange",
+              "note": "Die Farbe ist nach der Frucht benannt, nicht umgekehrt."
+            },
+            {
+              "text": "Welche Farbe entsteht aus Rot und Weiß?",
+              "answer": "Rosa",
+              "note": "Weiß macht jede Farbe heller, Schwarz macht sie dunkler – der Farbton selbst bleibt."
+            },
+            {
+              "text": "Welche Farbe liegt im Farbkreis des Malers dem Gelb genau gegenüber?",
+              "answer": "Violett",
+              "note": "Gegenüberliegende Farben heißen Komplementärfarben. Nebeneinander leuchten sie besonders stark."
+            }
+          ]
+        },
+        {
+          "name": "Rätsel",
+          "questions": [
+            {
+              "text": "Was hat Zähne, kann aber nicht beißen?",
+              "answer": "Ein Kamm",
+              "note": "Auch Säge, Reißverschluss und Zahnrad haben Zähne – gelten lassen, wer das ruft."
+            },
+            {
+              "text": "Was hat einen Hals, aber keinen Kopf?",
+              "answer": "Eine Flasche",
+              "note": "Auch die Gitarre hat einen Hals – sie hat aber auch einen Kopf, an dem die Wirbel sitzen."
+            },
+            {
+              "text": "Was wird umso nasser, je mehr es trocknet?",
+              "answer": "Ein Handtuch",
+              "note": "Ein Klassiker unter den Rätseln, den es in vielen Sprachen gibt."
+            },
+            {
+              "text": "Was gehört dir, wird aber von anderen viel öfter benutzt als von dir?",
+              "answer": "Dein Name",
+              "note": "Selbst sagt man ihn vor allem bei der Begrüßung – alle anderen den ganzen Tag."
+            }
+          ]
+        },
+        {
+          "name": "Berühmte Figuren",
+          "questions": [
+            {
+              "text": "Welcher Zauberschüler hat eine blitzförmige Narbe auf der Stirn?",
+              "answer": "Harry Potter",
+              "note": "Joanne K. Rowling veröffentlichte den ersten Band 1997."
+            },
+            {
+              "text": "Wie heißt der Bär, der im „Dschungelbuch“ Mogli das gemütliche Leben beibringt?",
+              "answer": "Balu",
+              "note": "Bei Rudyard Kipling ist Balu ein strenger Lehrer. Gemütlich wurde er erst 1967 im Zeichentrickfilm von Disney."
+            },
+            {
+              "text": "Wie heißt das Pferd von Pippi Langstrumpf?",
+              "answer": "Kleiner Onkel",
+              "note": "Astrid Lindgren erfand Pippi für ihre kranke Tochter Karin – und Pippi stemmt das Pferd mit bloßen Händen."
+            },
+            {
+              "text": "Wie heißt der Kater, mit dem der alte Pettersson zusammenwohnt?",
+              "answer": "Findus",
+              "note": "Der Schwede Sven Nordqvist veröffentlichte das erste Buch über die beiden 1984."
+            }
+          ]
+        },
+        {
+          "name": "Die Sinne",
+          "questions": [
+            {
+              "text": "Mit welchem Organ riecht der Mensch?",
+              "answer": "Mit der Nase",
+              "note": "Der Mensch hat rund 400 verschiedene Arten von Riechrezeptoren."
+            },
+            {
+              "text": "Wie heißt die fünfte Geschmacksrichtung neben süß, sauer, salzig und bitter?",
+              "answer": "Umami",
+              "note": "Der japanische Chemiker Kikunae Ikeda beschrieb sie 1908. Sie steckt etwa in Brühe und Parmesan."
+            },
+            {
+              "text": "In welchem Körperteil sitzt das Gleichgewichtsorgan?",
+              "answer": "Im Ohr",
+              "note": "Drei Bogengänge voller Flüssigkeit melden dem Gehirn jede Drehung des Kopfes."
+            },
+            {
+              "text": "Wie heißt die Stelle im Auge, an der man nichts sieht, weil dort der Sehnerv austritt?",
+              "answer": "Der blinde Fleck",
+              "note": "Man bemerkt ihn nicht: Das Gehirn füllt die Lücke auf, und das andere Auge hilft aus."
+            }
+          ]
+        },
+        {
+          "name": "Länderkürzel",
+          "questions": [
+            {
+              "text": "Welches Land trägt das Kürzel „A“ auf dem Autokennzeichen?",
+              "answer": "Österreich",
+              "note": "Es steht für „Austria“, den lateinischen Namen des Landes."
+            },
+            {
+              "text": "Welches Land hat die Internetendung „.es“?",
+              "answer": "Spanien",
+              "note": "Das Kürzel kommt von „España“ – so wie „.de“ von „Deutschland“."
+            },
+            {
+              "text": "Welches Land hat das internationale Autokennzeichen „H“?",
+              "answer": "Ungarn",
+              "note": "„H“ steht für Hungaria. Die Ungarn selbst nennen ihr Land Magyarország."
+            },
+            {
+              "text": "Wofür stehen die Buchstaben „CH“ auf Schweizer Autos?",
+              "answer": "Confoederatio Helvetica",
+              "note": "Latein, damit keine der vier Landessprachen bevorzugt wird."
+            }
+          ]
+        },
+        {
+          "name": "Wo ist das?",
+          "questions": [
+            {
+              "text": "In welcher Stadt fahren Gondeln durch die Kanäle?",
+              "answer": "Venedig",
+              "note": "Die Stadt steht auf rund 120 Inseln, verbunden durch mehr als 400 Brücken."
+            },
+            {
+              "text": "In welcher Stadt steht die Golden Gate Bridge?",
+              "answer": "San Francisco",
+              "note": "Ihre Farbe heißt „International Orange“ – sie sollte im Nebel gut zu sehen sein."
+            },
+            {
+              "text": "In welcher Stadt steht das Opernhaus, dessen Dach an weiße Segel erinnert?",
+              "answer": "Sydney",
+              "note": "Entworfen hat es der Däne Jørn Utzon; eröffnet wurde es 1973."
+            },
+            {
+              "text": "In welcher Stadt steht das Atomium?",
+              "answer": "Brüssel",
+              "note": "Gebaut für die Weltausstellung 1958, zeigt es einen Eisenkristall – 165 Milliarden Mal vergrößert."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
