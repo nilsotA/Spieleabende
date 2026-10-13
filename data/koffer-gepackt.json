@@ -1,0 +1,314 @@
+{
+  "name": "Koffer gepackt",
+  "description": "Alles rund ums Verreisen: Flughafen und Bahn, Strand und Zeltplatz, Zeitzonen, Grenzen und die Sitten anderswo. Für den Abend, an dem ohnehin alle vom letzten Urlaub erzählen.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Am Flughafen",
+          "questions": [
+            {
+              "text": "Wie heißt das Band, auf dem man nach der Landung seinen Koffer abholt?",
+              "answer": "Gepäckband",
+              "note": "Erfahrungsgemäß ist der Koffer, der als letzter kommt, immer der eigene."
+            },
+            {
+              "text": "Für welche Stadt steht der Flughafencode „FRA“ auf dem Gepäckanhänger?",
+              "answer": "Frankfurt am Main",
+              "note": "Die dreibuchstabigen Codes vergibt die IATA. München heißt „MUC“, Berlin seit 2020 „BER“."
+            },
+            {
+              "text": "Wie viel Flüssigkeit darf ein einzelner Behälter im Handgepäck üblicherweise enthalten?",
+              "answer": "100 Milliliter",
+              "note": "Alle Behälter zusammen müssen in einen durchsichtigen Beutel von höchstens einem Liter passen."
+            },
+            {
+              "text": "Welcher Flughafen hat den Code „LHR“?",
+              "answer": "London-Heathrow",
+              "note": "Er ist der größte Flughafen Großbritanniens. „LGW“ steht für Gatwick, ebenfalls bei London."
+            }
+          ]
+        },
+        {
+          "name": "Mit der Bahn",
+          "questions": [
+            {
+              "text": "Wofür steht die Abkürzung „ICE“?",
+              "answer": "Intercity-Express",
+              "note": "Der erste ICE fuhr 1991 im Linienbetrieb zwischen Hamburg und München."
+            },
+            {
+              "text": "Wie heißt der Zug, der durch den Tunnel unter dem Ärmelkanal fährt?",
+              "answer": "Eurostar",
+              "note": "Der Tunnel ist rund 50 Kilometer lang und wurde 1994 eröffnet."
+            },
+            {
+              "text": "Welche Bahnstrecke führt von Moskau bis Wladiwostok?",
+              "answer": "Die Transsibirische Eisenbahn",
+              "note": "Gut 9000 Kilometer – die längste durchgehende Bahnstrecke der Welt."
+            },
+            {
+              "text": "Wie heißt der berühmte Luxuszug, der einst Paris mit Istanbul verband?",
+              "answer": "Orient-Express",
+              "note": "Agatha Christie ließ in ihm 1934 einen Mord geschehen – und einen Zug voller Verdächtiger."
+            }
+          ]
+        },
+        {
+          "name": "Danke in aller Welt",
+          "questions": [
+            {
+              "text": "Wie sagt man „Danke“ auf Italienisch?",
+              "answer": "Grazie",
+              "note": "Die Antwort lautet „Prego“ – dasselbe Wort, mit dem der Kellner einen Tisch anbietet."
+            },
+            {
+              "text": "Wie sagt man „Danke“ auf Niederländisch?",
+              "answer": "Dank je wel",
+              "note": "Förmlicher heißt es „Dank u wel“, ganz kurz einfach „Bedankt“."
+            },
+            {
+              "text": "Wie sagt man „Danke“ auf Schwedisch?",
+              "answer": "Tack",
+              "note": "Wer sich besonders bedanken will, sagt „Tack så mycket“."
+            },
+            {
+              "text": "Wie sagt man „Danke“ auf Japanisch?",
+              "answer": "Arigatō",
+              "note": "Höflicher wird es mit „gozaimasu“ dahinter."
+            }
+          ]
+        },
+        {
+          "name": "Am Strand",
+          "questions": [
+            {
+              "text": "Was zeigt eine rote Flagge an einem bewachten Badestrand an?",
+              "answer": "Badeverbot",
+              "note": "Gelb heißt Vorsicht. Rot-gelbe Flaggen markieren den Bereich, in dem die Rettungsschwimmer aufpassen."
+            },
+            {
+              "text": "Wofür steht „LSF“ auf der Sonnencreme?",
+              "answer": "Lichtschutzfaktor",
+              "note": "LSF 30 heißt grob: dreißigmal so lange in der Sonne wie ohne Creme – in der Theorie."
+            },
+            {
+              "text": "Wie heißt die Strömung, die Schwimmer vom Strand weg aufs offene Meer zieht?",
+              "answer": "Rippströmung",
+              "note": "Nicht dagegen anschwimmen, sondern parallel zum Strand – dann ist man meist schnell heraus."
+            },
+            {
+              "text": "Was baute der Rostocker Korbmacher Wilhelm Bartelmann 1882 zum ersten Mal?",
+              "answer": "Den Strandkorb",
+              "note": "Bestellt hatte ihn eine ältere Dame mit Rheuma, die trotzdem an den Strand wollte."
+            }
+          ]
+        },
+        {
+          "name": "Camping",
+          "questions": [
+            {
+              "text": "Wie heißt das Fahrzeug zum Schlafen, das man hinten ans Auto hängt?",
+              "answer": "Wohnwagen",
+              "note": "Ist alles in einem Fahrzeug eingebaut, heißt es Wohnmobil."
+            },
+            {
+              "text": "Wie heißen die Metallstifte, mit denen man ein Zelt im Boden befestigt?",
+              "answer": "Heringe",
+              "note": "Woher der Name kommt, ist nicht ganz geklärt – vermutlich von der Form, die an den Fisch erinnert."
+            },
+            {
+              "text": "Wie nennt man eine Übernachtung unter freiem Himmel, ganz ohne Zelt?",
+              "answer": "Biwak",
+              "note": "Das Wort kam über das Französische aus dem niederdeutschen „Biwacht“ – einer zusätzlichen Nachtwache."
+            },
+            {
+              "text": "Wie heißt das Recht in Schweden, nach dem man eine Nacht auf fremdem Land zelten darf?",
+              "answer": "Jedermannsrecht",
+              "note": "Auch Norwegen und Finnland kennen es. Bedingung: Abstand zu Häusern halten und keine Spuren hinterlassen."
+            }
+          ]
+        },
+        {
+          "name": "Andere Länder, andere Sitten",
+          "questions": [
+            {
+              "text": "In welchem Land schließen viele Geschäfte mittags für die Siesta?",
+              "answer": "Spanien",
+              "note": "Dafür haben sie abends lange geöffnet – gegessen wird dort selten vor neun Uhr."
+            },
+            {
+              "text": "In welchem Land gilt Trinkgeld im Restaurant eher als unhöflich?",
+              "answer": "Japan",
+              "note": "Guter Service gilt dort als selbstverständlich. Zusätzliches Geld kann das Personal verwirren."
+            },
+            {
+              "text": "In welchem Land bedeutet ein Kopfschütteln „Ja“?",
+              "answer": "Bulgarien",
+              "note": "Ein Nicken heißt dort Nein. Wer verhandelt, sollte lieber zweimal nachfragen."
+            },
+            {
+              "text": "In welchem Land ist der Verkauf von Kaugummi seit 1992 weitgehend verboten?",
+              "answer": "Singapur",
+              "note": "Ausnahmen gibt es für Kaugummi aus der Apotheke, etwa zur Zahnpflege oder Rauchentwöhnung."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Reisende aus Büchern",
+          "questions": [
+            {
+              "text": "In wie vielen Tagen will Phileas Fogg bei Jules Verne die Welt umrunden?",
+              "answer": "80",
+              "note": "Er gewinnt seine Wette nur, weil er auf der Reise nach Osten unbemerkt einen Tag gewonnen hat."
+            },
+            {
+              "text": "Welcher Reisende strandet bei Jonathan Swift im Land der Zwerge?",
+              "answer": "Gulliver",
+              "note": "Das Land heißt Liliput. Seine Bewohner sind kaum größer als eine Hand."
+            },
+            {
+              "text": "Welcher Ritter zieht mit seinem Pferd Rosinante los, um gegen Windmühlen zu kämpfen?",
+              "answer": "Don Quijote",
+              "note": "Miguel de Cervantes veröffentlichte den ersten Teil 1605."
+            },
+            {
+              "text": "Wie heißt der Professor, der bei Jules Verne zum Mittelpunkt der Erde reist?",
+              "answer": "Otto Lidenbrock",
+              "note": "Hinein geht es durch einen Vulkankrater auf Island, wieder heraus kommen sie am Stromboli."
+            }
+          ]
+        },
+        {
+          "name": "Zeitzonen",
+          "questions": [
+            {
+              "text": "Stellt man auf dem Flug von Berlin nach New York die Uhr vor oder zurück?",
+              "answer": "Zurück",
+              "note": "New York liegt sechs Stunden hinter Berlin. Man landet oft fast zur selben Uhrzeit, zu der man abflog."
+            },
+            {
+              "text": "Wie viele Zeitzonen hat Russland?",
+              "answer": "Elf",
+              "note": "Wenn in Kaliningrad die Arbeit beginnt, ist auf Kamtschatka längst Feierabend."
+            },
+            {
+              "text": "Wie viele Zeitzonen gelten in China, obwohl es so breit ist?",
+              "answer": "Eine",
+              "note": "Überall gilt die Pekinger Zeit. Im äußersten Westen geht die Sonne deshalb teils erst gegen zehn Uhr auf."
+            },
+            {
+              "text": "Wie heißt die Linie im Pazifik, an der sich das Datum ändert?",
+              "answer": "Die Datumsgrenze",
+              "note": "Wer sie nach Westen überquert, überspringt einen Tag. Nach Osten erlebt man einen doppelt."
+            }
+          ]
+        },
+        {
+          "name": "Reiseziel gesucht",
+          "questions": [
+            {
+              "text": "In welchem Gewässer kann man auf dem Rücken liegen und Zeitung lesen, ohne unterzugehen?",
+              "answer": "Im Toten Meer",
+              "note": "Sein Wasser ist rund zehnmal salziger als das des Mittelmeers."
+            },
+            {
+              "text": "In welcher Stadt führt die Karlsbrücke hinauf zur Burg?",
+              "answer": "Prag",
+              "note": "Ihr Bau begann 1357. Dreißig Heiligenfiguren säumen sie."
+            },
+            {
+              "text": "In welchem Land liegt die Felsenstadt Petra?",
+              "answer": "Jordanien",
+              "note": "Die Nabatäer schlugen die Fassaden vor rund 2000 Jahren direkt aus rotem Sandstein."
+            },
+            {
+              "text": "Welche Inselgruppe brachte Charles Darwin mit ihren Finken ins Grübeln?",
+              "answer": "Die Galápagos-Inseln",
+              "note": "Jede Insel hatte ihre eigenen Finken mit passendem Schnabel – ein Baustein seiner Evolutionstheorie."
+            }
+          ]
+        },
+        {
+          "name": "Pass & Grenze",
+          "questions": [
+            {
+              "text": "Wie lange ist ein deutscher Reisepass für Erwachsene gültig?",
+              "answer": "Zehn Jahre",
+              "note": "Wer jünger als 24 ist, bekommt ihn nur für sechs Jahre."
+            },
+            {
+              "text": "Welche Farbe hat der Einband des deutschen Reisepasses?",
+              "answer": "Weinrot",
+              "note": "Fast alle EU-Staaten haben sich auf denselben Farbton geeinigt."
+            },
+            {
+              "text": "Welches Abkommen schaffte in weiten Teilen Europas die Grenzkontrollen ab?",
+              "answer": "Schengener Abkommen",
+              "note": "Benannt nach einem Weinort in Luxemburg. Unterzeichnet wurde es 1985 auf einem Moselschiff."
+            },
+            {
+              "text": "Welcher Ausweis des Völkerbunds half ab 1922 staatenlosen Flüchtlingen über die Grenzen?",
+              "answer": "Der Nansen-Pass",
+              "note": "Benannt nach dem Polarforscher Fridtjof Nansen. Er bekam 1922 den Friedensnobelpreis."
+            }
+          ]
+        },
+        {
+          "name": "An Bord",
+          "questions": [
+            {
+              "text": "Wie heißt die Küche auf einem Schiff?",
+              "answer": "Kombüse",
+              "note": "Wer dort kocht, heißt auf Seemannsdeutsch Smutje."
+            },
+            {
+              "text": "Wie nennt man die runden Fenster eines Schiffs?",
+              "answer": "Bullaugen",
+              "note": "Runde Öffnungen verteilen den Druck gleichmäßig und halten Wellen besser aus als eckige."
+            },
+            {
+              "text": "Welche Einheit misst die Geschwindigkeit eines Schiffs?",
+              "answer": "Knoten",
+              "note": "Ein Knoten ist eine Seemeile pro Stunde, also 1,852 Kilometer pro Stunde."
+            },
+            {
+              "text": "Was zählt man auf einem Schiff in „Glasen“?",
+              "answer": "Die halben Stunden einer Wache",
+              "note": "Jede halbe Stunde schlägt die Glocke einmal mehr. Bei acht Glasen ist die Wache vorbei."
+            }
+          ]
+        },
+        {
+          "name": "Mitbringsel",
+          "questions": [
+            {
+              "text": "Aus welchem Land bringt man Holzschuhe als Andenken mit?",
+              "answer": "Aus den Niederlanden",
+              "note": "„Klompen“ heißen sie dort. Früher trug man sie wirklich, auf Feldern und Höfen."
+            },
+            {
+              "text": "Aus welchem Land stammen die ineinandergesteckten Holzpuppen namens Matrjoschka?",
+              "answer": "Aus Russland",
+              "note": "Die erste entstand um 1890 – nach dem Vorbild einer japanischen Figur."
+            },
+            {
+              "text": "Aus welchem Land kommt der Bumerang, der zum Werfer zurückfliegt?",
+              "answer": "Aus Australien",
+              "note": "Zurück kommen nur die gebogenen Spielhölzer. Bumerangs für die Jagd flogen geradeaus."
+            },
+            {
+              "text": "Zu welcher Stadt gehört die Insel Murano mit ihren Glasbläsern?",
+              "answer": "Venedig",
+              "note": "Die Glasöfen wurden 1291 auf die Insel verlegt – aus Angst vor Bränden in der Stadt."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
