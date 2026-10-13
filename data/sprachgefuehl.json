@@ -1,0 +1,314 @@
+{
+  "name": "Sprachgefühl",
+  "description": "Redensarten, Wortherkunft und die Fallen der eigenen Muttersprache. Mitraten kann jeder am Tisch – gesprochen wird Deutsch schließlich von allen, und gestritten wird darüber sowieso.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Redensarten",
+          "questions": [
+            {
+              "text": "Was tut jemand, der „blaumacht“?",
+              "answer": "Er schwänzt die Arbeit",
+              "note": "Eine verbreitete Erklärung führt es auf Färber zurück: Beim Blaufärben musste der Stoff lange an der Luft liegen."
+            },
+            {
+              "text": "Was ist mit jemandem los, der „auf dem Holzweg ist“?",
+              "answer": "Er irrt sich",
+              "note": "Holzwege führten nur zur Stelle im Wald, an der Holz geschlagen wurde, und endeten dort. Wer weiterwollte, war falsch."
+            },
+            {
+              "text": "Was macht jemand, der „Fersengeld gibt“?",
+              "answer": "Er rennt davon",
+              "note": "Wer flieht, zeigt dem Verfolger die Fersen – mehr bekommt der nicht zu sehen."
+            },
+            {
+              "text": "Wer ist bei „mit Kind und Kegel“ eigentlich der Kegel?",
+              "answer": "Das uneheliche Kind",
+              "note": "Gemeint war also die ganze Familie, samt aller Kinder. In „Kegel“ für uneheliche Kinder lebt ein altes Wort weiter."
+            }
+          ]
+        },
+        {
+          "name": "Woher kommt das Wort?",
+          "questions": [
+            {
+              "text": "Aus welcher Sprache stammt das Wort „Tomate“?",
+              "answer": "Aus dem Aztekischen",
+              "note": "„Tomatl“ hieß die Frucht in Nahuatl. Über das Spanische kam das Wort nach Europa."
+            },
+            {
+              "text": "Aus welcher Sprache kommt das Wort „Anorak“?",
+              "answer": "Aus dem Grönländischen",
+              "note": "„Anoraq“ hieß bei den Inuit die Kapuzenjacke, genäht aus Robbenfell."
+            },
+            {
+              "text": "Welches Tier steckt im Wort „Muskel“?",
+              "answer": "Die Maus",
+              "note": "Lateinisch „musculus“ heißt Mäuschen – ein Muskel, der unter der Haut zuckt, erinnerte an eine huschende Maus."
+            },
+            {
+              "text": "Was bezeichnete das griechische Wort, aus dem „Idiot“ wurde?",
+              "answer": "Eine Privatperson",
+              "note": "Gemeint war im alten Athen, wer sich aus den öffentlichen Dingen heraushielt. Der Dummkopf kam erst später."
+            }
+          ]
+        },
+        {
+          "name": "Falsche Freunde",
+          "questions": [
+            {
+              "text": "Was bedeutet das englische Wort „gift“?",
+              "answer": "Geschenk",
+              "note": "Auch das deutsche Gift hieß einst Gabe. In der „Mitgift“ steckt diese alte Bedeutung noch."
+            },
+            {
+              "text": "Was heißt das englische Adjektiv „handy“?",
+              "answer": "Praktisch",
+              "note": "Das Mobiltelefon heißt in England „mobile“, in den USA „cell phone“. „Handy“ dafür ist deutsche Erfindung."
+            },
+            {
+              "text": "Was bedeutet das englische Verb „to become“?",
+              "answer": "Werden",
+              "note": "Wer im Restaurant „I become a steak“ sagt, kündigt an, gleich selbst eines zu werden."
+            },
+            {
+              "text": "Was bedeutet das englische „eventually“?",
+              "answer": "Schließlich",
+              "note": "Das deutsche „eventuell“ heißt dagegen „vielleicht“ – auf Englisch wäre das „possibly“."
+            }
+          ]
+        },
+        {
+          "name": "Kurz und bündig",
+          "questions": [
+            {
+              "text": "Wofür steht die Abkürzung „Kita“?",
+              "answer": "Kindertagesstätte",
+              "note": "Je nach Bundesland stecken darunter Krippe, Kindergarten und Hort unter einem Dach."
+            },
+            {
+              "text": "Wofür steht das Wort „Azubi“?",
+              "answer": "Auszubildender",
+              "note": "Das Berufsbildungsgesetz von 1969 ersetzte den „Lehrling“ amtlich durch den Auszubildenden."
+            },
+            {
+              "text": "Was bedeutet das „a. D.“ hinter einer Amtsbezeichnung?",
+              "answer": "Außer Dienst",
+              "note": "Ein „Bürgermeister a. D.“ war es einmal – ob im Ruhestand oder abgewählt, verrät das Kürzel nicht."
+            },
+            {
+              "text": "Was bedeutet „p. A.“ auf einem Briefumschlag?",
+              "answer": "Per Adresse",
+              "note": "Der Brief geht an jemanden, der dort nicht selbst wohnt – etwa an Gäste oder an Post über eine Firma."
+            }
+          ]
+        },
+        {
+          "name": "Satzzeichen",
+          "questions": [
+            {
+              "text": "Wie nennt man das Zeichen „@“ im Deutschen umgangssprachlich?",
+              "answer": "Klammeraffe",
+              "note": "Kaufleute benutzten es lange vor der E-Mail – bei Preisangaben stand es für „zu je“."
+            },
+            {
+              "text": "Wie heißt das Zeichen „&“?",
+              "answer": "Kaufmännisches Und",
+              "note": "Es ist eine verschliffene Verbindung der lateinischen Buchstaben e und t – „et“ heißt „und“."
+            },
+            {
+              "text": "Wie heißen die drei Pünktchen „…“, die einen Gedanken offenlassen?",
+              "answer": "Auslassungspunkte",
+              "note": "Es sind immer genau drei. Endet damit der Satz, kommt kein vierter Punkt dazu."
+            },
+            {
+              "text": "Wie heißen die spitzen, winkelförmigen Anführungszeichen, die man oft in Büchern sieht?",
+              "answer": "Guillemets",
+              "note": "Im Französischen zeigen die Spitzen nach außen, im deutschen Buchsatz meist nach innen."
+            }
+          ]
+        },
+        {
+          "name": "Marken, die jeder sagt",
+          "questions": [
+            {
+              "text": "Wie heißt jedes Papiertaschentuch nach seiner bekanntesten Marke?",
+              "answer": "Tempo",
+              "note": "Die Marke kam 1929 aus Nürnberg auf den Markt – vorher putzte man sich die Nase in Stoff."
+            },
+            {
+              "text": "Welcher Markenname steht bei vielen für jeden durchsichtigen Klebestreifen?",
+              "answer": "Tesa",
+              "note": "Der Name geht auf Elsa Tesmer zurück, eine Sekretärin bei Beiersdorf: „Tes“ und „a“."
+            },
+            {
+              "text": "Welcher Name steht für jede Kunststoffdose mit dicht schließendem Deckel?",
+              "answer": "Tupperdose",
+              "note": "Earl Tupper stellte sie 1946 vor. Verkauft wurde sie vor allem auf Partys bei Leuten zu Hause."
+            },
+            {
+              "text": "Welches Haushaltsgerät trägt den Namen eines warmen Fallwinds in den Alpen?",
+              "answer": "Der Föhn",
+              "note": "AEG ließ den „Fön“ 1908 schützen – ohne h, denn den Wind selbst konnte niemand als Marke anmelden."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Eingewandert",
+          "questions": [
+            {
+              "text": "Aus welcher Sprache kommt das Wort „Ketchup“?",
+              "answer": "Aus dem Chinesischen",
+              "note": "Gemeint war eine Fischsoße aus Südchina. Tomaten kamen erst viel später in Amerika hinein."
+            },
+            {
+              "text": "Aus welcher Sprache stammt das Wort „Joghurt“?",
+              "answer": "Aus dem Türkischen",
+              "note": "Das Original schreibt sich „yoğurt“. Das ğ spricht man kaum – deshalb gab es auch „Yoghurt“."
+            },
+            {
+              "text": "Aus welcher Sprache stammt das Wort „Tabu“?",
+              "answer": "Aus dem Tongaischen",
+              "note": "James Cook brachte „tapu“ 1777 von den Tonga-Inseln mit. Es bedeutete heilig und unberührbar."
+            },
+            {
+              "text": "Aus welcher Sprache kommt das Wort „Roboter“?",
+              "answer": "Aus dem Tschechischen",
+              "note": "Karel Čapek führte es 1920 in seinem Drama „R.U.R.“ ein. „Robota“ heißt Fronarbeit."
+            }
+          ]
+        },
+        {
+          "name": "Wörter des Jahres",
+          "questions": [
+            {
+              "text": "Welches Wort wählte die Gesellschaft für deutsche Sprache zum Wort des Jahres 2020?",
+              "answer": "Corona-Pandemie",
+              "note": "Die Gesellschaft für deutsche Sprache in Wiesbaden kürt seit 1971 ein Wort des Jahres – das erste war „aufmüpfig“."
+            },
+            {
+              "text": "Welches Wort aus einer Bundestagsrede von Olaf Scholz wurde Wort des Jahres 2022?",
+              "answer": "Zeitenwende",
+              "note": "Scholz sprach es am 27. Februar 2022, drei Tage nach dem russischen Angriff auf die Ukraine."
+            },
+            {
+              "text": "Welches Wort des Jahres 2016 beschrieb eine Politik, in der Gefühle mehr zählen als Fakten?",
+              "answer": "Postfaktisch",
+              "note": "Im selben Jahr wählte das Oxford Dictionary das englische Gegenstück: „post-truth“."
+            },
+            {
+              "text": "Welches Wort des Jahres 2023 beschrieb das Gefühl, von einer Krise in die nächste zu geraten?",
+              "answer": "Krisenmodus",
+              "note": "Pandemie, Krieg, Inflation, Klima: Die Jury sah darin den Dauerzustand eines ganzen Jahres."
+            }
+          ]
+        },
+        {
+          "name": "Grammatik-Fallen",
+          "questions": [
+            {
+              "text": "Wie lautet die übliche Mehrzahl von „Kaktus“?",
+              "answer": "Kakteen",
+              "note": "Der Duden lässt auch „Kaktusse“ gelten. „Kakteen“ ist eigentlich die Mehrzahl der Nebenform „Kaktee“."
+            },
+            {
+              "text": "Wie lautet die Mehrzahl von „Atlas“, dem Kartenbuch?",
+              "answer": "Atlanten",
+              "note": "Mercator nannte sein Kartenwerk 1595 nach einem sagenhaften König Atlas von Mauretanien. Auch „Atlasse“ ist erlaubt."
+            },
+            {
+              "text": "Welchen Fall verlangt „wegen“ in der Schriftsprache?",
+              "answer": "Den Genitiv",
+              "note": "„Wegen dem Wetter“ ist Umgangssprache. Den Dativ erlaubt der Duden nur, wo der Genitiv nicht zu erkennen ist."
+            },
+            {
+              "text": "Was ändert sich am Wort „Status“, wenn man die Mehrzahl bildet?",
+              "answer": "Nur die Aussprache: langes u",
+              "note": "Im Lateinischen gehört es zur u-Deklination. Geschrieben bleibt die Mehrzahl gleich, gesprochen nicht."
+            }
+          ]
+        },
+        {
+          "name": "Einwohnernamen",
+          "questions": [
+            {
+              "text": "Wie nennt man die Einwohner von Hamburg?",
+              "answer": "Hamburger",
+              "note": "Das Fleischgericht trägt denselben Namen. Ob es wirklich aus Hamburg stammt, ist umstritten."
+            },
+            {
+              "text": "Wie heißen die Einwohner von Halle an der Saale?",
+              "answer": "Hallenser",
+              "note": "In Halle in Westfalen heißen sie dagegen Haller – zwei Städte, zwei Endungen."
+            },
+            {
+              "text": "Wie heißen die Einwohner von Monaco?",
+              "answer": "Monegassen",
+              "note": "Nur ein kleiner Teil der Bewohner hat tatsächlich die monegassische Staatsangehörigkeit."
+            },
+            {
+              "text": "Wie heißen die Einwohner von Madagaskar?",
+              "answer": "Madagassen",
+              "note": "Ihre Sprache ist mit Sprachen in Indonesien verwandt – die ersten Siedler kamen über den Indischen Ozean."
+            }
+          ]
+        },
+        {
+          "name": "Teekesselchen",
+          "questions": [
+            {
+              "text": "Welches Wort meint ein Geldinstitut und eine Sitzgelegenheit?",
+              "answer": "Bank",
+              "note": "Beides geht auf dasselbe Wort zurück: Geldwechsler saßen auf dem Markt an Tischen und Bänken."
+            },
+            {
+              "text": "Welches Wort meint einen Türverschluss und den Wohnsitz eines Fürsten?",
+              "answer": "Schloss",
+              "note": "Beides kommt vom Verb „schließen“."
+            },
+            {
+              "text": "Welches Wort meint den Samen im Obst und die Mitte der Erde?",
+              "answer": "Kern",
+              "note": "Der innere Erdkern ist mehrere tausend Grad heiß – ähnlich heiß wie die Oberfläche der Sonne."
+            },
+            {
+              "text": "Welches Wort meint einen Laufvogel, ein Blumengebinde und einen Streit?",
+              "answer": "Strauß",
+              "note": "„Einen Strauß ausfechten“ ist älteres Deutsch für einen Kampf. Der Walzerkönig schrieb sich mit ss."
+            }
+          ]
+        },
+        {
+          "name": "Was heißt das eigentlich?",
+          "questions": [
+            {
+              "text": "Was bedeutet „Fauxpas“?",
+              "answer": "Ein Verstoß gegen gutes Benehmen",
+              "note": "Wörtlich ist es französisch für „falscher Schritt“."
+            },
+            {
+              "text": "Was bedeutet das lateinische „Placebo“ wörtlich?",
+              "answer": "Ich werde gefallen",
+              "note": "Das Wort stammt aus einem Gebet für die Toten. Erst später wurde daraus das Scheinmedikament."
+            },
+            {
+              "text": "Was ist ein „Euphemismus“?",
+              "answer": "Ein beschönigender Ausdruck",
+              "note": "„Freistellen“ statt „entlassen“, „Preisanpassung“ statt „teurer“ – Beispiele gibt es jeden Tag."
+            },
+            {
+              "text": "Was ist ein „Palindrom“?",
+              "answer": "Ein Wort, das rückwärts gleich lautet",
+              "note": "„Reliefpfeiler“ ist eines der längsten deutschen Beispiele, „Otto“ eines der kürzesten."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
