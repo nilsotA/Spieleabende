@@ -1,0 +1,314 @@
+{
+  "name": "Gut zu wissen",
+  "description": "Allgemeinwissen quer durch alles, was man im Laufe der Jahre so mitbekommt: Erdkunde und Geschichte, Film und Sport, Musik, Technik und Politik. Keine Fachfragen – nur das, was man eigentlich wissen könnte.",
+  "rounds": [
+    {
+      "categories": [
+        {
+          "name": "Erdkunde",
+          "questions": [
+            {
+              "text": "Welches Land hat die meisten Einwohner der Welt?",
+              "answer": "Indien",
+              "note": "2023 hat Indien China überholt. Beide Länder haben weit über eine Milliarde Menschen."
+            },
+            {
+              "text": "Auf welchem Kontinent liegt die Sahara?",
+              "answer": "Afrika",
+              "note": "Sie ist fast so groß wie die USA."
+            },
+            {
+              "text": "Welches Land ist das flächenmäßig größte in Südamerika?",
+              "answer": "Brasilien",
+              "note": "Es grenzt an alle Länder des Kontinents außer Chile und Ecuador."
+            },
+            {
+              "text": "Welches Gebirge bildet die Grenze zwischen Europa und Asien?",
+              "answer": "Der Ural",
+              "note": "Er zieht sich rund 2500 Kilometer von Nord nach Süd durch Russland."
+            }
+          ]
+        },
+        {
+          "name": "Geschichte",
+          "questions": [
+            {
+              "text": "Welcher französische Kaiser verlor 1815 die Schlacht bei Waterloo?",
+              "answer": "Napoleon",
+              "note": "Danach wurde er auf die Atlantikinsel St. Helena verbannt, wo er 1821 starb."
+            },
+            {
+              "text": "Welche römische Stadt verschüttete der Vesuv im Jahr 79?",
+              "answer": "Pompeji",
+              "note": "Die Asche konservierte die Stadt so gut, dass man heute noch Brotlaibe und Wandkritzeleien findet."
+            },
+            {
+              "text": "Nach welchem Seefahrer ist der Kontinent Amerika benannt?",
+              "answer": "Amerigo Vespucci",
+              "note": "Der Kartograf Martin Waldseemüller schrieb 1507 als Erster „America“ auf eine Weltkarte."
+            },
+            {
+              "text": "Welche Königin regierte Großbritannien mehr als 70 Jahre lang?",
+              "answer": "Elizabeth II.",
+              "note": "Von 1952 bis 2022 – länger als jede andere Monarchin und jeder Monarch Großbritanniens."
+            }
+          ]
+        },
+        {
+          "name": "Natur",
+          "questions": [
+            {
+              "text": "Was stellen Bienen aus Nektar her?",
+              "answer": "Honig",
+              "note": "Für ein Glas Honig fliegen die Bienen zusammen etwa dreimal um die Erde."
+            },
+            {
+              "text": "Wie heißt der Vorgang, bei dem Pflanzen aus Sonnenlicht Zucker herstellen?",
+              "answer": "Fotosynthese",
+              "note": "Als Nebenprodukt entsteht dabei der Sauerstoff, den wir atmen."
+            },
+            {
+              "text": "Welches Tier baut Dämme quer durch Bäche und Flüsse?",
+              "answer": "Der Biber",
+              "note": "Der Eingang zu seiner Burg liegt unter Wasser – so kommen Feinde nicht hinein."
+            },
+            {
+              "text": "Welche Raubkatze ist die größte der Welt?",
+              "answer": "Der Tiger",
+              "note": "Ein Sibirischer Tiger kann über 300 Kilogramm wiegen."
+            }
+          ]
+        },
+        {
+          "name": "Film & Fernsehen",
+          "questions": [
+            {
+              "text": "Wie heißt Steven Spielbergs Film über einen Hai aus dem Jahr 1975?",
+              "answer": "Der weiße Hai",
+              "note": "Der mechanische Hai fiel beim Dreh so oft aus, dass Spielberg ihn kaum zeigte. Gerade das machte den Film so spannend."
+            },
+            {
+              "text": "Welcher Zauberer ruft in „Der Herr der Ringe“: „Du kannst nicht vorbei!“?",
+              "answer": "Gandalf",
+              "note": "Der dritte Teil der Trilogie gewann 2004 elf Oscars – so viele wie zuvor nur „Ben Hur“ und „Titanic“."
+            },
+            {
+              "text": "Welcher Schauspieler spielte Jack in „Titanic“?",
+              "answer": "Leonardo DiCaprio",
+              "note": "Seinen ersten Oscar bekam er erst 2016, für „The Revenant“."
+            },
+            {
+              "text": "Seit welchem Jahr läuft der „Tatort“ im Ersten?",
+              "answer": "1970",
+              "note": "Der erste Fall hieß „Taxi nach Leipzig“."
+            }
+          ]
+        },
+        {
+          "name": "Sport",
+          "questions": [
+            {
+              "text": "In welcher Sportart gibt es den „Slam Dunk“?",
+              "answer": "Basketball",
+              "note": "Dabei wird der Ball von oben direkt durch den Korb gestopft."
+            },
+            {
+              "text": "Welches Land hat die meisten Fußball-Weltmeistertitel?",
+              "answer": "Brasilien",
+              "note": "Fünf Titel, zuletzt 2002. Deutschland und Italien folgen mit je vier."
+            },
+            {
+              "text": "In welcher Sportart heißt der Sieg bei allen vier großen Turnieren eines Jahres „Grand Slam“?",
+              "answer": "Tennis",
+              "note": "Die vier Turniere: Australian Open, French Open, Wimbledon und US Open."
+            },
+            {
+              "text": "Wie heißt der Wettbewerb, bei dem Schwimmen, Radfahren und Laufen direkt aufeinander folgen?",
+              "answer": "Triathlon",
+              "note": "Seit 2000 ist er olympisch. Die bekannteste Langdistanz ist der Ironman auf Hawaii."
+            }
+          ]
+        },
+        {
+          "name": "Essen & Trinken",
+          "questions": [
+            {
+              "text": "Aus welcher Region Spaniens stammt die Paella?",
+              "answer": "Aus Valencia",
+              "note": "Ursprünglich war sie ein Bauerngericht – mit Kaninchen und Bohnen statt Meeresfrüchten."
+            },
+            {
+              "text": "Welches italienische Wort steht für Nudeln, die noch Biss haben?",
+              "answer": "Al dente",
+              "note": "Wörtlich heißt es „für den Zahn“."
+            },
+            {
+              "text": "Aus welchem Land stammt der Käse Gouda?",
+              "answer": "Aus den Niederlanden",
+              "note": "Benannt ist er nach der Stadt Gouda, wo er seit dem Mittelalter auf dem Markt gehandelt wird."
+            },
+            {
+              "text": "Woraus wird Tofu hergestellt?",
+              "answer": "Aus Sojamilch",
+              "note": "Die Milch wird zum Gerinnen gebracht und gepresst – ganz ähnlich wie bei Käse."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "categories": [
+        {
+          "name": "Wissenschaft",
+          "questions": [
+            {
+              "text": "Wie heißt die Kraft, die alles zur Erde fallen lässt?",
+              "answer": "Die Schwerkraft",
+              "note": "Isaac Newton beschrieb sie 1687. Ob ihm dabei wirklich ein Apfel auf den Kopf fiel, ist Legende."
+            },
+            {
+              "text": "Wie heißt das kleinste Teilchen eines chemischen Elements?",
+              "answer": "Atom",
+              "note": "Griechisch „átomos“ heißt unteilbar – was seit der Kernspaltung nicht mehr stimmt."
+            },
+            {
+              "text": "Welcher Stern ist der Erde am nächsten?",
+              "answer": "Die Sonne",
+              "note": "Danach kommt Proxima Centauri – gut vier Lichtjahre entfernt."
+            },
+            {
+              "text": "Wofür steht die Abkürzung „DNS“?",
+              "answer": "Desoxyribonukleinsäure",
+              "note": "Die Doppelhelix beschrieben Watson und Crick 1953 – mit Röntgenbildern von Rosalind Franklin."
+            }
+          ]
+        },
+        {
+          "name": "Musik",
+          "questions": [
+            {
+              "text": "Aus welcher Stadt kamen die Beatles?",
+              "answer": "Aus Liverpool",
+              "note": "Ihre ersten großen Auftritte hatten sie allerdings in Hamburg, im Star-Club und auf der Reeperbahn."
+            },
+            {
+              "text": "Welche Melodie ist die Hymne der Europäischen Union?",
+              "answer": "Die Ode an die Freude",
+              "note": "Sie stammt aus Beethovens neunter Sinfonie. Gespielt wird die Hymne ohne Worte."
+            },
+            {
+              "text": "Welcher Komponist schrieb die „Mondscheinsonate“?",
+              "answer": "Ludwig van Beethoven",
+              "note": "Den Namen gab ihr erst ein Musikkritiker nach Beethovens Tod."
+            },
+            {
+              "text": "Mit welchem Lied gewann Lena 2010 den Eurovision Song Contest?",
+              "answer": "Satellite",
+              "note": "Es war der erste deutsche Sieg seit Nicole 1982 mit „Ein bißchen Frieden“."
+            }
+          ]
+        },
+        {
+          "name": "Kunst & Literatur",
+          "questions": [
+            {
+              "text": "Welcher Roman von George Orwell handelt vom „Großen Bruder“?",
+              "answer": "1984",
+              "note": "Orwell schrieb ihn 1948 und vertauschte für den Titel angeblich die letzten beiden Ziffern."
+            },
+            {
+              "text": "Wer schrieb „Der kleine Prinz“?",
+              "answer": "Antoine de Saint-Exupéry",
+              "note": "Er war Pilot und verschwand 1944 mit seinem Flugzeug über dem Mittelmeer."
+            },
+            {
+              "text": "In welchem Museum hängt die „Mona Lisa“?",
+              "answer": "Im Louvre",
+              "note": "Sie hängt hinter Panzerglas – 1911 war sie gestohlen worden und zwei Jahre verschwunden."
+            },
+            {
+              "text": "Wer schrieb die „Harry Potter“-Bücher?",
+              "answer": "Joanne K. Rowling",
+              "note": "Den ersten Band lehnten zwölf Verlage ab, bevor Bloomsbury zusagte."
+            }
+          ]
+        },
+        {
+          "name": "Politik & Gesellschaft",
+          "questions": [
+            {
+              "text": "Wie heißt das Parlament der Bundesrepublik Deutschland?",
+              "answer": "Bundestag",
+              "note": "Er tagt seit 1999 im Reichstagsgebäude in Berlin."
+            },
+            {
+              "text": "Wie viele Mitgliedstaaten hat die EU seit dem Brexit?",
+              "answer": "27",
+              "note": "Großbritannien trat am 31. Januar 2020 aus."
+            },
+            {
+              "text": "In welcher Stadt haben die Vereinten Nationen ihren Hauptsitz?",
+              "answer": "In New York",
+              "note": "Das Grundstück am East River gilt als internationales Gebiet."
+            },
+            {
+              "text": "Wer wählt in Deutschland den Bundespräsidenten?",
+              "answer": "Die Bundesversammlung",
+              "note": "Sie besteht aus allen Bundestagsabgeordneten und ebenso vielen Vertretern der Länder."
+            }
+          ]
+        },
+        {
+          "name": "Technik",
+          "questions": [
+            {
+              "text": "Wie heißt das drahtlose Netzwerk, über das das Handy zu Hause ins Internet geht?",
+              "answer": "WLAN",
+              "note": "Im Englischen sagt man meist „Wi-Fi“ – eigentlich ein Markenname."
+            },
+            {
+              "text": "Welche Firma brachte 2007 das erste iPhone heraus?",
+              "answer": "Apple",
+              "note": "Steve Jobs stellte es im Januar 2007 vor."
+            },
+            {
+              "text": "Welches Unternehmen gründeten Bill Gates und Paul Allen 1975?",
+              "answer": "Microsoft",
+              "note": "Den Namen setzten sie aus „Microcomputer“ und „Software“ zusammen."
+            },
+            {
+              "text": "Wie heißt das Satellitensystem der USA, mit dem Navis den Weg finden?",
+              "answer": "GPS",
+              "note": "Das europäische Gegenstück heißt Galileo."
+            }
+          ]
+        },
+        {
+          "name": "Bunt gemischt",
+          "questions": [
+            {
+              "text": "Welches Sternzeichen hat, wer am 1. Januar geboren ist?",
+              "answer": "Steinbock",
+              "note": "Der Steinbock reicht etwa vom 22. Dezember bis zum 20. Januar."
+            },
+            {
+              "text": "Wie viele Augen hat ein normaler Spielwürfel zusammen?",
+              "answer": "21",
+              "note": "Gegenüberliegende Seiten ergeben zusammen immer sieben."
+            },
+            {
+              "text": "In welchem Land steht der Steinkreis Stonehenge?",
+              "answer": "In England",
+              "note": "Die großen Steine wurden vor rund 4500 Jahren aufgestellt."
+            },
+            {
+              "text": "Wie heißt das Jubiläum nach 50 Ehejahren?",
+              "answer": "Goldene Hochzeit",
+              "note": "Nach 25 Jahren feiert man die silberne, nach 60 die diamantene."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
