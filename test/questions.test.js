@@ -747,7 +747,7 @@ test('der Zufallsmix hält zwei Namen für dieselbe Kategorie auseinander', asyn
   const quelle = await readFile(new URL('../server/questions.js', import.meta.url), 'utf8');
   // Erst mixSet herausschneiden: `for (const cat of round.categories)` steht
   // auch in stechenVorrat, und das ist nicht gemeint.
-  const mixQuelle = /export async function mixSet\(\)[\s\S]*?\n\}/.exec(quelle)?.[0] || '';
+  const mixQuelle = /export async function mixSet\([^)]*\)[\s\S]*?\n\}/.exec(quelle)?.[0] || '';
   assert.ok(mixQuelle, 'mixSet sollte auffindbar bleiben');
   const topfBlock = /for \(const cat of round\.categories\) \{[\s\S]*?\n      \}/.exec(mixQuelle)?.[0] || '';
   assert.ok(topfBlock, 'der Topf-Aufbau in mixSet sollte auffindbar bleiben');
@@ -1338,4 +1338,38 @@ test('der Kategorietausch bleibt in der Runde und meldet, wenn nichts mehr da is
   }
   const alle = saetze.flatMap((s) => s.rounds.flatMap((r) => r.categories.map((c) => c.name)));
   assert.equal(await ersatzKategorie({ runde: 1, ausgeschlossen: alle }), null);
+});
+
+test('das Gedächtnis meidet die jüngsten Kategorien, lässt aber nie zu wenig übrig', async () => {
+  const { zuletztGespielt } = await import('../server/questions.js');
+  const marken = ['a', 'b', 'c', 'd', 'e'];
+  // Nichts gespielt: nichts zu meiden.
+  assert.deepEqual([...zuletztGespielt(marken, {}, 2)], []);
+  // Zwei gespielt, drei frei, zwei müssen bleiben: beide gemieden.
+  assert.deepEqual([...zuletztGespielt(marken, { a: 5, b: 9 }, 2)].sort(), ['a', 'b']);
+  // Alle gespielt: die zwei ältesten kommen zurück.
+  const alle = { a: 1, b: 2, c: 3, d: 4, e: 5 };
+  assert.deepEqual([...zuletztGespielt(marken, alle, 2)].sort(), ['c', 'd', 'e']);
+  // Geerbte Namen zählen nicht als gespielt.
+  assert.deepEqual([...zuletztGespielt(['constructor', 'tostring'], {}, 1)], []);
+});
+
+test('der Zufallsmix meidet, was an den letzten Abenden dran war', async () => {
+  const { mixSet, alleSaetze, kategorieMarke } = await import('../server/questions.js');
+  const saetze = await alleSaetze();
+  const runde1 = [...new Set(saetze.flatMap((s) => s.rounds[0].categories.map((c) => kategorieMarke(c.name))))];
+  // Bis auf zwanzig ist in Runde 1 alles schon gelaufen.
+  const zuletzt = Object.fromEntries(runde1.slice(20).map((m, i) => [m, 1000 + i]));
+  for (let i = 0; i < 20; i += 1) {
+    const mix = normalizeSet(await mixSet({ zuletzt }));
+    for (const cat of mix.rounds[0].categories) {
+      assert.ok(!Object.hasOwn(zuletzt, kategorieMarke(cat.name)), `„${cat.name}“ war gerade erst dran`);
+    }
+  }
+  // Ist wirklich alles gelaufen, kommt trotzdem ein volles Brett – aus dem, was
+  // am längsten her ist.
+  const allesGespielt = Object.fromEntries(saetze.flatMap((s) => s.rounds.flatMap((r) => r.categories))
+    .map((c, i) => [kategorieMarke(c.name), 1000 + i]));
+  const mix = normalizeSet(await mixSet({ zuletzt: allesGespielt }));
+  assert.deepEqual(mix.rounds.map((r) => r.categories.length), [6, 6]);
 });

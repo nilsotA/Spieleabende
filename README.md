@@ -216,10 +216,11 @@ und deshalb lässt sich auch das Streichen selbst wieder zurücknehmen.
 
 ### Die Kategorie kennen wir schon
 
-Gerade beim Zufallsmix liegt gern eine Spalte auf dem Brett, die die Runde schon
-einmal gespielt hat. Solange darin noch kein Feld gewählt wurde, steht auf der
-Fernbedienung neben dem Kategorienamen ein **↻** – ein Tipp, und die Spalte bekommt
-eine andere Kategorie. Dasselbe geht im Host-Menü unter **„Kategorie tauschen“**.
+Der Zufallsmix meidet zwar, was an den letzten Abenden dran war (siehe unten) –
+aber nicht, was die Runde woanders gespielt hat. Liegt so eine Spalte auf dem
+Brett, lässt sie sich tauschen: Solange darin noch kein Feld gewählt wurde, steht
+auf der Fernbedienung neben dem Kategorienamen ein **↻** – ein Tipp, und die
+Spalte bekommt eine andere Kategorie. Dasselbe geht im Host-Menü unter **„Kategorie tauschen“**.
 
 Gezogen wird aus allen Sätzen nach den Regeln des Mixes: bevorzugt aus der
 passenden Runde, kein Thema, das schon auf dem Brett steht, keine Kategorie, die
@@ -773,6 +774,14 @@ entsprechend viele Lose mehr als eine Kategorie, die nur einmal vorkommt. Gemess
 über 4000 gewürfelte Bretter stand sie damit auf 45 Prozent aller Boards; jetzt
 sind es 13. Und zwei Kategorien desselben Themas – „Internet“ neben „Internet &
 Trends“ – landen nicht mehr zusammen auf einem Brett; das waren vorher 7 Prozent.
+
+Der Mix merkt sich außerdem, was an den letzten Abenden dran war: Jede Kategorie,
+aus der ein Feld gespielt oder die vom Brett getauscht wurde, kommt erst wieder,
+wenn der Rest durch ist – und dann zuerst die, die am längsten her ist. Je Runde
+bleiben immer mindestens 18 zur Auswahl, ein volles Brett gibt es also auch nach
+vielen Abenden. Wie viele Kategorien der Mix gerade meidet, steht in der Lobby
+unter der Auswahl; dort lässt sich das Gedächtnis mit **„Vergessen“** löschen.
+Gespeichert wird es neben dem Spielstand (`data/.spielstand-gespielt.json`).
 
 Emoji auf einer eigenen Zeile werden groß dargestellt – bei Rätseln wie
 `Welcher Film?\n🦁 👑` sind die Symbole ja die eigentliche Frage.

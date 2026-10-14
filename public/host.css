@@ -2136,3 +2136,7 @@ body.host.flat .tile {
   color: #2a1e05;
   font-weight: 700;
 }
+
+/* Beim Zufallsmix: was er gerade meidet, und der Knopf zum Vergessen. */
+.mix-gedaechtnis { margin-top: 0.35rem; }
+.mix-gedaechtnis .btn { margin-left: 0.25rem; vertical-align: baseline; }

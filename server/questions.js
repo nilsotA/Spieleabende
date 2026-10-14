@@ -364,7 +364,32 @@ export function themaGleich(a, b) {
   return [...klein].every((w) => gross.has(w));
 }
 
-export async function mixSet() {
+/**
+ * Welche Kategorien diesmal ausgelassen werden, weil sie zuletzt dran waren.
+ *
+ * `zuletzt` ordnet jeder Kategoriemarke den Zeitpunkt zu, an dem sie zuletzt
+ * gespielt (oder vom Brett getauscht) wurde. Gemieden wird von der jüngsten an
+ * – aber nie so viele, dass weniger als `rest` Marken übrig bleiben. Ist alles
+ * schon einmal gelaufen, kommen also die zurück, die am längsten her sind, und
+ * der Topf läuft nie leer.
+ */
+export function zuletztGespielt(marken, zuletzt = {}, rest = 1) {
+  // hasOwn, weil `zuletzt` aus einer JSON-Datei kommt: Eine Kategorie namens
+  // „Constructor" fände sonst eine geerbte Methode und gälte als gespielt.
+  const wann = (m) => (Object.hasOwn(zuletzt, m) ? Number(zuletzt[m]) || 0 : 0);
+  const gespielt = marken.filter((m) => wann(m) > 0).sort((a, b) => wann(b) - wann(a));
+  return new Set(gespielt.slice(0, Math.max(0, Math.min(gespielt.length, marken.length - rest))));
+}
+
+/**
+ * Wie viele Kategorien der Mix je Runde mindestens zur Auswahl behält, auch
+ * wenn die übrigen alle an den letzten Abenden dran waren. Sechs braucht das
+ * Brett; der Rest ist Spielraum für Abwechslung und das Ausweichen bei
+ * gleichen Themen.
+ */
+const MIX_MINDESTAUSWAHL = 18;
+
+export async function mixSet({ zuletzt = {} } = {}) {
   const dateien = (await listSets()).filter((s) => !s.error);
   // Nach Ursprungsrunde getrennt sammeln: Runde 2 zählt doppelt, dort gehören
   // die schwereren Kategorien hin. Ein gemeinsamer Topf würde „Flaggen für
@@ -416,9 +441,14 @@ export async function mixSet() {
     // gegen 6,2 Prozent, Faktor 2,4; der Rest ist die unterschiedliche Größe
     // der Runden-Töpfe. Aus welchem Satz die Fragen kommen, wird ausgelost –
     // die Kategorie heißt gleich, die vier Fragen dahinter sind es nicht.
+    // Was an den letzten Abenden dran war, bleibt diesmal draußen – siehe
+    // zuletztGespielt. Ohne Gedächtnis (`zuletzt` leer) ändert das nichts.
+    const meiden = zuletztGespielt(
+      [...topf.keys()].filter((name) => !vergeben.has(name)), zuletzt, MIX_MINDESTAUSWAHL,
+    );
     const nachSatz = new Map();
     for (const [name, eintraege] of topf) {
-      if (vergeben.has(name)) continue;
+      if (vergeben.has(name) || meiden.has(name)) continue;
       const e = eintraege[Math.floor(Math.random() * eintraege.length)];
       if (!nachSatz.has(e.satz)) nachSatz.set(e.satz, []);
       nachSatz.get(e.satz).push({ name, cat: e.cat });
@@ -502,12 +532,15 @@ export async function mixSet() {
  * schon weggetauscht wurde, und jede, aus der auch nur eine Frage schon
  * gestellt ist (auf dem Brett, im Stechen oder als Ersatzfrage).
  *
+ * Wie der Mix bevorzugt der Tausch Kategorien, die an den letzten Abenden
+ * nicht dran waren (`zuletzt`, siehe zuletztGespielt).
+ *
  * `runde` zählt ab 1. `belegt` sind die Namen, die nach dem Tausch auf dem
  * Brett stehen bleiben – gegen die wird das Thema geprüft. `ausgeschlossen`
  * sind Namen, die gar nicht in Frage kommen.
  */
 export async function ersatzKategorie({
-  runde = 1, belegt = [], ausgeschlossen = [], schonGestellt = [],
+  runde = 1, belegt = [], ausgeschlossen = [], schonGestellt = [], zuletzt = {},
 } = {}) {
   const gestellt = new Set(schonGestellt.map((t) => String(t).trim().toLowerCase()));
   const raus = new Set([...belegt, ...ausgeschlossen].map(kategorieMarke));
@@ -527,7 +560,11 @@ export async function ersatzKategorie({
   }
   const eigener = Math.min(Math.max(runde, 1) - 1, toepfe.length - 1);
   for (const topf of [toepfe[eigener], ...toepfe.filter((_, i) => i !== eigener)]) {
-    const marken = [...topf.keys()];
+    // Bevorzugt, was an den letzten Abenden nicht dran war; sonst das, was am
+    // längsten her ist.
+    const alle = [...topf.keys()];
+    const meiden = zuletztGespielt(alle, zuletzt, 1);
+    const marken = alle.filter((m) => !meiden.has(m));
     if (!marken.length) continue;
     const varianten = topf.get(marken[Math.floor(Math.random() * marken.length)]);
     const cat = varianten[Math.floor(Math.random() * varianten.length)];

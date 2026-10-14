@@ -4550,3 +4550,42 @@ test('zwei gleichzeitige Kategorietausche stellen nichts doppelt aufs Brett', as
     }
   }
 });
+
+test('der Server merkt sich gespielte Kategorien über Abende hinweg', async (t) => {
+  // Damit der Zufallsmix nächste Woche nicht wieder „Getränke" hinlegt: Eine
+  // Kategorie, aus der ein Feld gespielt wurde, steht danach im Gedächtnis –
+  // auch nach einem Neustart und unabhängig vom Zwölf-Stunden-Schnitt des
+  // Spielstands. Der Host kann es in der Lobby löschen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-gedaechtnis-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 6500 + Math.floor(Math.random() * 200);
+  let { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  let host = await alsHost(base, 'gedaechtnis-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', set: SATZ });
+  assert.equal((await zustand(base)).gemerkt, 0);
+  await host({ type: 'pick', catIdx: 1, rowIdx: 0 });
+  assert.equal((await zustand(base)).gemerkt, 1, 'K1 ist angespielt');
+  assert.equal((await zustand(base, false)).gemerkt, undefined, 'Spieler-Handys erfahren davon nichts');
+  await host({ type: 'endQuestion' });
+  await host({ type: 'close' });
+  // Ein Tausch merkt sich die weggetauschte Kategorie ebenso.
+  assert.equal((await host({ type: 'tauscheKategorie', catIdx: 0 })).ok, true);
+  assert.equal((await zustand(base)).gemerkt, 2);
+
+  const datei = JSON.parse(await readFile(stateFile.replace(/\.json$/, '-gespielt.json'), 'utf8'));
+  assert.deepEqual(Object.keys(datei).sort(), ['k0', 'k1']);
+
+  proc.kill('SIGKILL');
+  ({ proc, base } = await starteServer(port, stateFile));
+  assert.equal((await zustand(base)).gemerkt, 2, 'das Gedächtnis übersteht den Neustart');
+
+  host = await alsHost(base, 'gedaechtnis-host');
+  assert.equal((await host({ type: 'vergessen' })).ok, true);
+  assert.equal((await zustand(base)).gemerkt, 0);
+});

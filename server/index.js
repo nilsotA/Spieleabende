@@ -7,7 +7,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
-import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, ersatzFrage, ersatzKategorie, DATA_DIR } from './questions.js';
+import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, ersatzFrage, ersatzKategorie, kategorieMarke, DATA_DIR } from './questions.js';
 import { oeffne as oeffneImBrowser } from './browser.js';
 import { starteTunnel, stoppeTunnel } from './tunnel.js';
 import { neuerZugang, pruefeZugang, cookieKoepfe, ueberHttps, TUER_ZU } from './zugang.js';
@@ -297,6 +297,58 @@ async function ladeZugang() {
     console.error('Die Schlüssel ließen sich nicht sichern:', err.message);
   }
   return frisch;
+}
+
+/* Welche Kategorien an den letzten Abenden dran waren.
+ *
+ * Der Zufallsmix wusste nichts von letzter Woche und legte gern eine Kategorie
+ * hin, die der ganze Tisch noch kennt – „Kategorie tauschen" half dann von
+ * Hand. Jetzt merkt sich der Server jede Kategorie, aus der ein Feld gespielt
+ * oder die vom Brett getauscht wurde, mit Zeitpunkt; Mix und Tausch nehmen
+ * zuerst, was noch nicht dran war (siehe zuletztGespielt in questions.js).
+ *
+ * Anders als Spielstand und Schlüssel verfällt das nicht nach zwölf Stunden –
+ * es geht ja gerade um die Abende davor. Löschen kann es der Host in der Lobby.
+ */
+const GESPIELT_FILE = `${SAVE_FILE.replace(/\.json$/, '')}-gespielt.json`;
+let gespielt = {}; // Kategoriemarke → Zeitpunkt, zuletzt gespielt
+// Was in diesem Spiel schon vermerkt ist – damit nicht jeder Zug schreibt.
+let heuteGemerkt = new Set();
+
+async function ladeGespielt() {
+  try {
+    const roh = JSON.parse(await readFile(GESPIELT_FILE, 'utf8'));
+    if (roh && typeof roh === 'object' && !Array.isArray(roh)) {
+      gespielt = Object.fromEntries(Object.entries(roh).filter(([, wann]) => Number.isFinite(wann)));
+    }
+  } catch {
+    /* noch kein Gedächtnis, oder es ist unbrauchbar – dann fängt es neu an */
+  }
+}
+
+let gespieltSichern = Promise.resolve();
+function sichereGespielt() {
+  // Hintereinander, nicht gleichzeitig: zwei Schreiber auf derselben
+  // Zwischendatei könnten sich sonst gegenseitig das Umbenennen wegnehmen.
+  gespieltSichern = gespieltSichern.then(async () => {
+    const tmp = `${GESPIELT_FILE}.tmp`;
+    await writeFile(tmp, JSON.stringify(gespielt), 'utf8');
+    await rename(tmp, GESPIELT_FILE);
+  }).catch((err) => console.error('Gespielte Kategorien nicht gesichert:', err.message));
+  return gespieltSichern;
+}
+
+/** Vermerkt Kategorien als gespielt; schreibt nur, wenn etwas neu ist. */
+function merkeGespielt(namen) {
+  let neu = false;
+  for (const name of namen) {
+    const marke = kategorieMarke(name);
+    if (!marke || heuteGemerkt.has(marke)) continue;
+    heuteGemerkt.add(marke);
+    gespielt[marke] = Date.now();
+    neu = true;
+  }
+  if (neu) sichereGespielt();
 }
 
 async function forgetSave() {
@@ -598,6 +650,8 @@ function sichtFuer({ isHost, clientId }) {
     sicht.wiederhergestellt = wiederhergestelltAm;
     // Solange hier etwas steht, kommt der Spielstand nicht auf die Platte.
     sicht.sicherungFehler = sicherungFehler;
+    // Wie viele Kategorien der Zufallsmix gerade meidet – steht in der Lobby.
+    sicht.gemerkt = Object.keys(gespielt).length;
     sicht.wartende = warteschlange();
     // Ob der Tunnel noch steht. Der Host-Screen zeigt danach seine grüne Zeile
     // und wählt die Adresse für den QR-Code – und muss es deshalb erfahren,
@@ -643,7 +697,7 @@ const HOST_ACTIONS = new Set([
   'addTeam', 'renameTeam', 'removeTeam', 'removeMember', 'adjustScore', 'setTurn',
   'startGame', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion',
   'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz', 'buzzFor',
-  'undo', 'stechen', 'discard', 'pause', 'tauscheKategorie',
+  'undo', 'stechen', 'discard', 'pause', 'tauscheKategorie', 'vergessen',
 ]);
 
 /**
@@ -913,6 +967,7 @@ async function handleAction(clientId, body) {
         // auftauchen –, dazu was heute schon weggetauscht wurde.
         ausgeschlossen: [...namen, ...(state.abgewaehlt || [])],
         schonGestellt: [...gestellt, ...(state.stechenTexte || []), ...(state.ersatzTexte || [])],
+        zuletzt: gespielt,
       });
       // Während die Sätze laden, kann ein zweites Gerät tauschen (dann wäre
       // der Ersatz gegen ein veraltetes Brett ausgesucht und könnte doppelt
@@ -935,6 +990,9 @@ async function handleAction(clientId, body) {
         // einen anderen Zug seinen Rückweg-Eintrag vor diesen schieben.
         saveImages().catch((err) => console.error('Bilder nicht gesichert:', err.message));
       }
+      // Wer eine Kategorie wegtauscht, kennt sie – der nächste Mix soll sie
+      // ebenso meiden wie eine gespielte.
+      merkeGespielt([alt]);
       hostToast(`„${alt}“ ist raus, neu auf dem Brett: „${neu.name}“.`);
       break;
     }
@@ -1155,13 +1213,14 @@ async function handleAction(clientId, body) {
       const roh = body.set
         ? normalizeSet(body.set)
         : body.file === MIX
-          ? normalizeSet(await mixSet())
+          ? normalizeSet(await mixSet({ zuletzt: gespielt }))
           : await loadSet(body.file);
       const { set, images } = externalizeImages(roh);
       bilder = images;
       // Über einen Spielstart hinweg zurückzunehmen, hieße das alte Spiel
       // wiederauferstehen zu lassen – mitten in einem neuen.
       rueckWeg = [];
+      heuteGemerkt = new Set();
       G.startGame(state, set);
       await saveImages();
       break;
@@ -1240,6 +1299,14 @@ async function handleAction(clientId, body) {
       G.startStechen(state, frage);
       break;
     }
+    /** Das Gedächtnis über die letzten Abende löschen – siehe GESPIELT_FILE. */
+    case 'vergessen':
+      gespielt = {};
+      heuteGemerkt = new Set();
+      await sichereGespielt();
+      hostToast('Vergessen: Der Zufallsmix zieht wieder aus allen Kategorien.');
+      break;
+
     case 'backToLobby':
       state = G.backToLobby(state);
       rueckWeg = [];
@@ -1276,6 +1343,10 @@ async function handleAction(clientId, body) {
    */
   if (isHost) wiederhergestelltAm = null;
   merkeBild();
+  // Eine Kategorie gilt als gespielt, sobald ein Feld aus ihr aufgerufen ist.
+  if (state.board) {
+    merkeGespielt(state.board.categories.filter((c) => c.cells.some((z) => z.used)).map((c) => c.name));
+  }
   broadcast();
 }
 
@@ -1893,6 +1964,7 @@ server.on('error', (err) => {
   });
 });
 
+await ladeGespielt();
 const wiederhergestellt = await restore();
 if (wiederhergestellt) {
   state = wiederhergestellt;

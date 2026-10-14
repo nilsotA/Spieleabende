@@ -137,7 +137,8 @@ const MIX = '__mix';
 $('#set-select').addEventListener('change', async (ev) => {
   if (ev.target.value === MIX) {
     localSet = null;
-    $('#set-info').textContent = 'Zwölf Kategorien, beim Start frisch aus allen Sätzen gewürfelt.';
+    delete $('#set-info').dataset.mix;
+    zeigeMixInfo();
     return;
   }
   // Der geladene Satz haengt an der Option, nicht am Auswahl-Zeitpunkt: sonst
@@ -195,8 +196,38 @@ async function loadSets() {
   }
 }
 
+/**
+ * Beim Zufallsmix: wie viele Kategorien er gerade meidet, weil sie an den
+ * letzten Abenden dran waren – und der Weg, das zu vergessen.
+ *
+ * Ohne die Zeile wäre das Gedächtnis unsichtbar: Wer sich wundert, warum seine
+ * Lieblingskategorie nie mehr kommt, fände keinen Grund und keinen Schalter.
+ * Läuft bei jedem Rundruf (renderLobby), baut aber nur neu, wenn sich die
+ * Zahl ändert – sonst stünde der Knopf unter dem Finger jedes Mal neu da.
+ */
+function zeigeMixInfo() {
+  const info = $('#set-info');
+  if ($('#set-select').value !== MIX) return;
+  const n = state?.gemerkt || 0;
+  if (info.dataset.mix === String(n)) return;
+  info.dataset.mix = String(n);
+  info.innerHTML = '';
+  info.append(el('div', {}, 'Zwölf Kategorien, beim Start frisch aus allen Sätzen gewürfelt.'));
+  if (!n) return;
+  info.append(el('div', { class: 'mix-gedaechtnis' },
+    `${n === 1 ? 'Eine Kategorie' : `${n} Kategorien`} von den letzten Abenden ${n === 1 ? 'kommt' : 'kommen'} erst wieder, wenn der Rest durch ist. `,
+    el('button', {
+      type: 'button',
+      class: 'btn btn-ghost btn-sm',
+      onclick: () => {
+        if (confirm('Vergessen, welche Kategorien schon dran waren?\n\nDer Zufallsmix zieht danach wieder aus allen.')) act('vergessen');
+      },
+    }, 'Vergessen')));
+}
+
 function describeSet(set) {
   if (!set) return;
+  delete $('#set-info').dataset.mix;
   $('#set-info').innerHTML = '';
   // Zuerst der Satz über den Satz: Beim Auswählen ist die Frage „passt der zu
   // dieser Runde?", nicht „wie heißen die zwölf Kategorien". Seit es zwölf
@@ -577,6 +608,7 @@ function renderPause() {
 }
 
 function renderLobby() {
+  zeigeMixInfo();
   const list = $('#lobby-teams');
   // Die Liste wurde bei jedem Broadcast vollständig neu gebaut – und ein
   // Broadcast genügt schon, wenn ein Gast /play überhaupt öffnet; allein das
