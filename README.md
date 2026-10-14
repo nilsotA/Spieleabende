@@ -519,14 +519,17 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   zieht sich der Lichtbalken in der Farbe des Zugteams zusammen, und am Schild
   „Am Zug“ unter der Frage stehen die Sekunden; Handys und Fernbedienung zählen mit.
   Ist die Zeit um, steht dort „Zeit ist um“ auf Rot – auch beim roten Team eindeutig,
-  weil es der Text sagt und nicht der Farbton. Wie die Buzzer-Uhr **wertet sie
+  weil es der Text sagt und nicht der Farbton –, und die Leinwand gibt einen kurzen
+  Doppelton (nur sie, nicht jedes Handy im Raum). Nimmst du eine Wertung zurück und
+  ist das Zugteam wieder dran, läuft die Uhr dort weiter, wo sie stand. Wie die Buzzer-Uhr **wertet sie
   nichts**: Wer bei „Zeit ist um“ gerade die Antwort ausspricht, bekommt sie, wenn du
   es so willst. In der Pause steht sie still, und sagt das Zugteam „weiß nicht“,
   übernimmt die Buzzer-Uhr, sofern sie eingeschaltet ist.
 - **Uhr beim freien Buzzer:** normalerweise aus. Eingeschaltet (10 bis 30 Sekunden)
-  zieht sich der goldene Lichtbalken über der Bühne zusammen, und auf Handy und
-  Fernbedienung läuft die Sekundenzahl mit. Sie **wertet nichts**: Läuft die Zeit ab,
-  wird der Balken rot, mehr nicht – wer eine Sekunde später drückt, hat trotzdem
+  zieht sich der goldene Lichtbalken über der Bühne zusammen, und am Schild unter
+  der Frage, auf Handy und Fernbedienung läuft die Sekundenzahl mit. Sie **wertet
+  nichts**: Läuft die Zeit ab, wird der Balken rot und die Leinwand gibt einen kurzen
+  Doppelton, mehr nicht – wer eine Sekunde später drückt, hat trotzdem
   gedrückt, und darüber entscheidest du. Sie ist gegen das Schweigen da, wenn niemand
   sich traut.
 - **Wer ruft das Feld auf?** Standard: das Team am Zug tippt es auf seinem Handy an.

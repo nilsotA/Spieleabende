@@ -837,6 +837,12 @@ const KLAENGE = {
     { f: 220, at: 0, d: 0.16, v: 0.22, t: 'sawtooth' },
     { rausch: true, at: 0, d: 0.08, v: 0.16 },
   ],
+  // Zeit ist um: zwei gleiche, kurze Töne – eine Ansage, keine Wertung. Darum
+  // weder der Rutsch von „falsch" noch irgendetwas, das nach Strafe klingt.
+  zeitum: [
+    { f: 660, at: 0, d: 0.12, v: 0.24, t: 'square' },
+    { f: 660, at: 0.18, d: 0.18, v: 0.24, t: 'square' },
+  ],
   // Rundenende: das Spiegelbild des Rundenstarts, ruhiger und abwärts.
   rundenende: [
     { f: halbton(C5, 12), at: 0, d: 0.16, v: 0.24, t: 'square' },

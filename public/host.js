@@ -592,7 +592,12 @@ function renderUhr() {
   }
   stage.classList.add('uhr-laeuft');
   stage.classList.remove('uhr-aus');
+  // Getönt wird nur, wenn die Uhr vor Publikum abläuft. Wer die Seite neu lädt,
+  // während die Zeit schon um ist, bekommt sonst einen Ton ohne Anlass.
+  let liefNoch = false;
   uhrStopp = starteUhr(uhr.dauer, uhr.offenMs, (rest, anteil) => {
+    if (rest > 0) liefNoch = true;
+    else if (liefNoch) sound('zeitum');
     stage.style.setProperty('--uhr', String(anteil));
     // Der Balken allein reicht nicht: Er ist vier Pixel hoch, und beim roten
     // Team sähe „läuft" in Teamfarbe aus wie „abgelaufen" in Rot. Die Zahl am

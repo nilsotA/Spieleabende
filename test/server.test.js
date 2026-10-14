@@ -4639,3 +4639,32 @@ test('die Antwortuhr fürs Zugteam: aus ab Werk, läuft ab dem Aufrufen, hält i
   assert.equal(buzz.current.step, 'buzz');
   assert.equal(buzz.current.antwortOffenMs, null);
 });
+
+test('Zurücknehmen holt die Antwortuhr dorthin zurück, wo sie stand', async (t) => {
+  // Der Host drückt versehentlich „falsch", nimmt es zurück – und das Zugteam
+  // ist wieder dran. Die Uhr rechnete bis dahin ab dem ursprünglichen Aufrufen
+  // und zeigte sofort „Zeit ist um", als hätte das Team die Zeit verschlafen.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-uhrzurueck-'));
+  const port = 7900 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'uhrzurueck-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'settings', settings: { antwortUhr: 30 } });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await warte(800);
+  await host({ type: 'judge', correct: false });
+  assert.equal((await zustand(base)).current.step, 'buzz');
+  await warte(1500);
+  await host({ type: 'undo' });
+  const zurueck = await zustand(base);
+  assert.equal(zurueck.current.step, 'primary', 'das Zugteam ist wieder dran');
+  assert.ok(zurueck.current.antwortOffenMs < 1700,
+    `die anderthalb Sekunden danach zählen nicht mit – gemessen ${zurueck.current.antwortOffenMs} ms`);
+  assert.ok(zurueck.current.antwortOffenMs >= 700, 'die Zeit davor aber schon');
+});

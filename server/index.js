@@ -740,7 +740,7 @@ const RUECKNEHMBAR = new Set([
  * zurückzunehmen, das war auch vorher so.
  */
 const RUECKWEG_TIEFE = 25;
-let rueckWeg = []; // [{ state, was }, …] – hinten liegt der nächste Rückschritt
+let rueckWeg = []; // [{ state, was, am }, …] – hinten liegt der nächste Rückschritt
 
 /**
  * Einen früheren Spielstand übernehmen, ohne den Raum mit zurückzudrehen.
@@ -754,6 +754,29 @@ let rueckWeg = []; // [{ state, was }, …] – hinten liegt der nächste Rücks
  * Lobby auf „dran", jemand legt sein Team an, der Host nimmt den Zugwechsel
  * zurück, und das Team ist weg. Nachgestellt.
  */
+/**
+ * Die Uhren einer zurückgeholten Frage laufen dort weiter, wo sie standen.
+ *
+ * Ein Schnappschuss trägt die Startzeiten von damals. Holte „Zurücknehmen" die
+ * Antwortphase zurück – der Host hatte versehentlich „falsch" gedrückt –,
+ * rechnete die Antwortuhr ab dem ursprünglichen Aufrufen und zeigte meist
+ * sofort „Zeit ist um", obwohl das Zugteam eben noch mittendrin war. Dieselbe
+ * Rechnung wie bei der Pause: Alle Zeitpunkte wandern um die Spanne zwischen
+ * Sichern und Zurückholen. `buzzedAt` wandert mit, damit die angezeigte
+ * Reaktionszeit (`buzzedAt − buzzOpenedAt`) dieselbe bleibt.
+ *
+ * Einträge ohne Zeitpunkt (aus einem Stand vor dieser Regel) bleiben, wie sie
+ * sind.
+ */
+function holeUhrenNach(st, gesichertAm) {
+  const q = st.current;
+  if (!q || !gesichertAm) return;
+  const versatz = Math.max(0, Date.now() - gesichertAm);
+  for (const feld of ['gestelltAm', 'buzzOpenedAt', 'buzzedAt']) {
+    if (q[feld]) q[feld] += versatz;
+  }
+}
+
 function uebernimm(alt, jetztStand) {
   for (const team of alt.teams) {
     const jetzt = jetztStand.teams.find((t) => t.id === team.id);
@@ -900,7 +923,7 @@ async function handleAction(clientId, body) {
   // Kommentar an dieser Stelle beschrieb schon immer das gewünschte Verhalten;
   // der Code tat es nur nicht.
   const schnappschuss = RUECKNEHMBAR.has(type)
-    ? { state: structuredClone(state), was: benenne(type, state) }
+    ? { state: structuredClone(state), was: benenne(type, state), am: Date.now() }
     : null;
 
   switch (type) {
@@ -928,7 +951,9 @@ async function handleAction(clientId, body) {
           `Inzwischen ist etwas dazwischengekommen (${oben.was}) – schau kurz auf den Screen.`,
         );
       }
-      state = uebernimm(rueckWeg.pop().state, state);
+      const eintrag = rueckWeg.pop();
+      state = uebernimm(eintrag.state, state);
+      holeUhrenNach(state, eintrag.am);
       break;
     }
 
@@ -980,6 +1005,7 @@ async function handleAction(clientId, body) {
       // der in der Zwischenzeit durchging (eine Punktkorrektur vom Tablet) –
       // ein „Zurücknehmen" des Tauschs nähme den sonst gleich mit zurück.
       schnappschuss.state = structuredClone(state);
+      schnappschuss.am = Date.now();
       // Eingebettete Bilder wie beim Spielstart herauslösen, sonst ginge das
       // Foto aus einem selbstgebauten Satz bei jedem Rundruf an alle Handys.
       const { images } = externalizeImages({ rounds: [{ categories: [neu] }] });
@@ -1108,7 +1134,7 @@ async function handleAction(clientId, body) {
         const vonHand = team.score - ausGruenden;
         if (vonHand) korrekturen.push({ teamId: team.id, delta: vonHand });
       }
-      const vorher = { state: structuredClone(state), was: 'Frage verworfen' };
+      const vorher = { state: structuredClone(state), was: 'Frage verworfen', am: Date.now() };
       // Der Ankerpunkt bleibt im Stapel stehen, und übernommen wird eine Kopie.
       //
       // Vorher wurde er verbraucht (`rueckWeg.length = bis`). Nahm der Host das
