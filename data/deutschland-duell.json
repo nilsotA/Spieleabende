@@ -237,11 +237,6 @@
           "name": "Erfindungen",
           "questions": [
             {
-              "text": "Wer entdeckte die Röntgenstrahlen?",
-              "answer": "Wilhelm Conrad Röntgen",
-              "note": "1895, durch Zufall. Er verzichtete auf ein Patent – die Entdeckung sollte allen gehören."
-            },
-            {
               "text": "Welches Fahrzeug baute Carl Benz als Erster?",
               "answer": "Das Automobil",
               "note": "1886, mit drei Rädern. Die erste Fernfahrt machte seine Frau Bertha – ohne sein Wissen."
@@ -250,6 +245,11 @@
               "text": "Wer erfand den Buchdruck mit beweglichen Lettern?",
               "answer": "Johannes Gutenberg",
               "note": "Um 1450 in Mainz. Seine Bibel gilt als das erste in Serie gedruckte Buch Europas."
+            },
+            {
+              "text": "Unter welchem Namen ließ die Firma Bayer 1899 ihre Schmerztablette mit Acetylsalicylsäure eintragen?",
+              "answer": "Aspirin",
+              "note": "In den USA verlor Bayer die Marke nach dem Ersten Weltkrieg – dort ist „aspirin“ heute ein Allerweltswort für jede Schmerztablette."
             },
             {
               "text": "Welches deutsche Institut war maßgeblich an der Entwicklung von MP3 beteiligt?",

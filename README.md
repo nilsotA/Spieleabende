@@ -682,6 +682,14 @@ Sieben-Meter-Linie?“). Der Editor warnt beim Tippen, der Testlauf hält es fü
 die mitgelieferten Sätze fest. Auswahlfragen („Kölsch oder Pils?“) sind
 ausgenommen – dort gehört die Lösung in die Frage.
 
+Die Maschine sieht dabei nur das ganze Wort. Steckt die Lösung als Wortteil in
+der Frage („Welches Werkzeug braucht man für eine Schraube mit Kreuzschlitz?“,
+„Welchen Wall ließ Kaiser Hadrian bauen?“), muss ein Mensch hinschauen – eine
+Suche nach Wortteilen findet über hundert Stellen, und die meisten sind harmlos
+(„Achillessehne“ in einer Frage nach einer Sehne). Bei einer Durchsicht sind
+23 Fragen ersetzt worden: solche Geschenke, die beiden einzigen, die in zwei
+Sätzen wortgleich standen, und ein paar, die schlicht zu flach waren.
+
 ### Mitgeliefert
 
 Sechsundzwanzig fertige Sätze mit je 48 Fragen – zusammen 1248, keine doppelt. Jede einzelne

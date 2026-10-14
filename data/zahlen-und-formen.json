@@ -13,9 +13,9 @@
               "note": "Rund 3,14159 – und die Nachkommastellen hören nie auf."
             },
             {
-              "text": "Wie heißt die Zahl, mit der man 0 nicht teilen darf?",
-              "answer": "Die Null selbst",
-              "note": "Durch null teilen ist nicht unendlich, sondern gar nicht definiert."
+              "text": "Welche Zahl gilt in China als Glückszahl, weil sie ähnlich klingt wie das Wort für Reichtum?",
+              "answer": "Die Acht",
+              "note": "Die Olympischen Spiele in Peking begannen deshalb am 8. 8. 2008 um 20:08 Uhr."
             },
             {
               "text": "Welche Zahl nennt man den „Goldenen Schnitt“ – rund 1,618?",
@@ -33,9 +33,9 @@
           "name": "Formen & Körper",
           "questions": [
             {
-              "text": "Wie heißt ein Dreieck, bei dem alle drei Seiten gleich lang sind?",
-              "answer": "Gleichseitig",
-              "note": "Dann sind auch alle drei Winkel gleich groß, nämlich je 60 Grad."
+              "text": "Wie heißt ein Viereck mit vier gleich langen Seiten und vier rechten Winkeln?",
+              "answer": "Das Quadrat",
+              "note": "Jedes Quadrat ist auch ein Rechteck und eine Raute – umgekehrt gilt das nicht."
             },
             {
               "text": "Wie viele Ecken hat ein Würfel?",

@@ -18,14 +18,14 @@
               "note": "Griechisch für „Naturkunde“ – bis ins 19. Jahrhundert hieß das Fach bei uns schlicht Naturlehre."
             },
             {
-              "text": "Welches Fach beschäftigt sich mit Karten, Klima und Ländern?",
-              "answer": "Erdkunde",
-              "note": "Früher hieß es Geographie – „Erdbeschreibung“."
+              "text": "Welches Fach besuchen in vielen Bundesländern Schüler, die nicht am Religionsunterricht teilnehmen?",
+              "answer": "Ethik (auch: Philosophie, Werte und Normen)",
+              "note": "Jedes Land nennt es anders: In Niedersachsen „Werte und Normen“, in Brandenburg „LER“ – gemeint ist überall das Gleiche."
             },
             {
-              "text": "Wie heißt das Fach, in dem es um Staat, Recht und Gesellschaft geht?",
-              "answer": "Politik oder Sozialkunde",
-              "note": "In manchen Bundesländern heißt es Gemeinschaftskunde, in anderen Politik-Wirtschaft. Gemeint ist dasselbe."
+              "text": "Wofür stehen die vier Buchstaben MINT bei den Schulfächern?",
+              "answer": "Mathematik, Informatik, Naturwissenschaften, Technik",
+              "note": "Das Kürzel stammt aus der Bildungspolitik der Nullerjahre – im Englischen heißt dasselbe STEM."
             }
           ]
         },
@@ -88,9 +88,9 @@
               "note": "In manchen Schulen ersetzt heute ein Gong oder eine Melodie das Klingeln."
             },
             {
-              "text": "Wie nennt man den Dienst, bei dem eine Lehrkraft in der Pause auf dem Hof aufpasst?",
-              "answer": "Die Pausenaufsicht",
-              "note": "Rechtlich ist sie Aufsichtspflicht: Was auf dem Hof passiert, fällt in die Verantwortung der Schule."
+              "text": "Bei welchem Hüpfspiel spannen zwei Kinder ein Band um die Beine, und ein drittes springt darüber?",
+              "answer": "Gummitwist",
+              "note": "Gesprungen wird erst in Knöchelhöhe, dann an den Knien, dann an der Hüfte – wer patzt, muss selbst ins Band."
             },
             {
               "text": "Bei welchem Kreisspiel läuft einer außen herum und lässt ein Tuch hinter jemandem fallen?",
@@ -287,14 +287,14 @@
           "name": "Prüfungszeit",
           "questions": [
             {
-              "text": "Wie heißt die schriftliche Abschlussarbeit eines Bachelorstudiums?",
-              "answer": "Die Bachelorarbeit",
-              "note": "Sie ist meist die erste größere Arbeit im Studium und dauert je nach Fach zwei bis vier Monate."
+              "text": "Wie heißt das kleine versteckte Papier, mit dem man in einer Klausur schummelt?",
+              "answer": "Der Spickzettel",
+              "note": "Manche Lehrer erlauben einen offiziellen – wer ihn schreibt, lernt dabei meist genug, um ihn gar nicht mehr zu brauchen."
             },
             {
-              "text": "Wie heißt das Verfahren, mit dem Hochschulen Texte auf Abschreiben prüfen?",
-              "answer": "Plagiatsprüfung",
-              "note": "Die Programme vergleichen mit Milliarden Texten – auffällig ist nicht das einzelne Wort, sondern der Satzbau."
+              "text": "Welchen Titel darf man nach einer bestandenen Promotion vor den Namen setzen?",
+              "answer": "Doktor (Dr.)",
+              "note": "In Deutschland darf er sogar in den Personalausweis eingetragen werden – eine Pflicht, jemanden so anzureden, gibt es aber nicht."
             },
             {
               "text": "Wie nennt man eine Prüfung, die mündlich vor mehreren Prüfern stattfindet?",

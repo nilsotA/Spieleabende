@@ -102,7 +102,14 @@ test('keine Frage kommt in zwei Sätzen doppelt vor', async () => {
     for (const round of set.rounds) {
       for (const cat of round.categories) {
         for (const q of cat.questions) {
-          const schluessel = `${q.text}|${q.answer}`.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+          // Bildfragen teilen sich mit Absicht den Text („Welches Land hat
+          // diese Flagge?“) – bei ihnen unterscheidet das Bild. Alle anderen
+          // werden am Text allein erkannt: Vorher zählte die Lösung mit, und
+          // „Woraus wird Tofu hergestellt?“ stand zweimal im Korpus, einmal
+          // mit „Aus Sojabohnen“, einmal mit „Aus Sojamilch“. Emoji bleiben im
+          // Schlüssel – bei „Welcher Film? 🦁 👑“ sind sie die Frage.
+          if (q.image) continue;
+          const schluessel = q.text.toLowerCase().replace(/[\s\p{P}]/gu, '');
           if (gesehen.has(schluessel)) dopplungen.push(`${q.text} (${datei} und ${gesehen.get(schluessel)})`);
           gesehen.set(schluessel, datei);
         }

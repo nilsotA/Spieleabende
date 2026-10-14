@@ -88,11 +88,6 @@
               "note": "Zwei Glaswände mit Vakuum dazwischen. Erfunden für ein Labor, nicht für den Kaffee."
             },
             {
-              "text": "Wie nennt man die Maschine, die Wäsche trocknet, ohne dass man sie aufhängt?",
-              "answer": "Der Trockner",
-              "note": "Er kostet mehr Strom als Waschmaschine und Spülmaschine zusammen – deshalb hängt in vielen Kellern noch die Leine."
-            },
-            {
               "text": "Welches Gerät ersetzte den Teppichklopfer?",
               "answer": "Der Staubsauger",
               "note": "Das erste Modell von 1901 war so groß, dass es vor dem Haus stand – der Schlauch ging durchs Fenster."
@@ -101,6 +96,11 @@
               "text": "Welches Küchengerät erwärmt Essen mit Strahlung statt mit Hitze von außen?",
               "answer": "Die Mikrowelle",
               "note": "Erfunden aus Versehen: Einem Forscher schmolz vor einem Radargerät der Schokoriegel in der Tasche."
+            },
+            {
+              "text": "Was erfand die Dresdnerin Melitta Bentz 1908 mit Löschpapier aus dem Schulheft ihres Sohnes?",
+              "answer": "Den Kaffeefilter",
+              "note": "Ihre Firma trägt bis heute ihren Vornamen – und der Filter seine kegelige Form, die erst in den Dreißigern dazukam."
             }
           ]
         },
@@ -187,9 +187,9 @@
           "name": "Telefon & Post",
           "questions": [
             {
-              "text": "Wie hieß das dicke Buch, in dem alle Telefonnummern eines Ortes standen?",
-              "answer": "Das Telefonbuch",
-              "note": "Wer nicht drinstehen wollte, musste dafür bezahlen. Zerreißen konnten es nur Kraftsportler."
+              "text": "Welche Farbe hatten Telefonzellen und Briefkästen der Deutschen Bundespost?",
+              "answer": "Gelb",
+              "note": "Mit der Telekom wurden die Zellen ab den Neunzigern grau-magenta – die Briefkästen der Post sind gelb geblieben."
             },
             {
               "text": "Welches Gerät nahm Anrufe entgegen, wenn niemand zu Hause war?",
@@ -242,9 +242,9 @@
               "note": "Der erste gedruckte kam um 1900. Vorher malten Familien Kreidestriche an die Tür und wischten täglich einen weg."
             },
             {
-              "text": "Welches Fest feiert man in Bayern im September und Oktober auf der Theresienwiese?",
-              "answer": "Das Oktoberfest",
-              "note": "Es geht auf eine Hochzeit von 1810 zurück – gefeiert wurde auf der Wiese vor der Stadt, daher „Wiesn“."
+              "text": "Wessen Fest feiern Kinder am 11. November mit Laternenumzügen?",
+              "answer": "Sankt Martin",
+              "note": "Der Legende nach teilte er seinen Mantel mit einem frierenden Bettler – darum reitet beim Umzug oft ein Martin mit rotem Umhang voran."
             },
             {
               "text": "An welchem Tag finden Kinder in Deutschland etwas in ihren geputzten Stiefeln?",

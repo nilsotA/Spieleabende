@@ -133,14 +133,14 @@
           "name": "Sportdeutsch",
           "questions": [
             {
-              "text": "Wie heißt der Sprung mit gegrätschten Beinen über den Bock im Turnunterricht?",
-              "answer": "Die Grätsche",
-              "note": "Bock und Kasten gehen auf Friedrich Ludwig Jahn zurück, den „Turnvater“ des frühen 19. Jahrhunderts."
-            },
-            {
               "text": "Wie nennt man beim Fußball drei Tore eines Spielers in einem Spiel?",
               "answer": "Hattrick",
               "note": "Das Wort kommt aus dem Cricket: Wer drei Gegner nacheinander ausschied, bekam einen Hut geschenkt."
+            },
+            {
+              "text": "Wie nennt man beim Fußball einen Schuss direkt aus der Luft, bevor der Ball aufspringt?",
+              "answer": "Volleyschuss (Volley)",
+              "note": "Sein spektakulärster Verwandter ist der Fallrückzieher – Klaus Fischers gegen die Schweiz 1977 kennt bis heute jeder Sportschau-Fan."
             },
             {
               "text": "Wie heißt im Handball der Strafwurf, den es nach einer klaren Torchancen-Verhinderung gibt?",

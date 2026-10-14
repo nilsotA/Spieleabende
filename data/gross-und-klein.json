@@ -113,9 +113,9 @@
               "note": "Er steht immer genau gegenüber der Sonne – man hat sie also im Rücken."
             },
             {
-              "text": "Womit misst man den Luftdruck?",
-              "answer": "Mit dem Barometer",
-              "note": "Fällt der Zeiger schnell, kommt Wind: Tiefdruck bringt das schlechte Wetter."
+              "text": "Aus welcher Himmelsrichtung kommt das Wetter in Deutschland meistens?",
+              "answer": "Aus Westen",
+              "note": "Westwinde tragen die Tiefs vom Atlantik heran – darum schaut der Wetterbericht zuerst nach Frankreich und Großbritannien."
             },
             {
               "text": "Warum sieht man den Blitz, bevor man den Donner hört?",
@@ -162,9 +162,9 @@
           "name": "Unter Wasser",
           "questions": [
             {
-              "text": "Welcher Fisch bläst sich bei Gefahr zu einer stacheligen Kugel auf?",
-              "answer": "Der Kugelfisch",
-              "note": "Er saugt dafür Wasser in einen dehnbaren Magensack – der Fisch verdreifacht sein Volumen."
+              "text": "Welcher orange-weiß gestreifte Fisch wohnt zwischen den giftigen Tentakeln einer Seeanemone?",
+              "answer": "Der Clownfisch (Anemonenfisch)",
+              "note": "Eine Schleimschicht auf der Haut schützt ihn vor dem Nesselgift. Seit „Findet Nemo“ ist er der bekannteste Fisch der Welt."
             },
             {
               "text": "Wie viele Arme hat ein Seestern üblicherweise?",
@@ -217,9 +217,9 @@
               "note": "Rund 8000 Stacheln – und darunter ein Muskel, der sie wie eine Kapuze zuzieht."
             },
             {
-              "text": "Welche Blume wird über zwei Meter hoch und richtet sich nach der Sonne?",
-              "answer": "Die Sonnenblume",
-              "note": "Nur die jungen drehen mit. Ausgewachsene stehen fest nach Osten – da wärmen sie sich morgens schneller auf."
+              "text": "Welche Zwiebelblume löste im 17. Jahrhundert in den Niederlanden einen regelrechten Kaufrausch aus?",
+              "answer": "Die Tulpe",
+              "note": "Auf dem Höhepunkt 1637 wurden für eine einzige Zwiebel Preise wie für ein Stadthaus gezahlt – dann brach der Markt über Nacht zusammen."
             },
             {
               "text": "Wie nennt man es, wenn ein Gärtner den Trieb einer Sorte auf eine andere Pflanze setzt?",
@@ -287,14 +287,14 @@
           "name": "Berufe & Werkzeug",
           "questions": [
             {
-              "text": "Welches Werkzeug braucht man für eine Schraube mit Kreuzschlitz?",
-              "answer": "Einen Kreuzschlitz-Schraubendreher",
-              "note": "Der Kreuzschlitz wurde erfunden, damit der Dreher bei zu viel Kraft von selbst herausrutscht."
+              "text": "Welcher Handwerker mit Zylinder und schwarzer Kluft gilt als Glücksbringer?",
+              "answer": "Der Schornsteinfeger (Kaminkehrer)",
+              "note": "Ein sauberer Kamin hieß früher: kein Brand und ein warmes Haus. Deshalb soll es Glück bringen, ihn anzufassen."
             },
             {
-              "text": "Wie heißt der Beruf, der Schuhe herstellt und repariert?",
-              "answer": "Schuhmacher (Schuster)",
-              "note": "„Schuster, bleib bei deinen Leisten“ – der Leisten ist die Fußform aus Holz."
+              "text": "Wie heißt der Handwerker, der aus Holz Möbel, Türen und Fenster baut?",
+              "answer": "Der Tischler (Schreiner)",
+              "note": "Im Norden sagt man Tischler, im Süden und Westen Schreiner – es ist derselbe Beruf mit derselben Ausbildung."
             },
             {
               "text": "Womit prüft ein Maurer, ob eine Wand wirklich senkrecht steht?",
