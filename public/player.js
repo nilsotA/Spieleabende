@@ -839,6 +839,12 @@ function renderUhr() {
   // Die Antwortuhr sehen alle – auch die anderen Tische wollen wissen, wie
   // lange das Zugteam noch grübeln darf. Die Buzzer-Uhr nur, wer buzzern darf.
   const zeigen = !!uhr && (uhr.art === 'antwort' || state.you?.canBuzz);
+  // Wer gerade antworten muss, bekommt die Zahl zusätzlich groß in den Knopf.
+  const imKnopf = zeigen && uhr.art === 'antwort' && !!state.you?.onTheHook;
+  if (!imKnopf) {
+    buzzer.classList.remove('mit-uhr');
+    setzeText($('#buzzer-uhr'), '');
+  }
   if (!zeigen) {
     uhrStopp?.();
     uhrStopp = null;
@@ -849,11 +855,22 @@ function renderUhr() {
   if (uhr.schluessel === uhrSchluessel) return;
   uhrStopp?.();
   uhrSchluessel = uhr.schluessel;
+  let liefNoch = false;
   uhrStopp = starteUhr(uhr.dauer, uhr.offenMs, (rest) => {
     const sek = Math.ceil(rest / 1000);
     // Nur in die Uhr schreiben, nicht in die Lagezeile: Die wird vorgelesen,
     // und zwar bei jeder Änderung vollständig.
     setzeText($('#p-uhr'), rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um');
+    if (imKnopf) {
+      buzzer.classList.add('mit-uhr');
+      const gross = $('#buzzer-uhr');
+      setzeText(gross, rest > 0 ? String(sek) : 'ZEIT!');
+      gross.classList.toggle('aus', rest <= 0);
+      // Kurz brummen, wenn die Zeit vor den Augen abläuft – nur bei dem Team,
+      // das es angeht, und nicht beim Neuladen mit schon abgelaufener Uhr.
+      if (rest > 0) liefNoch = true;
+      else if (liefNoch) vibrate([200, 100, 200]);
+    }
   });
 }
 

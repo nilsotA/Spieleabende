@@ -518,6 +518,8 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   dazu, und 30 Sekunden sind für die meisten Runden ein guter Wert. Auf der Leinwand
   zieht sich der Lichtbalken in der Farbe des Zugteams zusammen, und am Schild
   „Am Zug“ unter der Frage stehen die Sekunden; Handys und Fernbedienung zählen mit.
+  Wer gerade antworten muss, hat die Zahl groß im Buzzer-Knopf, und sein Handy brummt
+  kurz, wenn die Zeit um ist.
   Ist die Zeit um, steht dort „Zeit ist um“ auf Rot – auch beim roten Team eindeutig,
   weil es der Text sagt und nicht der Farbton –, und die Leinwand gibt einen kurzen
   Doppelton (nur sie, nicht jedes Handy im Raum). Nimmst du eine Wertung zurück und

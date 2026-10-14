@@ -449,6 +449,14 @@ body {
 }
 .buzzer .bolt { font-size: 1.3em; line-height: 1; filter: grayscale(1); opacity: 0.35; }
 .buzzer .buzzer-label { font-size: 0.5em; }
+/* Antwortzeit im Knopf: Das Zugteam schaut beim Grübeln auf den großen Kreis,
+   nicht auf die Statuszeile darüber. Die Zahl nimmt den Platz des Blitzes ein,
+   der in dieser Phase ohnehin nur „gesperrt" bedeutet. */
+.buzzer-uhr { display: none; font-size: 1.5em; line-height: 1; font-style: normal; color: #fff;
+  font-variant-numeric: tabular-nums; }
+.buzzer.mit-uhr .bolt { display: none; }
+.buzzer.mit-uhr .buzzer-uhr { display: block; }
+.buzzer.mit-uhr .buzzer-uhr.aus { font-size: 0.75em; color: #ff8a9e; }
 
 .buzzer.armed {
   background: radial-gradient(circle at 50% 32%, #ff6b83 0%, #e01b46 42%, #8d0c28 100%);
