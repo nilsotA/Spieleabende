@@ -3,7 +3,7 @@
 import {
   $, el, connect, hostAction, sound, vibrate, flash,
   installAudioUnlock, keepScreenAwake, setFrageText, setzeText, anschlussStand,
-  aufzaehlung, punkte, starteUhr, verbergeSchluessel, lageSeit } from '/common.js';
+  aufzaehlung, punkte, starteUhr, laufendeUhr, verbergeSchluessel, lageSeit } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
@@ -34,21 +34,18 @@ let uhrStopp = null;
 let uhrSchluessel = null;
 
 function renderUhr() {
-  const q = state.current;
-  const dauer = (state.settings?.buzzUhr || 0) * 1000;
-  const laeuft = !!q && q.step === 'buzz' && !q.buzzedTeamId && dauer > 0 && !state.pause;
-  const schluessel = laeuft ? `${q.catIdx}:${q.rowIdx}:${(q.lockedOut || []).length}` : null;
-  if (!laeuft) {
+  const uhr = laufendeUhr(state);
+  if (!uhr) {
     uhrStopp?.();
     uhrStopp = null;
     uhrSchluessel = null;
     setzeText($('#r-uhr'), '');
     return;
   }
-  if (schluessel === uhrSchluessel) return;
+  if (uhr.schluessel === uhrSchluessel) return;
   uhrStopp?.();
-  uhrSchluessel = schluessel;
-  uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
+  uhrSchluessel = uhr.schluessel;
+  uhrStopp = starteUhr(uhr.dauer, uhr.offenMs, (rest) => {
     const sek = Math.ceil(rest / 1000);
     // Nur in die Uhr, nicht in die Lagezeile – siehe player.js.
     setzeText($('#r-uhr'), rest > 0 ? `  ⏱ ${sek}` : '  ⏱ Zeit ist um');

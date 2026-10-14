@@ -300,6 +300,21 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   background: linear-gradient(90deg, transparent, var(--red-1) 30%, var(--red-2) 50%, var(--red-1) 70%, transparent);
   box-shadow: 0 0 26px rgba(224, 27, 70, 0.5);
 }
+/* Die Antwortuhr des Zugteams: derselbe Balken, aber in der Teamfarbe – Gold
+   heißt „Buzzer frei", und das ist er in dieser Phase gerade nicht. */
+.stage.antwortuhr.uhr-laeuft .buzzline {
+  opacity: 1;
+  transition: opacity 180ms linear, background 160ms linear, box-shadow 160ms linear;
+  transform: scaleX(var(--uhr, 1));
+  background: linear-gradient(90deg, transparent, var(--team, var(--neon-1)) 30%, var(--team, var(--neon-1)) 70%, transparent);
+  box-shadow: 0 0 22px var(--team, var(--neon-1));
+}
+.stage.antwortuhr.uhr-aus .buzzline {
+  opacity: 1;
+  transform: scaleX(1);
+  background: linear-gradient(90deg, transparent, var(--red-1) 30%, var(--red-2) 50%, var(--red-1) 70%, transparent);
+  box-shadow: 0 0 26px rgba(224, 27, 70, 0.5);
+}
 .stage.buzzhit .buzzline {
   background: linear-gradient(90deg, transparent, #fff 50%, transparent);
   background: linear-gradient(90deg, transparent, var(--team, #fff) 50%, transparent);
@@ -927,6 +942,17 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 .q-status .chip.turn { background: rgba(255, 255, 255, 0.16); }
+/* Die Restzeit hängt als eigenes Element am Schild. Das Schild ist ein
+   Flex-Container, und dort fällt das führende Leerzeichen weg – ohne `pre`
+   stand „ROT· ⏱ 18". */
+#q-uhr { white-space: pre; }
+/* Zeit ist um: farbunabhängig rot, auch wenn das Zugteam selbst Rot spielt –
+   dort sagt es der Text, nicht der Farbton. */
+.q-status .chip.uhr-aus {
+  background: linear-gradient(180deg, var(--red-1), var(--red-2));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
 .q-status .chip.log.correct { background: rgba(34, 224, 138, 0.2); box-shadow: inset 0 0 0 1px rgba(34, 224, 138, 0.6); }
 .q-status .chip.log.wrong { background: rgba(255, 59, 92, 0.2); box-shadow: inset 0 0 0 1px rgba(255, 59, 92, 0.6); }
 .q-status .chip.buzzopen {

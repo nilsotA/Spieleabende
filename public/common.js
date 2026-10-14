@@ -669,6 +669,42 @@ export function wenigerBewegung() {
   return matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/**
+ * Welche Uhr gerade läuft – die des Zugteams oder die am freien Buzzer.
+ *
+ * Beide sind Lobby-Einstellungen und beide werten nichts; sie unterscheiden
+ * sich nur darin, wem die Zeit gehört. Leinwand, Handy und Fernbedienung
+ * fragen hier, statt die Regeln dreimal nachzubauen – sonst zeigt irgendwann
+ * ein Gerät eine Uhr, die die anderen nicht kennen.
+ *
+ * `schluessel` ändert sich genau dann, wenn eine neue Uhr beginnt: eine neue
+ * Frage, ein weiteres Team gesperrt. Der Fragetext steckt mit drin, weil eine
+ * gestrichene Frage dasselbe Feld mit einer Ersatzfrage neu aufruft – ohne ihn
+ * liefe die Uhr der alten einfach weiter.
+ */
+export function laufendeUhr(state) {
+  const q = state?.current;
+  if (!q || state.pause) return null;
+  const s = state.settings || {};
+  if (q.step === 'primary' && s.antwortUhr > 0 && q.antwortOffenMs != null) {
+    return {
+      art: 'antwort',
+      dauer: s.antwortUhr * 1000,
+      offenMs: q.antwortOffenMs,
+      schluessel: `a:${q.catIdx}:${q.rowIdx}:${q.text}`,
+    };
+  }
+  if (q.step === 'buzz' && !q.buzzedTeamId && s.buzzUhr > 0) {
+    return {
+      art: 'buzz',
+      dauer: s.buzzUhr * 1000,
+      offenMs: q.buzzOffenMs,
+      schluessel: `b:${q.catIdx}:${q.rowIdx}:${q.text}:${(q.lockedOut || []).length}`,
+    };
+  }
+  return null;
+}
+
 export function starteUhr(dauerMs, offenMs, tick) {
   const ende = performance.now() + Math.max(0, dauerMs - (offenMs || 0));
   const sanft = wenigerBewegung();

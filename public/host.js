@@ -1,7 +1,7 @@
 import {
   $, $$, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
   setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
-  punkte, delta as vorzeichen, starteUhr, verbergeSchluessel, lageSeit,
+  punkte, delta as vorzeichen, starteUhr, laufendeUhr, verbergeSchluessel, lageSeit,
   wenigerBewegung } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
@@ -164,6 +164,7 @@ for (const [id, key, parse] of [
   ['#set-buzzcorrect', 'buzzAfterCorrect', (v) => v === 'true'],
   ['#set-feldwahl', 'feldwahl', (v) => v],
   ['#set-buzzuhr', 'buzzUhr', (v) => Number(v)],
+  ['#set-antwortuhr', 'antwortUhr', (v) => Number(v)],
   ['#set-einsatz', 'einsatz', (v) => v],
 ]) {
   $(id).addEventListener('change', (ev) => act('settings', { settings: { [key]: parse(ev.target.value) } }));
@@ -538,7 +539,8 @@ function render(prev) {
 }
 
 /**
- * Die Uhr beim freien Buzzer – wenn der Host sie eingeschaltet hat.
+ * Die Uhren – fürs Zugteam und beim freien Buzzer, wenn der Host sie
+ * eingeschaltet hat. Welche gerade läuft, sagt laufendeUhr() in common.js.
  *
  * Sie wertet nichts. Sie zeigt dem Raum, dass die Zeit läuft, und dem Host, dass
  * er auflösen kann; entschieden wird weiter am Tisch. Genau deshalb steht sie
@@ -548,31 +550,57 @@ function render(prev) {
  */
 let uhrStopp = null;
 let uhrSchluessel = null;
+// Was die Uhr gerade am Schild unter der Frage zeigt. Gemerkt, weil
+// renderQuestion das Schild bei jedem Rundruf neu baut – ohne die Variable
+// stünde nach dem nächsten aufwachenden Handy dort kein „Zeit ist um" mehr.
+let uhrAnzeige = { text: '', aus: false };
+
+/** Schreibt die Restzeit in das Schild unter der Frage, falls es eins gibt. */
+function zeigeUhrAmSchild() {
+  const ziel = $('#q-uhr');
+  if (!ziel) return;
+  setzeText(ziel, uhrAnzeige.text);
+  ziel.closest('.chip')?.classList.toggle('uhr-aus', uhrAnzeige.aus);
+}
 
 function renderUhr() {
-  const q = state.current;
-  const dauer = (state.settings.buzzUhr || 0) * 1000;
-  const laeuft = !!q && q.step === 'buzz' && !q.buzzedTeamId && dauer > 0 && !state.pause;
-  // Neu gestartet wird nur, wenn wirklich eine andere Buzz-Phase beginnt –
-  // sonst setzte jeder Zustand vom Server die Uhr zurück, und ein Handy, das
-  // aus dem Standby kommt, schenkte dem Raum zehn Sekunden.
-  const schluessel = laeuft ? `${q.catIdx}:${q.rowIdx}:${(q.lockedOut || []).length}` : null;
+  const uhr = laufendeUhr(state);
   const stage = $('.stage');
-  if (!laeuft) {
+  if (!uhr) {
+    uhrAnzeige = { text: '', aus: false };
     uhrStopp?.();
     uhrStopp = null;
     uhrSchluessel = null;
-    stage.classList.remove('uhr-laeuft', 'uhr-aus');
+    stage.classList.remove('uhr-laeuft', 'uhr-aus', 'antwortuhr');
     stage.style.removeProperty('--uhr');
     return;
   }
-  if (schluessel === uhrSchluessel) return;
+  // Neu gestartet wird nur, wenn wirklich eine neue Uhr beginnt – sonst setzte
+  // jeder Zustand vom Server sie zurück, und ein Handy, das aus dem Standby
+  // kommt, schenkte dem Raum zehn Sekunden.
+  // Das Schild ist eben neu gebaut worden – den letzten Stand wieder eintragen.
+  zeigeUhrAmSchild();
+  if (uhr.schluessel === uhrSchluessel) return;
   uhrStopp?.();
-  uhrSchluessel = schluessel;
+  uhrSchluessel = uhr.schluessel;
+  // Die Antwortuhr gehört dem Zugteam und läuft deshalb in seiner Farbe; Gold
+  // bleibt dem freien Buzzer vorbehalten. Derselbe Balken, kein zweites Signal.
+  stage.classList.toggle('antwortuhr', uhr.art === 'antwort');
+  if (uhr.art === 'antwort') {
+    const team = state.teams.find((t) => t.id === state.current.teamId);
+    stage.style.setProperty('--team', team?.color || 'var(--neon-1)');
+  }
   stage.classList.add('uhr-laeuft');
   stage.classList.remove('uhr-aus');
-  uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest, anteil) => {
+  uhrStopp = starteUhr(uhr.dauer, uhr.offenMs, (rest, anteil) => {
     stage.style.setProperty('--uhr', String(anteil));
+    // Der Balken allein reicht nicht: Er ist vier Pixel hoch, und beim roten
+    // Team sähe „läuft" in Teamfarbe aus wie „abgelaufen" in Rot. Die Zahl am
+    // Schild ist farbunabhängig und auch von hinten im Raum zu lesen.
+    uhrAnzeige = rest > 0
+      ? { text: ` · ⏱ ${Math.ceil(rest / 1000)}`, aus: false }
+      : { text: ' · ⏱ Zeit ist um', aus: true };
+    zeigeUhrAmSchild();
     if (rest > 0) return;
     stage.classList.remove('uhr-laeuft');
     stage.classList.add('uhr-aus');
@@ -654,6 +682,7 @@ function renderLobby() {
   $('#set-buzzcorrect').value = String(state.settings.buzzAfterCorrect);
   $('#set-feldwahl').value = state.settings.feldwahl || 'team';
   $('#set-buzzuhr').value = String(state.settings.buzzUhr || 0);
+  $('#set-antwortuhr').value = String(state.settings.antwortUhr || 0);
   // `|| 'aus'`: Ein Spielstand von vor dem Einsatz kennt das Feld nicht, und
   // ein <select> mit undefined behält still seinen ersten Eintrag.
   $('#set-einsatz').value = state.settings.einsatz || 'aus';
@@ -1138,14 +1167,15 @@ function renderQuestion(prev) {
   if (q.step === 'result') $('#turn-pill').hidden = true;
 
   if (q.step === 'primary') {
-    status.append(el('div', { class: 'chip turn' }, `Am Zug: ${teamName(q.teamId)}`));
+    status.append(el('div', { class: 'chip turn' }, `Am Zug: ${teamName(q.teamId)}`,
+      el('span', { id: 'q-uhr' })));
     setBuzzIndicator('idle');
   } else if (q.step === 'buzz' && !q.buzzedTeamId) {
     const dabei = state.teams.filter((t) => !q.lockedOut.includes(t.id));
     status.append(el('div', { class: 'chip buzzopen' }, q.stechen
       // Beim Stechen zählt nicht der Punktwert, sondern wer noch im Rennen ist.
       ? `⚡ Wer zuerst drückt: ${aufzaehlung(dabei.map((t) => t.name))}`
-      : `⚡ Buzzer frei · ${q.halfValue} Punkte`));
+      : `⚡ Buzzer frei · ${q.halfValue} Punkte`, el('span', { id: 'q-uhr' })));
     setBuzzIndicator('armed');
   } else if (q.buzzedTeamId) {
     // Wie knapp war es? Das Buzzer-Rennen endete bisher ohne Ergebnis.
@@ -3150,6 +3180,9 @@ function fuelleSpickzettel() {
   }
   zeilen.push(['Runde 2', state.round >= 2 ? 'läuft – alles zählt doppelt' : 'zählt doppelt',
     state.round >= 2]);
+  if (s.antwortUhr) {
+    zeilen.push(['Antwortzeit', `${s.antwortUhr} Sekunden fürs Zugteam – ab dem Aufrufen, gewertet wird nichts`]);
+  }
   if (s.buzzUhr) {
     zeilen.push(['Uhr beim Buzzer', `${s.buzzUhr} Sekunden – sie zeigt nur die Zeit, gewertet wird nichts`]);
   }

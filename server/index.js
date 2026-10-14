@@ -1365,6 +1365,11 @@ function pickSettings(s = {}) {
     || (typeof s.buzzUhr === 'string' && s.buzzUhr.trim() !== '')
     ? Number(s.buzzUhr) : NaN;
   if ([0, 10, 15, 20, 30].includes(uhr)) out.buzzUhr = uhr;
+  // Die Antwortuhr nach derselben Regel: nur die Werte, die die Lobby anbietet.
+  const antwort = typeof s.antwortUhr === 'number'
+    || (typeof s.antwortUhr === 'string' && s.antwortUhr.trim() !== '')
+    ? Number(s.antwortUhr) : NaN;
+  if ([0, 20, 30, 45, 60].includes(antwort)) out.antwortUhr = antwort;
   if (['aus', 'runde'].includes(s.einsatz)) out.einsatz = s.einsatz;
   return out;
 }

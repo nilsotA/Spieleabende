@@ -1,7 +1,7 @@
 import {
   $, el, connect, action, toast, sound, vibrate, flash, wenigerBewegung,
   installAudioUnlock, unlockAudio, keepScreenAwake, onConnectionChange, isOnline, setFrageText, setzeText,
-  istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr, verbergeSchluessel,
+  istStumm, setzeStumm, punkte, delta as vorzeichen, starteUhr, laufendeUhr, verbergeSchluessel,
   lies, merke, verbindungsLage } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
@@ -835,22 +835,21 @@ let uhrSchluessel = null;
  * Neuaufbau sie gar nicht mehr treffen.
  */
 function renderUhr() {
-  const q = state.current;
-  const dauer = (state.settings?.buzzUhr || 0) * 1000;
-  const laeuft = !!q && q.step === 'buzz' && !q.buzzedTeamId && dauer > 0
-    && !state.pause && state.you?.canBuzz;
-  const schluessel = laeuft ? `${q.catIdx}:${q.rowIdx}:${(q.lockedOut || []).length}` : null;
-  if (!laeuft) {
+  const uhr = laufendeUhr(state);
+  // Die Antwortuhr sehen alle – auch die anderen Tische wollen wissen, wie
+  // lange das Zugteam noch grübeln darf. Die Buzzer-Uhr nur, wer buzzern darf.
+  const zeigen = !!uhr && (uhr.art === 'antwort' || state.you?.canBuzz);
+  if (!zeigen) {
     uhrStopp?.();
     uhrStopp = null;
     uhrSchluessel = null;
     setzeText($('#p-uhr'), '');
     return;
   }
-  if (schluessel === uhrSchluessel) return;
+  if (uhr.schluessel === uhrSchluessel) return;
   uhrStopp?.();
-  uhrSchluessel = schluessel;
-  uhrStopp = starteUhr(dauer, q.buzzOffenMs, (rest) => {
+  uhrSchluessel = uhr.schluessel;
+  uhrStopp = starteUhr(uhr.dauer, uhr.offenMs, (rest) => {
     const sek = Math.ceil(rest / 1000);
     // Nur in die Uhr schreiben, nicht in die Lagezeile: Die wird vorgelesen,
     // und zwar bei jeder Änderung vollständig.

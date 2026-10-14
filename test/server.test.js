@@ -4589,3 +4589,53 @@ test('der Server merkt sich gespielte Kategorien über Abende hinweg', async (t)
   assert.equal((await host({ type: 'vergessen' })).ok, true);
   assert.equal((await zustand(base)).gemerkt, 0);
 });
+
+test('die Antwortuhr fürs Zugteam: aus ab Werk, läuft ab dem Aufrufen, hält in der Pause an', async (t) => {
+  // Gegenstück zur Buzzer-Uhr für die Phase davor: Das Zugteam ist dran und
+  // grübelt. Auch sie wertet nichts – der Server schickt nur, wie lange die
+  // Frage schon offen ist, und das nur, solange das Zugteam dran ist.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-antwortuhr-'));
+  const port = 7700 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'antwortuhr-host');
+  assert.equal((await zustand(base)).settings.antwortUhr, 0, 'ab Werk aus');
+  await host({ type: 'settings', settings: { antwortUhr: 30 } });
+  assert.equal((await zustand(base)).settings.antwortUhr, 30);
+  for (const krumm of [7, 25, -30, 'dreißig', null, false, '', [], {}, Infinity]) {
+    await host({ type: 'settings', settings: { antwortUhr: krumm } });
+    assert.equal((await zustand(base)).settings.antwortUhr, 30,
+      `${JSON.stringify(krumm)} hätte nicht durchgehen dürfen`);
+  }
+  // Die Buzzer-Uhr bleibt davon unberührt.
+  assert.equal((await zustand(base)).settings.buzzUhr, 0);
+
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: 'beispiel-spieleabend.json' });
+  assert.equal((await zustand(base)).settings.antwortUhr, 30, 'die Einstellung übersteht den Spielstart');
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  const offen = await zustand(base);
+  assert.equal(offen.current.step, 'primary');
+  assert.ok(offen.current.antwortOffenMs >= 0 && offen.current.antwortOffenMs < 5000,
+    `plausible Laufzeit, gemessen ${offen.current.antwortOffenMs}`);
+  assert.equal(offen.current.buzzOffenMs, null, 'die Buzzer-Uhr läuft in dieser Phase nicht');
+
+  // Pause: Die Zeit des Zugteams steht still.
+  const vorher = (await zustand(base)).current.antwortOffenMs;
+  await host({ type: 'pause', an: true });
+  await warte(1200);
+  await host({ type: 'pause', an: false });
+  const nachher = (await zustand(base)).current.antwortOffenMs;
+  assert.ok(nachher - vorher < 900, `die Pause darf nicht mitzählen – gemessen ${nachher - vorher} ms`);
+  assert.ok(nachher >= vorher, 'rückwärts läuft sie aber auch nicht');
+
+  // Ist das Zugteam durch, ist es auch seine Uhr.
+  await host({ type: 'pass' });
+  const buzz = await zustand(base);
+  assert.equal(buzz.current.step, 'buzz');
+  assert.equal(buzz.current.antwortOffenMs, null);
+});

@@ -513,6 +513,16 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   Spitze wächst um ein Viertel, und Fotofinishs werden etwas seltener. Das ist
   kein Fehler, sondern der Preis der Aufregung – aber wer lieber knappe Abende
   hat, lässt ihn aus.
+- **Antwortzeit fürs Zugteam:** normalerweise aus. Eingeschaltet (20 bis 60 Sekunden)
+  läuft sie ab dem Moment, in dem das Feld aufgerufen ist – das Vorlesen gehört also
+  dazu, und 30 Sekunden sind für die meisten Runden ein guter Wert. Auf der Leinwand
+  zieht sich der Lichtbalken in der Farbe des Zugteams zusammen, und am Schild
+  „Am Zug“ unter der Frage stehen die Sekunden; Handys und Fernbedienung zählen mit.
+  Ist die Zeit um, steht dort „Zeit ist um“ auf Rot – auch beim roten Team eindeutig,
+  weil es der Text sagt und nicht der Farbton. Wie die Buzzer-Uhr **wertet sie
+  nichts**: Wer bei „Zeit ist um“ gerade die Antwort ausspricht, bekommt sie, wenn du
+  es so willst. In der Pause steht sie still, und sagt das Zugteam „weiß nicht“,
+  übernimmt die Buzzer-Uhr, sofern sie eingeschaltet ist.
 - **Uhr beim freien Buzzer:** normalerweise aus. Eingeschaltet (10 bis 30 Sekunden)
   zieht sich der goldene Lichtbalken über der Bühne zusammen, und auf Handy und
   Fernbedienung läuft die Sekundenzahl mit. Sie **wertet nichts**: Läuft die Zeit ab,

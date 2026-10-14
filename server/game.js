@@ -119,6 +119,13 @@ export function createState() {
       // sie nicht wegklicken müssen. Sie wertet auch nichts von selbst – sie
       // zeigt nur, dass die Zeit läuft, und dem Host, dass er auflösen kann.
       buzzUhr: 0,
+      // Sekunden für das Zugteam, 0 = aus. Läuft ab dem Aufrufen des Feldes –
+      // also während der Host vorliest, das ist bei den Zahlen eingerechnet.
+      // Wie die Buzzer-Uhr wertet sie nichts von selbst: Ist die Zeit um, wird
+      // die Anzeige rot, und der Host entscheidet. Ein Automat, der mitten im
+      // „Moment, ich hab's gleich" auf „falsch" schaltet, wäre am Tisch der
+      // schnellste Weg zu Streit.
+      antwortUhr: 0,
       // Der Einsatz: 'aus' | 'runde' (einer je Team und Runde).
       //
       // Voreingestellt aus. Er ist die einzige Regel des Spiels, die eine
@@ -628,6 +635,8 @@ export function pickCell(state, catIdx, rowIdx, byTeamId = null, einsatz = false
     buzzedTeamId: null,
     lockedOut: [],
     revealed: false,
+    // Seit wann das Zugteam dran ist – für die Antwortuhr (antwortUhr).
+    gestelltAm: Date.now(),
     buzzOpenedAt: null,
     log: [],
   };
@@ -1043,6 +1052,12 @@ export function setPause(state, an) {
     // echten Küchenpause entsprechend zehn Minuten.
     const jetzt = Date.now();
     const q = state.current;
+    // Die Antwortuhr des Zugteams hält genauso an – aus demselben Grund und
+    // mit derselben Rechnung: Nur der Teil der Pause zählt, der nach dem
+    // Aufrufen lag.
+    if (q?.gestelltAm && q.step === 'primary') {
+      q.gestelltAm += jetzt - Math.max(state.pauseSeit, q.gestelltAm);
+    }
     if (q?.buzzOpenedAt) {
       const versatz = jetzt - Math.max(state.pauseSeit, q.buzzOpenedAt);
       q.buzzOpenedAt += versatz;
@@ -1337,6 +1352,9 @@ export function viewFor(state, { isHost, clientId }) {
       // Weiterspielen kann den Beginn in die Zukunft legen. Ein Balken mit
       // scaleX über 1 stünde dann über die Bühne hinaus.
       buzzOffenMs: q.buzzOpenedAt ? Math.max(0, Date.now() - q.buzzOpenedAt) : null,
+      // Dasselbe für die Antwortuhr des Zugteams, nur solange es dran ist.
+      antwortOffenMs: q.gestelltAm && q.step === 'primary'
+        ? Math.max(0, Date.now() - q.gestelltAm) : null,
       // Wie knapp war das Rennen? Der Server weiß es längst, hat es aber für
       // sich behalten – dabei ist genau das der Moment, über den danach geredet
       // wird. Nur bei einem echten Handy-Buzz: Wenn der Host stellvertretend
