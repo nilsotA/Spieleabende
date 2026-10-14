@@ -7,7 +7,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import * as G from './game.js';
-import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, ersatzFrage, DATA_DIR } from './questions.js';
+import { listSets, loadSet, normalizeSet, setExists, externalizeImages, mixSet, stechenFrage, ersatzFrage, ersatzKategorie, DATA_DIR } from './questions.js';
 import { oeffne as oeffneImBrowser } from './browser.js';
 import { starteTunnel, stoppeTunnel } from './tunnel.js';
 import { neuerZugang, pruefeZugang, cookieKoepfe, ueberHttps, TUER_ZU } from './zugang.js';
@@ -642,7 +642,7 @@ const HOST_ACTIONS = new Set([
   'addTeam', 'renameTeam', 'removeTeam', 'removeMember', 'adjustScore', 'setTurn',
   'startGame', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion',
   'close', 'nextRound', 'backToLobby', 'settings', 'resetBuzz', 'buzzFor',
-  'undo', 'stechen', 'discard', 'pause',
+  'undo', 'stechen', 'discard', 'pause', 'tauscheKategorie',
 ]);
 
 /**
@@ -667,7 +667,7 @@ const LAGEGEBUNDEN = new Set(['judge', 'pass', 'openBuzz', 'reveal', 'endQuestio
 const RUECKNEHMBAR = new Set([
   'pick', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close',
   'nextRound', 'adjustScore', 'setTurn', 'resetBuzz', 'buzzFor', 'buzz',
-  'stechen',
+  'stechen', 'tauscheKategorie',
 ]);
 
 /**
@@ -803,6 +803,7 @@ function benenne(type, vorher) {
     case 'buzz': case 'buzzFor': return 'Buzz';
     case 'resetBuzz': return 'Buzz zurücksetzen';
     case 'stechen': return 'Stechen starten';
+    case 'tauscheKategorie': return 'Kategorietausch';
     default: return 'letzte Aktion';
   }
 }
@@ -893,6 +894,50 @@ async function handleAction(clientId, body) {
      * Das Verwerfen selbst ist zurücknehmbar: Ein Rückschritt holt die ganze
      * Frage samt Wertung wieder her.
      */
+    /**
+     * Eine ganze Spalte gegen eine andere Kategorie tauschen.
+     *
+     * Für den Zufallsmix gedacht: Der weiß nichts vom letzten Abend und legt
+     * gern eine Kategorie hin, die alle schon kennen. Bisher half dann nur
+     * „Neues Spiel" und neu würfeln – und das warf die fünf guten Spalten mit
+     * weg. Geht aber genauso bei jedem festen Satz.
+     *
+     * Dieselbe Reihenfolge wie bei „Frage austauschen": erst prüfen, dann die
+     * Sätze laden, dann prüfen, ob das Brett noch dasselbe ist. Ein `undo` oder
+     * ein Feldaufruf vom zweiten Gerät dazwischen weist `state.board` neu zu
+     * oder belegt ein Feld – beides fängt die zweite Prüfung.
+     */
+    case 'tauscheKategorie': {
+      const catIdx = Number(body.catIdx);
+      G.pruefeKategorieTausch(state, catIdx);
+      const brett = state.board;
+      const namen = [];
+      const gestellt = [];
+      for (const runde of state.questionSet?.rounds || []) {
+        for (const cat of runde.categories) {
+          namen.push(cat.name);
+          for (const f of cat.questions) gestellt.push(f.text);
+        }
+      }
+      const bleiben = brett.categories.filter((_, i) => i !== catIdx).map((c) => c.name);
+      const neu = await ersatzKategorie({
+        runde: state.round,
+        belegt: bleiben,
+        // Alles, was in diesem Spiel steht – auch die andere Runde: Die
+        // Kategorie, die in Runde 2 ohnehin noch kommt, soll nicht vorzeitig
+        // auftauchen –, dazu was heute schon weggetauscht wurde.
+        ausgeschlossen: [...namen, ...(state.abgewaehlt || [])],
+        schonGestellt: [...gestellt, ...(state.stechenTexte || []), ...(state.ersatzTexte || [])],
+      });
+      if (state.board !== brett) {
+        throw new G.GameError('Das Brett hat sich gerade geändert – bitte noch einmal ansehen.');
+      }
+      if (!neu) throw new G.GameError('Es ist keine passende Kategorie mehr übrig.');
+      const { alt } = G.ersetzeKategorie(state, catIdx, neu);
+      hostToast(`„${alt}“ ist raus, neu auf dem Brett: „${neu.name}“.`);
+      break;
+    }
+
     case 'discard': {
       const q = state.current;
       if (!q) throw new G.GameError('Gerade läuft keine Frage.');

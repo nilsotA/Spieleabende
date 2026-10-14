@@ -4474,3 +4474,43 @@ test('Zurücknehmen nimmt das zurück, was auf dem Knopf steht', async (t) => {
   const echt = await host({ type: 'undo', was: jetzt.rueckgaengig });
   assert.equal(echt.ok, true, echt.error || '');
 });
+
+test('eine unberührte Spalte lässt sich tauschen und der Tausch zurücknehmen', async (t) => {
+  // Beim Zufallsmix liegt gern eine Kategorie auf dem Brett, die die Runde schon
+  // kennt. Der Host tauscht sie gegen eine andere aus allen Sätzen – solange in
+  // der Spalte noch nichts gespielt wurde, und mit Rückweg, falls er sich vertippt.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-tausch-'));
+  const port = 6100 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'tausch-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: '__mix' });
+  const vorher = await zustand(base);
+  const namenVorher = vorher.board.categories.map((c) => c.name);
+
+  const a = await host({ type: 'tauscheKategorie', catIdx: 2 });
+  assert.equal(a.ok, true, JSON.stringify(a));
+  const nachher = await zustand(base);
+  const namenNachher = nachher.board.categories.map((c) => c.name);
+  assert.notEqual(namenNachher[2], namenVorher[2], 'die Spalte hat eine neue Kategorie');
+  assert.ok(!namenVorher.includes(namenNachher[2]), 'und zwar keine, die schon auf dem Brett stand');
+  assert.deepEqual(namenNachher.filter((_, i) => i !== 2), namenVorher.filter((_, i) => i !== 2), 'die anderen Spalten bleiben');
+  assert.equal(nachher.rueckgaengig, 'Kategorietausch');
+
+  await host({ type: 'undo' });
+  assert.deepEqual((await zustand(base)).board.categories.map((c) => c.name), namenVorher, 'der Tausch ist zurückgenommen');
+
+  // Eine angespielte Spalte bleibt, wie sie ist.
+  await host({ type: 'pick', catIdx: 0, rowIdx: 0 });
+  await host({ type: 'judge', correct: true });
+  await host({ type: 'endQuestion' });
+  await host({ type: 'close' });
+  const abgelehnt = await host({ type: 'tauscheKategorie', catIdx: 0 });
+  assert.equal(abgelehnt.ok, false);
+  assert.equal((await zustand(base)).board.categories[0].name, namenVorher[0]);
+});

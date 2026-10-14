@@ -254,7 +254,7 @@ export function stechenVorrat(saetze, schonGestellt = []) {
 }
 
 /** Alle lesbaren Sätze auf einmal – ein kaputter darf den Abend nicht aufhalten. */
-async function alleSaetze() {
+export async function alleSaetze() {
   const saetze = [];
   for (const eintrag of (await listSets()).filter((s) => !s.error)) {
     try {
@@ -482,4 +482,56 @@ export async function mixSet() {
       { categories: auswahl.slice(6, 12) },
     ],
   };
+}
+
+/**
+ * Eine andere Kategorie für eine Spalte, die noch niemand angerührt hat.
+ *
+ * Wer den Zufallsmix startet, sieht oft sofort eine Kategorie, die er vom
+ * letzten Abend kennt – der Mix weiß nichts von letzter Woche. Bisher half
+ * dann nur „Neues Spiel" und neu würfeln, und das warf die fünf guten
+ * Kategorien mit weg. Jetzt lässt sich die eine tauschen.
+ *
+ * Gezogen wird nach denselben Regeln wie im Mix:
+ *   - aus dem Topf derselben Runde – Runde 2 zählt doppelt und bekommt die
+ *     schwereren Kategorien; erst wenn dort nichts mehr geht, aus dem anderen;
+ *   - jeder Kategoriename mit einem Los, egal in wie vielen Sätzen es ihn gibt;
+ *   - kein Thema zweimal auf demselben Brett (themaGleich).
+ * Ausgeschlossen ist dazu alles, was heute schon dran war oder noch kommt:
+ * jede Kategorie, deren Name schon im Spiel steht oder die an diesem Abend
+ * schon weggetauscht wurde, und jede, aus der auch nur eine Frage schon
+ * gestellt ist (auf dem Brett, im Stechen oder als Ersatzfrage).
+ *
+ * `runde` zählt ab 1. `belegt` sind die Namen, die nach dem Tausch auf dem
+ * Brett stehen bleiben – gegen die wird das Thema geprüft. `ausgeschlossen`
+ * sind Namen, die gar nicht in Frage kommen.
+ */
+export async function ersatzKategorie({
+  runde = 1, belegt = [], ausgeschlossen = [], schonGestellt = [],
+} = {}) {
+  const gestellt = new Set(schonGestellt.map((t) => String(t).trim().toLowerCase()));
+  const raus = new Set([...belegt, ...ausgeschlossen].map(kategorieMarke));
+  const toepfe = [new Map(), new Map()];
+  for (const set of await alleSaetze()) {
+    set.rounds.forEach((round, ri) => {
+      const topf = toepfe[Math.min(ri, toepfe.length - 1)];
+      for (const cat of round.categories) {
+        const marke = kategorieMarke(cat.name);
+        if (raus.has(marke)) continue;
+        if (belegt.some((n) => themaGleich(n, cat.name))) continue;
+        if (cat.questions.some((q) => gestellt.has(String(q.text).trim().toLowerCase()))) continue;
+        if (!topf.has(marke)) topf.set(marke, []);
+        topf.get(marke).push(cat);
+      }
+    });
+  }
+  const eigener = Math.min(Math.max(runde, 1) - 1, toepfe.length - 1);
+  for (const topf of [toepfe[eigener], ...toepfe.filter((_, i) => i !== eigener)]) {
+    const marken = [...topf.keys()];
+    if (!marken.length) continue;
+    const varianten = topf.get(marken[Math.floor(Math.random() * marken.length)]);
+    const cat = varianten[Math.floor(Math.random() * varianten.length)];
+    return structuredClone({ name: cat.name, questions: cat.questions });
+  }
+  return null;
 }

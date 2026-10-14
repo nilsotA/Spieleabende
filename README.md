@@ -214,6 +214,19 @@ Gestrichen wird nicht durch Zurückrechnen, sondern indem der Server bis zu dem
 Zustand zurückgeht, in dem das Feld noch offen war. Deshalb stimmt danach alles,
 und deshalb lässt sich auch das Streichen selbst wieder zurücknehmen.
 
+### Die Kategorie kennen wir schon
+
+Gerade beim Zufallsmix liegt gern eine Spalte auf dem Brett, die die Runde schon
+einmal gespielt hat. Solange darin noch kein Feld gewählt wurde, steht auf der
+Fernbedienung neben dem Kategorienamen ein **↻** – ein Tipp, und die Spalte bekommt
+eine andere Kategorie. Dasselbe geht im Host-Menü unter **„Kategorie tauschen“**.
+
+Gezogen wird aus allen Sätzen nach den Regeln des Mixes: bevorzugt aus der
+passenden Runde, kein Thema, das schon auf dem Brett steht, keine Kategorie, die
+heute schon dran war oder gerade weggetauscht wurde, und keine, deren Fragen
+schon gelaufen sind. Wer noch einmal tippt, bekommt die nächste. Vertippt? Der
+Tausch steht auf dem Rückweg wie jeder andere Zug.
+
 ### Pause
 
 Zwei Stunden Spiel heißen mindestens einmal Küche. **⏸ Pause** – auf der

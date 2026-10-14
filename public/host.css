@@ -1928,6 +1928,14 @@ body.host.flat .tile {
   font-weight: 700;
 }
 .wiederbanner[hidden] { display: none; }
+
+/* Kategorien tauschen im Host-Menü: die Namen als Knöpfe, die umbrechen dürfen. */
+/* Linie und Überschrift kommen von .spick – derselbe Abschnittsstil wie der
+   Spickzettel darunter. Er steht davor, weil er eine Handlung ist und der
+   Zettel nur zum Nachschlagen; ganz unten war er auf 800 Pixel Höhe schon
+   abgeschnitten. */
+.menu-tausch p { margin: 0 0 0.6rem; }
+.menu-tausch-liste { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .wiederbanner .btn { white-space: nowrap; }
 
 /* Dieselbe Leiste in Rot: Der Spielstand kommt nicht auf die Platte. Rot,

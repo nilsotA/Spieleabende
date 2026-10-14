@@ -2953,8 +2953,43 @@ function closeMenu() {
   $('#btn-menu').focus();
 }
 
+/**
+ * Die Tauschknöpfe im Menü: einer je Spalte, in der noch nichts gespielt ist.
+ *
+ * Mit Schlüssel wie die Teamliste darüber: fillMenu läuft bei jedem Rundruf,
+ * solange das Menü offen ist, und ohne Schlüssel würden die Knöpfe unter dem
+ * Finger ausgetauscht. Nach einem Tausch ändert sich der Name in der Spalte,
+ * damit auch der Schlüssel – und der gedrückte Knopf ist wieder scharf.
+ */
+function fuelleTausch() {
+  const box = $('#menu-tausch');
+  const liste = $('#menu-tausch-liste');
+  if (!box || !liste) return;
+  const offen = state.phase === 'board' && !state.current && !!state.board;
+  const spalten = offen
+    ? state.board.categories.map((cat, catIdx) => ({ cat, catIdx }))
+      .filter(({ cat }) => cat.cells.every((z) => !z.used))
+    : [];
+  box.hidden = spalten.length === 0;
+  const key = spalten.map(({ cat, catIdx }) => `${catIdx}:${cat.name}`).join('|');
+  if (liste.dataset.key === key) return;
+  liste.dataset.key = key;
+  liste.innerHTML = '';
+  for (const { cat, catIdx } of spalten) {
+    liste.append(el('button', {
+      type: 'button',
+      class: 'btn btn-sm btn-ghost',
+      title: 'Gegen eine andere Kategorie tauschen',
+      'aria-label': `Kategorie „${cat.name}“ gegen eine andere tauschen`,
+      // Bis der neue Stand da ist, aus – ein Doppelklick tauschte sonst zweimal.
+      onclick: (ev) => { ev.currentTarget.disabled = true; act('tauscheKategorie', { catIdx }); },
+    }, `↻ ${cat.name}`));
+  }
+}
+
 function fillMenu() {
   fuelleSpickzettel();
+  fuelleTausch();
   menuRandPruefen();
   const list = $('#menu-teams');
   // Solange das Menü offen ist, läuft das bei jedem Broadcast – auch wenn nur

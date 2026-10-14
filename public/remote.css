@@ -258,6 +258,25 @@ body.remote #app {
   margin-top: 0.7rem;
 }
 .r-bcat:first-child { margin-top: 0; }
+/* Name links, Tauschknopf rechts. Der Knopf bleibt unauffällig – er ist ein
+   Werkzeug für den Host, keine Einladung –, aber mit voller Fingerbreite:
+   44 Pixel, wie jeder andere Knopf auf diesem Gerät. */
+.r-bcat { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.r-tausch {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -0.6rem -0.3rem -0.6rem 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted, #8aa0bf);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.r-tausch:active { background: rgba(255, 255, 255, 0.08); color: #9fd4ff; }
+.r-tausch:disabled { opacity: 0.35; }
 .r-brow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(3.2rem, 1fr));

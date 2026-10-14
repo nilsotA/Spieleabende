@@ -336,6 +336,14 @@
     <h2 id="menu-titel">Punkte &amp; Steuerung</h2>
     <ul id="menu-teams" class="menu-teams"></ul>
 
+    <!-- Kategorien tauschen: nur Spalten, in denen noch nichts gespielt ist,
+         und nur, solange das Brett offen ist. Gedacht für den Zufallsmix, wenn
+         eine Kategorie vom letzten Abend wieder auftaucht. -->
+    <div id="menu-tausch" class="spick menu-tausch" hidden>
+      <h3>Kategorie tauschen</h3>
+      <p class="muted small">Schon mal gespielt? Eine unberührte Spalte bekommt eine andere Kategorie aus allen Sätzen. Lässt sich zurücknehmen.</p>
+      <div id="menu-tausch-liste" class="menu-tausch-liste"></div>
+    </div>
     <!-- Spickzettel: die Regeln, wie sie für DIESE Runde eingestellt sind -->
     <div id="menu-regeln" class="spick">
       <h3>Spickzettel</h3>

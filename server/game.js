@@ -151,6 +151,9 @@ export function createState() {
     stechenRaus: [],
     // Und wer überhaupt mitspielen durfte – siehe adjustScore.
     stechenDabei: [],
+    // Kategorien, die an diesem Abend schon vom Brett getauscht wurden – damit
+    // ein zweiter Tausch sie nicht gleich zurückbringt.
+    abgewaehlt: [],
     // Welche Ersatzfragen heute schon eingewechselt wurden (siehe ersetzeFrage).
     // Sie stehen in keinem Fragensatz dieses Abends und wären sonst die
     // einzigen, die ein zweites Mal gezogen werden können.
@@ -429,6 +432,7 @@ export function startGame(state, questionSet) {
   // zwingt den nächsten Leser trotzdem dazu, sich das erst zu beweisen.
   state.stechenDabei = [];
   state.ersatzTexte = [];
+  state.abgewaehlt = [];
   return startRound(state, 1);
 }
 
@@ -474,6 +478,63 @@ export function startRound(state, round) {
  * steht dann „Uni-Latein 500 · Ersatz aus Küchengeräte" statt einer Überschrift,
  * die zur Frage nicht mehr passt.
  */
+/**
+ * Darf diese Spalte gegen eine andere Kategorie getauscht werden?
+ *
+ * Nur, solange noch keines ihrer Felder gespielt ist. Ist eines weg, steht auf
+ * der Tafel schon ein Ergebnis aus dieser Kategorie, und ein Tausch würde
+ * Punkte unter einer Überschrift stehen lassen, die es nicht mehr gibt. Für
+ * die übrigen Felder einer angespielten Spalte gibt es „Frage austauschen".
+ *
+ * Geprüft wird VOR dem Nachladen der Sätze, damit eine Absage sofort kommt –
+ * und noch einmal danach in ersetzeKategorie, falls sich dazwischen etwas tat.
+ */
+export function pruefeKategorieTausch(state, catIdx) {
+  if (state.phase !== 'board' || state.current) {
+    throw new GameError('Kategorien lassen sich nur tauschen, solange das Brett offen ist.');
+  }
+  const cat = state.board?.categories?.[catIdx];
+  if (!cat) throw new GameError('Diese Kategorie gibt es nicht.');
+  if (cat.cells.some((c) => c.used)) {
+    throw new GameError(`In „${cat.name}“ wurde schon gespielt – einzelne Fragen tauscht „Frage austauschen“.`);
+  }
+  return cat;
+}
+
+/**
+ * Legt eine andere Kategorie in eine unberührte Spalte.
+ *
+ * Getauscht wird an beiden Stellen: im Brett, das gespielt wird, und im
+ * Fragensatz, aus dem die Ausschlusslisten für Ersatz- und Stechfragen gebaut
+ * werden. Sonst könnte „Frage austauschen" später genau die weggetauschte
+ * Kategorie als Ersatz zurückholen – und umgekehrt eine Frage aus der neuen
+ * Kategorie noch einmal ziehen.
+ */
+export function ersetzeKategorie(state, catIdx, kategorie) {
+  const alt = pruefeKategorieTausch(state, catIdx);
+  if (!kategorie || !Array.isArray(kategorie.questions) || !kategorie.questions.length) {
+    throw new GameError('Für diese Spalte ist keine andere Kategorie mehr übrig.');
+  }
+  const mult = state.board.multiplier || 1;
+  state.board.categories[catIdx] = {
+    name: kategorie.name,
+    cells: kategorie.questions.map((q, rowIdx) => ({
+      value: (BASE_VALUES[rowIdx] ?? BASE_VALUES[BASE_VALUES.length - 1]) * mult,
+      text: q.text || '',
+      answer: q.answer || '',
+      image: q.image || null,
+      note: q.note || null,
+      used: false,
+    })),
+  };
+  const runde = state.questionSet?.rounds?.[state.round - 1];
+  if (runde?.categories?.[catIdx]) {
+    runde.categories[catIdx] = { name: kategorie.name, questions: kategorie.questions };
+  }
+  state.abgewaehlt = [...(state.abgewaehlt || []), alt.name];
+  return { alt: alt.name, neu: kategorie.name };
+}
+
 export function ersetzeFrage(state, catIdx, rowIdx, frage) {
   const cat = state.board?.categories?.[catIdx];
   const cell = cat && cat.cells[rowIdx];

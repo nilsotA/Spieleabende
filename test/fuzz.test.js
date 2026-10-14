@@ -229,6 +229,12 @@ function zuege(state, r) {
     ['startGame', () => G.startGame(state, SATZ)],
     ['pickCell', () => G.pickCell(state, catIdx, rowIdx)],
     ['pickCellByTeam', () => team && G.pickCell(state, catIdx, rowIdx, team.id)],
+    // Eine Spalte tauschen – mit absichtlich auch falschen Spalten und mitten
+    // in Fragen. Die Zusicherungen oben müssen danach genauso gelten.
+    ['ersetzeKategorie', () => G.ersetzeKategorie(state, catIdx, {
+      name: `Getauscht ${Math.floor(r() * 1000)}`,
+      questions: [0, 1, 2, 3].map((i) => ({ text: `Tauschfrage ${i}`, answer: `Tauschantwort ${i}`, note: null })),
+    })],
     // Der Einsatz reist als Nutzlast des Feldaufrufs mit – er hat keine eigene
     // Aktion, also muss er hier an derselben Stelle mitgewürfelt werden.
     ['pickCellMitEinsatz', () => G.pickCell(state, catIdx, rowIdx, null, true)],

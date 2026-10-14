@@ -1502,3 +1502,56 @@ test('eine Korrektur, die die Spitze nicht verändert, lässt das Stechen stehen
   assert.equal(d.stechenSieger, null, 'das ist der alte Fall und muss weiter greifen');
   assert.match(d.message, /zählt wieder der Punktestand/);
 });
+
+/*
+ * Eine Kategorie tauschen – für den Zufallsmix, wenn eine vom letzten Abend
+ * wieder auftaucht.
+ *
+ * Erlaubt nur, solange die Spalte unberührt ist und keine Frage offen steht.
+ * Ist ein Feld weg, steht auf der Tafel schon ein Ergebnis aus dieser
+ * Kategorie; für die übrigen Felder gibt es „Frage austauschen".
+ */
+test('eine unberührte Spalte lässt sich gegen eine andere Kategorie tauschen', () => {
+  const state = setup();
+  const vorher = state.board.categories.map((c) => c.name);
+  const neu = {
+    name: 'Ganz neu',
+    questions: [0, 1, 2, 3].map((i) => ({ text: `Neue Frage ${i}`, answer: `Neue Antwort ${i}`, note: null })),
+  };
+  const ergebnis = G.ersetzeKategorie(state, 0, neu);
+  assert.deepEqual(ergebnis, { alt: vorher[0], neu: 'Ganz neu' });
+  assert.equal(state.board.categories[0].name, 'Ganz neu');
+  assert.deepEqual(state.board.categories[0].cells.map((c) => c.value), [100, 200, 300, 500],
+    'die Werte kommen von der Spalte, nicht von der neuen Kategorie');
+  assert.ok(state.board.categories[0].cells.every((c) => !c.used));
+  assert.deepEqual(state.board.categories.slice(1).map((c) => c.name), vorher.slice(1),
+    'die anderen Spalten bleiben, wie sie sind');
+  // Auch im Fragensatz – daraus bauen Ersatz- und Stechfragen ihre Ausschlussliste.
+  assert.equal(state.questionSet.rounds[0].categories[0].name, 'Ganz neu');
+  assert.deepEqual(state.abgewaehlt, [vorher[0]], 'die alte merkt sich der Abend');
+});
+
+test('eine angespielte Spalte und eine offene Frage verhindern den Tausch', () => {
+  const state = setup();
+  const neu = { name: 'X', questions: [0, 1, 2, 3].map((i) => ({ text: `x${i}`, answer: `y${i}` })) };
+
+  G.pickCell(state, 0, 0);
+  assert.throws(() => G.ersetzeKategorie(state, 1, neu), /solange das Brett offen ist/,
+    'mitten in einer Frage wird nicht am Brett gebaut');
+  G.endQuestion(state);
+  G.closeQuestion(state);
+  assert.throws(() => G.ersetzeKategorie(state, 0, neu), /schon gespielt/,
+    'in der angespielten Spalte steht schon ein Ergebnis');
+  assert.throws(() => G.ersetzeKategorie(state, 9, neu), /gibt es nicht/);
+  assert.doesNotThrow(() => G.ersetzeKategorie(state, 1, neu), 'eine unberührte Spalte daneben geht');
+});
+
+test('ein neues Spiel vergisst, was weggetauscht wurde', () => {
+  const state = setup();
+  G.ersetzeKategorie(state, 0, { name: 'X', questions: [0, 1, 2, 3].map((i) => ({ text: `x${i}`, answer: `y${i}` })) });
+  assert.equal(state.abgewaehlt.length, 1);
+  const lobby = G.backToLobby(state);
+  assert.deepEqual(lobby.abgewaehlt, []);
+  G.startGame(lobby, SET);
+  assert.deepEqual(lobby.abgewaehlt, []);
+});

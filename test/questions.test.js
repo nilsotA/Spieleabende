@@ -1305,3 +1305,37 @@ test('ein zu langer Kategoriename sagt es, statt sich abschneiden zu lassen', ()
     }, `„${zuLang}" sollte auffallen, nicht abgeschnitten werden`);
   }
 });
+
+test('der Kategorietausch zieht nur, was noch nicht auf dem Tisch war', async () => {
+  // Wer zum dritten Mal den Zufallsmix spielt, kennt manche Spalte schon. Der
+  // Tausch soll dann wirklich etwas Neues bringen: keine abgewählte Kategorie,
+  // kein Thema, das schon auf dem Brett steht, und keine Frage, die heute schon
+  // lief – auch nicht über eine andere Fassung derselben Kategorie.
+  const { ersatzKategorie, alleSaetze } = await import('../server/questions.js');
+  const saetze = await alleSaetze();
+  const runde1 = saetze.flatMap((s) => s.rounds[0].categories);
+  const belegt = runde1.slice(0, 5).map((c) => c.name);
+  const ausgeschlossen = runde1.slice(5, 40).map((c) => c.name);
+  const gestellt = runde1.slice(40, 60).flatMap((c) => c.questions.map((q) => q.text));
+  const verboten = new Set([...belegt, ...ausgeschlossen]);
+
+  for (let i = 0; i < 30; i += 1) {
+    const neu = await ersatzKategorie({ runde: 1, belegt, ausgeschlossen, schonGestellt: gestellt });
+    assert.ok(neu, 'es ist noch etwas übrig');
+    assert.equal(neu.questions.length, 4);
+    assert.ok(!verboten.has(neu.name), `„${neu.name}“ hätte nicht kommen dürfen`);
+    for (const q of neu.questions) assert.ok(!gestellt.includes(q.text), `„${q.text}“ lief schon`);
+  }
+});
+
+test('der Kategorietausch bleibt in der Runde und meldet, wenn nichts mehr da ist', async () => {
+  const { ersatzKategorie, alleSaetze } = await import('../server/questions.js');
+  const saetze = await alleSaetze();
+  const runde2 = new Set(saetze.flatMap((s) => s.rounds.slice(1).flatMap((r) => r.categories.map((c) => c.name))));
+  for (let i = 0; i < 20; i += 1) {
+    const neu = await ersatzKategorie({ runde: 2 });
+    assert.ok(runde2.has(neu.name), `„${neu.name}“ ist keine Runde-2-Kategorie`);
+  }
+  const alle = saetze.flatMap((s) => s.rounds.flatMap((r) => r.categories.map((c) => c.name)));
+  assert.equal(await ersatzKategorie({ runde: 1, ausgeschlossen: alle }), null);
+});

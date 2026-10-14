@@ -536,8 +536,26 @@ function renderFeldwahl() {
   }
 
   for (const [catIdx, cat] of state.board.categories.entries()) {
+    // Eine Spalte, in der noch nichts gespielt ist, lässt sich gegen eine
+    // andere Kategorie tauschen – gedacht für den Zufallsmix, wenn eine
+    // Kategorie vom letzten Abend wieder auftaucht. Der Knopf schaltet sich
+    // beim Tippen ab, bis der neue Stand da ist: Ein Doppeltipp tauschte sonst
+    // gleich zweimal. Kein Rückfrage-Dialog – der Tausch lässt sich mit
+    // „Zurücknehmen" rückgängig machen, und der Knopf sagt dann genau das.
+    const unberuehrt = cat.cells.every((z) => !z.used);
     liste.append(
-      el('div', { class: 'r-bcat' }, cat.name),
+      el('div', { class: 'r-bcat' },
+        el('span', {}, cat.name),
+        unberuehrt ? el('button', {
+          type: 'button',
+          class: 'r-tausch',
+          title: 'Gegen eine andere Kategorie tauschen',
+          'aria-label': `Kategorie „${cat.name}“ gegen eine andere tauschen`,
+          onclick: (ev) => {
+            ev.currentTarget.disabled = true;
+            act('tauscheKategorie', { catIdx });
+          },
+        }, '↻') : null),
       el('div', { class: 'r-brow' }, ...cat.cells.map((cell, rowIdx) => el('button', {
         class: `r-bcell${cell.used ? ' used' : ''}`,
         type: 'button',
