@@ -1380,3 +1380,25 @@ test('der Zufallsmix meidet, was an den letzten Abenden dran war', async () => {
   const mix = normalizeSet(await mixSet({ zuletzt: allesGespielt }));
   assert.deepEqual(mix.rounds.map((r) => r.categories.length), [6, 6]);
 });
+
+test('keine Frage hängt an „zuletzt“ oder „aktuell“', async () => {
+  // „In welchem Jahr wurde Deutschland zuletzt Fußball-Weltmeister?“ war
+  // richtig, als die Frage geschrieben wurde – und ist es nach dem nächsten
+  // Titel nicht mehr, ohne dass jemand die Datei anfasst. Am Tisch fällt das
+  // auf, und dann hat ausgerechnet der Host unrecht. Solche Fragen lassen sich
+  // fast immer zeitfest stellen („… in Brasilien …“, „… als erstes fünfmal …“).
+  // Im Zusatz darf das Wort stehen, dort ordnet es nur ein.
+  const zeitwort = /\b(zuletzt|aktuell|derzeit|momentan|zurzeit)\b/i;
+  const funde = [];
+  for (const datei of DATEIEN) {
+    const set = normalizeSet(JSON.parse(await readFile(new URL(datei, DATEN), 'utf8')));
+    for (const round of set.rounds) {
+      for (const cat of round.categories) {
+        for (const q of cat.questions) {
+          if (zeitwort.test(q.text) || zeitwort.test(q.answer)) funde.push(`${datei}: ${q.text}`);
+        }
+      }
+    }
+  }
+  assert.deepEqual(funde, []);
+});

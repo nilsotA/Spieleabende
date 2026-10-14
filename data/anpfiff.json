@@ -192,9 +192,9 @@
               "note": "Die krumme Zahl stammt von den Spielen 1908 in London: Gestartet wurde vor Schloss Windsor, damit die Kinder zusehen konnten."
             },
             {
-              "text": "Welcher Jamaikaner hält den Weltrekord über 100 Meter?",
+              "text": "Welcher Jamaikaner lief 2009 in Berlin die 100 Meter in 9,58 Sekunden?",
               "answer": "Usain Bolt",
-              "note": "9,58 Sekunden, aufgestellt 2009 in Berlin."
+              "note": "Bei derselben WM lief er auch über 200 Meter Weltrekord: 19,19 Sekunden."
             },
             {
               "text": "Wie heißt die Technik, mit der Hochspringer heute rücklings über die Latte gehen?",
@@ -252,9 +252,9 @@
               "note": "Beide Bälle gehen auf denselben Ursprung zurück: genähte Schweinsblasen, die von Natur aus diese Form hatten."
             },
             {
-              "text": "Wie viele Nähte hat ein klassischer Baseball – 108 oder 216?",
-              "answer": "108",
-              "note": "Genäht wird bis heute von Hand, mit rotem Faden und immer derselben Anzahl Stiche."
+              "text": "Wie heißt beim Boule die kleine Zielkugel, an die alle möglichst nah heranwerfen?",
+              "answer": "Das Schweinchen (Cochonnet)",
+              "note": "Französisch „cochonnet“ heißt Ferkel. Wer nach einer Runde am dichtesten dran liegt, punktet."
             }
           ]
         },

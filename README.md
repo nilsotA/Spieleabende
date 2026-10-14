@@ -699,6 +699,14 @@ Opernhaus in Sydney zweimal, der Wanderfalke im Sturzflug zweimal. Die
 Prüfung auf gleiche Lösungen findet so etwas erst ab zwei gemeinsamen Wörtern;
 darunter hilft nur Lesen.
 
+Zwei Regeln sind dabei hängen geblieben. Eine Frage darf nicht an „zuletzt“
+oder „aktuell“ hängen – „Wann wurde Deutschland zuletzt Weltmeister?“ wird
+falsch, sobald der nächste Titel kommt, und niemand fasst dafür die Datei an.
+Sie heißt jetzt „… in Brasilien den WM-Titel?“; der Testlauf hält die Regel
+fest. Und auf 500 gehört kein Münzwurf: „Kölsch oder Pils?“ um die höchste
+Punktzahl ist Glück, kein Wissen. Ausgenommen sind Kategorien, in denen das
+Raten die Idee ist („Wahr oder falsch“, „Was war zuerst?“).
+
 ### Mitgeliefert
 
 Sechsundzwanzig fertige Sätze mit je 48 Fragen – zusammen 1248, keine doppelt. Jede einzelne
