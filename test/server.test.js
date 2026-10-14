@@ -4514,3 +4514,39 @@ test('eine unberührte Spalte lässt sich tauschen und der Tausch zurücknehmen'
   assert.equal(abgelehnt.ok, false);
   assert.equal((await zustand(base)).board.categories[0].name, namenVorher[0]);
 });
+
+test('zwei gleichzeitige Kategorietausche stellen nichts doppelt aufs Brett', async (t) => {
+  // Fernbedienung und Host-Laptop tippen im selben Moment auf ↻. Der Ersatz
+  // wird ausgesucht, während die Sätze laden – gegen das Brett von vorher. Ohne
+  // zweite Prüfung konnten so zwei Spalten dieselbe Kategorie bekommen, und ein
+  // Zurücknehmen nahm beide Tausche auf einmal zurück.
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-tausch2-'));
+  const port = 6300 + Math.floor(Math.random() * 200);
+  const { proc, base } = await starteServer(port, path.join(dir, 'stand.json'));
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const host = await alsHost(base, 'tausch2-host');
+  for (const name of ['Rot', 'Blau']) await host({ type: 'addTeam', name });
+  await host({ type: 'startGame', file: '__mix' });
+  for (let i = 0; i < 5; i += 1) {
+    const vorher = (await zustand(base)).board.categories.map((c) => c.name);
+    const tiefeVorher = (await zustand(base)).rueckwegTiefe;
+    const antworten = await Promise.all([1, 3, 4].map((catIdx) => host({ type: 'tauscheKategorie', catIdx })));
+    const durch = antworten.filter((a) => a.ok).length;
+    assert.ok(durch >= 1, 'mindestens einer geht durch');
+    const nachher = await zustand(base);
+    const namen = nachher.board.categories.map((c) => c.name);
+    assert.equal(new Set(namen).size, namen.length, `doppelt auf dem Brett: ${namen.join(', ')}`);
+    assert.equal(nachher.rueckwegTiefe, tiefeVorher + durch, 'jeder Tausch hat genau einen Rückschritt');
+    // Jeder Rückschritt nimmt genau einen Tausch zurück.
+    for (let n = durch; n > 0; n -= 1) {
+      await host({ type: 'undo' });
+      const zwischen = (await zustand(base)).board.categories.map((c) => c.name);
+      const anders = zwischen.filter((name, k) => name !== vorher[k]).length;
+      assert.equal(anders, n - 1, `nach dem Rückschritt sind noch ${anders} Spalten getauscht`);
+    }
+  }
+});

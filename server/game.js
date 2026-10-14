@@ -436,6 +436,21 @@ export function startGame(state, questionSet) {
   return startRound(state, 1);
 }
 
+/** Eine Spalte fürs Brett – beim Rundenstart wie beim Kategorietausch gleich gebaut. */
+function baueSpalte(cat, mult) {
+  return {
+    name: cat.name,
+    cells: cat.questions.map((q, rowIdx) => ({
+      value: (BASE_VALUES[rowIdx] ?? BASE_VALUES[BASE_VALUES.length - 1]) * mult,
+      text: q.text || '',
+      answer: q.answer || '',
+      image: q.image || null,
+      note: q.note || null,
+      used: false,
+    })),
+  };
+}
+
 export function startRound(state, round) {
   const set = state.questionSet;
   const data = set.rounds[round - 1];
@@ -451,17 +466,7 @@ export function startRound(state, round) {
   for (const team of state.teams) team.einsatzOffen = true;
   state.board = {
     multiplier: mult,
-    categories: data.categories.map((cat) => ({
-      name: cat.name,
-      cells: cat.questions.map((q, rowIdx) => ({
-        value: (BASE_VALUES[rowIdx] ?? BASE_VALUES[BASE_VALUES.length - 1]) * mult,
-        text: q.text || '',
-        answer: q.answer || '',
-        image: q.image || null,
-        note: q.note || null,
-        used: false,
-      })),
-    })),
+    categories: data.categories.map((cat) => baueSpalte(cat, mult)),
   };
   state.current = null;
   state.phase = 'board';
@@ -469,15 +474,6 @@ export function startRound(state, round) {
   return state;
 }
 
-/**
- * Legt eine andere Frage auf ein Feld – für „Frage austauschen".
- *
- * Das Feld selbst bleibt, was es war: dieselbe Kategorie, derselbe Wert, dieselbe
- * Stelle im Brett. Nur der Inhalt wird getauscht. Kommt die Ersatzfrage aus einer
- * anders benannten Kategorie, merkt sich das Feld die Herkunft – auf der Leinwand
- * steht dann „Uni-Latein 500 · Ersatz aus Küchengeräte" statt einer Überschrift,
- * die zur Frage nicht mehr passt.
- */
 /**
  * Darf diese Spalte gegen eine andere Kategorie getauscht werden?
  *
@@ -515,18 +511,7 @@ export function ersetzeKategorie(state, catIdx, kategorie) {
   if (!kategorie || !Array.isArray(kategorie.questions) || !kategorie.questions.length) {
     throw new GameError('Für diese Spalte ist keine andere Kategorie mehr übrig.');
   }
-  const mult = state.board.multiplier || 1;
-  state.board.categories[catIdx] = {
-    name: kategorie.name,
-    cells: kategorie.questions.map((q, rowIdx) => ({
-      value: (BASE_VALUES[rowIdx] ?? BASE_VALUES[BASE_VALUES.length - 1]) * mult,
-      text: q.text || '',
-      answer: q.answer || '',
-      image: q.image || null,
-      note: q.note || null,
-      used: false,
-    })),
-  };
+  state.board.categories[catIdx] = baueSpalte(kategorie, state.board.multiplier || 1);
   const runde = state.questionSet?.rounds?.[state.round - 1];
   if (runde?.categories?.[catIdx]) {
     runde.categories[catIdx] = { name: kategorie.name, questions: kategorie.questions };
@@ -535,6 +520,15 @@ export function ersetzeKategorie(state, catIdx, kategorie) {
   return { alt: alt.name, neu: kategorie.name };
 }
 
+/**
+ * Legt eine andere Frage auf ein Feld – für „Frage austauschen".
+ *
+ * Das Feld selbst bleibt, was es war: dieselbe Kategorie, derselbe Wert, dieselbe
+ * Stelle im Brett. Nur der Inhalt wird getauscht. Kommt die Ersatzfrage aus einer
+ * anders benannten Kategorie, merkt sich das Feld die Herkunft – auf der Leinwand
+ * steht dann „Uni-Latein 500 · Ersatz aus Küchengeräte" statt einer Überschrift,
+ * die zur Frage nicht mehr passt.
+ */
 export function ersetzeFrage(state, catIdx, rowIdx, frage) {
   const cat = state.board?.categories?.[catIdx];
   const cell = cat && cat.cells[rowIdx];

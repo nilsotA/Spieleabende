@@ -2982,7 +2982,12 @@ function fuelleTausch() {
       title: 'Gegen eine andere Kategorie tauschen',
       'aria-label': `Kategorie „${cat.name}“ gegen eine andere tauschen`,
       // Bis der neue Stand da ist, aus – ein Doppelklick tauschte sonst zweimal.
-      onclick: (ev) => { ev.currentTarget.disabled = true; act('tauscheKategorie', { catIdx }); },
+      // Abgelehnt, bleibt der Schlüssel gleich – dann von Hand wieder an.
+      onclick: (ev) => {
+        const knopf = ev.currentTarget;
+        knopf.disabled = true;
+        act('tauscheKategorie', { catIdx }).then((r) => { if (!r?.ok) knopf.disabled = false; });
+      },
     }, `↻ ${cat.name}`));
   }
 }

@@ -199,7 +199,8 @@ async function saveNow() {
 /**
  * Eingebettete Bilder liegen sonst nur im Arbeitsspeicher – nach einem Neustart
  * wären in einem wiederhergestellten Spiel alle Bildfragen kaputt. Sie ändern
- * sich nur beim Spielstart, also genügt ein Schreibvorgang je Spiel.
+ * sich nur beim Spielstart und beim Kategorietausch, also genügt dort je ein
+ * Schreibvorgang.
  */
 async function saveImages() {
   if (!bilder.size) return unlink(SAVE_IMAGES).catch(() => {});
@@ -878,23 +879,6 @@ async function handleAction(clientId, body) {
     }
 
     /**
-     * Eine Frage streichen: Sie zählt nicht, das Feld bleibt offen.
-     *
-     * Doppeldeutig gestellt, die Lösung war vorhin schon gefallen, im Fragensatz
-     * steht ein Fehler – so etwas merkt man erst beim Vorlesen. Bisher blieb nur
-     * die Wahl zwischen „irgendwie werten" und „Feld verbrannt": Das Feld war
-     * belegt, sobald es aufgerufen war.
-     *
-     * Gestrichen wird nicht durch Rückrechnen von Punkten, Bilanz und Serie –
-     * das wäre eine zweite Buchhaltung neben der ersten und ginge irgendwann
-     * auseinander. Stattdessen geht es den Weg zurück bis zu dem Zustand, in dem
-     * das Feld noch offen war. Damit stimmt alles wieder, was an dieser Frage
-     * hing, ohne dass es einzeln aufgezählt werden muss.
-     *
-     * Das Verwerfen selbst ist zurücknehmbar: Ein Rückschritt holt die ganze
-     * Frage samt Wertung wieder her.
-     */
-    /**
      * Eine ganze Spalte gegen eine andere Kategorie tauschen.
      *
      * Für den Zufallsmix gedacht: Der weiß nichts vom letzten Abend und legt
@@ -920,6 +904,7 @@ async function handleAction(clientId, body) {
         }
       }
       const bleiben = brett.categories.filter((_, i) => i !== catIdx).map((c) => c.name);
+      const spalten = brett.categories.map((c) => c.name).join('\n');
       const neu = await ersatzKategorie({
         runde: state.round,
         belegt: bleiben,
@@ -929,15 +914,48 @@ async function handleAction(clientId, body) {
         ausgeschlossen: [...namen, ...(state.abgewaehlt || [])],
         schonGestellt: [...gestellt, ...(state.stechenTexte || []), ...(state.ersatzTexte || [])],
       });
-      if (state.board !== brett) {
+      // Während die Sätze laden, kann ein zweites Gerät tauschen (dann wäre
+      // der Ersatz gegen ein veraltetes Brett ausgesucht und könnte doppelt
+      // dastehen) oder ein `undo` das Brett neu zuweisen. Beides fällt hier auf.
+      if (state.board !== brett || brett.categories.map((c) => c.name).join('\n') !== spalten) {
         throw new G.GameError('Das Brett hat sich gerade geändert – bitte noch einmal ansehen.');
       }
       if (!neu) throw new G.GameError('Es ist keine passende Kategorie mehr übrig.');
+      // Der Schnappschuss von vor dem Laden kennt womöglich einen Zug nicht,
+      // der in der Zwischenzeit durchging (eine Punktkorrektur vom Tablet) –
+      // ein „Zurücknehmen" des Tauschs nähme den sonst gleich mit zurück.
+      schnappschuss.state = structuredClone(state);
+      // Eingebettete Bilder wie beim Spielstart herauslösen, sonst ginge das
+      // Foto aus einem selbstgebauten Satz bei jedem Rundruf an alle Handys.
+      const { images } = externalizeImages({ rounds: [{ categories: [neu] }] });
       const { alt } = G.ersetzeKategorie(state, catIdx, neu);
+      if (images.size) {
+        for (const [id, bild] of images) bilder.set(id, bild);
+        // Nicht abwarten: Der Zug ist schon geschehen, und ein Warten hier ließe
+        // einen anderen Zug seinen Rückweg-Eintrag vor diesen schieben.
+        saveImages().catch((err) => console.error('Bilder nicht gesichert:', err.message));
+      }
       hostToast(`„${alt}“ ist raus, neu auf dem Brett: „${neu.name}“.`);
       break;
     }
 
+    /**
+     * Eine Frage streichen: Sie zählt nicht, das Feld bleibt offen.
+     *
+     * Doppeldeutig gestellt, die Lösung war vorhin schon gefallen, im Fragensatz
+     * steht ein Fehler – so etwas merkt man erst beim Vorlesen. Bisher blieb nur
+     * die Wahl zwischen „irgendwie werten" und „Feld verbrannt": Das Feld war
+     * belegt, sobald es aufgerufen war.
+     *
+     * Gestrichen wird nicht durch Rückrechnen von Punkten, Bilanz und Serie –
+     * das wäre eine zweite Buchhaltung neben der ersten und ginge irgendwann
+     * auseinander. Stattdessen geht es den Weg zurück bis zu dem Zustand, in dem
+     * das Feld noch offen war. Damit stimmt alles wieder, was an dieser Frage
+     * hing, ohne dass es einzeln aufgezählt werden muss.
+     *
+     * Das Verwerfen selbst ist zurücknehmbar: Ein Rückschritt holt die ganze
+     * Frage samt Wertung wieder her.
+     */
     case 'discard': {
       const q = state.current;
       if (!q) throw new G.GameError('Gerade läuft keine Frage.');

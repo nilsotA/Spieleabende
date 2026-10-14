@@ -552,8 +552,11 @@ function renderFeldwahl() {
           title: 'Gegen eine andere Kategorie tauschen',
           'aria-label': `Kategorie „${cat.name}“ gegen eine andere tauschen`,
           onclick: (ev) => {
-            ev.currentTarget.disabled = true;
-            act('tauscheKategorie', { catIdx });
+            const knopf = ev.currentTarget;
+            knopf.disabled = true;
+            // Abgelehnt („nichts mehr übrig"), ändert sich am Brett nichts –
+            // und der Knopf bliebe sonst bis zum nächsten Feld ausgegraut.
+            act('tauscheKategorie', { catIdx }).then((r) => { if (!r?.ok) knopf.disabled = false; });
           },
         }, '↻') : null),
       el('div', { class: 'r-brow' }, ...cat.cells.map((cell, rowIdx) => el('button', {
