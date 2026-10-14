@@ -93,14 +93,14 @@
               "note": "Bis zu sechs Tonnen. Seine Ohren dienen als Kühlfläche, nicht nur zum Hören."
             },
             {
-              "text": "Welches Tier hat das größte Gehirn der Erde?",
-              "answer": "Der Pottwal",
-              "note": "Rund acht Kilo – etwa das Fünffache eines Menschengehirns."
-            },
-            {
               "text": "Welches Landtier wird am ältesten?",
               "answer": "Die Riesenschildkröte",
               "note": "Über 150 Jahre sind belegt – manche Exemplare haben mehrere Weltkriege überdauert."
+            },
+            {
+              "text": "Welches Tier hat das größte Gehirn der Erde?",
+              "answer": "Der Pottwal",
+              "note": "Rund acht Kilo – etwa das Fünffache eines Menschengehirns."
             }
           ]
         },
@@ -247,14 +247,14 @@
               "note": "Dachsbaue werden über Generationen weitergenutzt – manche sind Jahrhunderte alt."
             },
             {
-              "text": "Wie heißt in der Jägersprache der Kot, an dem man das Wild erkennt?",
-              "answer": "Die Losung",
-              "note": "Die Jägersprache hat für fast alles ein eigenes Wort – Augen heißen Lichter, Ohren Lauscher."
-            },
-            {
               "text": "Wie heißt die Paarungszeit im Herbst, in der die Hirsche röhren?",
               "answer": "Die Brunft",
               "note": "Das Röhren ist eine Kraftprobe: Wer tiefer und länger ruft, hat meist den stärkeren Körper."
+            },
+            {
+              "text": "Wie heißt in der Jägersprache der Kot, an dem man das Wild erkennt?",
+              "answer": "Die Losung",
+              "note": "Die Jägersprache hat für fast alles ein eigenes Wort – Augen heißen Lichter, Ohren Lauscher."
             }
           ]
         },

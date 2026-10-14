@@ -38,9 +38,9 @@
               "note": "Der erste ICE fuhr 1991 im Linienbetrieb zwischen Hamburg und München."
             },
             {
-              "text": "Wie heißt der Zug, der durch den Tunnel unter dem Ärmelkanal fährt?",
-              "answer": "Eurostar",
-              "note": "Der Tunnel ist rund 50 Kilometer lang und wurde 1994 eröffnet."
+              "text": "Wie heißt der berühmte Luxuszug, der einst Paris mit Istanbul verband?",
+              "answer": "Orient-Express",
+              "note": "Agatha Christie ließ in ihm 1934 einen Mord geschehen – und einen Zug voller Verdächtiger."
             },
             {
               "text": "Welche Bahnstrecke führt von Moskau bis Wladiwostok?",
@@ -48,9 +48,9 @@
               "note": "Gut 9000 Kilometer – die längste durchgehende Bahnstrecke der Welt."
             },
             {
-              "text": "Wie heißt der berühmte Luxuszug, der einst Paris mit Istanbul verband?",
-              "answer": "Orient-Express",
-              "note": "Agatha Christie ließ in ihm 1934 einen Mord geschehen – und einen Zug voller Verdächtiger."
+              "text": "Wie heißt der Zug, der durch den Tunnel unter dem Ärmelkanal fährt?",
+              "answer": "Eurostar",
+              "note": "Der Tunnel ist rund 50 Kilometer lang und wurde 1994 eröffnet."
             }
           ]
         },
@@ -63,6 +63,11 @@
               "note": "Die Antwort lautet „Prego“ – dasselbe Wort, mit dem der Kellner einen Tisch anbietet."
             },
             {
+              "text": "Wie sagt man „Danke“ auf Japanisch?",
+              "answer": "Arigatō",
+              "note": "Höflicher wird es mit „gozaimasu“ dahinter."
+            },
+            {
               "text": "Wie sagt man „Danke“ auf Niederländisch?",
               "answer": "Dank je wel",
               "note": "Förmlicher heißt es „Dank u wel“, ganz kurz einfach „Bedankt“."
@@ -71,11 +76,6 @@
               "text": "Wie sagt man „Danke“ auf Schwedisch?",
               "answer": "Tack",
               "note": "Wer sich besonders bedanken will, sagt „Tack så mycket“."
-            },
-            {
-              "text": "Wie sagt man „Danke“ auf Japanisch?",
-              "answer": "Arigatō",
-              "note": "Höflicher wird es mit „gozaimasu“ dahinter."
             }
           ]
         },
@@ -93,14 +93,14 @@
               "note": "LSF 30 heißt grob: dreißigmal so lange in der Sonne wie ohne Creme – in der Theorie."
             },
             {
-              "text": "Wie heißt die Strömung, die Schwimmer vom Strand weg aufs offene Meer zieht?",
-              "answer": "Rippströmung",
-              "note": "Nicht dagegen anschwimmen, sondern parallel zum Strand – dann ist man meist schnell heraus."
-            },
-            {
               "text": "Was baute der Rostocker Korbmacher Wilhelm Bartelmann 1882 zum ersten Mal?",
               "answer": "Den Strandkorb",
               "note": "Bestellt hatte ihn eine ältere Dame mit Rheuma, die trotzdem an den Strand wollte."
+            },
+            {
+              "text": "Wie heißt die Strömung, die Schwimmer vom Strand weg aufs offene Meer zieht?",
+              "answer": "Rippströmung",
+              "note": "Nicht dagegen anschwimmen, sondern parallel zum Strand – dann ist man meist schnell heraus."
             }
           ]
         },
@@ -187,14 +187,14 @@
           "name": "Zeitzonen",
           "questions": [
             {
+              "text": "Wie heißt die Linie im Pazifik, an der sich das Datum ändert?",
+              "answer": "Die Datumsgrenze",
+              "note": "Wer sie nach Westen überquert, überspringt einen Tag. Nach Osten erlebt man einen doppelt."
+            },
+            {
               "text": "Stellt man auf dem Flug von Berlin nach New York die Uhr vor oder zurück?",
               "answer": "Zurück",
               "note": "New York liegt sechs Stunden hinter Berlin. Man landet oft fast zur selben Uhrzeit, zu der man abflog."
-            },
-            {
-              "text": "Wie viele Zeitzonen hat Russland?",
-              "answer": "Elf",
-              "note": "Wenn in Kaliningrad die Arbeit beginnt, ist auf Kamtschatka längst Feierabend."
             },
             {
               "text": "Wie viele Zeitzonen gelten in China, obwohl es so breit ist?",
@@ -202,9 +202,9 @@
               "note": "Überall gilt die Pekinger Zeit. Im äußersten Westen geht die Sonne deshalb teils erst gegen zehn Uhr auf."
             },
             {
-              "text": "Wie heißt die Linie im Pazifik, an der sich das Datum ändert?",
-              "answer": "Die Datumsgrenze",
-              "note": "Wer sie nach Westen überquert, überspringt einen Tag. Nach Osten erlebt man einen doppelt."
+              "text": "Wie viele Zeitzonen hat Russland?",
+              "answer": "Elf",
+              "note": "Wenn in Kaliningrad die Arbeit beginnt, ist auf Kamtschatka längst Feierabend."
             }
           ]
         },
@@ -222,14 +222,14 @@
               "note": "Ihr Bau begann 1357. Dreißig Heiligenfiguren säumen sie."
             },
             {
-              "text": "In welchem Land liegt die Felsenstadt Petra?",
-              "answer": "Jordanien",
-              "note": "Die Nabatäer schlugen die Fassaden vor rund 2000 Jahren direkt aus rotem Sandstein."
-            },
-            {
               "text": "Welche Inselgruppe brachte Charles Darwin mit ihren Finken ins Grübeln?",
               "answer": "Die Galápagos-Inseln",
               "note": "Jede Insel hatte ihre eigenen Finken mit passendem Schnabel – ein Baustein seiner Evolutionstheorie."
+            },
+            {
+              "text": "In welchem Land liegt die Felsenstadt Petra?",
+              "answer": "Jordanien",
+              "note": "Die Nabatäer schlugen die Fassaden vor rund 2000 Jahren direkt aus rotem Sandstein."
             }
           ]
         },
@@ -262,11 +262,6 @@
           "name": "An Bord",
           "questions": [
             {
-              "text": "Wie heißt die Küche auf einem Schiff?",
-              "answer": "Kombüse",
-              "note": "Wer dort kocht, heißt auf Seemannsdeutsch Smutje."
-            },
-            {
               "text": "Wie nennt man die runden Fenster eines Schiffs?",
               "answer": "Bullaugen",
               "note": "Runde Öffnungen verteilen den Druck gleichmäßig und halten Wellen besser aus als eckige."
@@ -275,6 +270,11 @@
               "text": "Welche Einheit misst die Geschwindigkeit eines Schiffs?",
               "answer": "Knoten",
               "note": "Ein Knoten ist eine Seemeile pro Stunde, also 1,852 Kilometer pro Stunde."
+            },
+            {
+              "text": "Wie heißt die Küche auf einem Schiff?",
+              "answer": "Kombüse",
+              "note": "Wer dort kocht, heißt auf Seemannsdeutsch Smutje."
             },
             {
               "text": "Was zählt man auf einem Schiff in „Glasen“?",

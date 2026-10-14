@@ -83,14 +83,14 @@
           "name": "Verdrehte Sprichwörter",
           "questions": [
             {
+              "text": "Wie heißt es richtig? „Lügen haben lange Beine.“",
+              "answer": "Lügen haben kurze Beine",
+              "note": "Kurze Beine kommen nicht weit – die Lüge wird also eingeholt."
+            },
+            {
               "text": "Wie heißt es richtig? „Der frühe Wurm fängt den Vogel.“",
               "answer": "Der frühe Vogel fängt den Wurm",
               "note": "Aus dem Englischen übernommen: „The early bird catches the worm.“"
-            },
-            {
-              "text": "Wie heißt es richtig? „Viele Brüche verderben den Kobold.“",
-              "answer": "Viele Köche verderben den Brei",
-              "note": "Es gibt auch das Gegenteil: „Viele Hände, schnelles Ende.“"
             },
             {
               "text": "Wie heißt es richtig? „Wer im Glashaus sitzt, soll nicht mit Brötchen werfen.“",
@@ -98,9 +98,9 @@
               "note": "Wer selbst angreifbar ist, greift besser nicht an."
             },
             {
-              "text": "Wie heißt es richtig? „Lügen haben lange Beine.“",
-              "answer": "Lügen haben kurze Beine",
-              "note": "Kurze Beine kommen nicht weit – die Lüge wird also eingeholt."
+              "text": "Wie heißt es richtig? „Viele Brüche verderben den Kobold.“",
+              "answer": "Viele Köche verderben den Brei",
+              "note": "Es gibt auch das Gegenteil: „Viele Hände, schnelles Ende.“"
             }
           ]
         },
@@ -267,9 +267,9 @@
               "note": "1982. Die DVD kam Ende 1996 in den Handel – dazwischen liegen vierzehn Jahre."
             },
             {
-              "text": "Was wurde zuerst erfunden: das Telefon oder die Glühbirne?",
-              "answer": "Das Telefon",
-              "note": "Telefon 1876, Glühbirne 1879"
+              "text": "Was war zuerst: die Pyramiden von Gizeh oder Kleopatra?",
+              "answer": "Die Pyramiden",
+              "note": "Rund 2500 v. Chr. gegenüber dem 1. Jahrhundert v. Chr."
             },
             {
               "text": "Was war zuerst: der Buchdruck mit beweglichen Lettern oder Kolumbus in Amerika?",
@@ -277,9 +277,9 @@
               "note": "Um 1450 gegenüber 1492"
             },
             {
-              "text": "Was war zuerst: die Pyramiden von Gizeh oder Kleopatra?",
-              "answer": "Die Pyramiden",
-              "note": "Rund 2500 v. Chr. gegenüber dem 1. Jahrhundert v. Chr."
+              "text": "Was wurde zuerst erfunden: das Telefon oder die Glühbirne?",
+              "answer": "Das Telefon",
+              "note": "Telefon 1876, Glühbirne 1879"
             }
           ]
         },

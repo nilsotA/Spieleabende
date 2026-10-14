@@ -43,14 +43,14 @@
               "note": "Deshalb heißt es Langbahn. Im Winter wird oft auf 25 Metern geschwommen – dort sind die Zeiten wegen der vielen Wenden schneller."
             },
             {
-              "text": "Wie hoch hängt ein Basketballkorb über dem Boden – in Metern?",
-              "answer": "3,05",
-              "note": "Genau zehn Fuß – die Höhe stammt aus der Turnhalle von 1891."
-            },
-            {
               "text": "Wie breit ist ein Fußballtor zwischen den Pfosten – in Metern?",
               "answer": "7,32",
               "note": "Acht Yards – auch dieses Maß ist ein Erbe der Engländer."
+            },
+            {
+              "text": "Wie hoch hängt ein Basketballkorb über dem Boden – in Metern?",
+              "answer": "3,05",
+              "note": "Genau zehn Fuß – die Höhe stammt aus der Turnhalle von 1891."
             }
           ]
         },
@@ -93,14 +93,14 @@
               "note": "Fünf Scheiben pro Schießen. Jeder Fehler kostet je nach Rennen eine Strafrunde von 150 Metern oder eine Strafminute."
             },
             {
-              "text": "In welcher Sportart kämpft man um den Stanley Cup?",
-              "answer": "Eishockey",
-              "note": "Der Pokal wird seit 1893 vergeben und ist damit die älteste Trophäe im nordamerikanischen Profisport."
-            },
-            {
               "text": "Welche Sportart wird auf einem Pferd mit langen Schlägern gespielt?",
               "answer": "Polo",
               "note": "Gespielt wird in Abschnitten, die „Chukker“ heißen. Dazwischen werden die Pferde gewechselt."
+            },
+            {
+              "text": "In welcher Sportart kämpft man um den Stanley Cup?",
+              "answer": "Eishockey",
+              "note": "Der Pokal wird seit 1893 vergeben und ist damit die älteste Trophäe im nordamerikanischen Profisport."
             }
           ]
         },
@@ -133,6 +133,11 @@
           "name": "Sportdeutsch",
           "questions": [
             {
+              "text": "Wie heißt der Sprung mit gegrätschten Beinen über den Bock im Turnunterricht?",
+              "answer": "Die Grätsche",
+              "note": "Bock und Kasten gehen auf Friedrich Ludwig Jahn zurück, den „Turnvater“ des frühen 19. Jahrhunderts."
+            },
+            {
               "text": "Wie nennt man beim Fußball drei Tore eines Spielers in einem Spiel?",
               "answer": "Hattrick",
               "note": "Das Wort kommt aus dem Cricket: Wer drei Gegner nacheinander ausschied, bekam einen Hut geschenkt."
@@ -141,11 +146,6 @@
               "text": "Wie heißt im Handball der Strafwurf, den es nach einer klaren Torchancen-Verhinderung gibt?",
               "answer": "Der Siebenmeter",
               "note": "Der Torwart darf ihm bis auf vier Meter entgegenkommen – näher nicht."
-            },
-            {
-              "text": "Wie heißt der Sprung mit gegrätschten Beinen über den Bock im Turnunterricht?",
-              "answer": "Die Grätsche",
-              "note": "Bock und Kasten gehen auf Friedrich Ludwig Jahn zurück, den „Turnvater“ des frühen 19. Jahrhunderts."
             },
             {
               "text": "Wie heißt der Ausdruck für den Punkt, an dem ein Läufer plötzlich kaum noch kann?",
@@ -197,14 +197,14 @@
               "note": "9,58 Sekunden, aufgestellt 2009 in Berlin."
             },
             {
-              "text": "Wie viele Hürden stehen im 110-Meter-Hürdenlauf der Männer?",
-              "answer": "Zehn",
-              "note": "Jede ist 1,067 Meter hoch – ein Maß, das aus der Umrechnung englischer Fuß stammt."
-            },
-            {
               "text": "Wie heißt die Technik, mit der Hochspringer heute rücklings über die Latte gehen?",
               "answer": "Fosbury-Flop",
               "note": "Dick Fosbury gewann damit 1968 Olympiagold. Vorher rollte man bäuchlings über die Latte."
+            },
+            {
+              "text": "Wie viele Hürden stehen im 110-Meter-Hürdenlauf der Männer?",
+              "answer": "Zehn",
+              "note": "Jede ist 1,067 Meter hoch – ein Maß, das aus der Umrechnung englischer Fuß stammt."
             }
           ]
         },
@@ -217,6 +217,11 @@
               "note": "Fünf Titel davon in Folge mit Ferrari. Erst Lewis Hamilton zog später mit sieben gleich."
             },
             {
+              "text": "Welche deutsche Tennisspielerin gewann 1988 alle vier Grand Slams und Olympia-Gold?",
+              "answer": "Steffi Graf",
+              "note": "Der Golden Slam – bis heute einmalig."
+            },
+            {
               "text": "Wer schoss im WM-Finale 2014 das Tor zum deutschen Titel?",
               "answer": "Mario Götze",
               "note": "In der Verlängerung gegen Argentinien, 113. Minute."
@@ -225,17 +230,17 @@
               "text": "Wie heißt das Fußballspiel von 1954, das als „Wunder von Bern“ in die Geschichte einging?",
               "answer": "Das WM-Finale gegen Ungarn",
               "note": "Deutschland lag 0:2 zurück und gewann 3:2. Ungarn war zuvor vier Jahre lang ungeschlagen."
-            },
-            {
-              "text": "Welche deutsche Tennisspielerin gewann 1988 alle vier Grand Slams und Olympia-Gold?",
-              "answer": "Steffi Graf",
-              "note": "Der Golden Slam – bis heute einmalig."
             }
           ]
         },
         {
           "name": "Ball ist nicht gleich Ball",
           "questions": [
+            {
+              "text": "Welcher Ball ist im Spiel der leichteste: Tischtennis, Tennis oder Handball?",
+              "answer": "Der Tischtennisball",
+              "note": "Er wiegt 2,7 Gramm."
+            },
             {
               "text": "Welcher Sportball hat Grübchen in der Oberfläche?",
               "answer": "Der Golfball",
@@ -245,11 +250,6 @@
               "text": "In welcher Sportart spielt man mit einem Ball, der nicht rund, sondern eiförmig ist?",
               "answer": "Rugby – American Football gilt auch",
               "note": "Beide Bälle gehen auf denselben Ursprung zurück: genähte Schweinsblasen, die von Natur aus diese Form hatten."
-            },
-            {
-              "text": "Welcher Ball ist im Spiel der leichteste: Tischtennis, Tennis oder Handball?",
-              "answer": "Der Tischtennisball",
-              "note": "Er wiegt 2,7 Gramm."
             },
             {
               "text": "Wie viele Nähte hat ein klassischer Baseball – 108 oder 216?",
@@ -267,9 +267,9 @@
               "note": "Der Satz wird Sepp Herberger zugeschrieben – ebenso wie „Nach dem Spiel ist vor dem Spiel“."
             },
             {
-              "text": "Welcher Bundestrainer führte Deutschland 1954 zum ersten WM-Titel?",
-              "answer": "Sepp Herberger",
-              "note": "Er war insgesamt 28 Jahre für die Nationalmannschaft verantwortlich, unterbrochen vom Krieg."
+              "text": "Wie heißt der Trainer, der eine Mannschaft nur für kurze Zeit übernimmt?",
+              "answer": "Interimstrainer",
+              "note": "„Interim“ ist Latein für „unterdessen“. Meist rückt für ein paar Wochen jemand aus dem eigenen Verein nach."
             },
             {
               "text": "Welcher Trainerposten wird in England „the hot seat“ genannt?",
@@ -277,9 +277,9 @@
               "note": "„Hot seat“ heißt wörtlich heißer Stuhl. Im Profifußball hält sich ein Trainer im Schnitt gut ein Jahr."
             },
             {
-              "text": "Wie heißt der Trainer, der eine Mannschaft nur für kurze Zeit übernimmt?",
-              "answer": "Interimstrainer",
-              "note": "„Interim“ ist Latein für „unterdessen“. Meist rückt für ein paar Wochen jemand aus dem eigenen Verein nach."
+              "text": "Welcher Bundestrainer führte Deutschland 1954 zum ersten WM-Titel?",
+              "answer": "Sepp Herberger",
+              "note": "Er war insgesamt 28 Jahre für die Nationalmannschaft verantwortlich, unterbrochen vom Krieg."
             }
           ]
         },

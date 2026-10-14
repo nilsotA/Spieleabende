@@ -162,35 +162,30 @@
           "name": "Was ist die Frage?",
           "questions": [
             {
-              "text": "Dieser Physiker formulierte die Relativitätstheorie.",
-              "answer": "Wer ist Albert Einstein?",
-              "note": "Den Nobelpreis bekam er nicht dafür, sondern für die Erklärung des photoelektrischen Effekts."
-            },
-            {
-              "text": "Dieses Land schenkte den USA die Freiheitsstatue.",
-              "answer": "Was ist Frankreich?",
-              "note": "Sie kam 1885 in 214 Kisten zerlegt über den Atlantik."
-            },
-            {
               "text": "Dieses Getränk entsteht aus Wasser, Hopfen, Malz und Hefe.",
               "answer": "Was ist Bier?",
               "note": "Die Hefe fehlt im Reinheitsgebot von 1516 – man kannte sie damals noch nicht."
             },
             {
+              "text": "Dieser Physiker formulierte die Relativitätstheorie.",
+              "answer": "Wer ist Albert Einstein?",
+              "note": "Den Nobelpreis bekam er nicht dafür, sondern für die Erklärung des photoelektrischen Effekts."
+            },
+            {
               "text": "Dieser Planet ist der Sonne am nächsten.",
               "answer": "Was ist Merkur?",
               "note": "Trotzdem ist er nicht der heißeste Planet: Die Venus hat eine dichte Atmosphäre, er gar keine."
+            },
+            {
+              "text": "Dieses Land schenkte den USA die Freiheitsstatue.",
+              "answer": "Was ist Frankreich?",
+              "note": "Sie kam 1885 in 214 Kisten zerlegt über den Atlantik."
             }
           ]
         },
         {
           "name": "Abkürzungen",
           "questions": [
-            {
-              "text": "Wofür steht „PDF“?",
-              "answer": "Portable Document Format",
-              "note": "1993 von Adobe entwickelt – damit ein Dokument überall gleich aussieht, egal auf welchem Gerät."
-            },
             {
               "text": "Wofür steht „DIY“?",
               "answer": "Do it yourself",
@@ -200,6 +195,11 @@
               "text": "Wofür steht „ASAP“?",
               "answer": "As soon as possible",
               "note": "Wörtlich „so bald wie möglich“ – im Büroalltag meist: sofort."
+            },
+            {
+              "text": "Wofür steht „PDF“?",
+              "answer": "Portable Document Format",
+              "note": "1993 von Adobe entwickelt – damit ein Dokument überall gleich aussieht, egal auf welchem Gerät."
             },
             {
               "text": "Wofür steht die Bilddatei-Endung „GIF“?",
@@ -217,11 +217,6 @@
               "note": "Der Biss ist da, damit man den Apfel nicht für eine Kirsche hält."
             },
             {
-              "text": "Welche Kaffeehauskette hat eine grüne Meerjungfrau im Logo?",
-              "answer": "Starbucks",
-              "note": "Es ist eine Sirene aus der griechischen Sage – zweischwänzig, im Logo inzwischen stark beschnitten."
-            },
-            {
               "text": "Welcher Softwarekonzern hat vier farbige Quadrate im Logo?",
               "answer": "Microsoft",
               "note": "Die vier Farben stehen für die Produktfamilien: Windows, Office, Xbox und Bing."
@@ -230,6 +225,11 @@
               "text": "Welches Tier ziert das Logo von Lacoste?",
               "answer": "Ein Krokodil",
               "note": "Der Spitzname des Gründers, Tennisspieler René Lacoste – wegen einer Wette um einen Krokodilledergepäckkoffer."
+            },
+            {
+              "text": "Welche Kaffeehauskette hat eine grüne Meerjungfrau im Logo?",
+              "answer": "Starbucks",
+              "note": "Es ist eine Sirene aus der griechischen Sage – zweischwänzig, im Logo inzwischen stark beschnitten."
             }
           ]
         },
@@ -272,14 +272,14 @@
               "note": "Sein Herz wiegt so viel wie ein Kleinwagen, sein Ruf ist über Hunderte Kilometer zu hören."
             },
             {
-              "text": "Wie viele Herzen hat ein Oktopus?",
-              "answer": "Drei",
-              "note": "Zwei pumpen durch die Kiemen, eines durch den Körper – und sein Blut ist blau."
-            },
-            {
               "text": "Welches Landtier trägt am längsten, nämlich rund 22 Monate?",
               "answer": "Der Elefant",
               "note": "Fast zwei Jahre. Das Kalb wiegt bei der Geburt schon rund 100 Kilo."
+            },
+            {
+              "text": "Wie viele Herzen hat ein Oktopus?",
+              "answer": "Drei",
+              "note": "Zwei pumpen durch die Kiemen, eines durch den Körper – und sein Blut ist blau."
             }
           ]
         },

@@ -667,7 +667,14 @@ Der Editor zeigt den Punktwert an jeder Frage mit an, damit die Leiter beim
 Schreiben sichtbar bleibt. Nachgemessen wurde die Regel einmal über alle Sätze:
 84 Kategorien standen in der falschen Reihenfolge und sind gerichtet – meist
 saß die leichteste Frage auf 500 („Wofür steht GmbH?", „Welche Farbe hat die
-Silbermedaille?", „Welche Band sang Bohemian Rhapsody?").
+Silbermedaille?", „Welche Band sang Bohemian Rhapsody?"). Nach einem echten
+Spieleabend kam ein zweiter Durchgang über alle 26 Sätze mit derselben Tabelle:
+96 weitere Kategorien sind umsortiert, wieder meist eine Frage auf 500, die der
+halbe Tisch im Schlaf weiß („In welchem Jahr wurde Deutschland zuletzt
+Fußball-Weltmeister?", „In welchem Film von 1994 hört die Hauptfigur ‚Lauf,
+Forrest, lauf!‘?", „Welche Königin regierte Großbritannien mehr als 70 Jahre?").
+Getauscht wird dabei nur innerhalb der Kategorie – keine Frage ist dazugekommen
+oder weggefallen.
 
 Prüfen kann das keine Maschine. Was sie prüft, ist der Nachbarfall: ob eine
 Frage ihre eigene Lösung im Text stehen hat („Wie nennt man den Wurf von der

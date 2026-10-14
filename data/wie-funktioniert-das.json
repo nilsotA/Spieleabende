@@ -88,14 +88,14 @@
               "note": "Durchgesetzt hat er sich erst 1923 an Gummistiefeln. „Zipper“ kommt vom Geräusch."
             },
             {
-              "text": "Auf welche Erfindung kam ein Schweizer beim Blick auf die Widerhaken im Fell seines Hundes?",
-              "answer": "Der Klettverschluss",
-              "note": "Georges de Mestral meldete ihn 1951 an. Der Markenname Velcro steckt die Wörter velours und crochet zusammen."
-            },
-            {
               "text": "Welches Ding mit Feder und Bügel hält eine Stoffwindel, ohne dass die Spitze frei liegt?",
               "answer": "Die Sicherheitsnadel",
               "note": "Walter Hunt kam 1849 beim Biegen eines Drahtes darauf und verkaufte das Patent sofort."
+            },
+            {
+              "text": "Auf welche Erfindung kam ein Schweizer beim Blick auf die Widerhaken im Fell seines Hundes?",
+              "answer": "Der Klettverschluss",
+              "note": "Georges de Mestral meldete ihn 1951 an. Der Markenname Velcro steckt die Wörter velours und crochet zusammen."
             },
             {
               "text": "Welcher Ungar meldete 1938 den Kugelschreiber an? In England heißt das Ding heute nach ihm.",
@@ -262,11 +262,6 @@
           "name": "Das liegt daran",
           "questions": [
             {
-              "text": "Warum ist der Himmel bei klarem Wetter blau?",
-              "answer": "Die Luft streut blaues Licht viel stärker als rotes",
-              "note": "Abends legt das Licht einen längeren Weg durch die Lufthülle zurück. Dann bleibt vor allem Rot übrig."
-            },
-            {
               "text": "Wie heißt die nach oben gerichtete Kraft, die einen Flugzeugflügel in der Luft hält?",
               "answer": "Der Auftrieb",
               "note": "Der Flügel lenkt Luft nach unten ab. Als Gegenkraft wird er selbst nach oben gedrückt – Kraft und Gegenkraft."
@@ -280,6 +275,11 @@
               "text": "Wie heißt der Effekt, der ein Martinshorn höher klingen lässt, solange es auf einen zufährt?",
               "answer": "Der Doppler-Effekt",
               "note": "Christian Doppler sagte ihn 1842 voraus. Astronomen messen damit, wie schnell sich ferne Sterne entfernen."
+            },
+            {
+              "text": "Warum ist der Himmel bei klarem Wetter blau?",
+              "answer": "Die Luft streut blaues Licht viel stärker als rotes",
+              "note": "Abends legt das Licht einen längeren Weg durch die Lufthülle zurück. Dann bleibt vor allem Rot übrig."
             }
           ]
         },

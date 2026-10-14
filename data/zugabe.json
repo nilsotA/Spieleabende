@@ -8,6 +8,11 @@
           "name": "Instrumente",
           "questions": [
             {
+              "text": "Welches Instrument bedient man mit Manualen, Pedalen und Registern?",
+              "answer": "Die Orgel",
+              "note": "Die „Königin der Instrumente“ – die größten haben über zehntausend Pfeifen."
+            },
+            {
               "text": "Welches Blechblasinstrument hat einen Schiebezug statt Ventilen?",
               "answer": "Die Posaune",
               "note": "Der Zug macht sie zum einzigen Blechblasinstrument, das stufenlos gleiten kann."
@@ -16,11 +21,6 @@
               "text": "Zu welcher Instrumentenfamilie gehört das Saxophon?",
               "answer": "Zu den Holzblasinstrumenten",
               "note": "Obwohl es aus Messing ist: Entscheidend ist das Rohrblatt im Mundstück, nicht das Material."
-            },
-            {
-              "text": "Welches Instrument bedient man mit Manualen, Pedalen und Registern?",
-              "answer": "Die Orgel",
-              "note": "Die „Königin der Instrumente“ – die größten haben über zehntausend Pfeifen."
             },
             {
               "text": "Wie heißt das Schlaginstrument mit Holzstäben, das tiefer klingt als ein Xylophon?",
@@ -217,14 +217,14 @@
               "note": "Der Name stammt vom Typenschild einer Nähmaschine – Wechsel- und Gleichstrom."
             },
             {
-              "text": "Welcher Gitarrist spielte 1969 in Woodstock die amerikanische Hymne?",
-              "answer": "Jimi Hendrix",
-              "note": "Er spielte am Montagmorgen vor den letzten Übriggebliebenen – und wurde damit unsterblich."
-            },
-            {
               "text": "Welche Band veröffentlichte das Album „The Dark Side of the Moon“?",
               "answer": "Pink Floyd",
               "note": "Es stand über 700 Wochen in den US-Charts – mehr als vierzehn Jahre."
+            },
+            {
+              "text": "Welcher Gitarrist spielte 1969 in Woodstock die amerikanische Hymne?",
+              "answer": "Jimi Hendrix",
+              "note": "Er spielte am Montagmorgen vor den letzten Übriggebliebenen – und wurde damit unsterblich."
             },
             {
               "text": "Wie hieß Freddie Mercury mit bürgerlichem Namen?",

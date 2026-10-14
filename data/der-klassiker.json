@@ -113,11 +113,6 @@
               "note": "Erfunden 1989 am Kernforschungszentrum CERN von Tim Berners-Lee – als Werkzeug, damit Forscher Texte austauschen konnten."
             },
             {
-              "text": "Wofür steht die Abkürzung RTL?",
-              "answer": "Radio Télévision Luxembourg",
-              "note": "Der Sender startete tatsächlich in Luxemburg."
-            },
-            {
               "text": "Wofür stand in der DDR die Abkürzung Stasi?",
               "answer": "Ministerium für Staatssicherheit",
               "note": "Zuletzt arbeiteten dort rund 90.000 Hauptamtliche, dazu kamen weit mehr inoffizielle Mitarbeiter."
@@ -126,6 +121,11 @@
               "text": "Wofür steht das LCD in „LCD-Bildschirm“?",
               "answer": "Liquid Crystal Display",
               "note": "Auf Deutsch: Flüssigkristallanzeige."
+            },
+            {
+              "text": "Wofür steht die Abkürzung RTL?",
+              "answer": "Radio Télévision Luxembourg",
+              "note": "Der Sender startete tatsächlich in Luxemburg."
             }
           ]
         },

@@ -83,14 +83,14 @@
           "name": "Monate",
           "questions": [
             {
-              "text": "Welcher Monat ist nach Julius Caesar benannt?",
-              "answer": "Juli",
-              "note": "Den August benannte man nach seinem Nachfolger, Kaiser Augustus."
-            },
-            {
               "text": "In welchem Monat feiert man Halloween?",
               "answer": "Oktober",
               "note": "Am 31. Oktober, dem Abend vor Allerheiligen. Daher der englische Name: All Hallows’ Eve."
+            },
+            {
+              "text": "Welcher Monat ist nach Julius Caesar benannt?",
+              "answer": "Juli",
+              "note": "Den August benannte man nach seinem Nachfolger, Kaiser Augustus."
             },
             {
               "text": "In welchem Monat beginnt der astronomische Herbst?",
@@ -108,6 +108,11 @@
           "name": "Wer macht dieses Geräusch?",
           "questions": [
             {
+              "text": "Welcher Vogel ruft seinen eigenen Namen?",
+              "answer": "Der Kuckuck",
+              "note": "Nur das Männchen ruft so. Das Weibchen klingt eher wie ein trillerndes Kichern."
+            },
+            {
               "text": "Welches Tier wiehert?",
               "answer": "Das Pferd",
               "note": "Neben dem Wiehern gibt es das leise Brummeln, mit dem eine Stute ihr Fohlen ruft."
@@ -121,11 +126,6 @@
               "text": "Welches Tier röhrt im Herbst durch den Wald?",
               "answer": "Der Rothirsch",
               "note": "Je tiefer das Röhren, desto größer meist der Hirsch – die Hirschkühe hören genau hin."
-            },
-            {
-              "text": "Welcher Vogel ruft seinen eigenen Namen?",
-              "answer": "Der Kuckuck",
-              "note": "Nur das Männchen ruft so. Das Weibchen klingt eher wie ein trillerndes Kichern."
             }
           ]
         },
@@ -222,14 +222,14 @@
               "note": "Bei Rudyard Kipling ist Balu ein strenger Lehrer. Gemütlich wurde er erst 1967 im Zeichentrickfilm von Disney."
             },
             {
-              "text": "Wie heißt das Pferd von Pippi Langstrumpf?",
-              "answer": "Kleiner Onkel",
-              "note": "Astrid Lindgren erfand Pippi für ihre kranke Tochter Karin – und Pippi stemmt das Pferd mit bloßen Händen."
-            },
-            {
               "text": "Wie heißt der Kater, mit dem der alte Pettersson zusammenwohnt?",
               "answer": "Findus",
               "note": "Der Schwede Sven Nordqvist veröffentlichte das erste Buch über die beiden 1984."
+            },
+            {
+              "text": "Wie heißt das Pferd von Pippi Langstrumpf?",
+              "answer": "Kleiner Onkel",
+              "note": "Astrid Lindgren erfand Pippi für ihre kranke Tochter Karin – und Pippi stemmt das Pferd mit bloßen Händen."
             }
           ]
         },
@@ -242,11 +242,6 @@
               "note": "Der Mensch hat rund 400 verschiedene Arten von Riechrezeptoren."
             },
             {
-              "text": "Wie heißt die fünfte Geschmacksrichtung neben süß, sauer, salzig und bitter?",
-              "answer": "Umami",
-              "note": "Der japanische Chemiker Kikunae Ikeda beschrieb sie 1908. Sie steckt etwa in Brühe und Parmesan."
-            },
-            {
               "text": "In welchem Körperteil sitzt das Gleichgewichtsorgan?",
               "answer": "Im Ohr",
               "note": "Drei Bogengänge voller Flüssigkeit melden dem Gehirn jede Drehung des Kopfes."
@@ -255,6 +250,11 @@
               "text": "Wie heißt die Stelle im Auge, an der man nichts sieht, weil dort der Sehnerv austritt?",
               "answer": "Der blinde Fleck",
               "note": "Man bemerkt ihn nicht: Das Gehirn füllt die Lücke auf, und das andere Auge hilft aus."
+            },
+            {
+              "text": "Wie heißt die fünfte Geschmacksrichtung neben süß, sauer, salzig und bitter?",
+              "answer": "Umami",
+              "note": "Der japanische Chemiker Kikunae Ikeda beschrieb sie 1908. Sie steckt etwa in Brühe und Parmesan."
             }
           ]
         },

@@ -162,24 +162,24 @@
           "name": "Eingewandert",
           "questions": [
             {
-              "text": "Aus welcher Sprache kommt das Wort „Ketchup“?",
-              "answer": "Aus dem Chinesischen",
-              "note": "Gemeint war eine Fischsoße aus Südchina. Tomaten kamen erst viel später in Amerika hinein."
-            },
-            {
               "text": "Aus welcher Sprache stammt das Wort „Joghurt“?",
               "answer": "Aus dem Türkischen",
               "note": "Das Original schreibt sich „yoğurt“. Das ğ spricht man kaum – deshalb gab es auch „Yoghurt“."
             },
             {
-              "text": "Aus welcher Sprache stammt das Wort „Tabu“?",
-              "answer": "Aus dem Tongaischen",
-              "note": "James Cook brachte „tapu“ 1777 von den Tonga-Inseln mit. Es bedeutete heilig und unberührbar."
-            },
-            {
               "text": "Aus welcher Sprache kommt das Wort „Roboter“?",
               "answer": "Aus dem Tschechischen",
               "note": "Karel Čapek führte es 1920 in seinem Drama „R.U.R.“ ein. „Robota“ heißt Fronarbeit."
+            },
+            {
+              "text": "Aus welcher Sprache kommt das Wort „Ketchup“?",
+              "answer": "Aus dem Chinesischen",
+              "note": "Gemeint war eine Fischsoße aus Südchina. Tomaten kamen erst viel später in Amerika hinein."
+            },
+            {
+              "text": "Aus welcher Sprache stammt das Wort „Tabu“?",
+              "answer": "Aus dem Tongaischen",
+              "note": "James Cook brachte „tapu“ 1777 von den Tonga-Inseln mit. Es bedeutete heilig und unberührbar."
             }
           ]
         },
@@ -242,9 +242,9 @@
               "note": "Das Fleischgericht trägt denselben Namen. Ob es wirklich aus Hamburg stammt, ist umstritten."
             },
             {
-              "text": "Wie heißen die Einwohner von Halle an der Saale?",
-              "answer": "Hallenser",
-              "note": "In Halle in Westfalen heißen sie dagegen Haller – zwei Städte, zwei Endungen."
+              "text": "Wie heißen die Einwohner von Madagaskar?",
+              "answer": "Madagassen",
+              "note": "Ihre Sprache ist mit Sprachen in Indonesien verwandt – die ersten Siedler kamen über den Indischen Ozean."
             },
             {
               "text": "Wie heißen die Einwohner von Monaco?",
@@ -252,9 +252,9 @@
               "note": "Nur ein kleiner Teil der Bewohner hat tatsächlich die monegassische Staatsangehörigkeit."
             },
             {
-              "text": "Wie heißen die Einwohner von Madagaskar?",
-              "answer": "Madagassen",
-              "note": "Ihre Sprache ist mit Sprachen in Indonesien verwandt – die ersten Siedler kamen über den Indischen Ozean."
+              "text": "Wie heißen die Einwohner von Halle an der Saale?",
+              "answer": "Hallenser",
+              "note": "In Halle in Westfalen heißen sie dagegen Haller – zwei Städte, zwei Endungen."
             }
           ]
         },
@@ -292,9 +292,9 @@
               "note": "Wörtlich ist es französisch für „falscher Schritt“."
             },
             {
-              "text": "Was bedeutet das lateinische „Placebo“ wörtlich?",
-              "answer": "Ich werde gefallen",
-              "note": "Das Wort stammt aus einem Gebet für die Toten. Erst später wurde daraus das Scheinmedikament."
+              "text": "Was ist ein „Palindrom“?",
+              "answer": "Ein Wort, das rückwärts gleich lautet",
+              "note": "„Reliefpfeiler“ ist eines der längsten deutschen Beispiele, „Otto“ eines der kürzesten."
             },
             {
               "text": "Was ist ein „Euphemismus“?",
@@ -302,9 +302,9 @@
               "note": "„Freistellen“ statt „entlassen“, „Preisanpassung“ statt „teurer“ – Beispiele gibt es jeden Tag."
             },
             {
-              "text": "Was ist ein „Palindrom“?",
-              "answer": "Ein Wort, das rückwärts gleich lautet",
-              "note": "„Reliefpfeiler“ ist eines der längsten deutschen Beispiele, „Otto“ eines der kürzesten."
+              "text": "Was bedeutet das lateinische „Placebo“ wörtlich?",
+              "answer": "Ich werde gefallen",
+              "note": "Das Wort stammt aus einem Gebet für die Toten. Erst später wurde daraus das Scheinmedikament."
             }
           ]
         }

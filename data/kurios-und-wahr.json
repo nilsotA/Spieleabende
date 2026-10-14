@@ -33,14 +33,14 @@
           "name": "Der Körper",
           "questions": [
             {
-              "text": "Wie viele Rippen hat ein Mensch normalerweise?",
-              "answer": "24",
-              "note": "Zwölf Paare. „12 Paare“ gilt genauso."
-            },
-            {
               "text": "Welches Organ kann große Teile von sich selbst nachwachsen lassen?",
               "answer": "Die Leber",
               "note": "Sie wächst selbst nach großen Eingriffen wieder auf ihre alte Größe. Nur deshalb ist eine Lebendspende überhaupt möglich."
+            },
+            {
+              "text": "Wie viele Rippen hat ein Mensch normalerweise?",
+              "answer": "24",
+              "note": "Zwölf Paare. „12 Paare“ gilt genauso."
             },
             {
               "text": "Welcher Muskel ist der größte im menschlichen Körper?",
@@ -138,6 +138,11 @@
               "note": "Näher dran gewinnt – hier lohnt sich Rechnen statt Raten."
             },
             {
+              "text": "Wie viele Halswirbel hat eine Giraffe?",
+              "answer": "Sieben",
+              "note": "Genauso viele wie der Mensch – nur deutlich länger."
+            },
+            {
               "text": "Wie viele Sekunden hat ein Jahr mit 365 Tagen?",
               "answer": "31 536 000",
               "note": "Wer auf die Million genau danebenliegt, hat es trotzdem verdient."
@@ -146,11 +151,6 @@
               "text": "Wie viele Liter Blut pumpt ein menschliches Herz ungefähr an einem Tag?",
               "answer": "Rund 7000 Liter",
               "note": "Alles zwischen 5000 und 9000 gelten lassen."
-            },
-            {
-              "text": "Wie viele Halswirbel hat eine Giraffe?",
-              "answer": "Sieben",
-              "note": "Genauso viele wie der Mensch – nur deutlich länger."
             }
           ]
         }
@@ -262,16 +262,6 @@
           "name": "Zahlen mit Charakter",
           "questions": [
             {
-              "text": "Wie viele Streifen hat die Flagge der USA?",
-              "answer": "13",
-              "note": "Für die dreizehn Gründerstaaten."
-            },
-            {
-              "text": "Wie viele Steine hat ein klassisches Domino-Spiel?",
-              "answer": "28",
-              "note": "Gemeint ist das übliche Doppel-Sechs-Spiel."
-            },
-            {
               "text": "Wie viele Zacken hat eine Schneeflocke typischerweise?",
               "answer": "Sechs",
               "note": "Die sechseckige Form kommt von der Struktur des Eiskristalls."
@@ -280,6 +270,16 @@
               "text": "Wie viele Augen haben zwei Spielwürfel zusammen?",
               "answer": "42",
               "note": "Ein Würfel hat 21."
+            },
+            {
+              "text": "Wie viele Streifen hat die Flagge der USA?",
+              "answer": "13",
+              "note": "Für die dreizehn Gründerstaaten."
+            },
+            {
+              "text": "Wie viele Steine hat ein klassisches Domino-Spiel?",
+              "answer": "28",
+              "note": "Gemeint ist das übliche Doppel-Sechs-Spiel."
             }
           ]
         },

@@ -287,24 +287,24 @@
           "name": "Berufe & Werkzeug",
           "questions": [
             {
-              "text": "Wie heißt der Beruf, der Schuhe herstellt und repariert?",
-              "answer": "Schuhmacher (Schuster)",
-              "note": "„Schuster, bleib bei deinen Leisten“ – der Leisten ist die Fußform aus Holz."
-            },
-            {
               "text": "Welches Werkzeug braucht man für eine Schraube mit Kreuzschlitz?",
               "answer": "Einen Kreuzschlitz-Schraubendreher",
               "note": "Der Kreuzschlitz wurde erfunden, damit der Dreher bei zu viel Kraft von selbst herausrutscht."
             },
             {
-              "text": "Wie heißt der Handwerker, der Fässer und Bottiche baut?",
-              "answer": "Böttcher (Küfer)",
-              "note": "Je nach Gegend auch Fassbinder oder Schäffler – ein Beruf mit vielen Namen und wenigen Leuten."
+              "text": "Wie heißt der Beruf, der Schuhe herstellt und repariert?",
+              "answer": "Schuhmacher (Schuster)",
+              "note": "„Schuster, bleib bei deinen Leisten“ – der Leisten ist die Fußform aus Holz."
             },
             {
               "text": "Womit prüft ein Maurer, ob eine Wand wirklich senkrecht steht?",
               "answer": "Mit dem Senklot (Lot)",
               "note": "Ein Gewicht an der Schnur – seit Jahrtausenden unschlagbar, denn die Schwerkraft irrt nie."
+            },
+            {
+              "text": "Wie heißt der Handwerker, der Fässer und Bottiche baut?",
+              "answer": "Böttcher (Küfer)",
+              "note": "Je nach Gegend auch Fassbinder oder Schäffler – ein Beruf mit vielen Namen und wenigen Leuten."
             }
           ]
         }

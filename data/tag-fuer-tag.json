@@ -43,14 +43,14 @@
               "note": "Kardia ist griechisch. Dasselbe Wort steckt im Myokardinfarkt, dem Fachwort für den Herzinfarkt."
             },
             {
-              "text": "Was bedeutet der Zusatz „retard“ im Namen eines Medikaments?",
-              "answer": "Der Wirkstoff wird verzögert abgegeben",
-              "note": "Vom französischen retard für Verspätung. Die Tablette wirkt über Stunden statt auf einen Schlag."
-            },
-            {
               "text": "Wie heißt ein Scheinmedikament ohne Wirkstoff im Fachwort?",
               "answer": "Placebo",
               "note": "Lateinisch für „ich werde gefallen“. Es wirkt messbar – allein dadurch, dass jemand behandelt wird."
+            },
+            {
+              "text": "Was bedeutet der Zusatz „retard“ im Namen eines Medikaments?",
+              "answer": "Der Wirkstoff wird verzögert abgegeben",
+              "note": "Vom französischen retard für Verspätung. Die Tablette wirkt über Stunden statt auf einen Schlag."
             }
           ]
         },
@@ -83,11 +83,6 @@
           "name": "Unterwegs",
           "questions": [
             {
-              "text": "Wofür steht das S in S-Bahn?",
-              "answer": "Für Stadtschnellbahn",
-              "note": "Berlin führte den Namen 1930 ein. Das weiße S auf grünem Grund stammt aus derselben Zeit."
-            },
-            {
               "text": "Was bedeutet das Kürzel ICE bei der Deutschen Bahn?",
               "answer": "Intercity-Express",
               "note": "Der erste fuhr 1991. Intern heißt die älteste Baureihe schlicht 401 – Wagen ohne eigenen Antrieb."
@@ -96,6 +91,11 @@
               "text": "Warum sollen Reisende am Bahnsteig hinter der weißen Linie bleiben?",
               "answer": "Wegen des Sogs durchfahrender Züge",
               "note": "Ein Zug schiebt die Luft vor sich her und reißt sie hinter sich mit. Beides zerrt an allem am Rand."
+            },
+            {
+              "text": "Wofür steht das S in S-Bahn?",
+              "answer": "Für Stadtschnellbahn",
+              "note": "Berlin führte den Namen 1930 ein. Das weiße S auf grünem Grund stammt aus derselben Zeit."
             },
             {
               "text": "Wie heißt im Amtsdeutsch der Zuschlag für eine Fahrt ohne gültigen Fahrschein?",
@@ -118,14 +118,14 @@
               "note": "In der Libelle sitzt Flüssigkeit und eine Blase. Die Blase wandert immer zum höchsten Punkt."
             },
             {
-              "text": "Wofür steht die Abkürzung HSS auf einem Metallbohrer?",
-              "answer": "Für Schnellarbeitsstahl",
-              "note": "Englisch high speed steel. Er bleibt auch heiß noch hart – deshalb darf er schnell drehen."
-            },
-            {
               "text": "Welches Maß nennt die Zahl auf einem Maulschlüssel?",
               "answer": "Die Schlüsselweite in Millimetern",
               "note": "SW 13 passt auf eine Mutter mit 13 Millimetern zwischen den Flächen – nicht auf ein Gewinde M13."
+            },
+            {
+              "text": "Wofür steht die Abkürzung HSS auf einem Metallbohrer?",
+              "answer": "Für Schnellarbeitsstahl",
+              "note": "Englisch high speed steel. Er bleibt auch heiß noch hart – deshalb darf er schnell drehen."
             }
           ]
         },
@@ -217,9 +217,9 @@
               "note": "Ein Goldhamster läuft darin nachts mehrere Kilometer. Am Tag schläft er, oft tief in der Streu vergraben."
             },
             {
-              "text": "Wie viele Zähne hat ein ausgewachsener Hund?",
-              "answer": "42",
-              "note": "Der Mensch kommt auf 32. Welpen haben 28 Milchzähne und wechseln sie mit vier bis sieben Monaten."
+              "text": "Wozu dient einer Katze das lange Tasthaar über dem Maul?",
+              "answer": "Zum Messen von Abständen im Dunkeln",
+              "note": "Es sitzt tief in der Haut an Nerven. So prüft eine Katze, ob sie durch eine Lücke passt."
             },
             {
               "text": "Warum darf man Hunden keine Schokolade geben?",
@@ -227,9 +227,9 @@
               "note": "Je dunkler die Schokolade, desto mehr davon. Katzen vertragen es ebenso schlecht, naschen nur seltener."
             },
             {
-              "text": "Wozu dient einer Katze das lange Tasthaar über dem Maul?",
-              "answer": "Zum Messen von Abständen im Dunkeln",
-              "note": "Es sitzt tief in der Haut an Nerven. So prüft eine Katze, ob sie durch eine Lücke passt."
+              "text": "Wie viele Zähne hat ein ausgewachsener Hund?",
+              "answer": "42",
+              "note": "Der Mensch kommt auf 32. Welpen haben 28 Milchzähne und wechseln sie mit vier bis sieben Monaten."
             }
           ]
         },
@@ -287,14 +287,14 @@
           "name": "Im Lokal",
           "questions": [
             {
-              "text": "Wie viel fasst die Stange, aus der man in Köln sein Kölsch trinkt?",
-              "answer": "0,2 Liter",
-              "note": "Die schmale Form hält das Bier frisch. Nachgeschenkt wird, bis der Gast den Deckel aufs Glas legt."
-            },
-            {
               "text": "Wie heißt der Tisch, an dem sich regelmäßig dieselbe Runde trifft?",
               "answer": "Der Stammtisch",
               "note": "Oft mit Wimpel oder Schild. Wer nicht dazugehört, darf dort meist sitzen, bis die Runde eintrifft."
+            },
+            {
+              "text": "Was ist gemeint, wenn am Ende des Abends jemand einen Absacker vorschlägt?",
+              "answer": "Das letzte Getränk vor dem Heimweg",
+              "note": "Meist ein Schnaps. In der Gastronomie heißt er auch Digestif, also etwas für die Verdauung."
             },
             {
               "text": "Worauf weisen die kleinen Ziffern hinter Gerichten auf der Speisekarte hin?",
@@ -302,9 +302,9 @@
               "note": "Üblich, aber nicht vorgeschrieben: meist 1 Farbstoff, 2 Konservierung, 3 Antioxidation, 4 Geschmack."
             },
             {
-              "text": "Was ist gemeint, wenn am Ende des Abends jemand einen Absacker vorschlägt?",
-              "answer": "Das letzte Getränk vor dem Heimweg",
-              "note": "Meist ein Schnaps. In der Gastronomie heißt er auch Digestif, also etwas für die Verdauung."
+              "text": "Wie viel fasst die Stange, aus der man in Köln sein Kölsch trinkt?",
+              "answer": "0,2 Liter",
+              "note": "Die schmale Form hält das Bier frisch. Nachgeschenkt wird, bis der Gast den Deckel aufs Glas legt."
             }
           ]
         }

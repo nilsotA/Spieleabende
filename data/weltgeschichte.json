@@ -83,6 +83,11 @@
           "name": "Entdecker & Eroberer",
           "questions": [
             {
+              "text": "Von welchem Kontinent aus breitete sich der Homo sapiens über die Welt aus?",
+              "answer": "Von Afrika",
+              "note": "Vor rund 70.000 Jahren begann die große Ausbreitung. Alle Menschen außerhalb Afrikas gehen darauf zurück."
+            },
+            {
               "text": "Wer erreichte als Erster den Südpol?",
               "answer": "Roald Amundsen",
               "note": "Der Norweger war fünf Wochen vor Robert Falcon Scott da."
@@ -91,11 +96,6 @@
               "text": "Welche Krankheit fürchteten Seefahrer auf langen Reisen am meisten?",
               "answer": "Skorbut",
               "note": "Vitamin-C-Mangel. Zitrusfrüchte an Bord machten dem ein Ende."
-            },
-            {
-              "text": "Von welchem Kontinent aus breitete sich der Homo sapiens über die Welt aus?",
-              "answer": "Von Afrika",
-              "note": "Vor rund 70.000 Jahren begann die große Ausbreitung. Alle Menschen außerhalb Afrikas gehen darauf zurück."
             },
             {
               "text": "Wessen Expedition umrundete als erste die Erde?",

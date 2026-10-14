@@ -87,14 +87,14 @@
           "name": "Währungen",
           "questions": [
             {
-              "text": "Womit bezahlt man in Japan?",
-              "answer": "Mit Yen",
-              "note": "Das Zeichen ¥ steht auch für den chinesischen Yuan. Beide Namen bedeuten ursprünglich schlicht „rund“."
-            },
-            {
               "text": "Womit bezahlt man in Großbritannien?",
               "answer": "Mit Pfund Sterling",
               "note": "Die älteste noch benutzte Währung der Welt. Ein Pfund hatte früher 240 Pence, seit 1971 sind es 100."
+            },
+            {
+              "text": "Womit bezahlt man in Japan?",
+              "answer": "Mit Yen",
+              "note": "Das Zeichen ¥ steht auch für den chinesischen Yuan. Beide Namen bedeuten ursprünglich schlicht „rund“."
             },
             {
               "text": "Womit bezahlt man in Indien?",
@@ -122,14 +122,14 @@
               "note": "San Marino gilt als älteste noch bestehende Republik der Welt – der Überlieferung nach gegründet im Jahr 301."
             },
             {
-              "text": "Welches Land umschließt Lesotho vollständig?",
-              "answer": "Südafrika",
-              "note": "Lesotho ist eines von nur drei Ländern der Welt, die vollständig von einem einzigen Staat umschlossen sind."
-            },
-            {
               "text": "Wie viele Nachbarländer hat Deutschland?",
               "answer": "Neun",
               "note": "Dänemark, Polen, Tschechien, Österreich, Schweiz, Frankreich, Luxemburg, Belgien, Niederlande"
+            },
+            {
+              "text": "Welches Land umschließt Lesotho vollständig?",
+              "answer": "Südafrika",
+              "note": "Lesotho ist eines von nur drei Ländern der Welt, die vollständig von einem einzigen Staat umschlossen sind."
             }
           ]
         },
@@ -142,14 +142,14 @@
               "note": "Mallorca gehört zu den Balearen, zusammen mit Menorca, Ibiza und Formentera. Die Hauptstadt heißt Palma."
             },
             {
-              "text": "Wie heißt die größte Insel der Erde?",
-              "answer": "Grönland",
-              "note": "Über zwei Millionen Quadratkilometer, aber nur rund 56.000 Einwohner. Es gehört zu Dänemark und regiert sich weitgehend selbst."
-            },
-            {
               "text": "In welchem Meer liegt Kreta?",
               "answer": "Im Mittelmeer",
               "note": "„Ägäis“ oder „Kretisches Meer“ zählt auch – beides gehört zum Mittelmeer"
+            },
+            {
+              "text": "Wie heißt die größte Insel der Erde?",
+              "answer": "Grönland",
+              "note": "Über zwei Millionen Quadratkilometer, aber nur rund 56.000 Einwohner. Es gehört zu Dänemark und regiert sich weitgehend selbst."
             },
             {
               "text": "Zu welchem Land gehört die Osterinsel?",
@@ -270,14 +270,14 @@
           "name": "Städte der Welt",
           "questions": [
             {
-              "text": "Welche Millionenstadt teilt der Bosporus in einen europäischen und einen asiatischen Teil?",
-              "answer": "Istanbul",
-              "note": "Sie hieß früher Konstantinopel und davor Byzanz. Als einzige Millionenstadt liegt sie auf zwei Kontinenten."
-            },
-            {
               "text": "In welchem Land liegt die Stadt Kyoto?",
               "answer": "In Japan",
               "note": "Kyoto war über tausend Jahre Sitz des Kaisers. Der Name bedeutet schlicht „Hauptstadt“ – Tokio heißt „östliche Hauptstadt“."
+            },
+            {
+              "text": "Welche Millionenstadt teilt der Bosporus in einen europäischen und einen asiatischen Teil?",
+              "answer": "Istanbul",
+              "note": "Sie hieß früher Konstantinopel und davor Byzanz. Als einzige Millionenstadt liegt sie auf zwei Kontinenten."
             },
             {
               "text": "Wie hieß New York, bevor es New York hieß?",

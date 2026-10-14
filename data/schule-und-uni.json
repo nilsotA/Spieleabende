@@ -138,14 +138,14 @@
               "note": "Geschrieben hat er nichts. Alles stammt von seinen Schülern."
             },
             {
-              "text": "Wer war der Lehrer Alexanders des Großen?",
-              "answer": "Aristoteles",
-              "note": "Er unterrichtete den jungen Alexander drei Jahre lang – vermutlich in Mieza in Makedonien."
-            },
-            {
               "text": "Welche italienische Ärztin entwickelte eine bis heute verbreitete Pädagogik?",
               "answer": "Maria Montessori",
               "note": "Sie durfte in Italien zunächst nicht Medizin studieren und setzte die Zulassung durch."
+            },
+            {
+              "text": "Wer war der Lehrer Alexanders des Großen?",
+              "answer": "Aristoteles",
+              "note": "Er unterrichtete den jungen Alexander drei Jahre lang – vermutlich in Mieza in Makedonien."
             },
             {
               "text": "Welcher Pädagoge gründete 1840 den ersten Kindergarten?",
@@ -162,14 +162,14 @@
           "name": "Schulsystem",
           "questions": [
             {
-              "text": "Wer entscheidet in Deutschland über Lehrpläne – Bund oder Länder?",
-              "answer": "Die Länder",
-              "note": "Deshalb unterscheiden sich Ferien, Lehrpläne und sogar die Namen der Schulformen von Land zu Land."
-            },
-            {
               "text": "Wie viele Schuljahre umfasst die Grundschule in den meisten Bundesländern?",
               "answer": "4",
               "note": "In Berlin und Brandenburg sind es sechs Jahre."
+            },
+            {
+              "text": "Wer entscheidet in Deutschland über Lehrpläne – Bund oder Länder?",
+              "answer": "Die Länder",
+              "note": "Deshalb unterscheiden sich Ferien, Lehrpläne und sogar die Namen der Schulformen von Land zu Land."
             },
             {
               "text": "Wie heißt die Schulform, die Haupt-, Real- und Gymnasialzweig unter einem Dach vereint?",
@@ -267,11 +267,6 @@
               "note": "Es gibt keine landesweite Pflicht – die Schulen entscheiden selbst, und die meisten halten daran fest."
             },
             {
-              "text": "In welchem Land beginnt das Schuljahr im April?",
-              "answer": "In Japan",
-              "note": "Es beginnt zur Kirschblüte. Auch das Geschäftsjahr startet dort im April."
-            },
-            {
               "text": "Welches skandinavische Land gilt seit Jahren als Vorbild für sein Schulsystem?",
               "answer": "Finnland",
               "note": "Berühmt wurde das Land durch die PISA-Studien um 2000 – seither reisen Delegationen dorthin."
@@ -280,6 +275,11 @@
               "text": "Wie heißt die Abschlussprüfung in Frankreich, die dem Abitur entspricht?",
               "answer": "Das Baccalauréat",
               "note": "Es gibt es in drei Zweigen: allgemeinbildend, technisch und beruflich."
+            },
+            {
+              "text": "In welchem Land beginnt das Schuljahr im April?",
+              "answer": "In Japan",
+              "note": "Es beginnt zur Kirschblüte. Auch das Geschäftsjahr startet dort im April."
             }
           ]
         },

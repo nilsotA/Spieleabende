@@ -33,6 +33,11 @@
           "name": "Schilder am Straßenrand",
           "questions": [
             {
+              "text": "Welches Tempolimit gilt automatisch, sobald man in eine geschlossene Ortschaft einfährt?",
+              "answer": "Höchstens 50 km/h",
+              "note": "Das gelbe Ortsschild trägt keine Zahl – die Regel gilt allein dadurch, dass es am Straßenrand steht."
+            },
+            {
               "text": "Welches Verkehrszeichen ist achteckig und rot?",
               "answer": "Das Stoppschild",
               "note": "An der Form allein erkennt man es – sogar von hinten und selbst dann, wenn die Aufschrift in fremden Buchstaben steht."
@@ -41,11 +46,6 @@
               "text": "Welche Form hat das Schild „Vorfahrt gewähren“?",
               "answer": "Ein auf der Spitze stehendes Dreieck",
               "note": "Diese Form kommt im deutschen Schilderwald nur ein einziges Mal vor – man erkennt sie sogar von hinten."
-            },
-            {
-              "text": "Welches Tempolimit gilt automatisch, sobald man in eine geschlossene Ortschaft einfährt?",
-              "answer": "Höchstens 50 km/h",
-              "note": "Das gelbe Ortsschild trägt keine Zahl – die Regel gilt allein dadurch, dass es am Straßenrand steht."
             },
             {
               "text": "Wie heißt das schräge Kreuz, das an Bahnübergängen dem Zug den Vorrang einräumt?",
@@ -63,14 +63,14 @@
               "note": "Die Nummer gilt in der ganzen EU und funktioniert auch ohne Guthaben auf dem Mobiltelefon."
             },
             {
-              "text": "Wie heißt die Position, in die man eine bewusstlose Person mit normaler Atmung bringt?",
-              "answer": "Die stabile Seitenlage",
-              "note": "Der Kopf wird dabei überstreckt, der Mund zeigt nach unten – so bleiben die Atemwege frei."
-            },
-            {
               "text": "Welchen Gegenstand muss ein Auto in Deutschland neben Warndreieck und Warnweste an Bord haben?",
               "answer": "Einen Verbandkasten",
               "note": "Der Inhalt ist in einer DIN-Norm festgelegt und trägt ein Haltbarkeitsdatum, das meist nach fünf Jahren abläuft."
+            },
+            {
+              "text": "Wie heißt die Position, in die man eine bewusstlose Person mit normaler Atmung bringt?",
+              "answer": "Die stabile Seitenlage",
+              "note": "Der Kopf wird dabei überstreckt, der Mund zeigt nach unten – so bleiben die Atemwege frei."
             },
             {
               "text": "Wofür stehen beim Erste-Hilfe-Merkspruch für Verstauchungen die vier Buchstaben „PECH“?",
@@ -118,14 +118,14 @@
               "note": "Gemeint ist eine bestimmte Person im Haus; der Zusatz „persönlich“ geht noch einen Schritt weiter."
             },
             {
-              "text": "Welches Land druckt als einziges keinen Staatsnamen auf seine Briefmarken?",
-              "answer": "Großbritannien",
-              "note": "Als Heimat der ersten Briefmarke genießt es dieses Vorrecht – stattdessen steht dort der Kopf des Monarchen."
-            },
-            {
               "text": "Wie heißt das Fachwort für die gezackten Ränder einer Briefmarke?",
               "answer": "Die Zähnung (auch: Perforation)",
               "note": "Vor 1854 trennte man die Bogen mit der Schere – Sammler zahlen bis heute Aufschläge für allseits breite Ränder."
+            },
+            {
+              "text": "Welches Land druckt als einziges keinen Staatsnamen auf seine Briefmarken?",
+              "answer": "Großbritannien",
+              "note": "Als Heimat der ersten Briefmarke genießt es dieses Vorrecht – stattdessen steht dort der Kopf des Monarchen."
             }
           ]
         },
@@ -138,6 +138,11 @@
               "note": "Seinen Namen trägt er nach Februa, einem römischen Reinigungsfest, das in diesem Monat gefeiert wurde."
             },
             {
+              "text": "Welcher Papst ließ 1582 den Kalender reformieren, nach dem wir heute rechnen?",
+              "answer": "Gregor XIII.",
+              "note": "Zehn Tage fielen damals einfach aus: Auf den 4. Oktober folgte direkt der 15."
+            },
+            {
               "text": "Welcher römische Gott mit zwei Gesichtern gab dem ersten Monat unseres Kalenders seinen Namen?",
               "answer": "Janus",
               "note": "Er war der Gott der Türen und Übergänge: Ein Gesicht blickt zurück, das andere nach vorn."
@@ -146,11 +151,6 @@
               "text": "Welcher deutsche Wochentag heißt im Englischen nach dem germanischen Gott Wodan?",
               "answer": "Der Mittwoch",
               "note": "Im Namen Wednesday steckt der Gott bis heute; das deutsche Wort zählt dagegen schlicht die Wochenmitte."
-            },
-            {
-              "text": "Welcher Papst ließ 1582 den Kalender reformieren, nach dem wir heute rechnen?",
-              "answer": "Gregor XIII.",
-              "note": "Zehn Tage fielen damals einfach aus: Auf den 4. Oktober folgte direkt der 15."
             }
           ]
         }
@@ -167,14 +167,14 @@
               "note": "Der Name stammt vom blassen Band am Nachthimmel, das die Griechen für verschüttete Milch hielten."
             },
             {
-              "text": "Wie heißt der größte Mond des Sonnensystems, der um Jupiter kreist?",
-              "answer": "Ganymed",
-              "note": "Er ist größer als der Planet Merkur und der einzige Mond mit einem eigenen Magnetfeld."
-            },
-            {
               "text": "Wie heißt der rote Zwergstern, der unserer Sonne von allen Sternen am nächsten steht?",
               "answer": "Proxima Centauri",
               "note": "Er gehört zum Dreiersystem Alpha Centauri – 4,2 Lichtjahre weit weg, für heutige Sonden über 70.000 Jahre Reisezeit."
+            },
+            {
+              "text": "Wie heißt der größte Mond des Sonnensystems, der um Jupiter kreist?",
+              "answer": "Ganymed",
+              "note": "Er ist größer als der Planet Merkur und der einzige Mond mit einem eigenen Magnetfeld."
             },
             {
               "text": "Wie heißt der größte Körper im Asteroidengürtel, der heute als Zwergplanet gilt?",

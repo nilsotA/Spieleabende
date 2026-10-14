@@ -38,14 +38,14 @@
               "note": "Elf im Westen, fünf im Osten – seit 1990, als die DDR-Bezirke wieder zu Ländern wurden."
             },
             {
-              "text": "Wie heißt die Hauptstadt von Nordrhein-Westfalen?",
-              "answer": "Düsseldorf",
-              "note": "Nicht Köln, obwohl das größer ist – ein Streit, den man in beiden Städten gern führt."
-            },
-            {
               "text": "Welches Bundesland ist flächenmäßig das größte?",
               "answer": "Bayern",
               "note": "Rund ein Fünftel der Fläche Deutschlands. Nach Einwohnern liegt Nordrhein-Westfalen vorn."
+            },
+            {
+              "text": "Wie heißt die Hauptstadt von Nordrhein-Westfalen?",
+              "answer": "Düsseldorf",
+              "note": "Nicht Köln, obwohl das größer ist – ein Streit, den man in beiden Städten gern führt."
             },
             {
               "text": "Welches Bundesland ist flächenmäßig das kleinste?",
@@ -237,9 +237,9 @@
           "name": "Erfindungen",
           "questions": [
             {
-              "text": "Wer erfand den Buchdruck mit beweglichen Lettern?",
-              "answer": "Johannes Gutenberg",
-              "note": "Um 1450 in Mainz. Seine Bibel gilt als das erste in Serie gedruckte Buch Europas."
+              "text": "Wer entdeckte die Röntgenstrahlen?",
+              "answer": "Wilhelm Conrad Röntgen",
+              "note": "1895, durch Zufall. Er verzichtete auf ein Patent – die Entdeckung sollte allen gehören."
             },
             {
               "text": "Welches Fahrzeug baute Carl Benz als Erster?",
@@ -247,9 +247,9 @@
               "note": "1886, mit drei Rädern. Die erste Fernfahrt machte seine Frau Bertha – ohne sein Wissen."
             },
             {
-              "text": "Wer entdeckte die Röntgenstrahlen?",
-              "answer": "Wilhelm Conrad Röntgen",
-              "note": "1895, durch Zufall. Er verzichtete auf ein Patent – die Entdeckung sollte allen gehören."
+              "text": "Wer erfand den Buchdruck mit beweglichen Lettern?",
+              "answer": "Johannes Gutenberg",
+              "note": "Um 1450 in Mainz. Seine Bibel gilt als das erste in Serie gedruckte Buch Europas."
             },
             {
               "text": "Welches deutsche Institut war maßgeblich an der Entwicklung von MP3 beteiligt?",

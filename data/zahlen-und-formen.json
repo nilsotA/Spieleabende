@@ -33,9 +33,9 @@
           "name": "Formen & Körper",
           "questions": [
             {
-              "text": "Welcher geometrische Körper hat genau eine Fläche, keine Ecke und keine Kante?",
-              "answer": "Die Kugel",
-              "note": "Von allen Körpern mit gleichem Volumen hat sie die kleinste Oberfläche. Deshalb sind Seifenblasen rund."
+              "text": "Wie heißt ein Dreieck, bei dem alle drei Seiten gleich lang sind?",
+              "answer": "Gleichseitig",
+              "note": "Dann sind auch alle drei Winkel gleich groß, nämlich je 60 Grad."
             },
             {
               "text": "Wie viele Ecken hat ein Würfel?",
@@ -43,9 +43,9 @@
               "note": "Dazu kommen 6 Flächen und 12 Kanten. 8 minus 12 plus 6 ergibt 2 – das gilt bei jedem solchen Körper."
             },
             {
-              "text": "Wie heißt ein Dreieck, bei dem alle drei Seiten gleich lang sind?",
-              "answer": "Gleichseitig",
-              "note": "Dann sind auch alle drei Winkel gleich groß, nämlich je 60 Grad."
+              "text": "Welcher geometrische Körper hat genau eine Fläche, keine Ecke und keine Kante?",
+              "answer": "Die Kugel",
+              "note": "Von allen Körpern mit gleichem Volumen hat sie die kleinste Oberfläche. Deshalb sind Seifenblasen rund."
             },
             {
               "text": "Wie viele Flächen hat ein klassischer Fußball aus Fünf- und Sechsecken?",
@@ -217,11 +217,6 @@
               "note": "Ein Liter ist genau ein Kubikdezimeter – ein Würfel mit 10 Zentimetern Kantenlänge."
             },
             {
-              "text": "Wie viele Zentimeter sind ein Zoll?",
-              "answer": "2,54",
-              "note": "Das Zoll war ursprünglich die Breite eines Daumens. Bildschirme werden bis heute so gemessen."
-            },
-            {
               "text": "In welcher Einheit misst man Kraft?",
               "answer": "Newton",
               "note": "Ein Newton ist ungefähr die Kraft, mit der eine Tafel Schokolade nach unten zieht."
@@ -230,6 +225,11 @@
               "text": "Wie viele Quadratmeter hat ein Hektar?",
               "answer": "10.000",
               "note": "Ein Quadrat von 100 mal 100 Metern."
+            },
+            {
+              "text": "Wie viele Zentimeter sind ein Zoll?",
+              "answer": "2,54",
+              "note": "Das Zoll war ursprünglich die Breite eines Daumens. Bildschirme werden bis heute so gemessen."
             }
           ]
         },
@@ -292,9 +292,9 @@
               "note": "90 Minuten sind eineinhalb Stunden. Der häufigste Fehler ist, die 90 wie eine Dezimalzahl zu addieren."
             },
             {
-              "text": "Buch und Stift kosten zusammen 11 Euro. Das Buch kostet 10 Euro mehr. Was kostet der Stift?",
-              "answer": "50 Cent",
-              "note": "Nicht 1 Euro – dann wären es zusammen 12 Euro."
+              "text": "Was ist größer: die Hälfte von 60 oder ein Drittel von 90?",
+              "answer": "Beide sind 30 – gleich groß",
+              "note": "Die Frage lädt zum Vergleichen ein, obwohl es nichts zu vergleichen gibt. Genau darin liegt der Trick."
             },
             {
               "text": "Auf einem Hof gibt es Hühner und Kühe, zusammen 10 Köpfe und 28 Beine. Wie viele Kühe?",
@@ -302,9 +302,9 @@
               "note": "10 Köpfe mit je 2 Beinen wären 20. Die 8 fehlenden gehören 4 Kühen."
             },
             {
-              "text": "Was ist größer: die Hälfte von 60 oder ein Drittel von 90?",
-              "answer": "Beide sind 30 – gleich groß",
-              "note": "Die Frage lädt zum Vergleichen ein, obwohl es nichts zu vergleichen gibt. Genau darin liegt der Trick."
+              "text": "Buch und Stift kosten zusammen 11 Euro. Das Buch kostet 10 Euro mehr. Was kostet der Stift?",
+              "answer": "50 Cent",
+              "note": "Nicht 1 Euro – dann wären es zusammen 12 Euro."
             }
           ]
         }

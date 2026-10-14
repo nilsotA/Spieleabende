@@ -113,14 +113,14 @@
               "note": "Getauft 1564 in Stratford-upon-Avon. Rund 38 Bühnenstücke werden ihm zugeschrieben."
             },
             {
-              "text": "Welcher französische Flieger schrieb das Buch über einen Prinzen von einem winzigen Planeten?",
-              "answer": "Antoine de Saint-Exupéry",
-              "note": "Die Zeichnungen darin stammen von ihm selbst, auch die Schlange, die einen Elefanten verschluckt hat."
-            },
-            {
               "text": "Welche Engländerin erfand die Ermittler Hercule Poirot und Miss Marple?",
               "answer": "Agatha Christie",
               "note": "Ihr Stück „Die Mausefalle“ wurde 1952 in Nottingham uraufgeführt und lief in London jahrzehntelang."
+            },
+            {
+              "text": "Welcher französische Flieger schrieb das Buch über einen Prinzen von einem winzigen Planeten?",
+              "answer": "Antoine de Saint-Exupéry",
+              "note": "Die Zeichnungen darin stammen von ihm selbst, auch die Schlange, die einen Elefanten verschluckt hat."
             },
             {
               "text": "Wer erzählte vom Verfall einer Lübecker Kaufmannsfamilie über vier Generationen?",
@@ -197,14 +197,14 @@
               "note": "Das Haus war als Naturkundemuseum geplant und wurde 1819 als Gemäldegalerie eröffnet."
             },
             {
-              "text": "Welches Haus auf der Berliner Museumsinsel zeigt die Büste der Nofretete?",
-              "answer": "Das Neue Museum",
-              "note": "Die Büste ist rund 3300 Jahre alt und kam 1913 nach Berlin. Die ganze Insel gehört seit 1999 zum Welterbe."
-            },
-            {
               "text": "In welchem Amsterdamer Haus hängt Rembrandts riesiges Gruppenbild „Die Nachtwache“?",
               "answer": "Im Rijksmuseum",
               "note": "Das Bild ist über vier Meter breit. Es wurde im 18. Jahrhundert beschnitten, damit es an eine Wand passte."
+            },
+            {
+              "text": "Welches Haus auf der Berliner Museumsinsel zeigt die Büste der Nofretete?",
+              "answer": "Das Neue Museum",
+              "note": "Die Büste ist rund 3300 Jahre alt und kam 1913 nach Berlin. Die ganze Insel gehört seit 1999 zum Welterbe."
             }
           ]
         },
@@ -272,14 +272,14 @@
               "note": "Zur Preisverleihung in Stockholm kam er nicht. Patti Smith sang dort eines seiner Lieder."
             },
             {
-              "text": "Welcher Kolumbianer schrieb „Hundert Jahre Einsamkeit“ und wurde 1982 ausgezeichnet?",
-              "answer": "Gabriel García Márquez",
-              "note": "Sein Stil heißt magischer Realismus: Wunderliches wird erzählt, als wäre es ganz gewöhnlich."
-            },
-            {
               "text": "Welcher Autor von „Siddhartha“ und „Der Steppenwolf“ wurde 1946 geehrt?",
               "answer": "Hermann Hesse",
               "note": "Geboren in Calw im Schwarzwald, lebte er ab 1912 in der Schweiz und wurde dort Staatsbürger."
+            },
+            {
+              "text": "Welcher Kolumbianer schrieb „Hundert Jahre Einsamkeit“ und wurde 1982 ausgezeichnet?",
+              "answer": "Gabriel García Márquez",
+              "note": "Sein Stil heißt magischer Realismus: Wunderliches wird erzählt, als wäre es ganz gewöhnlich."
             }
           ]
         },

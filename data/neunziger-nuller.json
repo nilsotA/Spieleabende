@@ -8,6 +8,11 @@
           "name": "Fernsehen damals",
           "questions": [
             {
+              "text": "Welche Quizshow mit Günther Jauch startete 1999 in Deutschland?",
+              "answer": "Wer wird Millionär?",
+              "note": "Das Format kommt aus Großbritannien und läuft in über hundert Ländern. Der Telefonjoker wurde im Handyzeitalter immer schwerer zu schützen."
+            },
+            {
               "text": "Welche Samstagabendshow moderierte Thomas Gottschalk jahrzehntelang?",
               "answer": "Wetten, dass..?",
               "note": "Von 1987 bis 2011 stand Gottschalk dort. Bis zu 23 Millionen Menschen sahen zu – solche Zahlen erreicht heute keine Sendung mehr."
@@ -21,11 +26,6 @@
               "text": "Welche Vorabendserie läuft seit 1992 bei RTL und wird mit vier Buchstaben abgekürzt?",
               "answer": "Gute Zeiten, schlechte Zeiten",
               "note": "„GZSZ“ genügt völlig."
-            },
-            {
-              "text": "Welche Quizshow mit Günther Jauch startete 1999 in Deutschland?",
-              "answer": "Wer wird Millionär?",
-              "note": "Das Format kommt aus Großbritannien und läuft in über hundert Ländern. Der Telefonjoker wurde im Handyzeitalter immer schwerer zu schützen."
             }
           ]
         },
@@ -108,6 +108,11 @@
           "name": "Kino der Neunziger",
           "questions": [
             {
+              "text": "In welchem Film von 1994 hört die Hauptfigur als Kind „Lauf, Forrest, lauf!“?",
+              "answer": "Forrest Gump",
+              "note": "Die Feder am Anfang und am Ende ist am Computer entstanden – für 1994 eine kleine Sensation."
+            },
+            {
               "text": "Welcher Film von 1997 spielt auf einem sinkenden Ozeandampfer?",
               "answer": "Titanic",
               "note": "Elf Oscars – so viele bekamen nur zwei andere Filme. Das echte Wrack liegt in rund 3.800 Metern Tiefe."
@@ -121,11 +126,6 @@
               "text": "In welchem Film von 1999 hat man die Wahl zwischen der roten und der blauen Pille?",
               "answer": "Matrix",
               "note": "Rot heißt: die Wahrheit. Der Ausdruck „rote Pille“ wird bis heute in ganz anderen Zusammenhängen benutzt."
-            },
-            {
-              "text": "In welchem Film von 1994 hört die Hauptfigur als Kind „Lauf, Forrest, lauf!“?",
-              "answer": "Forrest Gump",
-              "note": "Die Feder am Anfang und am Ende ist am Computer entstanden – für 1994 eine kleine Sensation."
             }
           ]
         },
@@ -167,9 +167,9 @@
               "note": "Als Buchgeld gab es ihn schon seit 1999. 2002 kamen Scheine und Münzen – die D-Mark galt noch zwei Monate parallel."
             },
             {
-              "text": "Diese Suchmaschine wurde 1998 gegründet und ist nach einer sehr großen Zahl benannt.",
-              "answer": "Was ist Google?",
-              "note": "Die Zahl heißt „Googol“: eine Eins mit hundert Nullen."
+              "text": "Diese Spielkonsole von Sony kam 1995 nach Europa und spielte Spiele von CD.",
+              "answer": "Was ist die PlayStation?",
+              "note": "Geplant war sie als CD-Laufwerk für Nintendo. Aus dem geplatzten Vertrag wurde die erfolgreichste Konsole ihrer Zeit."
             },
             {
               "text": "Diese graue Handheld-Konsole von Nintendo kam 1989 heraus und hatte ein grünliches Display.",
@@ -177,9 +177,9 @@
               "note": "Vier Graustufen, vier Batterien, über 30 Stunden Laufzeit. Verkauft wurde er mehr als 100 Millionen Mal."
             },
             {
-              "text": "Diese Spielkonsole von Sony kam 1995 nach Europa und spielte Spiele von CD.",
-              "answer": "Was ist die PlayStation?",
-              "note": "Geplant war sie als CD-Laufwerk für Nintendo. Aus dem geplatzten Vertrag wurde die erfolgreichste Konsole ihrer Zeit."
+              "text": "Diese Suchmaschine wurde 1998 gegründet und ist nach einer sehr großen Zahl benannt.",
+              "answer": "Was ist Google?",
+              "note": "Die Zahl heißt „Googol“: eine Eins mit hundert Nullen."
             }
           ]
         },
@@ -192,9 +192,9 @@
               "note": "Zehn Staffeln, 236 Folgen. Das Titellied „I'll Be There for You“ wurde eigens für die Serie geschrieben."
             },
             {
-              "text": "Welche Krankenhausserie startete 1994 und machte George Clooney weltbekannt?",
-              "answer": "Emergency Room",
-              "note": "„ER“ gilt auch."
+              "text": "Welche Mysteryserie folgte den FBI-Agenten Mulder und Scully?",
+              "answer": "Akte X",
+              "note": "„Die Wahrheit ist irgendwo da draußen.“ Neun Staffeln liefen am Stück, viel später kamen noch zwei dazu."
             },
             {
               "text": "In welcher Serie lebt die Familie Bundy in Chicago?",
@@ -202,9 +202,9 @@
               "note": "Im Original heißt sie „Married… with Children“. Al Bundy verkauft Damenschuhe und erzählt ständig von seinen vier Touchdowns."
             },
             {
-              "text": "Welche Mysteryserie folgte den FBI-Agenten Mulder und Scully?",
-              "answer": "Akte X",
-              "note": "„Die Wahrheit ist irgendwo da draußen.“ Neun Staffeln liefen am Stück, viel später kamen noch zwei dazu."
+              "text": "Welche Krankenhausserie startete 1994 und machte George Clooney weltbekannt?",
+              "answer": "Emergency Room",
+              "note": "„ER“ gilt auch."
             }
           ]
         },
@@ -237,6 +237,11 @@
           "name": "Handy-Zeitalter",
           "questions": [
             {
+              "text": "Welches Tier sang Mitte der Nuller den deutschen Klingelton-Hit „Ich bin Schnappi“?",
+              "answer": "Ein Krokodil",
+              "note": "„Schnappi“ war ursprünglich ein Kinderlied aus einer WDR-Sendung und stand 2005 wochenlang auf Platz eins."
+            },
+            {
               "text": "Wofür steht die Abkürzung SMS?",
               "answer": "Short Message Service",
               "note": "Gedacht war er nur als Nebenkanal für Technikmeldungen. 160 Zeichen, weil genau so viel Platz übrig war."
@@ -250,11 +255,6 @@
               "text": "Welche Funktechnik für kurze Strecken ist nach einem dänischen Wikingerkönig benannt?",
               "answer": "Bluetooth",
               "note": "Harald Blauzahn – das Zeichen sind seine verbundenen Initialen in Runen."
-            },
-            {
-              "text": "Welches Tier sang Mitte der Nuller den deutschen Klingelton-Hit „Ich bin Schnappi“?",
-              "answer": "Ein Krokodil",
-              "note": "„Schnappi“ war ursprünglich ein Kinderlied aus einer WDR-Sendung und stand 2005 wochenlang auf Platz eins."
             }
           ]
         },
@@ -297,14 +297,14 @@
               "note": "Weltmeister wurde Italien, Deutschland holte den dritten Platz. In Erinnerung blieben eher die Fanmeilen."
             },
             {
-              "text": "In welchem Jahr lief die erste deutsche Staffel von „Big Brother“?",
-              "answer": "2000",
-              "note": "Die erste Staffel lief 106 Tage. Ob so ein Format mit der Menschenwürde vereinbar ist, wurde damals ernsthaft gestritten."
-            },
-            {
               "text": "In welchem Jahr wurde Deutschland zuletzt Fußball-Europameister?",
               "answer": "1996",
               "note": "In England, 2:1 im Finale gegen Tschechien."
+            },
+            {
+              "text": "In welchem Jahr lief die erste deutsche Staffel von „Big Brother“?",
+              "answer": "2000",
+              "note": "Die erste Staffel lief 106 Tage. Ob so ein Format mit der Menschenwürde vereinbar ist, wurde damals ernsthaft gestritten."
             }
           ]
         }
