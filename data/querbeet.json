@@ -98,9 +98,9 @@
               "note": "Diese Anomalie rettet Fische: Das kälteste Wasser steigt nach oben und friert dort, der Grund bleibt flüssig."
             },
             {
-              "text": "Wie nennt man den Übergang, bei dem Eis ohne Schmelzen direkt zu Wasserdampf wird?",
-              "answer": "Sublimation",
-              "note": "Trockeneis macht nichts anderes: Es hinterlässt keine Pfütze, sondern nur Nebel."
+              "text": "Wie heißt der Effekt, durch den Wasser in einem haarfeinen Röhrchen von selbst nach oben steigt?",
+              "answer": "Der Kapillareffekt",
+              "note": "So saugt sich auch Löschpapier voll – und zusammen mit der Verdunstung an den Blättern kommt Wasser so in hohe Baumkronen."
             }
           ]
         },
@@ -212,9 +212,9 @@
           "name": "Bekannte Bauwerke",
           "questions": [
             {
-              "text": "In welcher Stadt steht das Opernhaus mit den weißen Segeldächern am Hafen?",
-              "answer": "In Sydney",
-              "note": "Die Dächer bestehen aus über einer Million Keramikfliesen in zwei Farbtönen – rein weiß sind sie nicht."
+              "text": "In welcher Stadt steht das Kolosseum?",
+              "answer": "In Rom",
+              "note": "Bis zu 50.000 Zuschauer sahen dort Tierhetzen und Gladiatorenkämpfe – eingeweiht wurde es im Jahr 80 nach Christus."
             },
             {
               "text": "Welches Hochhaus in New York war ab 1931 vierzig Jahre lang das höchste Gebäude der Welt?",

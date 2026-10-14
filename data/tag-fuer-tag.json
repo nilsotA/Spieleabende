@@ -83,9 +83,9 @@
           "name": "Unterwegs",
           "questions": [
             {
-              "text": "Was bedeutet das Kürzel ICE bei der Deutschen Bahn?",
-              "answer": "Intercity-Express",
-              "note": "Der erste fuhr 1991. Intern heißt die älteste Baureihe schlicht 401 – Wagen ohne eigenen Antrieb."
+              "text": "Wie heißt die Karte, mit der man ein Jahr lang zum halben Preis Bahn fährt?",
+              "answer": "Die BahnCard 50",
+              "note": "Die erste BahnCard gab es 1992 – damals nur als Halbpreiskarte. Die Varianten mit 25 und 100 Prozent kamen später."
             },
             {
               "text": "Warum sollen Reisende am Bahnsteig hinter der weißen Linie bleiben?",
@@ -94,7 +94,7 @@
             },
             {
               "text": "Wofür steht das S in S-Bahn?",
-              "answer": "Für Stadtschnellbahn",
+              "answer": "Für Stadtschnellbahn (auch: Schnellbahn)",
               "note": "Berlin führte den Namen 1930 ein. Das weiße S auf grünem Grund stammt aus derselben Zeit."
             },
             {

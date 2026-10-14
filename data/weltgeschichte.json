@@ -133,11 +133,6 @@
           "name": "Berühmte Sätze",
           "questions": [
             {
-              "text": "Wer sagte bei der ersten Mondlandung „Ein kleiner Schritt für einen Menschen …“?",
-              "answer": "Neil Armstrong",
-              "note": "Er beharrte darauf, „a man“ gesagt zu haben. Auf der Aufnahme ist das kleine „a“ nicht zu hören."
-            },
-            {
               "text": "Wer soll gesagt haben „Ich weiß, dass ich nichts weiß“?",
               "answer": "Sokrates",
               "note": "Überliefert hat es Platon – wörtlich so gesagt hat Sokrates es wohl nie."
@@ -151,6 +146,11 @@
               "text": "Wer soll gesagt haben „Wenn sie kein Brot haben, sollen sie doch Kuchen essen“?",
               "answer": "Marie-Antoinette",
               "note": "Belegt ist es nicht – der Satz stand schon vor ihrer Zeit bei Rousseau."
+            },
+            {
+              "text": "Wer versprach seinem Land 1940 nichts als „Blut, Mühe, Tränen und Schweiß“?",
+              "answer": "Winston Churchill",
+              "note": "Gesagt am 13. Mai 1940 im Unterhaus, drei Tage nach seiner Ernennung zum Premierminister."
             }
           ]
         }

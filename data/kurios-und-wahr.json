@@ -24,7 +24,7 @@
             },
             {
               "text": "Welches Tier hat den größten Augapfel aller lebenden Tiere?",
-              "answer": "Der Riesenkalmar",
+              "answer": "Der Riesenkalmar (auch: Koloss-Kalmar)",
               "note": "Sein Auge misst rund 25 Zentimeter – wie ein Fußball."
             }
           ]
@@ -187,9 +187,9 @@
           "name": "Rekorde der Natur",
           "questions": [
             {
-              "text": "Welche Wüste ist die größte Trockenwüste der Erde?",
+              "text": "Welche Wüste ist die größte heiße Wüste der Erde?",
               "answer": "Die Sahara",
-              "note": "Die Antarktis ist als Kältewüste größer – gefragt ist die heiße."
+              "note": "Die Antarktis ist als Kältewüste noch größer – Wüste heißt nur: kaum Niederschlag."
             },
             {
               "text": "Wie heißt die tiefste bekannte Stelle der Weltmeere?",

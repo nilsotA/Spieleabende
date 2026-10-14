@@ -690,6 +690,15 @@ Suche nach Wortteilen findet über hundert Stellen, und die meisten sind harmlos
 23 Fragen ersetzt worden: solche Geschenke, die beiden einzigen, die in zwei
 Sätzen wortgleich standen, und ein paar, die schlicht zu flach waren.
 
+Danach kam eine Faktenprüfung. Falsch war die Clementine (nicht Mandarine ×
+Bitterorange, sondern × Süßorange, wie Erbgutanalysen zeigen), schief der
+Skeleton („mit den Armen voran“ – die liegen am Körper), nicht eindeutig
+„Telefon oder Glühbirne zuerst?“. Dazu neun Paare, die in verschiedenen Sätzen
+dasselbe fragten, nur anders formuliert – „Wofür steht ICE?“ zweimal, das
+Opernhaus in Sydney zweimal, der Wanderfalke im Sturzflug zweimal. Die
+Prüfung auf gleiche Lösungen findet so etwas erst ab zwei gemeinsamen Wörtern;
+darunter hilft nur Lesen.
+
 ### Mitgeliefert
 
 Sechsundzwanzig fertige Sätze mit je 48 Fragen – zusammen 1248, keine doppelt. Jede einzelne
