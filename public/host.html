@@ -358,6 +358,16 @@
       <p class="muted small">Schon mal gespielt? Eine unberührte Spalte bekommt eine andere Kategorie aus allen Sätzen. Lässt sich zurücknehmen.</p>
       <div id="menu-tausch-liste" class="menu-tausch-liste"></div>
     </div>
+    <!-- Die Uhren auch mitten im Spiel: „20 Sekunden sind zu knapp" fällt
+         meist erst nach drei Fragen auf. Die Auswahl kopiert host.js aus der
+         Lobby, damit beide Listen nicht auseinanderlaufen. -->
+    <div id="menu-uhren" class="spick menu-uhren">
+      <h3>Uhren</h3>
+      <div class="menu-uhren-felder">
+        <label>Antwortzeit fürs Zugteam <select id="menu-antwortuhr"></select></label>
+        <label>Uhr beim freien Buzzer <select id="menu-buzzuhr"></select></label>
+      </div>
+    </div>
     <!-- Spickzettel: die Regeln, wie sie für DIESE Runde eingestellt sind -->
     <div id="menu-regeln" class="spick">
       <h3>Spickzettel</h3>

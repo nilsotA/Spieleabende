@@ -527,6 +527,8 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
   nichts**: Wer bei „Zeit ist um“ gerade die Antwort ausspricht, bekommt sie, wenn du
   es so willst. In der Pause steht sie still, und sagt das Zugteam „weiß nicht“,
   übernimmt die Buzzer-Uhr, sofern sie eingeschaltet ist.
+  Beide Uhren lassen sich auch mitten im Spiel umstellen – im Menü (`⋯`) unter
+  „Uhren“. Läuft gerade eine Frage, rechnet die Uhr sofort mit der neuen Dauer weiter.
 - **Uhr beim freien Buzzer:** normalerweise aus. Eingeschaltet (10 bis 30 Sekunden)
   zieht sich der goldene Lichtbalken über der Bühne zusammen, und am Schild unter
   der Frage, auf Handy und Fernbedienung läuft die Sekundenzahl mit. Sie **wertet

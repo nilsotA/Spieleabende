@@ -1962,6 +1962,8 @@ body.host.flat .tile {
    abgeschnitten. */
 .menu-tausch p { margin: 0 0 0.6rem; }
 .menu-tausch-liste { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.menu-uhren-felder { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
+.menu-uhren-felder label { display: flex; flex-direction: column; gap: 0.25rem; flex: 1 1 12rem; }
 .wiederbanner .btn { white-space: nowrap; }
 
 /* Dieselbe Leiste in Rot: Der Spielstand kommt nicht auf die Platte. Rot,

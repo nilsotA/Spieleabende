@@ -170,6 +170,16 @@ for (const [id, key, parse] of [
   $(id).addEventListener('change', (ev) => act('settings', { settings: { [key]: parse(ev.target.value) } }));
 }
 
+// Dieselben Uhren im Menü – die Stufen kommen aus der Lobby, nicht aus einer
+// zweiten Liste hier.
+for (const [menu, lobby, key] of [
+  ['#menu-antwortuhr', '#set-antwortuhr', 'antwortUhr'],
+  ['#menu-buzzuhr', '#set-buzzuhr', 'buzzUhr'],
+]) {
+  $(menu).innerHTML = $(lobby).innerHTML;
+  $(menu).addEventListener('change', (ev) => act('settings', { settings: { [key]: Number(ev.target.value) } }));
+}
+
 async function loadSets() {
   try {
     const sets = await (await fetch('/api/sets')).json();
@@ -3062,6 +3072,11 @@ function fuelleTausch() {
 function fillMenu() {
   fuelleSpickzettel();
   fuelleTausch();
+  // Nicht unter dem Finger umstellen: fillMenu läuft bei jedem Rundruf.
+  for (const [id, key] of [['#menu-antwortuhr', 'antwortUhr'], ['#menu-buzzuhr', 'buzzUhr']]) {
+    const feld = $(id);
+    if (document.activeElement !== feld) feld.value = String(state.settings[key] || 0);
+  }
   menuRandPruefen();
   const list = $('#menu-teams');
   // Solange das Menü offen ist, läuft das bei jedem Broadcast – auch wenn nur

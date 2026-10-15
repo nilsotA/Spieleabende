@@ -680,7 +680,9 @@ export function wenigerBewegung() {
  * `schluessel` ändert sich genau dann, wenn eine neue Uhr beginnt: eine neue
  * Frage, ein weiteres Team gesperrt. Der Fragetext steckt mit drin, weil eine
  * gestrichene Frage dasselbe Feld mit einer Ersatzfrage neu aufruft – ohne ihn
- * liefe die Uhr der alten einfach weiter.
+ * liefe die Uhr der alten einfach weiter. Die Dauer steckt ebenfalls drin:
+ * Stellt der Host sie mitten in der Frage im Menü um, rechnet die Uhr sofort
+ * mit der neuen weiter – ab demselben Beginn.
  */
 export function laufendeUhr(state) {
   const q = state?.current;
@@ -691,7 +693,7 @@ export function laufendeUhr(state) {
       art: 'antwort',
       dauer: s.antwortUhr * 1000,
       offenMs: q.antwortOffenMs,
-      schluessel: `a:${q.catIdx}:${q.rowIdx}:${q.text}`,
+      schluessel: `a:${s.antwortUhr}:${q.catIdx}:${q.rowIdx}:${q.text}`,
     };
   }
   if (q.step === 'buzz' && !q.buzzedTeamId && s.buzzUhr > 0) {
@@ -699,7 +701,7 @@ export function laufendeUhr(state) {
       art: 'buzz',
       dauer: s.buzzUhr * 1000,
       offenMs: q.buzzOffenMs,
-      schluessel: `b:${q.catIdx}:${q.rowIdx}:${q.text}:${(q.lockedOut || []).length}`,
+      schluessel: `b:${s.buzzUhr}:${q.catIdx}:${q.rowIdx}:${q.text}:${(q.lockedOut || []).length}`,
     };
   }
   return null;
