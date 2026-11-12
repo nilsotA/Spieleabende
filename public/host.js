@@ -1074,7 +1074,11 @@ function renderBoard() {
       // Feld, das längst schwarz ist. Gesperrt ist es trotzdem: `disabled`
       // hängt unverändert an cell.used, nachfassen kann also niemand.
       const offeneFrage = state.current?.catIdx === catIdx && state.current?.rowIdx === rowIdx;
-      tile.classList.toggle('used', cell.used && !offeneFrage);
+      // … und noch den Augenblick danach, in dem das Panel in das Feld
+      // zurückfährt (`schliesseFrage`): Es soll in ein leuchtendes Feld
+      // einfahren und das Feld erst dann abschalten.
+      const haelt = abschaltFeld === `${catIdx}-${rowIdx}`;
+      tile.classList.toggle('used', cell.used && !offeneFrage && !haelt);
       tile.disabled = cell.used || state.phase !== 'board';
     });
   });
@@ -1140,10 +1144,9 @@ function renderQuestion(prev) {
   clearTimeout(schliessZeit);
   schliessZeit = null;
   box.classList.remove('zu');
-  // Was der Timer noch erledigt hätte: Die Kachel der Vorfrage darf ihre
-  // Abschalt-Animation nicht behalten, sonst liefe sie beim nächsten Aufbau
-  // des Boards erneut.
-  for (const kachel of $$('.tile.picked')) kachel.classList.remove('picked');
+  // Was der Timer noch erledigt hätte: Die Kachel der Vorfrage ist jetzt
+  // einfach aus – ohne Abschalt-Animation hinter der neuen Frage.
+  beendeAbschalten(true);
   box.hidden = false;
   // Das Feld ist gewählt – egal ob auf der Leinwand angeklickt oder auf dem
   // Handy angetippt. `prev` ist nur beim allerersten Zustand leer: Ein Reload
@@ -1401,6 +1404,49 @@ function openFromTile(panel, q) {
  * ins Leere tippen.
  */
 let schliessZeit = null;
+/*
+ * Das Feld der eben beendeten Frage, solange es noch nicht abgeschaltet ist.
+ *
+ * Ablauf: Das Panel fährt in das noch leuchtende Feld zurück (320 ms), dann
+ * drückt sich das Feld einmal ein und geht am tiefsten Punkt aus. Vorher
+ * schaltete es sofort ab – hinter dem Panel, wo es niemand sah –, und beim
+ * Entfernen der Klasse `picked` lief die Aufbau-Animation der Wand noch einmal
+ * an: Das Feld verschwand, kam wieder und fiel dann erst weg.
+ */
+let abschaltFeld = null;
+let abschaltZeit = null;
+// Ist ein Feld einmal aufgebaut, hört es auf die Aufbau-Animation nicht mehr
+// (`.tile.steht` in host.css).
+$('#board')?.addEventListener('animationend', (ev) => {
+  if (ev.animationName === 'panelBoot') ev.target.classList?.add('steht');
+});
+function beendeAbschalten(sofort) {
+  clearTimeout(abschaltZeit);
+  abschaltZeit = null;
+  const feld = abschaltFeld;
+  abschaltFeld = null;
+  for (const kachel of $$('.tile.picked')) kachel.classList.remove('picked');
+  if (!feld) return;
+  const tile = $(`[data-cell="${feld}"]`);
+  if (!tile) return;
+  // Nur abschalten, was wirklich gespielt ist – ein „Zurücknehmen" in diesem
+  // Augenblick hat die Frage wieder geöffnet.
+  const [c, r] = feld.split('-').map(Number);
+  const gespielt = !!state?.board?.categories?.[c]?.cells?.[r]?.used;
+  const offen = state?.current?.catIdx === c && state?.current?.rowIdx === r;
+  if (!gespielt || offen) return;
+  if (sofort) {
+    tile.classList.add('used');
+    return;
+  }
+  tile.classList.add('steht', 'picked');
+  // Am tiefsten Punkt des Eindrückens geht das Licht aus.
+  abschaltZeit = setTimeout(() => {
+    tile.classList.add('used');
+    abschaltZeit = setTimeout(() => tile.classList.remove('picked'), 300);
+  }, 150);
+}
+
 function schliesseFrage(box, panel, altQ) {
   const tile = $(`[data-cell="${altQ.catIdx}-${altQ.rowIdx}"]`);
   const p = panel.getBoundingClientRect();
@@ -1417,16 +1463,20 @@ function schliesseFrage(box, panel, altQ) {
   panel.style.animation = 'panelZu 320ms var(--ease) forwards';
   setBuzzIndicator('aus');
 
-  // Jetzt erst darf die Kachel ausgehen – sichtbar, vor freier Wand.
-  tile.classList.add('picked');
+  // Das Feld bleibt an, bis das Panel in ihm angekommen ist.
+  beendeAbschalten(true);
+  abschaltFeld = `${altQ.catIdx}-${altQ.rowIdx}`;
+  tile.classList.add('steht');
+  tile.classList.remove('used');
 
   clearTimeout(schliessZeit);
   schliessZeit = setTimeout(() => {
     box.hidden = true;
     box.classList.remove('zu');
     panel.style.animation = '';
-    tile.classList.remove('picked');
-  }, 320);
+    // Jetzt erst geht die Kachel aus – sichtbar, vor freier Wand.
+    beendeAbschalten(false);
+  }, 300);
 }
 
 function setBuzzIndicator(mode) {

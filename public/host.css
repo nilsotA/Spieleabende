@@ -645,13 +645,18 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   from { opacity: 0; transform: translateY(16px) scale(0.97); }
 }
 
+/* Ist die Wand einmal aufgebaut, läuft ihre Aufbau-Animation nicht noch
+   einmal an. Ohne diese Regel fiel ein Feld, dem eine andere Animation wieder
+   abgenommen wurde, auf `panelBoot` zurück – und blendete sich neu ein. */
+.tile.steht { animation: none; }
+
 /* Das Feld schaltet ab, wenn die Frage durch ist: einmal eindrücken und
-   einrasten. Die Klasse wurde bisher gesetzt und wieder entfernt, ohne dass
-   irgendeine Regel darauf hörte – das Panel sprang hart von Blau auf Schwarz. */
-.tile.picked { animation: panelAus 500ms var(--ease); }
+   einrasten. Am tiefsten Punkt (nach 150 ms) setzt host.js `used` – dort geht
+   das Licht aus. */
+.tile.picked { animation: panelAus 450ms var(--ease); }
 @keyframes panelAus {
-  0% { transform: translateY(-7px) scale(1.035); }
-  55% { transform: translateY(2px) scale(0.982); }
+  0% { transform: none; }
+  33% { transform: translateY(3px) scale(0.95); }
   100% { transform: none; }
 }
 
