@@ -61,6 +61,12 @@ export function speicherImArbeitsspeicher({ jetzt = () => Date.now() } = {}) {
       return e?.weg ? JSON.parse(e.weg) : [];
     },
 
+    /** Raum und Rückweg zusammen – im Netz eine Reise statt zweier. */
+    async ladeMitWeg(code) {
+      const e = hole(code);
+      return e ? { daten: JSON.parse(e.json), weg: e.weg ? JSON.parse(e.weg) : [] } : { daten: null, weg: [] };
+    },
+
     /** `erwartet` −1 heißt: Den Raum darf es noch nicht geben. */
     async schreibe(code, erwartet, daten, weg) {
       const e = hole(code);
@@ -176,6 +182,11 @@ export function speicherUpstash({ url, token, fetchen = fetch, jetzt = () => Dat
     async ladeWeg(code) {
       const roh = await befehl(['GET', k.weg(code)]);
       return roh ? JSON.parse(roh) : [];
+    },
+
+    async ladeMitWeg(code) {
+      const [raum, weg] = await rutsch([['GET', k.raum(code)], ['GET', k.weg(code)]]);
+      return { daten: raum ? JSON.parse(raum) : null, weg: weg ? JSON.parse(weg) : [] };
     },
 
     async schreibe(code, erwartet, daten, weg) {

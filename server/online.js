@@ -16,8 +16,13 @@
  *     dieselben Regeln an wie am Laptop (spiel.js) und legt ihn zurück – aber
  *     nur, wenn inzwischen niemand anderes geschrieben hat.
  *   - Die Geräte fragen nach, statt zuzuhören: „Ich habe Stand 17, gibt es
- *     Neueres?" Das kostet einen einzigen kleinen Lesezugriff, solange sich
- *     nichts getan hat.
+ *     Neueres?" Die Frage bleibt bis zu neun Sekunden beim Server liegen und
+ *     wird in dem Augenblick beantwortet, in dem sich etwas tut (`halte`).
+ *     Landet der Zug in derselben Funktionsinstanz – auf Vercel der
+ *     Normalfall –, weckt er die Wartenden direkt; sonst merkt es die
+ *     wartende Anfrage beim nächsten kleinen Blick in den Speicher.
+ *   - Wer selbst etwas tut, bekommt den neuen Stand gleich mit der Antwort
+ *     und muss ihn nicht erst abholen.
  *
  * Diese Datei kennt weder Vercel noch einen bestimmten Speicher. `erzeugeOnline`
  * bekommt den Speicher gereicht und gibt eine Funktion zurück, die eine
@@ -52,6 +57,23 @@ const BILD_MAX_ZEICHEN = 900000;
 const SIGNALE_MAX = 8;
 const GEHEIMNISSE_MAX = 200;
 const SCHREIB_VERSUCHE = 8;
+/* So lange bleibt eine Nachfrage höchstens liegen. Unter der Laufzeitgrenze
+   der Funktion (vercel.json) und über dem Abstand, in dem sich die Geräte
+   ohnehin melden. */
+const HALTE_MAX_MS = 9000;
+/* In diesem Abstand sieht eine liegende Nachfrage selbst im Speicher nach –
+   für den Fall, dass der Zug in einer anderen Instanz ankam. Das Gerät nennt
+   seinen Wunsch (während einer Frage kürzer), der Server hält ihn in Grenzen. */
+const NACHSEHEN_MIN_MS = 400;
+const NACHSEHEN_MAX_MS = 5000;
+/* Weckt diese Instanz ihre Wartenden nachweislich selbst, darf der Blick in
+   den Speicher seltener werden – er ist dann nur noch das Netz unter dem Seil.
+   Fällt doch einmal eine fremde Änderung auf, gilt zehn Minuten wieder der
+   kurze Abstand. */
+const NACHSEHEN_GELASSEN = 3;
+const FREMD_FRIST_MS = 10 * 60 * 1000;
+/* So viele Räume behält eine Instanz im Kopf (siehe `gedaechtnis`). */
+const GEDAECHTNIS_MAX = 40;
 const MAX_BODY_BYTES = 4 * 1024 * 1024;
 
 const MIME_BILD = {
@@ -118,6 +140,121 @@ function frischerRaum(code, jetzt) {
 }
 
 export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'online' }) {
+  const instanz = randomBytes(4).toString('hex');
+
+  /* ----------------------------------------------- Was die Instanz behält
+   *
+   * Verlassen darf sich das Spiel auf nichts davon: Die nächste Anfrage kann
+   * woanders landen. Aber solange sie hier landet, spart es Wege.
+   *
+   * `gedaechtnis`: der Raum, wie diese Instanz ihn zuletzt gelesen oder
+   * geschrieben hat. Ein Zug rechnet zuerst damit und schreibt – das Schreiben
+   * prüft ohnehin die Fassung. Stimmt sie, hat der Zug eine Reise zum Speicher
+   * gebraucht statt zweier. Stimmt sie nicht (oder endet der Zug mit einem
+   * Fehler, der an einem veralteten Stand liegen könnte), wird frisch gelesen
+   * und noch einmal gerechnet. Gültig wird also nie etwas, das auf einem alten
+   * Stand beruht.
+   *
+   * `wartende`: die liegenden Nachfragen je Raum.
+   * `lage`: ob diese Instanz Züge des Raums selbst sieht und wann zuletzt eine
+   * Änderung an ihr vorbeiging.
+   */
+  const gedaechtnis = new Map(); // code -> { rev, json, wegJson }
+  const wartende = new Map(); // code -> Set<(daten) => void>
+  const lage = new Map(); // code -> { eigene, fremdAm }
+
+  function merke(code, daten, wegJson) {
+    gedaechtnis.delete(code);
+    gedaechtnis.set(code, { rev: daten.rev, json: JSON.stringify(daten), wegJson });
+    if (gedaechtnis.size > GEDAECHTNIS_MAX) {
+      const aeltester = gedaechtnis.keys().next().value;
+      gedaechtnis.delete(aeltester);
+      lage.delete(aeltester);
+    }
+  }
+  /** Frisch gelesen. Der Rückweg im Kopf gilt weiter, wenn die Fassung dieselbe ist. */
+  function merkeGelesen(code, daten, weg) {
+    const alt = gedaechtnis.get(code);
+    merke(code, daten, weg !== undefined
+      ? JSON.stringify(weg)
+      : (alt && alt.rev === daten.rev ? alt.wegJson : undefined));
+  }
+  /** Schreibt – und behält bei Erfolg, was jetzt im Speicher steht. */
+  async function lege(code, erwartet, daten, weg) {
+    if (!await speicher.schreibe(code, erwartet, daten, weg)) {
+      gedaechtnis.delete(code);
+      return false;
+    }
+    const alt = gedaechtnis.get(code);
+    merke(code, daten, weg !== undefined
+      ? JSON.stringify(weg)
+      : (alt && alt.rev === erwartet ? alt.wegJson : undefined));
+    return true;
+  }
+
+  const lageVon = (code) => {
+    if (!lage.has(code)) lage.set(code, { eigene: false, fremdAm: -Infinity });
+    return lage.get(code);
+  };
+
+  /** Der Raum hat einen neuen sichtbaren Stand – wer hier wartet, bekommt ihn. */
+  function wecke(code, daten) {
+    lageVon(code).eigene = true;
+    const menge = wartende.get(code);
+    if (menge) for (const fn of [...menge]) fn(daten);
+  }
+
+  /**
+   * Lässt eine Nachfrage liegen, bis sich der Raum ändert.
+   *
+   * Ergebnis: `{ daten }` – hier geweckt, der neue Stand liegt bei;
+   * `{ neu: true }` – der Blick in den Speicher zeigt eine andere Nummer;
+   * `{}` – die Zeit ist um, nichts geschehen.
+   */
+  function halte(code, seit, dauer, takt, res) {
+    return new Promise((fertig) => {
+      let erledigt = false;
+      let zeit = null;
+      const menge = wartende.get(code) || new Set();
+      wartende.set(code, menge);
+      const ende = (was) => {
+        if (erledigt) return;
+        erledigt = true;
+        clearTimeout(zeit);
+        clearTimeout(frist);
+        menge.delete(geweckt);
+        if (!menge.size && wartende.get(code) === menge) wartende.delete(code);
+        res.off?.('close', aufgelegt);
+        fertig(was);
+      };
+      const geweckt = (daten) => ende({ daten });
+      const aufgelegt = () => ende({});
+      const abstand = () => {
+        const l = lageVon(code);
+        const gelassen = l.eigene && jetzt() - l.fremdAm > FREMD_FRIST_MS;
+        return Math.min(NACHSEHEN_MAX_MS, takt * (gelassen ? NACHSEHEN_GELASSEN : 1));
+      };
+      const siehNach = async () => {
+        try {
+          const kopf = await speicher.kopf(code);
+          if (erledigt) return;
+          if (!kopf || kopf.nummer !== seit) {
+            lageVon(code).fremdAm = jetzt();
+            return ende({ neu: true });
+          }
+        } catch {
+          /* der Speicher hakt – beim nächsten Blick noch einmal */
+        }
+        if (!erledigt) zeit = setTimeout(siehNach, abstand());
+        return undefined;
+      };
+      menge.add(geweckt);
+      res.on?.('close', aufgelegt);
+      const frist = setTimeout(() => ende({}), dauer);
+      zeit = setTimeout(siehNach, abstand());
+    });
+  }
+
   /* ------------------------------------------------------------ Antworten */
 
   function sende(res, code, type, body, kopf = {}) {
@@ -297,39 +434,71 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
     const puls = !!clientId && url.searchParams.has('puls');
     const geraete = puls ? await speicher.puls(wer.code, clientId, willHost) : null;
     const seit = url.searchParams.has('seit') ? Number(url.searchParams.get('seit')) : NaN;
-    // Der billige Weg: nichts Neues, keine Meldung – ein einziger Lesezugriff.
-    if (!geraete && seit === kopf.nummer) return json(res, 200, { unveraendert: true, nummer: kopf.nummer });
+    const zahl = (name, vor) => {
+      const n = Number(url.searchParams.get(name));
+      return Number.isFinite(n) && n > 0 ? n : vor;
+    };
+    const warte = Number.isNaN(seit) ? 0 : Math.min(HALTE_MAX_MS, zahl('warte', 0));
+    const takt = Math.max(NACHSEHEN_MIN_MS, Math.min(NACHSEHEN_MAX_MS, zahl('takt', 1000)));
+    const nichtsNeues = () => json(res, 200, { unveraendert: true, nummer: seit });
 
-    for (let versuch = 0; versuch < SCHREIB_VERSUCHE; versuch++) {
-      const daten = await speicher.lade(wer.code);
-      if (!daten) return keinRaum(res);
-      const isHost = willHost && gleich(wer.hostGeheim, daten.hostGeheim);
-      const rev = daten.rev;
+    /**
+     * Liest den Raum, bringt Anwesenheit und Geheimnis in Ordnung und
+     * antwortet. Gibt true zurück, statt zu antworten, wenn das Gerät den
+     * Stand schon hat und warten möchte.
+     */
+    async function frisch(gemeldet) {
+      for (let versuch = 0; versuch < SCHREIB_VERSUCHE; versuch++) {
+        const daten = await speicher.lade(wer.code);
+        if (!daten) return keinRaum(res);
+        const isHost = willHost && gleich(wer.hostGeheim, daten.hostGeheim);
+        const rev = daten.rev;
 
-      const vorbei = abendVorbei(daten);
-      let sichtbar = vorbei;
-      let still = false; // Änderungen, die niemand auf dem Bildschirm sieht
-      if (geraete && gleicheAnwesenheitAb(daten, geraete)) sichtbar = true;
-      if (clientId && !daten.geheim[clientId]) {
-        daten.geheim[clientId] = randomUUID();
-        vergissAlteGeheimnisse(daten);
-        still = true;
+        const vorbei = abendVorbei(daten);
+        let sichtbar = vorbei;
+        let still = false; // Änderungen, die niemand auf dem Bildschirm sieht
+        if (gemeldet && gleicheAnwesenheitAb(daten, gemeldet)) sichtbar = true;
+        if (clientId && !daten.geheim[clientId]) {
+          daten.geheim[clientId] = randomUUID();
+          vergissAlteGeheimnisse(daten);
+          still = true;
+        }
+        if (sichtbar || still) {
+          daten.rev = rev + 1;
+          if (sichtbar) daten.nummer += 1;
+          if (vorbei) daten.geaendertAm = jetzt();
+          if (!await lege(wer.code, rev, daten, vorbei ? [] : undefined)) continue;
+          if (sichtbar) wecke(wer.code, daten);
+        } else {
+          merkeGelesen(wer.code, daten);
+        }
+        if (gemeldet) {
+          const alt = Object.entries(gemeldet)
+            .filter(([, g]) => jetzt() - g.zeit > GERAET_VERGESSEN_MS).map(([id]) => id);
+          if (alt.length) await speicher.vergissGeraete(wer.code, alt);
+        }
+        if (seit === daten.nummer) return warte ? true : nichtsNeues();
+        return sende(res, 200, 'application/json; charset=utf-8', sichtFuer(daten, { isHost, clientId }));
       }
-      if (sichtbar || still) {
-        daten.rev = rev + 1;
-        if (sichtbar) daten.nummer += 1;
-        if (vorbei) daten.geaendertAm = jetzt();
-        if (!await speicher.schreibe(wer.code, rev, daten, vorbei ? [] : undefined)) continue;
-      }
-      if (geraete) {
-        const alt = Object.entries(geraete)
-          .filter(([, g]) => jetzt() - g.zeit > GERAET_VERGESSEN_MS).map(([id]) => id);
-        if (alt.length) await speicher.vergissGeraete(wer.code, alt);
-      }
-      if (seit === daten.nummer) return json(res, 200, { unveraendert: true, nummer: daten.nummer });
-      return sende(res, 200, 'application/json; charset=utf-8', sichtFuer(daten, { isHost, clientId }));
+      return json(res, 503, { error: 'Gerade ist zu viel los – gleich noch einmal.' });
     }
-    return json(res, 503, { error: 'Gerade ist zu viel los – gleich noch einmal.' });
+
+    // Der billige Weg: nichts Neues, keine Meldung – ein einziger Lesezugriff.
+    if (geraete || seit !== kopf.nummer) {
+      if (await frisch(geraete) !== true) return undefined;
+    } else if (!warte) {
+      return nichtsNeues();
+    }
+
+    // Das Gerät hat den Stand schon. Die Frage bleibt liegen, bis sich etwas tut.
+    const was = await halte(wer.code, seit, warte, takt, res);
+    if (was.daten && was.daten.nummer !== seit && (!clientId || was.daten.geheim[clientId])) {
+      const isHost = willHost && gleich(wer.hostGeheim, was.daten.hostGeheim);
+      return sende(res, 200, 'application/json; charset=utf-8', sichtFuer(was.daten, { isHost, clientId }));
+    }
+    if (!was.daten && !was.neu) return nichtsNeues();
+    if (await frisch(null) === true) return nichtsNeues();
+    return undefined;
   }
 
   async function aktion(req, res, url) {
@@ -345,21 +514,42 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
     const wer = ausweis(req, url, willHost, body);
     if (!wer.code) return keinRaum(res, 'Kein Raum gewählt.');
 
+    const wegNoetig = RUECKNEHMBAR.has(type) || type === 'undo' || type === 'discard';
     for (let versuch = 0; versuch < SCHREIB_VERSUCHE; versuch++) {
-      const daten = await speicher.lade(wer.code);
+      // Erst mit dem Stand rechnen, den diese Instanz im Kopf hat – siehe
+      // `gedaechtnis`. Geht das schief, gleich noch einmal mit frisch gelesenem.
+      const imKopf = versuch === 0 ? gedaechtnis.get(wer.code) : null;
+      const vermutet = !!imKopf && (!wegNoetig || imKopf.wegJson !== undefined);
+      let daten;
+      let wegRoh;
+      if (vermutet) {
+        daten = JSON.parse(imKopf.json);
+        wegRoh = imKopf.wegJson !== undefined ? JSON.parse(imKopf.wegJson) : undefined;
+      } else if (wegNoetig) {
+        ({ daten, weg: wegRoh } = await speicher.ladeMitWeg(wer.code));
+        if (daten) merkeGelesen(wer.code, daten, wegRoh);
+      } else {
+        daten = await speicher.lade(wer.code);
+        if (daten) merkeGelesen(wer.code, daten);
+      }
       if (!daten) return keinRaum(res);
       const isHost = willHost && gleich(wer.hostGeheim, daten.hostGeheim);
       const rev = daten.rev;
+      const veraltetVielleicht = () => {
+        gedaechtnis.delete(wer.code);
+        return vermutet;
+      };
 
       // Niemand handelt für ein fremdes Handy – siehe `geheimnisse` in index.js.
       const erwartet = daten.geheim[clientId];
       if (erwartet && erwartet !== body.geheim) {
+        if (veraltetVielleicht()) continue;
         return json(res, 200, { ok: false, error: 'Dieses Gerät gehört jemand anderem.' });
       }
       if (erwartet && !daten.bewiesen.includes(clientId)) daten.bewiesen.push(clientId);
 
       const vorbei = abendVorbei(daten);
-      const brauchtWeg = !vorbei && (RUECKNEHMBAR.has(type) || type === 'undo' || type === 'discard');
+      const brauchtWeg = !vorbei && wegNoetig;
       const platzhalter = [];
       const offen = []; // was nebenher noch in den Speicher soll
       const raum = neuerRaum({
@@ -380,7 +570,7 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
         },
       });
       raum.state = daten.state;
-      raum.rueckWeg = brauchtWeg ? entpackeWeg(await speicher.ladeWeg(wer.code), daten.state) : platzhalter;
+      raum.rueckWeg = brauchtWeg ? entpackeWeg(wegRoh || [], daten.state) : platzhalter;
       raum.gezeigteBilder = new Set(daten.gezeigteBilder);
       raum.gespielt = daten.gespielt || {};
       raum.heuteGemerkt = new Set(daten.heuteGemerkt);
@@ -389,6 +579,8 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
         await handleAction(raum, clientId, body, isHost);
         await Promise.all(offen);
       } catch (err) {
+        // „Du bist nicht dran" kann am alten Stand liegen – frisch nachrechnen.
+        if (veraltetVielleicht()) continue;
         if (!(err instanceof G.GameError)) {
           console.error(err);
           return json(res, 500, { ok: false, error: err.message });
@@ -407,10 +599,16 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
       daten.rev = rev + 1;
       daten.nummer += 1;
       daten.geaendertAm = jetzt();
-      const geschrieben = await speicher.schreibe(
+      const geschrieben = await lege(
         wer.code, rev, daten, wegNeu ? packeWeg(raum.rueckWeg, raum.state) : undefined,
       );
-      if (geschrieben) return json(res, 200, { ok: true, nummer: daten.nummer });
+      if (geschrieben) {
+        wecke(wer.code, daten);
+        // Der neue Stand reist gleich mit zurück – das Gerät, das gehandelt
+        // hat, muss ihn nicht erst abholen.
+        return sende(res, 200, 'application/json; charset=utf-8',
+          `{"ok":true,"nummer":${daten.nummer},"sicht":${sichtFuer(daten, { isHost, clientId })}}`);
+      }
       // Jemand war schneller. Neu lesen und noch einmal – der zweite Buzz
       // sieht dann, dass schon einer dran ist.
     }
@@ -471,7 +669,7 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
     pfad = pfad.replace(/^\/+|\/+$/g, '');
     const m = req.method;
     try {
-      if (pfad === 'laeuft') return json(res, 200, { quizduell: true, raeume: true });
+      if (pfad === 'laeuft') return json(res, 200, { quizduell: true, raeume: true, instanz });
       if (pfad === 'info' && m === 'GET') return await info(req, res, url);
       if (pfad === 'raum' && m === 'POST') return await raumAnlegen(res);
       if (pfad === 'state' && m === 'GET') return await zustand(req, res, url);

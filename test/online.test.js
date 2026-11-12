@@ -33,27 +33,39 @@ function pruefe(name, fn) {
 async function umgebung(t, baue, { uhr } = {}) {
   const jetzt = uhr ? () => uhr.zeit : undefined;
   const speicher = baue(jetzt);
-  const server = await starteOnlineLokal({ port: 0, speicher, jetzt });
-  t.after(() => new Promise((r) => server.close(r)));
-  const base = `http://localhost:${server.address().port}`;
+  const starte = async () => {
+    const server = await starteOnlineLokal({ port: 0, speicher, jetzt });
+    t.after(() => new Promise((r) => {
+      server.closeAllConnections?.();
+      server.close(r);
+    }));
+    return `http://localhost:${server.address().port}`;
+  };
+  const base = await starte();
+  // Eine zweite Funktionsinstanz über demselben Speicher – auf Vercel kann
+  // jede Anfrage auf einer anderen Maschine landen.
+  let zweite = null;
+  const andereInstanz = async () => (zweite ??= await starte());
 
-  const holeJson = async (pfad, opt) => {
-    const res = await fetch(base + pfad, opt);
+  const holeJson = async (pfad, opt, wo = base) => {
+    const res = await fetch(wo + pfad, opt);
     return { status: res.status, daten: await res.json().catch(() => null) };
   };
   const neuerRaum = async () => (await holeJson('/api/raum', { method: 'POST' })).daten;
 
   /** Ein Gerät: merkt sich Kennung, Geheimnis und letzten Stand wie der Browser. */
-  function geraet(id, { k, h } = {}) {
+  function geraet(id, { k, h, wo = base } = {}) {
     const rolle = h ? 'host' : 'player';
     const g = { id, geheim: undefined, nummer: null };
-    g.stand = async ({ puls = false, seit = false } = {}) => {
+    g.stand = async ({ puls = false, seit = false, warte = 0, takt = 0 } = {}) => {
       const q = new URLSearchParams({ clientId: id, role: rolle });
       if (h) q.set('h', h);
       if (k) q.set('k', k);
       if (puls) q.set('puls', '1');
-      if (seit && g.nummer != null) q.set('seit', String(g.nummer));
-      const { status, daten } = await holeJson(`/api/state?${q}`);
+      if ((seit || warte) && g.nummer != null) q.set('seit', String(g.nummer));
+      if (warte) q.set('warte', String(warte));
+      if (takt) q.set('takt', String(takt));
+      const { status, daten } = await holeJson(`/api/state?${q}`, undefined, wo);
       if (daten?.geheim) g.geheim = daten.geheim;
       if (typeof daten?.nummer === 'number') g.nummer = daten.nummer;
       return { status, ...daten };
@@ -62,10 +74,10 @@ async function umgebung(t, baue, { uhr } = {}) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...mehr, type, role: rolle, clientId: id, geheim: g.geheim, h, k }),
-    })).daten;
+    }, wo)).daten;
     return g;
   }
-  return { base, holeJson, neuerRaum, geraet, speicher };
+  return { base, holeJson, neuerRaum, geraet, speicher, andereInstanz };
 }
 
 pruefe('ein Raum entsteht, und nur sein Host-Schlüssel führt ihn', async (t, baue) => {
@@ -334,4 +346,135 @@ pruefe('ein selbst geladener Satz bringt seine eingebetteten Bilder mit', async 
   // In einem anderen Raum gibt es dieses Bild nicht.
   const fremd = await neuerRaum();
   assert.equal((await fetch(`${base}${bildAdresse}&k=${fremd.k}`)).status, 404);
+});
+
+/* ------------------------------------------------- Ohne spürbare Verzögerung */
+
+const SATZ = {
+  name: 'Klein',
+  rounds: [{
+    categories: Array.from({ length: 2 }, (_, c) => ({
+      name: `K${c}`,
+      questions: Array.from({ length: 4 }, (_, i) => ({ text: `Frage ${c}-${i}`, answer: `Antwort ${c}-${i}` })),
+    })),
+  }],
+};
+
+/** Raum mit zwei Teams, je einem Handy, und laufendem Spiel. */
+async function spielbereit(u, { woGaeste } = {}) {
+  const raum = await u.neuerRaum();
+  const host = u.geraet('c_host', { h: raum.h });
+  await host.stand({ puls: true });
+  const teams = [];
+  for (const name of ['Rot', 'Blau']) {
+    await host.tu('addTeam', { name });
+  }
+  const sicht = await host.stand();
+  const handys = [];
+  for (const [i, name] of ['Anna', 'Bert'].entries()) {
+    const handy = u.geraet(`c_${name}`, { k: raum.k, wo: woGaeste });
+    await handy.stand({ puls: true });
+    await handy.stand();
+    assert.equal((await handy.tu('joinTeam', { name, teamId: sicht.teams[i].id })).ok, true);
+    await handy.stand();
+    handys.push(handy);
+    teams.push(sicht.teams[i].id);
+  }
+  assert.equal((await host.tu('startGame', { set: SATZ })).ok, true);
+  await host.stand();
+  for (const handy of handys) await handy.stand();
+  return { raum, host, handys, teams };
+}
+
+pruefe('eine Nachfrage bleibt liegen und kommt in dem Augenblick zurück, in dem sich etwas tut', async (t, baue) => {
+  const u = await umgebung(t, baue);
+  const { host, handys: [anna] } = await spielbereit(u);
+
+  // Nichts geschieht: Die Antwort kommt erst nach der erbetenen Wartezeit.
+  let los = Date.now();
+  const still = await anna.stand({ warte: 400 });
+  assert.equal(still.unveraendert, true);
+  assert.ok(Date.now() - los >= 350, `blieb ${Date.now() - los} ms liegen`);
+
+  // Jemand handelt: Die liegende Frage wird sofort beantwortet – lange bevor
+  // sie selbst im Speicher nachgesehen hätte (takt) oder abgelaufen wäre.
+  los = Date.now();
+  const offen = anna.stand({ warte: 8000, takt: 5000 });
+  await new Promise((r) => setTimeout(r, 100));
+  const vorZug = Date.now();
+  assert.equal((await host.tu('pick', { catIdx: 0, rowIdx: 0 })).ok, true);
+  const neu = await offen;
+  assert.equal(neu.phase, 'question', 'der neue Stand kommt mit');
+  assert.ok(Date.now() - vorZug < 1500, `kam ${Date.now() - vorZug} ms nach dem Zug`);
+
+  // Wer mit einem veralteten Stand fragt, wartet gar nicht.
+  anna.nummer -= 1;
+  los = Date.now();
+  assert.equal((await anna.stand({ warte: 8000 })).phase, 'question');
+  assert.ok(Date.now() - los < 1500);
+});
+
+pruefe('die Antwort auf einen Zug bringt den neuen Stand gleich mit', async (t, baue) => {
+  const u = await umgebung(t, baue);
+  const { host, handys: [, bert] } = await spielbereit(u);
+  const zug = await host.tu('pick', { catIdx: 0, rowIdx: 0 });
+  assert.equal(zug.ok, true);
+  assert.equal(zug.sicht.phase, 'question');
+  assert.equal(zug.sicht.nummer, zug.nummer);
+  assert.equal(zug.sicht.current.answer, 'Antwort 0-0', 'der Host bekommt die Host-Sicht');
+
+  // Ein Handy bekommt seine eigene Sicht – ohne Lösung.
+  await host.tu('pass');
+  const buzz = await bert.tu('buzz');
+  assert.equal(buzz.ok, true, buzz.error);
+  assert.equal(buzz.sicht.current.answer, null, 'keine Lösung fürs Handy');
+  assert.equal(buzz.sicht.rueckwegTiefe, undefined);
+  // Ein abgelehnter Zug bringt nichts mit.
+  const frech = await bert.tu('addTeam', { name: 'Gelb' });
+  assert.equal(frech.ok, false);
+  assert.equal(frech.sicht, undefined);
+});
+
+pruefe('zwei Instanzen: Züge von nebenan werden bemerkt, und ein alter Stand im Kopf schadet nicht', async (t, baue) => {
+  const u = await umgebung(t, baue);
+  const nebenan = await u.andereInstanz();
+  // Der Bildschirm landet auf der einen Maschine, die Handys auf der anderen.
+  const { raum, host, handys: [anna, bert] } = await spielbereit(u, { woGaeste: nebenan });
+
+  // Die liegende Frage des Handys erfährt vom Zug nebenan beim nächsten Blick
+  // in den Speicher.
+  const offen = anna.stand({ warte: 8000, takt: 400 });
+  await new Promise((r) => setTimeout(r, 100));
+  const vorZug = Date.now();
+  assert.equal((await host.tu('pick', { catIdx: 0, rowIdx: 0 })).ok, true);
+  assert.equal((await offen).phase, 'question');
+  assert.ok(Date.now() - vorZug < 2500, `kam ${Date.now() - vorZug} ms nach dem Zug`);
+
+  // Hin und her über beide Maschinen: Jede hat zwischendurch einen veralteten
+  // Stand im Kopf. Gültig wird trotzdem nur, was zum echten Stand passt.
+  assert.equal((await host.tu('pass')).ok, true);                          // Maschine 1
+  assert.equal((await bert.tu('buzz')).ok, true);                          // Maschine 2
+  const doppelt = await anna.tu('buzz');                                   // Maschine 2
+  assert.equal(doppelt.ok, false, 'Bert war schneller');
+  const wertung = await host.tu('judge', { correct: true });             // Maschine 1 – kennt den Buzz nur aus dem Speicher
+  assert.equal(wertung.ok, true, wertung.error);
+  assert.equal(wertung.sicht.current.step, 'result');
+  const punkte = Object.fromEntries(wertung.sicht.teams.map((tm) => [tm.name, tm.score]));
+  assert.ok(punkte.Blau > 0, 'Berts Team bekommt die Punkte');
+
+  // Ein Fehler, der nur am alten Stand läge, wird nicht gemeldet: Maschine 2
+  // hat noch die offene Frage im Kopf, in Wahrheit ist das Feld wieder frei.
+  const zu = await host.tu('close');
+  assert.equal(zu.ok, true, zu.error);
+  assert.equal(zu.sicht.phase, 'board');
+  const hostNebenan = u.geraet('c_host', { h: raum.h, wo: nebenan });
+  hostNebenan.geheim = host.geheim;
+  const naechste = await hostNebenan.tu('pick', { catIdx: 1, rowIdx: 0 });
+  assert.equal(naechste.ok, true, naechste.error);
+  // Und zurücknehmen über die andere Maschine nimmt genau diesen Zug zurück.
+  const zurueck = await host.tu('undo');
+  assert.equal(zurueck.ok, true, zurueck.error);
+  assert.equal(zurueck.sicht.phase, 'board');
+  assert.equal(zurueck.sicht.rueckgaengig, 'Frage abschließen', 'der Rückweg von nebenan ist angekommen');
+  assert.equal(zurueck.sicht.teams.find((tm) => tm.name === 'Blau').score, punkte.Blau);
 });

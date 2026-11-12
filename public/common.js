@@ -172,10 +172,12 @@ function frageRaumcode(grund) {
   });
 }
 
-/* Die Abfrage-Schleife des Netz-Spiels schläft zwischen zwei Fragen. Wer selbst
-   etwas getan hat, weckt sie – sonst sähe man den eigenen Zug erst nach dem
-   nächsten Takt. */
+/* Die Abfrage-Schleife des Netz-Spiels schläft zwischen zwei Fragen, wenn der
+   Server Nachfragen nicht liegen lässt. Wer selbst etwas getan hat, weckt sie. */
 let wecker = null;
+/* Im Netz-Spiel bringt die Antwort auf einen Zug den neuen Stand gleich mit.
+   `connect` hängt hier ein, wie er übernommen wird. */
+let nimmRaumStand = null;
 // Nach einem eigenen Zug meldet sich das Gerät auch gleich wieder an: Wer eben
 // einem Team beigetreten ist, soll in der Lobby nicht noch acht Sekunden lang
 // als „ohne Team" gezählt werden.
@@ -636,10 +638,16 @@ export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false 
   /* ---------------------------------------------------------- Netz-Spiel
    *
    * Im Raum gibt es keine offene Leitung. Das Gerät fragt nach – mit der
-   * Nummer des Stands, den es schon hat. Solange sich nichts getan hat, ist die
-   * Antwort drei Dutzend Zeichen lang und kostet den Server einen Lesezugriff.
-   * Etwa alle acht Sekunden hängt es ein „ich bin noch da" an; daran erkennt
-   * der Server, wer weg ist, denn auflegen kann hier niemand.
+   * Nummer des Stands, den es schon hat – und der Server lässt die Frage
+   * liegen, bis sich etwas tut. Die Antwort kommt also in dem Augenblick, in
+   * dem jemand buzzert oder wertet, nicht erst beim nächsten Takt. Etwa alle
+   * acht Sekunden fragt das Gerät neu und hängt ein „ich bin noch da" an;
+   * daran erkennt der Server, wer weg ist, denn auflegen kann hier niemand.
+   *
+   * `raumTakt` ist nur noch das Netz darunter: der Abstand, in dem der Server
+   * für eine liegende Frage selbst im Speicher nachsieht (falls der Zug auf
+   * einer anderen Maschine ankam) – und der Abfragetakt für einen Server, der
+   * nichts liegen lässt.
    */
   const PULS_TAKT = 8000;
   let lobby = true;
@@ -647,8 +655,8 @@ export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false 
 
   const raumTakt = () => {
     if (document.hidden) return 4000;
-    if (heiss) return 600;
-    return lobby ? 1500 : 1200;
+    if (heiss) return 500;
+    return lobby ? 1500 : 1000;
   };
 
   const raumPause = (ms) => new Promise((weiter) => {
@@ -695,30 +703,62 @@ export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false 
       : '');
   }
 
+  /**
+   * Übernimmt einen Stand des Raums – aus der Abfrage oder aus der Antwort auf
+   * den eigenen Zug. Beide können denselben Stand bringen, und die langsamere
+   * darf den neueren nicht wieder überschreiben: Es zählt die höhere Nummer.
+   */
+  function uebernimmStand(sicht) {
+    if (!sicht || typeof sicht.nummer !== 'number') return;
+    if (raum?.k && sicht.raum && sicht.raum !== raum.k) return; // Antwort aus dem alten Raum
+    if (letzteNummer != null && sicht.nummer <= letzteNummer) return;
+    merkeGeheim(sicht.geheim);
+    verarbeiteSignale(sicht.signale);
+    letzteNummer = sicht.nummer;
+    lobby = sicht.phase === 'lobby';
+    nimm(sicht, `Raum ${sicht.raum}`);
+    melde(`Verbunden – Raum ${sicht.raum}.`);
+  }
+  nimmRaumStand = uebernimmStand;
+
+  /* Zwischen zwei Abfragen liegt mindestens dieser Abstand – damit ein Server,
+     der aus irgendeinem Grund sofort und immer wieder antwortet, das Handy
+     nicht in eine Dauerschleife schickt. */
+  const ABFRAGE_ABSTAND = 120;
+
   async function raumSchleife() {
     let naechsterPuls = 0;
     for (;;) {
       const puls = pulsSofort || Date.now() >= naechsterPuls;
       pulsSofort = false;
+      // Liegen bleiben darf die Frage, bis die nächste Meldung fällig ist.
+      const warte = letzteNummer == null ? 0
+        : Math.max(0, Math.min(PULS_TAKT, puls ? PULS_TAKT : naechsterPuls - Date.now()));
       const adresse = `/api/state?clientId=${encodeURIComponent(id)}&role=${role}`
-        + (letzteNummer != null ? `&seit=${letzteNummer}` : '') + (puls ? '&puls=1' : '');
+        + (letzteNummer != null ? `&seit=${letzteNummer}` : '') + (puls ? '&puls=1' : '')
+        + (warte ? `&warte=${Math.round(warte)}&takt=${raumTakt()}` : '');
+      const los = Date.now();
+      let liessLiegen = true;
+      // Eine Leitung, die ohne Antwort hängen bleibt, soll die Schleife nicht
+      // für immer festhalten.
+      const abbruch = typeof AbortController === 'function' ? new AbortController() : null;
+      const notbremse = setTimeout(() => abbruch?.abort(), warte + 12000);
       try {
-        const res = await fetch(adresse, { cache: 'no-store' });
+        const res = await fetch(adresse, { cache: 'no-store', signal: abbruch?.signal });
         if (res.status === 404 && (await res.json().catch(() => ({}))).keinRaum) {
+          clearTimeout(notbremse);
           await ohneRaum();
           continue;
         }
         if (!res.ok) throw new Error(`Das Spiel antwortet mit ${res.status}.`);
-        if (puls) naechsterPuls = Date.now() + PULS_TAKT;
+        if (puls) naechsterPuls = los + PULS_TAKT;
         const sicht = await res.json();
         setOnline(true);
-        if (!sicht.unveraendert) {
-          merkeGeheim(sicht.geheim);
-          verarbeiteSignale(sicht.signale);
-          letzteNummer = sicht.nummer;
-          lobby = sicht.phase === 'lobby';
-          nimm(sicht, `Raum ${sicht.raum}`);
-          melde(`Verbunden – Raum ${sicht.raum}.`);
+        if (sicht.unveraendert) {
+          // Kam „nichts Neues" sofort zurück, lässt dieser Server nichts liegen.
+          liessLiegen = warte > 0 && Date.now() - los >= Math.min(warte, 1000) - 50;
+        } else {
+          uebernimmStand(sicht);
         }
       } catch (err) {
         setOnline(false);
@@ -726,8 +766,11 @@ export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false 
         melde(/antwortet mit/.test(err.message) ? err.message : 'Keine Verbindung zum Spiel.');
         await new Promise((r) => setTimeout(r, 2000));
         continue;
+      } finally {
+        clearTimeout(notbremse);
       }
-      await raumPause(raumTakt());
+      if (!liessLiegen) await raumPause(raumTakt());
+      else if (Date.now() - los < ABFRAGE_ABSTAND) await raumPause(ABFRAGE_ABSTAND - (Date.now() - los));
     }
   }
 
@@ -837,7 +880,15 @@ export async function action(type, payload = {}, role = 'player') {
     });
     const data = await res.json().catch(() => ({ ok: false, error: 'Serverfehler' }));
     if (data.ok) setOnline(true);
-    // Im Netz-Spiel: nicht auf den nächsten Takt warten, um den eigenen Zug zu sehen.
+    // Im Netz-Spiel steht der neue Stand schon in der Antwort – sofort zeigen,
+    // statt ihn erst abzuholen.
+    if (data.ok && data.sicht) {
+      try {
+        nimmRaumStand?.(data.sicht);
+      } catch (err) {
+        panne(err, 'Stand aus der Antwort');
+      }
+    }
     weckeAbfrage();
     if (!data.ok && data.error && !payload.quiet) toast(data.error, 'error');
     return data;

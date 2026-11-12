@@ -41,9 +41,11 @@ Was dabei anders ist als am Laptop:
   einen neuen an.
 - **Mehrere Runden zugleich.** Jeder Bildschirm hat seinen eigenen Raum; zwei
   Wohnzimmer stören sich nicht.
-- **Die Geräte fragen nach, statt zuzuhören.** Zwischen Knopfdruck und Anzeige liegt
-  deshalb bis zu etwa eine halbe Sekunde, während einer Frage weniger. Wer zuerst
-  gebuzzert hat, entscheidet weiterhin der Server, nicht die Anzeige.
+- **Die Geräte fragen nach, statt zuzuhören** – aber die Frage bleibt beim Server
+  liegen, bis sich etwas tut. Ein Buzz oder eine Wertung steht deshalb in der Regel
+  sofort auf allen Geräten; im ungünstigen Fall (der Zug landet auf einer anderen
+  Maschine des Anbieters) nach etwa einer halben Sekunde. Wer zuerst gebuzzert hat,
+  entscheidet weiterhin der Server, nicht die Anzeige.
 - **Eigene Fragensätze** speichert der Editor im Netz nicht auf dem Server. Satz als
   Datei herunterladen und in der Lobby über „Datei laden …" wählen – eingebettete
   Bilder dürfen dabei je etwa 650 kB groß sein, der ganze Satz 4 MB.
@@ -980,8 +982,16 @@ alles unter `/api/` eine einzige Funktion (`api/quizduell.js`). Die lädt den Ra
 Redis, wendet dieselben Regeln an wie der Laptop-Server (`server/spiel.js`) und legt
 ihn zurück – aber nur, wenn inzwischen niemand anderes geschrieben hat (ein
 Lua-Skript prüft die Fassung). Zwei Handys, die im selben Augenblick buzzern, können
-sich so nicht überschreiben. Solange sich nichts tut, kostet eine Nachfrage einen
-einzigen kleinen Lesezugriff.
+sich so nicht überschreiben.
+
+Damit das nicht träge wirkt: Die Nachfrage eines Geräts („ich habe Stand 17, gibt es
+Neueres?") bleibt bis zu neun Sekunden bei der Funktion liegen. Kommt der Zug in
+derselben Funktionsinstanz an – auf Vercel der Normalfall –, weckt er die Wartenden
+direkt; sonst bemerkt ihn die liegende Nachfrage bei ihrem nächsten kleinen Blick in
+den Speicher. Wer selbst handelt, bekommt den neuen Stand gleich mit der Antwort.
+Und die Instanz rechnet einen Zug zuerst mit dem Stand, den sie noch im Kopf hat:
+Stimmt die Fassung beim Schreiben, hat der Zug eine einzige Reise zu Redis gebraucht;
+stimmt sie nicht, wird frisch gelesen und neu gerechnet.
 
 **Am eigenen Rechner ausprobieren:** `npm run online` startet dasselbe unter
 `http://localhost:3100/host`, mit den Räumen im Arbeitsspeicher. Die Tests
