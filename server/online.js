@@ -492,7 +492,7 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
         return json(res, 200, {
           ok: false,
           error: 'Im Netz-Spiel lassen sich Sätze nicht auf dem Server speichern. '
-            + 'Lade den Satz als Datei herunter und wähle ihn in der Lobby über „Datei laden …".',
+            + 'Lade den Satz als Datei herunter und wähle ihn in der Lobby über „Datei laden …“.',
         });
       }
       // Die offene Leitung des Laptop-Servers gibt es hier nicht. 204 heißt für

@@ -43,6 +43,148 @@ let ROLE = 'player';
  * die ganze Seite: Stylesheet, Skript und Bilder holt der Browser ohne
  * Adresszusatz. Diese Zeile hängt sich also an nichts Neues.
  */
+/* ------------------------------------------------------ Netz-Spiel: der Raum
+ *
+ * Veröffentlicht (Vercel) bedient ein Server viele Spiele zugleich. Jedes ist
+ * ein Raum mit einem vierbuchstabigen Code; der Bildschirm bekommt dazu einen
+ * Host-Schlüssel. In den Adressen heißen die beiden wie beim Tunnel-Spiel `k`
+ * und `h` – so baut der Host-Screen QR-Code und Fernbedienungs-Link wie immer.
+ *
+ * Anders als beim Tunnel kann der Server sie hier nicht als Cookie setzen: Die
+ * Seiten kommen als fertige Dateien, ohne dass ein Programm die Adresse sähe.
+ * Also legt diese Datei sie ab – als Cookie, damit jede Anfrage (auch ein
+ * Bild) sie von selbst trägt, und im Speicher des Browsers, damit ein Handy
+ * nach Tagen noch in seinen Raum zurückfindet.
+ *
+ * Am Laptop passiert von alldem nichts: Erst wenn /api/info `raeume` meldet,
+ * wird hier etwas angefasst.
+ */
+// Außerhalb eines Browsers (die Tests laden diese Datei auch so) gibt es keine Adresse.
+const adresseBeimLaden = typeof location === 'undefined' ? null
+  : new URL(location.href); // bevor verbergeSchluessel() sie kürzt
+const RAUM_K = 'quizduell.raum.k';
+const RAUM_H = 'quizduell.raum.h';
+
+function setzeKeks(name, wert) {
+  const sicher = location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(wert)}; Path=/; Max-Age=2592000; SameSite=Lax${sicher}`;
+}
+
+let infoVersprechen = null;
+/** Was der Server über sich sagt – einmal geholt, auf Wunsch neu. */
+export function serverInfo(neu = false) {
+  if (neu || !infoVersprechen) {
+    infoVersprechen = fetch('/api/info', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : {}))
+      .catch(() => ({}));
+  }
+  return infoVersprechen;
+}
+
+let raum = null; // { k, h } im Netz-Spiel, sonst null
+
+function uebernimmRaum(k, h) {
+  if (k) {
+    merke(RAUM_K, k);
+    setzeKeks('qd_spiel', k);
+  }
+  if (h) {
+    merke(RAUM_H, h);
+    setzeKeks('qd_host', h);
+  }
+  raum = { k: k || raum?.k || '', h: h || raum?.h || '' };
+  serverInfo(true);
+  // Der Host-Screen baut daraus QR-Code und Adressen – siehe loadUrls().
+  window.dispatchEvent(new Event('quizduell-raum'));
+  return raum;
+}
+
+/** Legt einen neuen Raum an und macht dieses Gerät zu seinem Host. */
+export async function neuerRaum() {
+  const antwort = await (await fetch('/api/raum', { method: 'POST' })).json();
+  if (!antwort.ok) throw new Error(antwort.error || 'Der Raum ließ sich nicht anlegen.');
+  return uebernimmRaum(antwort.k, antwort.h);
+}
+
+/**
+ * Stellt fest, ob dieser Server Räume führt, und sorgt dann dafür, dass dieses
+ * Gerät in einem steht. Gibt `null` zurück, wenn es ein Laptop-Server ist.
+ *
+ * `anlegen`: Der Host-Screen darf sich einen Raum machen, wenn er keinen hat.
+ * Alle anderen brauchen einen, den es schon gibt – Handys den Code, die
+ * Fernbedienung den Host-Schlüssel aus ihrem QR-Code.
+ */
+async function richteRaumEin(anlegen) {
+  const info = await serverInfo();
+  if (!info.raeume) return null;
+  const ausAdresse = (name) => adresseBeimLaden?.searchParams.get(name) || '';
+  let h = ROLE === 'host' ? (ausAdresse('h') || lies(RAUM_H) || '') : '';
+  let k = (ausAdresse('k') || lies(RAUM_K) || '').toUpperCase();
+  if (ROLE === 'host' && h) k = h.split('.')[0];
+  if (ROLE === 'host' && !h && anlegen) return neuerRaum();
+  return uebernimmRaum(k, h);
+}
+
+/**
+ * Fragt nach dem Raumcode, wenn ein Handy ohne (gültigen) Raum dasteht – wer
+ * die Adresse abtippt statt den QR-Code zu scannen, landet hier.
+ */
+function frageRaumcode(grund) {
+  return new Promise((fertig) => {
+    document.querySelector('.raum-frage')?.remove();
+    const eingabe = el('input', {
+      id: 'raum-code', maxlength: '4', autocomplete: 'off', autocapitalize: 'characters',
+      spellcheck: 'false', placeholder: 'ABCD', 'aria-describedby': 'raum-frage-hinweis',
+    });
+    const fehler = el('p', { class: 'raum-frage-fehler', role: 'alert' });
+    const form = el('form', { class: 'card raum-frage-karte', novalidate: '' },
+      el('h2', {}, 'Welcher Raum?'),
+      el('p', { id: 'raum-frage-hinweis', class: 'muted' },
+        grund || 'Der Code steht auf dem Bildschirm – vier Buchstaben. Oder scann dort einfach den QR-Code.'),
+      el('label', { for: 'raum-code' }, 'Raumcode'),
+      eingabe,
+      el('button', { class: 'btn btn-primary btn-block', type: 'submit' }, 'Beitreten'),
+      fehler);
+    const huelle = el('div', { class: 'raum-frage', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Raumcode eingeben' }, form);
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const code = eingabe.value.trim().toUpperCase();
+      if (!/^[A-Z]{4}$/.test(code)) {
+        fehler.textContent = 'Der Code hat vier Buchstaben.';
+        return;
+      }
+      fehler.textContent = '';
+      try {
+        const res = await fetch(`/api/state?role=player&k=${code}`, { cache: 'no-store' });
+        if (res.status === 404) {
+          fehler.textContent = `Einen Raum ${code} gibt es nicht – schau noch einmal auf den Bildschirm.`;
+          return;
+        }
+      } catch {
+        fehler.textContent = 'Keine Verbindung zum Spiel.';
+        return;
+      }
+      huelle.remove();
+      fertig(uebernimmRaum(code, ''));
+    });
+    document.body.append(huelle);
+    eingabe.focus();
+  });
+}
+
+/* Die Abfrage-Schleife des Netz-Spiels schläft zwischen zwei Fragen. Wer selbst
+   etwas getan hat, weckt sie – sonst sähe man den eigenen Zug erst nach dem
+   nächsten Takt. */
+let wecker = null;
+// Nach einem eigenen Zug meldet sich das Gerät auch gleich wieder an: Wer eben
+// einem Team beigetreten ist, soll in der Lobby nicht noch acht Sekunden lang
+// als „ohne Team" gezählt werden.
+let pulsSofort = false;
+function weckeAbfrage() {
+  pulsSofort = true;
+  wecker?.();
+}
+
 export function verbergeSchluessel() {
   const url = new URL(location.href);
   if (!url.searchParams.has('h') && !url.searchParams.has('k')) return;
@@ -320,7 +462,7 @@ function panne(err, wo) {
  * lautlos in einem Ereignis-Handler – die Seite fror ein und behauptete dabei,
  * alles sei in Ordnung. Jetzt sagt sie, was los ist.
  */
-export function connect({ role, onState, onEvent, onStatus }) {
+export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false }) {
   setRole(role);
   const id = clientId();
   /*
@@ -491,7 +633,111 @@ export function connect({ role, onState, onEvent, onStatus }) {
     notwegLaeuft = false;
   }
 
+  /* ---------------------------------------------------------- Netz-Spiel
+   *
+   * Im Raum gibt es keine offene Leitung. Das Gerät fragt nach – mit der
+   * Nummer des Stands, den es schon hat. Solange sich nichts getan hat, ist die
+   * Antwort drei Dutzend Zeichen lang und kostet den Server einen Lesezugriff.
+   * Etwa alle acht Sekunden hängt es ein „ich bin noch da" an; daran erkennt
+   * der Server, wer weg ist, denn auflegen kann hier niemand.
+   */
+  const PULS_TAKT = 8000;
+  let lobby = true;
+  let letztesSignal = null;
+
+  const raumTakt = () => {
+    if (document.hidden) return 4000;
+    if (heiss) return 600;
+    return lobby ? 1500 : 1200;
+  };
+
+  const raumPause = (ms) => new Promise((weiter) => {
+    const los = () => {
+      clearTimeout(zeit);
+      if (wecker === los) wecker = null;
+      weiter();
+    };
+    const zeit = setTimeout(los, ms);
+    wecker = los;
+  });
+
+  /** Meldungen an den Host und der Buzz-Ton – was sonst über die Leitung käme. */
+  function verarbeiteSignale(signale = []) {
+    const hoechste = signale.reduce((n, sig) => Math.max(n, sig.id), 0);
+    // Beim ersten Stand nichts nachholen: Wer die Seite neu lädt, soll nicht
+    // die Meldungen der letzten Minute noch einmal hören.
+    if (letztesSignal != null) {
+      for (const sig of signale) {
+        if (sig.id <= letztesSignal) continue;
+        if (sig.name === 'toast') toast(sig.daten.text, sig.daten.level);
+        else onEvent?.(sig.name, sig.daten);
+      }
+    }
+    letztesSignal = Math.max(letztesSignal ?? 0, hoechste);
+  }
+
+  async function ohneRaum() {
+    letzteNummer = null;
+    if (raumAnlegen) {
+      // Der Raum des Host-Screens ist abgelaufen – er macht sich einen neuen.
+      melde('Lege einen neuen Raum an …');
+      await neuerRaum();
+      return;
+    }
+    if (role === 'host') {
+      melde('Diese Fernbedienung gehört zu keinem Raum – scann ihren QR-Code im Menü des Bildschirms.');
+      await new Promise((r) => setTimeout(r, 5000));
+      return;
+    }
+    melde('Welcher Raum?');
+    await frageRaumcode(raum?.k
+      ? `Den Raum ${raum.k} gibt es nicht mehr. Der neue Code steht auf dem Bildschirm – vier Buchstaben.`
+      : '');
+  }
+
+  async function raumSchleife() {
+    let naechsterPuls = 0;
+    for (;;) {
+      const puls = pulsSofort || Date.now() >= naechsterPuls;
+      pulsSofort = false;
+      const adresse = `/api/state?clientId=${encodeURIComponent(id)}&role=${role}`
+        + (letzteNummer != null ? `&seit=${letzteNummer}` : '') + (puls ? '&puls=1' : '');
+      try {
+        const res = await fetch(adresse, { cache: 'no-store' });
+        if (res.status === 404 && (await res.json().catch(() => ({}))).keinRaum) {
+          await ohneRaum();
+          continue;
+        }
+        if (!res.ok) throw new Error(`Das Spiel antwortet mit ${res.status}.`);
+        if (puls) naechsterPuls = Date.now() + PULS_TAKT;
+        const sicht = await res.json();
+        setOnline(true);
+        if (!sicht.unveraendert) {
+          merkeGeheim(sicht.geheim);
+          verarbeiteSignale(sicht.signale);
+          letzteNummer = sicht.nummer;
+          lobby = sicht.phase === 'lobby';
+          nimm(sicht, `Raum ${sicht.raum}`);
+          melde(`Verbunden – Raum ${sicht.raum}.`);
+        }
+      } catch (err) {
+        setOnline(false);
+        lageAkte.letzterFehler = err.message || 'Abfrage kam nicht durch';
+        melde(/antwortet mit/.test(err.message) ? err.message : 'Keine Verbindung zum Spiel.');
+        await new Promise((r) => setTimeout(r, 2000));
+        continue;
+      }
+      await raumPause(raumTakt());
+    }
+  }
+
   melde('Verbinde mit dem Spiel …');
+  richteRaumEin(raumAnlegen)
+    .then((r) => (r ? raumSchleife() : starteStrom()))
+    .catch(() => starteStrom());
+
+  /* -------------------------------------------- Laptop: die offene Leitung */
+  function starteStrom() {
   const fristTimer = setTimeout(
     () => notwegAuf('Die Live-Verbindung kommt nicht durch – ich hole den Spielstand jetzt selbst.'),
     STROM_FRIST,
@@ -505,7 +751,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
     panne(err, 'Live-Verbindung');
     clearTimeout(fristTimer);
     notwegAuf('Dieser Browser lässt keine Live-Verbindung zu – ich hole den Spielstand selbst.');
-    return null;
+    return;
   }
 
   // Der Nachweis, dass diese Gerätekennung uns gehört.
@@ -579,8 +825,7 @@ export function connect({ role, onState, onEvent, onStatus }) {
   // „offen, aber null Zustände" ist genau die Auskunft, die diesen Abend
   // gekostet hat.
   setInterval(() => { lageAkte.strom = source.readyState; }, 1000);
-
-  return source;
+  } // starteStrom
 }
 
 export async function action(type, payload = {}, role = 'player') {
@@ -592,6 +837,8 @@ export async function action(type, payload = {}, role = 'player') {
     });
     const data = await res.json().catch(() => ({ ok: false, error: 'Serverfehler' }));
     if (data.ok) setOnline(true);
+    // Im Netz-Spiel: nicht auf den nächsten Takt warten, um den eigenen Zug zu sehen.
+    weckeAbfrage();
     if (!data.ok && data.error && !payload.quiet) toast(data.error, 'error');
     return data;
   } catch {

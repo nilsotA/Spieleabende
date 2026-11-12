@@ -4,7 +4,49 @@ Ein Quiz-Spielbrett im Stil der Quizduell-Show: **ein großer Screen** (Beamer, 
 geteilter Bildschirm) zeigt Kategorien, Punktefelder und Fragen – **alle Mitspieler
 buzzern über ihr Handy** im gleichen WLAN.
 
-Keine Datenbank, keine Abhängigkeiten, kein Build. Node installieren, starten, spielen.
+Keine Abhängigkeiten, kein Build. Es gibt zwei Wege zu spielen:
+
+| | Im Netz (per Link) | Am Laptop (per Doppelklick) |
+|---|---|---|
+| Start | Adresse im Browser öffnen | Startdatei ausführen, Node nötig |
+| Handys | von überall, per QR-Code oder Raumcode | gleiches WLAN (oder Tunnel) |
+| Internet | nötig | nicht nötig |
+| Einrichten | einmal auf Vercel veröffentlichen | nichts |
+
+Beide spielen sich gleich: dieselben Regeln, dieselben Fragen, dieselbe Oberfläche.
+
+---
+
+## Im Netz spielen
+
+Einmal veröffentlicht (siehe [Auf Vercel veröffentlichen](#auf-vercel-veröffentlichen)),
+braucht der Abend nichts mehr außer einem Browser:
+
+1. Am Fernseher oder Laptop **`/host`** öffnen. Der Bildschirm legt sich von selbst
+   einen **Raum** an und zeigt dessen Code – vier Buchstaben – samt QR-Code.
+2. Die Handys **scannen den QR-Code**. Wer lieber tippt, öffnet die Adresse und gibt
+   den Raumcode ein. Ein gemeinsames WLAN braucht niemand.
+3. Teams bilden, Fragensatz wählen, **Spiel starten**.
+
+Die **Fernbedienung** fürs eigene Handy hängt wie immer am Menü des Bildschirms
+(`⋯`): Ihr QR-Code trägt den Host-Schlüssel dieses Raums. Den gibt man nicht an
+Mitspieler weiter – wer ihn hat, sieht die Lösungen und darf werten.
+
+Was dabei anders ist als am Laptop:
+
+- **Der Raum bleibt.** Der Browser am Bildschirm merkt sich seinen Raum. Wer `/host`
+  nächste Woche wieder öffnet, landet im selben – mit dem Gedächtnis, welche
+  Kategorien schon dran waren. Ein Spiel, das zwölf Stunden stillstand, ist dabei
+  abgeräumt; nach 30 Tagen ohne Besuch verfällt der Raum, und der Bildschirm legt
+  einen neuen an.
+- **Mehrere Runden zugleich.** Jeder Bildschirm hat seinen eigenen Raum; zwei
+  Wohnzimmer stören sich nicht.
+- **Die Geräte fragen nach, statt zuzuhören.** Zwischen Knopfdruck und Anzeige liegt
+  deshalb bis zu etwa eine halbe Sekunde, während einer Frage weniger. Wer zuerst
+  gebuzzert hat, entscheidet weiterhin der Server, nicht die Anzeige.
+- **Eigene Fragensätze** speichert der Editor im Netz nicht auf dem Server. Satz als
+  Datei herunterladen und in der Lobby über „Datei laden …" wählen – eingebettete
+  Bilder dürfen dabei je etwa 650 kB groß sein, der ganze Satz 4 MB.
 
 ---
 
@@ -900,7 +942,12 @@ aus, hat aber fünf Zacken statt neun.
 ```
 Start-Quizduell.command/.bat, start-quizduell.sh   zum Doppelklicken
 Start-Quizduell-Online.*                          dasselbe, mit Tunnel nach draußen
-server/   game.js (Spielregeln) · questions.js (Fragensätze) · index.js (HTTP/SSE)
+api/quizduell.js · vercel.json                    Einstieg für das Spiel im Netz (Vercel)
+server/   game.js (Spielregeln) · questions.js (Fragensätze)
+          spiel.js (Aktionen auf einem „Raum" – von beiden Servern benutzt)
+          index.js (Laptop: HTTP/SSE, ein Raum im Arbeitsspeicher)
+          online.js (Netz: viele Räume) · speicher.js (Arbeitsspeicher oder Upstash Redis)
+          online-lokal.js (`npm run online` – das Netz-Spiel am eigenen Rechner)
           browser.js (öffnet den Host-Screen beim Doppelklick-Start)
           tunnel.js (cloudflared) · zugang.js (Schlüssel, nur mit Tunnel)
 public/   host.* (Board) · player.* (Handy) · remote.* (Fernbedienung)
@@ -908,3 +955,36 @@ public/   host.* (Board) · player.* (Handy) · remote.* (Fernbedienung)
 data/     Fragensätze als JSON, Bilder unter data/bilder/
 test/     Regeltests
 ```
+
+## Auf Vercel veröffentlichen
+
+Das Spiel im Netz läuft auf [Vercel](https://vercel.com) (der kostenlose Hobby-Plan
+reicht) und legt seine Räume in **Upstash Redis** ab – dieselbe Kombination wie bei
+„Der Dümmste fliegt raus". Einmalig:
+
+1. Auf vercel.com **„Add New → Project"**, dieses Repository importieren. Framework:
+   **Other** – es gibt nichts zu bauen, die Voreinstellungen passen.
+2. Im Projekt unter **Storage** „**Upstash Redis**" hinzufügen und mit dem Projekt
+   verbinden. Eine vorhandene Datenbank – etwa die vom „Dümmsten" – lässt sich
+   mitbenutzen: Alle Schlüssel dieses Spiels beginnen mit `qd:` und kommen den
+   anderen nicht in die Quere. Das Feld „Custom Prefix" leer lassen.
+3. Neu deployen. Danach `https://<dein-projekt>.vercel.app/host` am Fernseher öffnen.
+
+Ohne die Redis-Zugangsdaten startet die veröffentlichte Fassung absichtlich nicht:
+`/api/info` sagt dann im Klartext, was fehlt. Die Funktionen laufen in Frankfurt
+(`fra1` in `vercel.json`); liegt die Datenbank ebenfalls dort (`eu-central-1`),
+ist jeder Zug spürbar schneller.
+
+**Wie es gebaut ist:** Vercel liefert `public/` als fertige Seiten aus und ruft für
+alles unter `/api/` eine einzige Funktion (`api/quizduell.js`). Die lädt den Raum aus
+Redis, wendet dieselben Regeln an wie der Laptop-Server (`server/spiel.js`) und legt
+ihn zurück – aber nur, wenn inzwischen niemand anderes geschrieben hat (ein
+Lua-Skript prüft die Fassung). Zwei Handys, die im selben Augenblick buzzern, können
+sich so nicht überschreiben. Solange sich nichts tut, kostet eine Nachfrage einen
+einzigen kleinen Lesezugriff.
+
+**Am eigenen Rechner ausprobieren:** `npm run online` startet dasselbe unter
+`http://localhost:3100/host`, mit den Räumen im Arbeitsspeicher. Die Tests
+(`test/online.test.js`) laufen über echte HTTP-Anfragen dagegen – und, wenn ein
+`redis-server` installiert ist, ein zweites Mal über die Upstash-Schnittstelle gegen
+echtes Redis.

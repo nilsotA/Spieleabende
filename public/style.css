@@ -398,3 +398,20 @@ label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0
   color: #ffd9e0;
   line-height: 1.4;
 }
+
+/* Netz-Spiel: die Frage nach dem Raumcode. Liegt über allem, weil ohne Raum
+   nichts darunter etwas bedeutet. */
+.raum-frage {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.2rem;
+  background: rgba(4, 6, 11, 0.92);
+}
+.raum-frage-karte { width: min(24rem, 100%); display: flex; flex-direction: column; gap: 0.7rem; }
+.raum-frage-karte h2 { margin: 0; }
+.raum-frage-karte p { margin: 0; }
+.raum-frage-karte input {
+  font-size: 2rem; font-weight: 800; letter-spacing: 0.35em; text-align: center; text-transform: uppercase;
+  padding: 0.5rem 0.2rem 0.5rem 0.55em;
+}
+.raum-frage-fehler { color: #ffb0bd; min-height: 1.4em; }

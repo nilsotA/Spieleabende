@@ -2168,3 +2168,7 @@ body.host.flat .tile {
 /* Beim Zufallsmix: was er gerade meidet, und der Knopf zum Vergessen. */
 .mix-gedaechtnis { margin-top: 0.35rem; }
 .mix-gedaechtnis .btn { margin-left: 0.25rem; vertical-align: baseline; }
+
+/* Netz-Spiel: der Raumcode in der Lobby – lesbar vom anderen Ende des Zimmers. */
+.raum-code { margin: 0 0 0.4rem; font-size: 1.05rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #9fb0c9); }
+.raum-code b { font-size: 2.2rem; letter-spacing: 0.3em; color: #fff; margin-left: 0.4rem; font-family: var(--font-num, inherit); }

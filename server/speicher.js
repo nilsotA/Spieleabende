@@ -234,7 +234,7 @@ export function speicherAusUmgebung(env = process.env) {
   if (env.VERCEL || env.NODE_ENV === 'production') {
     throw new Error(
       'Upstash Redis ist nicht eingerichtet (UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN fehlen). '
-      + 'Im Vercel-Dashboard unter „Storage" Upstash Redis mit dem Projekt verbinden und neu deployen.',
+      + 'Im Vercel-Dashboard unter „Storage“ Upstash Redis mit dem Projekt verbinden und neu deployen.',
     );
   }
   return speicherImArbeitsspeicher();

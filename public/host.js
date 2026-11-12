@@ -48,6 +48,8 @@ keepScreenAwake();
 
 connect({
   role: 'host',
+  // Im Netz-Spiel legt sich dieser Bildschirm seinen Raum selbst an.
+  raumAnlegen: true,
   onState: (next) => {
     const prev = state;
     state = next;
@@ -277,6 +279,7 @@ function eigeneHerkunft() {
 // Sie kommen vom Server und stehen nur diesem Bildschirm zur Verfügung.
 let schluessel = '';
 let hostSchluessel = '';
+let raeume = false; // Netz-Spiel: Räume statt Tunnel
 // Hat der Host selbst eine Adresse angetippt? Dann redet ihm das Nachfragen
 // unten nicht mehr hinein.
 let handverlesen = false;
@@ -289,6 +292,7 @@ async function loadUrls() {
     const info = await (await fetch('/api/info')).json();
     schluessel = info.schluessel || '';
     hostSchluessel = info.hostSchluessel || '';
+    raeume = !!info.raeume;
     const liste = $('#join-urls');
     liste.innerHTML = '';
     // Die eigene Herkunft zuerst: Sie ist die einzige Adresse, von der wir
@@ -331,7 +335,19 @@ async function loadUrls() {
     // Beim Spiel über den Tunnel hängt am Ziel ein Schlüssel. Die Adresse im
     // Kästchen darunter führt dann nur bis zur verschlossenen Tür – wer sie
     // abtippt, weil die Kamera zickt, braucht die vollständige Zeile.
-    if (schluessel) {
+    // Netz-Spiel: Der Raumcode ist der Weg hinein – groß genug, um ihn vom
+    // Sofa aus abzutippen, falls die Kamera den QR-Code nicht mag.
+    const raumZeile = $('#raum-code');
+    if (raumZeile) {
+      raumZeile.hidden = !(info.raeume && schluessel);
+      setzeText($('#raum-code-wert'), schluessel);
+    }
+    if (info.raeume && schluessel) {
+      const oben = $('#join-hinweis');
+      if (oben) oben.textContent = 'Scannen – oder die Adresse öffnen und den Raumcode eintippen:';
+      const nachsatz = $('#qr-ziel-nachsatz');
+      if (nachsatz) nachsatz.textContent = 'Eure Gäste brauchen kein gemeinsames WLAN.';
+    } else if (schluessel) {
       const oben = $('#join-hinweis');
       if (oben) oben.textContent = 'Scannen – das ist beim Spiel übers Internet der Weg hinein:';
       const nachsatz = $('#qr-ziel-nachsatz');
@@ -355,7 +371,7 @@ async function loadUrls() {
     // nachgefragt, bis der Tunnel da ist – und danach nie wieder.
     const tunnelDa = tunnelVorhanden;
     zeigeTunnel(tunnelDa); // deckt den Fall ab, dass gar keine Adresse gezeigt wird
-    if (schluessel && !tunnelDa && !handverlesen && tunnelFragen < TUNNEL_FRAGEN_MAX) {
+    if (schluessel && !raeume && !tunnelDa && !handverlesen && tunnelFragen < TUNNEL_FRAGEN_MAX) {
       tunnelFragen += 1;
       setTimeout(loadUrls, 2000);
     }
@@ -386,6 +402,13 @@ function zeigeTunnel(da) {
   if (!box) return;
   if (!schluessel) {
     box.hidden = true; // im Heimnetz gibt es nichts zu melden
+    return;
+  }
+  if (raeume) {
+    // Im Netz-Spiel gibt es keinen Tunnel, der wegbrechen könnte.
+    box.hidden = false;
+    box.classList.add('steht');
+    box.textContent = '🌍 Über das Internet – eure Gäste brauchen kein gemeinsames WLAN.';
     return;
   }
   box.hidden = false;
@@ -469,6 +492,10 @@ function zeigeQr(basis, liste) {
 
 loadSets();
 loadUrls();
+// Im Netz-Spiel steht der Raum erst nach dem ersten Kontakt fest (oder wird
+// neu angelegt, wenn der alte abgelaufen ist) – dann stimmen QR-Code und
+// Adressen erst jetzt.
+window.addEventListener('quizduell-raum', () => loadUrls());
 
 /* ------------------------------------------------------------------ Render */
 
