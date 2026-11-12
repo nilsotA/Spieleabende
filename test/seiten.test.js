@@ -1425,7 +1425,7 @@ test('der Einsatz-Schalter gehört einem Team, nicht dem Gerät', () => {
     'host.js: die Ansage muss die Team-ID festhalten, nicht bloß „ja"');
   assert.match(host, /einsatzFuer === state\?\.teams\?\.\[state\.turnIndex\]\?\.id/,
     'host.js: die Ansage gilt nur, solange dasselbe Team am Zug ist');
-  const tile = /onclick: \(\) => \{\s*const mitEinsatz = einsatzSteht\(\);/.exec(host)?.[0] || '';
+  const tile = /onclick: \((?:ev)?\) => \{\s*const mitEinsatz = einsatzSteht\(\);/.exec(host)?.[0] || '';
   assert.ok(tile, 'host.js: der Feldklick muss über einsatzSteht() gehen, nicht über ein rohes Ja/Nein');
 
   const fern = ohneKommentare(lies('remote.js'));
