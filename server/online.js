@@ -139,7 +139,7 @@ function frischerRaum(code, jetzt) {
   };
 }
 
-export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'online' }) {
+export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'online', oeffentlich = '' }) {
   const instanz = randomBytes(4).toString('hex');
 
   /* ----------------------------------------------- Was die Instanz behält
@@ -408,7 +408,11 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
   async function info(req, res, url) {
     const proto = String(req.headers['x-forwarded-proto'] || 'http').split(',')[0].trim();
     const host = String(req.headers['x-forwarded-host'] || req.headers.host || 'localhost').split(',')[0].trim();
-    const out = { raeume: true, bau, urls: [`${proto}://${host}`], port: null };
+    // Vercel gibt jedem Projekt mehrere Adressen, und nur die Hauptadresse ist
+    // ohne Vercel-Anmeldung erreichbar. Öffnet der Host seinen Bildschirm über
+    // eine der anderen (er selbst ist ja angemeldet), führte der QR-Code die
+    // Gäste vor eine Anmeldeseite. Deshalb: die öffentliche, wenn bekannt.
+    const out = { raeume: true, bau, urls: [oeffentlich || `${proto}://${host}`], port: null };
     const alsHost = ausweis(req, url, true);
     if (alsHost.hostGeheim) {
       const daten = await speicher.lade(alsHost.code);

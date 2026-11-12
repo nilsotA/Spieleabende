@@ -22,6 +22,10 @@ export default async function handler(req, res) {
       behandle = erzeugeOnline({
         speicher: speicherAusUmgebung(),
         bau: (process.env.VERCEL_GIT_COMMIT_SHA || 'online').slice(0, 7),
+        // Die Adresse, die ohne Anmeldung bei Vercel erreichbar ist – auf sie
+        // zeigen QR-Code und Fernbedienungs-Link, egal worüber der Host kam.
+        oeffentlich: process.env.VERCEL_ENV === 'production' && process.env.VERCEL_PROJECT_PRODUCTION_URL
+          ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '',
       });
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });

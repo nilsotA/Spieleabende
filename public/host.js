@@ -308,7 +308,9 @@ async function loadUrls() {
     // in ein WLAN führt, in dem sie nicht sind.
     const tunnel = info.urls.find((u) => u.startsWith('https://'));
     tunnelVorhanden = !!tunnel;
-    const eigen = eigeneHerkunft();
+    // Im Netz-Spiel nennt der Server die öffentliche Adresse. Die eigene
+    // Herkunft kann dort eine sein, die nur mit Vercel-Anmeldung aufgeht.
+    const eigen = raeume && tunnel ? null : eigeneHerkunft();
     info.urls = [...new Set([
       ...(tunnel ? [tunnel] : []),
       ...(eigen ? [eigen] : []),

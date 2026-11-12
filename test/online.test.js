@@ -478,3 +478,14 @@ pruefe('zwei Instanzen: Züge von nebenan werden bemerkt, und ein alter Stand im
   assert.equal(zurueck.sicht.rueckgaengig, 'Frage abschließen', 'der Rückweg von nebenan ist angekommen');
   assert.equal(zurueck.sicht.teams.find((tm) => tm.name === 'Blau').score, punkte.Blau);
 });
+
+pruefe('QR-Code und Fernbedienung zeigen auf die öffentliche Adresse, egal worüber der Host kam', async (t, baue) => {
+  // Auf Vercel sind die Nebenadressen eines Projekts nur mit Anmeldung
+  // erreichbar. Der Host ist angemeldet und merkt nichts – seine Gäste schon.
+  const server = await starteOnlineLokal({ port: 0, speicher: baue(), oeffentlich: 'https://spiel.example' });
+  t.after(() => new Promise((r) => server.close(r)));
+  const info = await (await fetch(`http://localhost:${server.address().port}/api/info`, {
+    headers: { 'x-forwarded-host': 'spiel-nebenadresse.example', 'x-forwarded-proto': 'https' },
+  })).json();
+  assert.deepEqual(info.urls, ['https://spiel.example']);
+});
