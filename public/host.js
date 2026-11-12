@@ -1043,10 +1043,16 @@ function renderBoard() {
             // Der Ton hängt am Zustandswechsel, nicht am Klick: Das Feld lässt
             // sich auch vom Handy des Hosts aus wählen, und dann klappte das
             // Panel auf der Leinwand stumm auf.
-            onclick: () => {
+            onclick: (ev) => {
               const mitEinsatz = einsatzSteht();
               einsatzFuer = null;
-              act('pick', { catIdx, rowIdx, einsatz: mitEinsatz });
+              // Im Netz-Spiel liegt zwischen Klick und aufklappender Frage eine
+              // Reise zum Server. Das Feld zeigt sofort, dass es getroffen
+              // wurde – sonst klickt man ein zweites Mal.
+              const feld = ev.currentTarget;
+              feld.classList.add('gewaehlt');
+              Promise.resolve(act('pick', { catIdx, rowIdx, einsatz: mitEinsatz }))
+                .finally(() => feld.classList.remove('gewaehlt'));
             },
             // Der zugängliche Name war allein die Zahl – vierundzwanzig Knöpfe
             // mit vier verschiedenen Namen. Die Kategorie steht in einem

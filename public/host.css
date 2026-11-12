@@ -637,6 +637,10 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   transition: opacity var(--t-micro) linear;
 }
 .tile:hover:not(:disabled) { transform: translateY(-4px); }
+/* Getroffen: Das Feld gibt nach und leuchtet auf, bis die Frage aufklappt. */
+.tile:active:not(:disabled),
+.tile.gewaehlt { transform: translateY(1px) scale(0.97); filter: brightness(1.22); }
+.tile.gewaehlt::after { opacity: 1; }
 .tile:hover:not(:disabled)::after,
 .tile:focus-visible::after { opacity: 1; }
 .tile:focus-visible { outline: none; }
