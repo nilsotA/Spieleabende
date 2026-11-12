@@ -417,7 +417,9 @@ function punktesprung(delta, von, bis) {
   }
   const start = performance.now();
   const schritt = (jetzt) => {
-    const t = Math.min(1, (jetzt - start) / 500);
+    // Der Zeitstempel des ersten Bildes kann vor `start` liegen – ohne die
+    // Untergrenze lief die Zahl einen Augenblick lang rückwärts (0 → −8 → 100).
+    const t = Math.max(0, Math.min(1, (jetzt - start) / 500));
     feld.textContent = punkte(Math.round(von + (bis - von) * (1 - (1 - t) ** 3)));
     if (t < 1) requestAnimationFrame(schritt);
   };

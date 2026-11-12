@@ -2098,7 +2098,9 @@ function countUp(node, von, bis, dauer = 600) {
   }
   const start = performance.now();
   const schritt = (jetzt) => {
-    const t = Math.min(1, (jetzt - start) / dauer);
+    // Untergrenze: Der Zeitstempel des ersten Bildes kann vor `start` liegen,
+    // und dann zählte die Zahl kurz in die falsche Richtung.
+    const t = Math.max(0, Math.min(1, (jetzt - start) / dauer));
     const ease = 1 - (1 - t) ** 3;
     node.textContent = punkte(Math.round(von + (bis - von) * ease));
     if (t < 1) requestAnimationFrame(schritt);

@@ -1215,9 +1215,11 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   background: radial-gradient(70% 55% at 50% 50%, rgba(4, 6, 11, 0.92), rgba(4, 6, 11, 0.99));
 }
 .ansage.an { animation: ansageAn var(--dauer, 1800ms) var(--ease) both; }
+/* Der Vorhang fällt schnell: Bei 12 % (gut 200 ms) blitzte die frisch
+   aufgebaute Wand noch einmal hell auf, bevor die Ansage sie verdeckte. */
 @keyframes ansageAn {
   0% { opacity: 0; }
-  12% { opacity: 1; }
+  4% { opacity: 1; }
   78% { opacity: 1; }
   100% { opacity: 0; }
 }
