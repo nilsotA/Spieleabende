@@ -103,7 +103,7 @@ export const HOST_ACTIONS = new Set([
 const LAGEGEBUNDEN = new Set(['judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close', 'resetBuzz',
   'buzzFor', 'discard']);
 
-const RUECKNEHMBAR = new Set([
+export const RUECKNEHMBAR = new Set([
   'pick', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close',
   'nextRound', 'adjustScore', 'setTurn', 'resetBuzz', 'buzzFor', 'buzz',
   'stechen', 'tauscheKategorie',
