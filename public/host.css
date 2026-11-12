@@ -1724,6 +1724,10 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
   position: relative;
   z-index: 3;
 }
+/* Meldungen sitzen über der Steuerleiste, nicht auf ihr: Mit dem
+   allgemeinen Abstand von unten verdeckten sie ein paar Sekunden lang genau
+   die Knöpfe, die der Host als Nächstes braucht (Einsatz, Zurücknehmen). */
+body.host #toasts { bottom: 4.6rem; }
 .controls-inner { display: flex; align-items: center; gap: 0.8rem; max-width: 1700px; margin: 0 auto; flex-wrap: wrap; }
 /* Der Hinweis darf schrumpfen, aber nicht zu einer Buchstabensäule: Unter
    15rem klappt lieber die ganze Leiste um, als dass „Buzzer ist frei." in drei
