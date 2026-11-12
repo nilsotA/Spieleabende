@@ -158,6 +158,18 @@ body.remote #app {
   .rhead { display: none; }
 }
 
+/* Dasselbe auf einem kleinen Handy hochkant (iPhone SE, 568 Pixel hoch):
+   Drei gestapelte Knöpfe samt „Zurücknehmen" reichten bis über die Lösung –
+   zu sehen war nur noch das Wort „Lösung", nicht die Antwort. Nebeneinander
+   geben „Richtig" und „Falsch" eine Knopfhöhe frei; der Schriftzug oben tritt
+   auch hier ab. */
+@media (max-height: 640px) and (max-width: 559px) {
+  .r-buttons { grid-template-columns: 1fr 1fr; }
+  .r-buttons .r-big:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .r-big { padding: 0.8rem 0.5rem; }
+  .rhead { display: none; }
+}
+
 /* Auf dem Handy des Hosts ist der Tap-Highlight aus (kommt aus player.css, die
    remote.html mitlädt) – ohne Ersatz fühlt sich kein Tipp bestätigt an. */
 .r-big:active { transform: translateY(2px) scale(0.985); filter: brightness(1.15); }
