@@ -357,7 +357,12 @@ function render() {
         setz(
           big('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), seit),
           big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), seit),
-          big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz'), seit),
+          // Direkt darüber steht schon „↩ Buzz zurücknehmen" – der Rückweg-Knopf
+          // trägt nach einem Buzz dieselbe Aufschrift und tut dasselbe. Zwei
+          // gleich beschriftete Knöpfe übereinander lassen nur rätseln, worin
+          // sie sich unterscheiden.
+          ...(state.rueckgaengig === 'Buzz' ? []
+            : [big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz'), seit)]),
         );
       } else if (q.stechen) {
         setzeText(phase, state.stechenSieger
