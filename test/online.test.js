@@ -299,3 +299,39 @@ pruefe('Fragensätze und Bilddateien kommen auch im Netz', async (t, baue) => {
   assert.equal(speichern.daten.ok, false);
   assert.match(speichern.daten.error, /Datei/);
 });
+
+pruefe('ein selbst geladener Satz bringt seine eingebetteten Bilder mit', async (t, baue) => {
+  // Am Laptop liegen sie im Arbeitsspeicher des Servers. Im Netz gibt es den
+  // nicht – sie wandern in den Speicher und kommen unter einer eigenen Adresse
+  // zurück, die jedes Gerät des Raums abrufen kann.
+  const { base, neuerRaum, geraet } = await umgebung(t, baue);
+  const raum = await neuerRaum();
+  const host = geraet('c_host', { h: raum.h });
+  await host.stand({ puls: true });
+  for (const name of ['Rot', 'Blau']) await host.tu('addTeam', { name });
+
+  const pixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  const satz = {
+    name: 'Mit Bild',
+    rounds: [{
+      categories: Array.from({ length: 2 }, (_, c) => ({
+        name: `K${c}`,
+        questions: Array.from({ length: 4 }, (_, i) => ({
+          text: `Frage ${c}-${i}`, answer: `Antwort ${c}-${i}`, image: c === 0 && i === 0 ? pixel : null,
+        })),
+      })),
+    }],
+  };
+  assert.equal((await host.tu('startGame', { set: satz })).ok, true);
+  await host.tu('pick', { catIdx: 0, rowIdx: 0 });
+  const bildAdresse = (await host.stand()).current.image;
+  assert.match(bildAdresse, /^\/api\/bild\?id=b[0-9a-f]+$/, 'die Adresse kommt ohne Unterpfad – so ruft Vercel sie auf');
+
+  const bild = await fetch(`${base}${bildAdresse}&k=${raum.k}`);
+  assert.equal(bild.status, 200);
+  assert.equal(bild.headers.get('content-type'), 'image/png');
+  assert.ok((await bild.arrayBuffer()).byteLength > 20);
+  // In einem anderen Raum gibt es dieses Bild nicht.
+  const fremd = await neuerRaum();
+  assert.equal((await fetch(`${base}${bildAdresse}&k=${fremd.k}`)).status, 404);
+});
