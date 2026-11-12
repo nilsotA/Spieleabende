@@ -1176,6 +1176,10 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 /* Die Krone braucht mehr als die 2,4rem der Ziffernspalte, sonst drängelt sie
    sich an den Namen. Nur im Endstand – im Rundenende stehen dort Ziffern. */
 .scores-panel.final .score-list li { grid-template-columns: 3.2rem 1fr auto auto; }
+/* Zur Halbzeit gibt es keinen Platzsprung – und nur drei Spalten. Das leere
+   Feld belegte trotzdem die dritte und schob die Punktzahl in eine zweite
+   Zeile unter den Namen. */
+.scores-panel:not(.final) .score-list .sprung { display: none; }
 /* Platzsprung aus Runde 2. Grün und Rot wie überall im Spiel: rauf ist gut. */
 .score-list .sprung {
   font-size: 0.72em;
