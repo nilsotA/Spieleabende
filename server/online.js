@@ -459,7 +459,11 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
     } catch {
       return json(res, 400, { error: 'Ungültige Adresse' });
     }
-    let pfad = url.searchParams.get('pfad');
+    // Vercel hängt die umgeschriebenen Angaben je nach Laufzeit an die Adresse
+    // oder nur an `req.query` – beides gilt.
+    const ausAnfrage = (name) => url.searchParams.get(name)
+      ?? (typeof req.query?.[name] === 'string' ? req.query[name] : null);
+    let pfad = ausAnfrage('pfad');
     if (pfad == null) {
       if (url.pathname.startsWith('/bilder/')) return datei(res, url.pathname.slice('/bilder/'.length));
       pfad = url.pathname.replace(/^\/api\//, '');
@@ -473,7 +477,7 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
       if (pfad === 'state' && m === 'GET') return await zustand(req, res, url);
       if (pfad === 'action' && m === 'POST') return await aktion(req, res, url);
       if (pfad === 'bild' && m === 'GET') return await bild(req, res, url);
-      if (pfad === 'datei' && m === 'GET') return await datei(res, url.searchParams.get('name'));
+      if (pfad === 'datei' && m === 'GET') return await datei(res, ausAnfrage('name'));
       if (pfad === 'sets' && m === 'GET') return json(res, 200, await listSets());
       if (pfad === 'mix' && m === 'GET') return json(res, 200, await mixSet());
       if (pfad === 'set' && m === 'GET') {

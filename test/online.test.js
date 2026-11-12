@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { starteOnlineLokal } from '../server/online-lokal.js';
-import { speicherImArbeitsspeicher } from '../server/speicher.js';
+import { speicherImArbeitsspeicher, speicherUpstash } from '../server/speicher.js';
+import { starteRedisShim } from './hilfen/redis-shim.js';
 
 /*
  * Das Spiel im Netz: Räume statt eines Laptops.
@@ -10,11 +11,28 @@ import { speicherImArbeitsspeicher } from '../server/speicher.js';
  * Geprüft wird über echte HTTP-Anfragen gegen denselben Code, der auf Vercel
  * läuft – nur mit dem Speicher im Arbeitsspeicher. Jede Anfrage steht für
  * sich; zwischen zweien bleibt nichts im Prozess stehen außer dem Speicher.
+ *
+ * Jeder Test läuft zweimal: einmal mit dem Speicher im Arbeitsspeicher und –
+ * wenn auf dem Rechner ein redis-server liegt – einmal über die
+ * Upstash-Schnittstelle gegen echtes Redis, samt Lua-Skript. Das ist der Weg,
+ * den die veröffentlichte Fassung nimmt.
  */
 
-async function umgebung(t, { uhr } = {}) {
+const shim = await starteRedisShim();
+test.after(() => shim?.zu());
+
+const ARTEN = [
+  ['Arbeitsspeicher', (jetzt) => speicherImArbeitsspeicher({ jetzt })],
+  ...(shim ? [['Redis', (jetzt) => speicherUpstash({ url: shim.url, token: shim.token, jetzt })]] : []),
+];
+/** Meldet einen Test für jede Speicherart an. */
+function pruefe(name, fn) {
+  for (const [art, baue] of ARTEN) test(`${name} [${art}]`, (t) => fn(t, baue));
+}
+
+async function umgebung(t, baue, { uhr } = {}) {
   const jetzt = uhr ? () => uhr.zeit : undefined;
-  const speicher = speicherImArbeitsspeicher({ jetzt });
+  const speicher = baue(jetzt);
   const server = await starteOnlineLokal({ port: 0, speicher, jetzt });
   t.after(() => new Promise((r) => server.close(r)));
   const base = `http://localhost:${server.address().port}`;
@@ -50,8 +68,8 @@ async function umgebung(t, { uhr } = {}) {
   return { base, holeJson, neuerRaum, geraet, speicher };
 }
 
-test('ein Raum entsteht, und nur sein Host-Schlüssel führt ihn', async (t) => {
-  const { holeJson, neuerRaum, geraet } = await umgebung(t);
+pruefe('ein Raum entsteht, und nur sein Host-Schlüssel führt ihn', async (t, baue) => {
+  const { holeJson, neuerRaum, geraet } = await umgebung(t, baue);
   const raum = await neuerRaum();
   assert.match(raum.k, /^[A-HJ-NP-Z]{4}$/, 'vier Buchstaben, ohne I und O');
   assert.ok(raum.h.startsWith(`${raum.k}.`), 'der Host-Schlüssel nennt seinen Raum');
@@ -86,8 +104,8 @@ test('ein Raum entsteht, und nur sein Host-Schlüssel führt ihn', async (t) => 
   assert.equal((await holeJson('/api/info')).daten.raeume, true);
 });
 
-test('zwei Räume wissen nichts voneinander', async (t) => {
-  const { neuerRaum, geraet } = await umgebung(t);
+pruefe('zwei Räume wissen nichts voneinander', async (t, baue) => {
+  const { neuerRaum, geraet } = await umgebung(t, baue);
   const a = await neuerRaum();
   const b = await neuerRaum();
   assert.notEqual(a.k, b.k);
@@ -98,8 +116,8 @@ test('zwei Räume wissen nichts voneinander', async (t) => {
   assert.equal((await hostB.stand()).teams.length, 0);
 });
 
-test('nachfragen kostet nichts, solange sich nichts tut', async (t) => {
-  const { neuerRaum, geraet } = await umgebung(t);
+pruefe('nachfragen kostet nichts, solange sich nichts tut', async (t, baue) => {
+  const { neuerRaum, geraet } = await umgebung(t, baue);
   const raum = await neuerRaum();
   const host = geraet('c_host', { h: raum.h });
   const gast = geraet('c_gast', { k: raum.k });
@@ -117,8 +135,8 @@ test('nachfragen kostet nichts, solange sich nichts tut', async (t) => {
   assert.equal(neu.teams.length, 1, 'nach einer Änderung kommt der ganze Stand');
 });
 
-test('ein ganzer Spielzug im Raum: aufrufen, buzzern, werten, zurücknehmen', async (t) => {
-  const { neuerRaum, geraet } = await umgebung(t);
+pruefe('ein ganzer Spielzug im Raum: aufrufen, buzzern, werten, zurücknehmen', async (t, baue) => {
+  const { neuerRaum, geraet } = await umgebung(t, baue);
   const raum = await neuerRaum();
   const host = geraet('c_host', { h: raum.h });
   await host.stand({ puls: true });
@@ -165,8 +183,8 @@ test('ein ganzer Spielzug im Raum: aufrufen, buzzern, werten, zurücknehmen', as
   assert.equal(stand.teams[0].score, 0);
 });
 
-test('zwei Handys buzzern im selben Augenblick – genau eines gewinnt', async (t) => {
-  const { neuerRaum, geraet } = await umgebung(t);
+pruefe('zwei Handys buzzern im selben Augenblick – genau eines gewinnt', async (t, baue) => {
+  const { neuerRaum, geraet } = await umgebung(t, baue);
   const raum = await neuerRaum();
   const host = geraet('c_host', { h: raum.h });
   await host.stand({ puls: true });
@@ -190,8 +208,8 @@ test('zwei Handys buzzern im selben Augenblick – genau eines gewinnt', async (
   assert.ok([teams[1].id, teams[2].id].includes(stand.current.buzzedTeamId));
 });
 
-test('niemand handelt für ein fremdes Handy', async (t) => {
-  const { neuerRaum, geraet } = await umgebung(t);
+pruefe('niemand handelt für ein fremdes Handy', async (t, baue) => {
+  const { neuerRaum, geraet } = await umgebung(t, baue);
   const raum = await neuerRaum();
   const host = geraet('c_host', { h: raum.h });
   await host.stand({ puls: true });
@@ -213,9 +231,9 @@ test('niemand handelt für ein fremdes Handy', async (t) => {
   assert.equal((await host.stand()).teams[0].members.length, 1);
 });
 
-test('wer sich nicht mehr meldet, gilt als weg – und ist wieder da, wenn er sich meldet', async (t) => {
+pruefe('wer sich nicht mehr meldet, gilt als weg – und ist wieder da, wenn er sich meldet', async (t, baue) => {
   const uhr = { zeit: Date.now() };
-  const { neuerRaum, geraet } = await umgebung(t, { uhr });
+  const { neuerRaum, geraet } = await umgebung(t, baue, { uhr });
   const raum = await neuerRaum();
   const host = geraet('c_host', { h: raum.h });
   await host.stand({ puls: true });
@@ -242,9 +260,9 @@ test('wer sich nicht mehr meldet, gilt als weg – und ist wieder da, wenn er si
   assert.equal(stand.teams[0].members[0].online, true, 'und mit der nächsten Meldung ist sie wieder da');
 });
 
-test('nach zwölf stillen Stunden fängt der Raum leer an, das Gedächtnis bleibt', async (t) => {
+pruefe('nach zwölf stillen Stunden fängt der Raum leer an, das Gedächtnis bleibt', async (t, baue) => {
   const uhr = { zeit: Date.now() };
-  const { neuerRaum, geraet } = await umgebung(t, { uhr });
+  const { neuerRaum, geraet } = await umgebung(t, baue, { uhr });
   const raum = await neuerRaum();
   const host = geraet('c_host', { h: raum.h });
   await host.stand({ puls: true });
@@ -262,8 +280,8 @@ test('nach zwölf stillen Stunden fängt der Raum leer an, das Gedächtnis bleib
   assert.equal((await host.tu('addTeam', { name: 'Neu' })).ok, true, 'derselbe Host-Schlüssel gilt weiter');
 });
 
-test('Fragensätze und Bilddateien kommen auch im Netz', async (t) => {
-  const { base, holeJson } = await umgebung(t);
+pruefe('Fragensätze und Bilddateien kommen auch im Netz', async (t, baue) => {
+  const { base, holeJson } = await umgebung(t, baue);
   const saetze = (await holeJson('/api/sets')).daten;
   assert.ok(saetze.length >= 20);
   const satz = (await holeJson('/api/set?file=laender-flaggen.json')).daten;

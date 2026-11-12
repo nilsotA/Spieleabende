@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["fra1"],
+  "functions": {
+    "api/quizduell.js": {
+      "includeFiles": "data/**",
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    { "source": "/host", "destination": "/host.html" },
+    { "source": "/play", "destination": "/player.html" },
+    { "source": "/remote", "destination": "/remote.html" },
+    { "source": "/editor", "destination": "/editor.html" },
+    { "source": "/bilder/:name", "destination": "/api/quizduell?pfad=datei&name=:name" },
+    { "source": "/api/:pfad", "destination": "/api/quizduell?pfad=:pfad" }
+  ]
+}
