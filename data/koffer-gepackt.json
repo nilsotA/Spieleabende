@@ -43,14 +43,14 @@
               "note": "Agatha Christie ließ in ihm 1934 einen Mord geschehen – und einen Zug voller Verdächtiger."
             },
             {
+              "text": "Wie heißt der Schnellzug, der London durch den Kanaltunnel mit Paris und Brüssel verbindet?",
+              "answer": "Eurostar",
+              "note": "Der Tunnel ist rund 50 Kilometer lang und wurde 1994 eröffnet."
+            },
+            {
               "text": "Welche Bahnstrecke führt von Moskau bis Wladiwostok?",
               "answer": "Die Transsibirische Eisenbahn",
               "note": "Gut 9000 Kilometer – die längste durchgehende Bahnstrecke der Welt."
-            },
-            {
-              "text": "Wie heißt der Zug, der durch den Tunnel unter dem Ärmelkanal fährt?",
-              "answer": "Eurostar",
-              "note": "Der Tunnel ist rund 50 Kilometer lang und wurde 1994 eröffnet."
             }
           ]
         },
@@ -194,7 +194,7 @@
             {
               "text": "Stellt man auf dem Flug von Berlin nach New York die Uhr vor oder zurück?",
               "answer": "Zurück",
-              "note": "New York liegt sechs Stunden hinter Berlin. Man landet oft fast zur selben Uhrzeit, zu der man abflog."
+              "note": "New York liegt sechs Stunden hinter Berlin. Nach rund neun Stunden Flug zeigt die Uhr dort nur etwa drei Stunden mehr."
             },
             {
               "text": "Wie viele Zeitzonen gelten in China, obwohl es so breit ist?",

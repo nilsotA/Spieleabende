@@ -19,8 +19,8 @@
             },
             {
               "text": "Welches Wort steckt in „SCHLAF“?",
-              "answer": "FALSCH",
-              "note": "Sechs Buchstaben ergeben 720 mögliche Reihenfolgen. Ein sinnvolles Wort ist selten darunter."
+              "answer": "FALSCH (auch: FLACHS)",
+              "note": "Sechs Buchstaben ergeben 720 mögliche Reihenfolgen – hier stecken gleich zwei Wörter drin: FALSCH und FLACHS."
             },
             {
               "text": "Welches Wort steckt in „ELTERN“?",
@@ -75,7 +75,7 @@
             {
               "text": "Ein Tag auf der Venus dauert länger als ein Jahr auf der Venus.",
               "answer": "Wahr",
-              "note": "Die Venus dreht sich langsamer, als sie die Sonne umrundet"
+              "note": "Eine Drehung dauert 243 Erdtage, ein Umlauf um die Sonne nur 225 – und sie dreht sich obendrein rückwärts."
             }
           ]
         },
@@ -177,9 +177,9 @@
               "note": "Jede andere gerade Zahl lässt sich durch 2 teilen – deshalb bleibt sie allein."
             },
             {
-              "text": "Diese Zahl ist weder eine Primzahl noch aus Primzahlen zusammengesetzt.",
+              "text": "Diese positive ganze Zahl ist weder Primzahl noch aus Primzahlen zusammengesetzt.",
               "answer": "Was ist die Eins?",
-              "note": "Sie ist weder Primzahl noch zusammengesetzt. Wäre sie eine, ließe sich jede Zahl auf unendlich viele Arten zerlegen."
+              "note": "Wäre sie eine Primzahl, ließe sich jede Zahl auf unendlich viele Arten in Primfaktoren zerlegen."
             }
           ]
         },
@@ -202,8 +202,8 @@
               "note": "Umlaute machen Ärger: Wohin rutscht ein Ö? Deshalb schreiben solche Rätsel meist ohne."
             },
             {
-              "text": "Gleiche Regel: „TQJFMFBCFOE“",
-              "answer": "SPIELEABEND",
+              "text": "Gleiche Regel: „SBUFGVDIT“",
+              "answer": "RATEFUCHS",
               "note": "Je länger das Wort, desto leichter das Knacken – die Buchstabenhäufigkeit verrät alles."
             }
           ]
@@ -277,9 +277,9 @@
               "note": "Um 1450 gegenüber 1492"
             },
             {
-              "text": "Was ist älter: die Universität Oxford oder die Aztekenstadt Tenochtitlan?",
-              "answer": "Die Universität Oxford",
-              "note": "In Oxford wurde schon um 1096 gelehrt, Tenochtitlan erst um 1325 gegründet."
+              "text": "Ordnet von alt nach neu: Universität Oxford, Aztekenstadt Tenochtitlan, Inkastadt Machu Picchu.",
+              "answer": "Oxford, Tenochtitlan, Machu Picchu",
+              "note": "In Oxford wurde schon um 1096 gelehrt, Tenochtitlan um 1325 gegründet, Machu Picchu erst um 1450 erbaut."
             }
           ]
         },

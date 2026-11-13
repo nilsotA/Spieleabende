@@ -100,7 +100,7 @@
             {
               "text": "Welche Nudelsorte heißt übersetzt „Schmetterlinge“?",
               "answer": "Farfalle",
-              "note": "Wörtlich „Schmetterlinge“ – auf Deutsch sagt man auch Schleifchennudeln."
+              "note": "Einzahl: farfalla. Auf Deutsch sagt man auch Schleifchennudeln – in der Mitte werden sie zusammengekniffen."
             }
           ]
         },
@@ -192,6 +192,11 @@
               "note": "Die entscheidende Pressekonferenz war ein Missverständnis: „Ab sofort, unverzüglich“ stand so in keinem Beschluss."
             },
             {
+              "text": "In welchem antiken Staat war Julius Cäsar Diktator?",
+              "answer": "In Rom (Römische Republik)",
+              "note": "Er ließ sich 44 v. Chr. zum Diktator auf Lebenszeit ernennen – wenige Wochen später wurde er ermordet."
+            },
+            {
               "text": "Wer war der erste Mensch auf dem Mond?",
               "answer": "Neil Armstrong",
               "note": "Über seinen ersten Satz wird bis heute gestritten – hat er das „a“ vor „man“ gesagt oder nicht?"
@@ -200,11 +205,6 @@
               "text": "In welchem Jahr begann der Erste Weltkrieg?",
               "answer": "1914",
               "note": "Auslöser war das Attentat von Sarajevo Ende Juni; einen Monat später erklärte Österreich-Ungarn Serbien den Krieg."
-            },
-            {
-              "text": "In welchem antiken Staat war Julius Cäsar Diktator?",
-              "answer": "In der Römischen Republik",
-              "note": "„Rom“ oder „Römisches Reich“ ruhig gelten lassen."
             }
           ]
         },
@@ -252,7 +252,7 @@
               "note": "Der Name bedeutet schlicht „runde Münze“."
             },
             {
-              "text": "Dieses Ereignis beschreibt die Explosion eines Sterns am Ende seines Lebenszyklus.",
+              "text": "So nennt man die Explosion eines Sterns am Ende seines Lebens.",
               "answer": "Was ist eine Supernova?",
               "note": "Alles Eisen in unserem Blut stammt aus solchen Explosionen."
             }

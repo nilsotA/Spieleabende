@@ -33,9 +33,9 @@
           "name": "Aus dem Lateinischen",
           "questions": [
             {
-              "text": "Was bedeutet „Abitur“ wörtlich – aus dem Lateinischen übersetzt?",
-              "answer": "Er wird weggehen",
-              "note": "Von „abire“, weggehen: das Zeugnis für den Abgang von der Schule."
+              "text": "Was bedeutet das lateinische Verb „abire“, von dem das Wort „Abitur“ abstammt?",
+              "answer": "Weggehen (auch: abgehen)",
+              "note": "Über neulateinisch „abiturire“, abgehen wollen: das Zeugnis für den Abgang von der Schule."
             },
             {
               "text": "Was heißt „curriculum“ auf Deutsch?",
@@ -99,8 +99,8 @@
             },
             {
               "text": "Wie heißt das Fangspiel, bei dem Gefangene erstarren, bis jemand sie befreit?",
-              "answer": "Versteinern",
-              "note": "Andernorts heißt es Einfrieren oder Kettenfangen – Regeln und Namen wechseln von Schulhof zu Schulhof."
+              "answer": "Versteinern (auch: Einfrieren, Eisfangen)",
+              "note": "Andernorts heißt es Einfrieren, Eisfangen oder Hexe und Zauberer – die Namen wechseln von Schulhof zu Schulhof."
             }
           ]
         },
@@ -199,7 +199,7 @@
             {
               "text": "Welcher Roman von Erich Kästner spielt in einem Internat und heißt nach einer Klasse?",
               "answer": "Das fliegende Klassenzimmer",
-              "note": "Kästner schrieb dazu drei Vorworte – er fand, ein Buch für Kinder brauche eine ordentliche Einleitung."
+              "note": "Kästner teilte das Vorwort in zwei Abteilungen und hängte ein Nachwort an – Kinder verdienten eine ordentliche Einleitung."
             },
             {
               "text": "Wie heißt Bertolt Brechts Stück über einen Physiker und seine Verantwortung?",
@@ -214,7 +214,7 @@
             {
               "text": "Wofür steht die Abkürzung „AG“ im Stundenplan einer Schule?",
               "answer": "Arbeitsgemeinschaft",
-              "note": "Anders als im Vereinsrecht ist damit keine Aktiengesellschaft gemeint."
+              "note": "Anders als im Wirtschaftsteil der Zeitung ist damit keine Aktiengesellschaft gemeint."
             },
             {
               "text": "Wofür steht das „G“ in „G8“ und „G9“?",
@@ -262,9 +262,9 @@
           "name": "Schule anderswo",
           "questions": [
             {
-              "text": "In welchem Land tragen Schulkinder besonders häufig Uniform?",
-              "answer": "In Großbritannien",
-              "note": "Es gibt keine landesweite Pflicht – die Schulen entscheiden selbst, und die meisten halten daran fest."
+              "text": "In welchem Land gehören Blazer und Krawatte an fast jeder Schule zur Uniform – ganz ohne Gesetz?",
+              "answer": "In Großbritannien (auch: England)",
+              "note": "Die Schulen entscheiden selbst – und die meisten halten an der Uniform fest."
             },
             {
               "text": "Welches nordeuropäische Land gilt seit Jahren als Vorbild für sein Schulsystem?",

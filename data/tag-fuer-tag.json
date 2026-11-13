@@ -164,7 +164,7 @@
             {
               "text": "An welche Stelle des Umschlags gehört die Briefmarke?",
               "answer": "Nach oben rechts",
-              "note": "Dort sucht die Maschine den Stempel. Klebt sie anderswo, wird der Brief von Hand sortiert."
+              "note": "Dort sucht die Maschine die Marke, um sie zu stempeln. Klebt sie anderswo, wird der Brief von Hand sortiert."
             },
             {
               "text": "Was bekommt der Absender bei einem Einschreiben mit Rückschein zurück?",

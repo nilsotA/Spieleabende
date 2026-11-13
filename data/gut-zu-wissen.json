@@ -34,7 +34,7 @@
           "questions": [
             {
               "text": "Welche Königin regierte Großbritannien mehr als 70 Jahre lang?",
-              "answer": "Elizabeth II.",
+              "answer": "Elisabeth II.",
               "note": "Von 1952 bis 2022 – länger als jede andere Monarchin und jeder Monarch Großbritanniens."
             },
             {
@@ -118,9 +118,9 @@
               "note": "Dabei wird der Ball von oben direkt durch den Korb gestopft."
             },
             {
-              "text": "In welcher Sportart heißt der Sieg bei allen vier großen Turnieren eines Jahres „Grand Slam“?",
+              "text": "In welcher Sportart bilden Wimbledon und drei weitere Turniere zusammen den „Grand Slam“?",
               "answer": "Tennis",
-              "note": "Die vier Turniere: Australian Open, French Open, Wimbledon und US Open."
+              "note": "Die drei anderen: Australian Open, French Open und US Open."
             },
             {
               "text": "Welches Land wurde als erstes fünfmal Fußball-Weltmeister?",

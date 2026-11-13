@@ -20,7 +20,7 @@
             {
               "text": "Welches Tier gilt als das gefährlichste der Welt, weil es Krankheiten überträgt?",
               "answer": "Die Stechmücke",
-              "note": "Über Malaria und Dengue sterben jährlich mehr Menschen als durch alle Raubtiere zusammen."
+              "note": "An Malaria und Dengue sterben jährlich mehr Menschen als durch alle Raubtiere zusammen."
             },
             {
               "text": "Blattschneiderameisen fressen die eingetragenen Blätter gar nicht. Wozu dienen sie?",
@@ -133,7 +133,7 @@
           "name": "Durch die Jahreszeiten",
           "questions": [
             {
-              "text": "Wie heißt der monatelange Schlaf, in den Igel und Murmeltier fallen?",
+              "text": "Wie nennt man es, wenn Igel und Murmeltier die kalten Monate reglos im Nest überdauern?",
               "answer": "Der Winterschlaf",
               "note": "Der Herzschlag des Igels sinkt von 200 auf unter 10 Schläge pro Minute."
             },
@@ -194,7 +194,7 @@
             {
               "text": "Welches Reptil kann seine Farbe wechseln?",
               "answer": "Das Chamäleon",
-              "note": "Nicht zur Tarnung, sondern vor allem zur Stimmung und zur Temperaturregelung."
+              "note": "Weniger zur Tarnung: Die Farbe zeigt vor allem die Stimmung an und hilft, die Körperwärme zu regeln."
             },
             {
               "text": "Welche heimische Giftschlange erkennt man am dunklen Zickzackband auf dem Rücken?",
@@ -237,9 +237,9 @@
           "name": "Spuren im Revier",
           "questions": [
             {
-              "text": "Wie heißt das Bauwerk, das Biber mitten im Wasser errichten?",
+              "text": "Wie heißt der Wohnbau, den Biber aus Ästen und Schlamm errichten – mit Eingang unter Wasser?",
               "answer": "Die Biberburg",
-              "note": "Der Eingang liegt unter Wasser – deshalb stauen sie den Bach erst auf die passende Höhe."
+              "note": "Damit der Eingang unter Wasser bleibt, stauen Biber den Bach mit einem Damm auf die passende Höhe."
             },
             {
               "text": "Wie nennt man das unterirdische Gangsystem von Fuchs und Dachs?",
@@ -294,7 +294,7 @@
             {
               "text": "Wie viele Höcker hat ein Dromedar?",
               "answer": "Einen",
-              "note": "Das Trampeltier hat zwei – eine Merkhilfe: das D liegt auf der Seite mit einem Bogen, das T des Trampeltiers mit zweien."
+              "note": "Das Trampeltier hat zwei. Merkhilfe: Ein liegendes D hat einen Bogen, das B des Baktrischen Kamels zwei."
             },
             {
               "text": "In wie viele Abteilungen ist der Magen einer Kuh geteilt?",
