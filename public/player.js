@@ -168,6 +168,7 @@ zeigeTon();
 
 /* ------------------------------------------------------------------ Buzzer */
 
+let gedrueckt = false; // hat dieses Handy in der laufenden Buzzer-Runde gedrückt?
 const buzzer = $('#buzzer');
 let buzzLock = false;
 
@@ -218,6 +219,7 @@ async function pressBuzzer() {
   if (!isOnline()) return toast('Keine Verbindung – dein Buzz käme nicht an.', 'error');
 
   buzzLock = true;
+  gedrueckt = true; // nur wer selbst gedrückt hat, hört „zu spät“
   setTimeout(() => (buzzLock = false), 400);
   vibrate(60);
   sound('buzz');
@@ -998,6 +1000,7 @@ function renderBuzzer(prev) {
     // An der eigenen Berechtigung festmachen, nicht am globalen Schritt: sonst
     // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.
     if (prev && !prev.you?.canBuzz) {
+      gedrueckt = false;
       vibrate([30, 50, 30]);
       sound('armed');
       flash();
@@ -1028,8 +1031,14 @@ function renderBuzzer(prev) {
     status.classList.toggle('you', mine);
     // Nur beim Übergang tönen, nicht bei jedem Update derselben Lage.
     if (prev && !(prev.current?.step === 'buzz' && prev.current?.buzzedTeamId)) {
-      if (mine) { vibrate([40, 40, 80]); sound('correct'); }
-      else if (!q.lockedOut.includes(you.teamId) && q.teamId !== you.teamId) sound('zuspaet');
+      // Der Buzz ist gewonnen, nicht die Antwort: Bisher kam hier der „Richtig“-
+      // Ton – vor der Wertung, und kurz darauf womöglich der „Falsch“-Ton. Ein
+      // neutraler Ton sagt nur „ihr seid dran“.
+      if (mine) { vibrate([40, 40, 80]); sound('pick'); }
+      // „Zu spät“ nur, wo wirklich jemand gedrückt hat – nicht auf jedem Handy
+      // im Raum gleichzeitig.
+      else if (gedrueckt && !q.lockedOut.includes(you.teamId) && q.teamId !== you.teamId) sound('zuspaet');
+      gedrueckt = false;
     }
     return;
   }

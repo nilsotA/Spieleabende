@@ -370,6 +370,23 @@
         <label>Uhr beim freien Buzzer <select id="menu-buzzuhr"></select></label>
       </div>
     </div>
+    <!-- Die Wege hinein, auch mitten im Spiel. Die Lobby mit ihren QR-Codes ist
+         dann ausgeblendet – wer später dazukommt, dessen Handy neu lädt oder
+         nach einem Neustart eine neue Tunneladresse braucht, und der Host, der
+         seine Fernbedienung erst jetzt holt, fanden sonst keinen Code. -->
+    <div id="menu-qr" class="spick menu-qr" hidden>
+      <h3>Handys verbinden</h3>
+      <div class="menu-qr-reihe">
+        <figure class="menu-qr-code">
+          <div id="menu-qr-play" class="remote-qr-bild"></div>
+          <figcaption class="muted small">Mitspielen</figcaption>
+        </figure>
+        <figure id="menu-qr-fern-box" class="menu-qr-code" hidden>
+          <div id="menu-qr-fern" class="remote-qr-bild"></div>
+          <figcaption class="muted small">Fernbedienung – nur mit deinem eigenen Handy scannen, wer sie hat, sieht alle Lösungen.</figcaption>
+        </figure>
+      </div>
+    </div>
     <!-- Spickzettel: die Regeln, wie sie für DIESE Runde eingestellt sind -->
     <div id="menu-regeln" class="spick">
       <h3>Spickzettel</h3>

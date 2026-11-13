@@ -39,6 +39,20 @@ let gradAngelegt = false;
 const act = hostAction;
 
 installAudioUnlock();
+/*
+ * Der Browser gibt Töne erst nach einem Klick oder Tastendruck auf dieser Seite
+ * frei. Wird der Bildschirm neu geladen und danach nur per Fernbedienung
+ * gesteuert, blieb die Leinwand den ganzen Abend stumm – ohne dass es jemand
+ * merkte, denn auch der Ton-Knopf zeigte „Ton an“. Ein kleiner Hinweis, bis
+ * die erste Geste kommt.
+ */
+setTimeout(() => {
+  if (istStumm() || navigator.userActivation?.hasBeenActive) return;
+  const hinweis = el('button', { type: 'button', class: 'ton-hinweis' }, '🔈 Für Ton einmal hier klicken');
+  document.body.append(hinweis);
+  const weg = () => hinweis.remove();
+  for (const art of ['pointerdown', 'keydown']) document.addEventListener(art, weg, { once: true, capture: true });
+}, 1500);
 // Der Host-Screen ist oft ein MacBook oder iPad, und während einer Frage fasst
 // ihn niemand an – die Leinwand ging mitten im Spiel schwarz. Handy und
 // Fernbedienung hielten sich längst wach, ausgerechnet die Bühne nicht.
@@ -186,6 +200,9 @@ async function loadSets() {
   try {
     const sets = await (await fetch('/api/sets')).json();
     const select = $('#set-select');
+    // Die Auswahl bleibt stehen: Vorher sprang „↻“ (oder das Nachladen beim
+    // Zurückkommen aus dem Editor) jedes Mal auf den ersten Eintrag.
+    const vorher = select.value;
     const keepLocal = select.querySelector('option[value="__local"]');
     select.innerHTML = '';
     if (keepLocal) select.append(keepLocal);
@@ -203,7 +220,10 @@ async function loadSets() {
           set.error ? `${set.file} – ${set.error}` : `${set.name} (${set.questions} Fragen)`),
       );
     }
-    select.dispatchEvent(new Event('change'));
+    if (vorher && [...select.options].some((o) => o.value === vorher && !o.disabled)) select.value = vorher;
+    // Nur bei einer echten Änderung neu beschreiben – sonst flackerte die
+    // Satz-Info bei jedem Tab-Wechsel.
+    if (!vorher || select.value !== vorher) select.dispatchEvent(new Event('change'));
   } catch {
     toast('Fragensätze konnten nicht geladen werden.', 'error');
   }
@@ -377,6 +397,22 @@ async function loadUrls() {
       tunnelFragen += 1;
       setTimeout(loadUrls, 2000);
     }
+    // Der Laptop ist (noch) in keinem WLAN: Der Server kennt nur localhost, und
+    // ein QR-Code darauf führt auf jedem Handy ins eigene Gerät. Wer per
+    // Doppelklick startet, bevor das WLAN-Passwort eingetippt ist, behielt ihn
+    // bisher den ganzen Abend. Also nachfragen, bis eine echte Adresse da ist.
+    const nurLokal = !eigen && !schluessel && info.urls.length > 0
+      && info.urls.every((u) => /\/\/(localhost|127\.|\[::1\])/.test(u));
+    if (!schluessel) {
+      const nachsatz = $('#qr-ziel-nachsatz');
+      if (nachsatz) {
+        nachsatz.dataset.normal ??= nachsatz.textContent;
+        nachsatz.textContent = nurLokal
+          ? 'Der Laptop ist noch in keinem WLAN – der Code stellt sich um, sobald er verbunden ist.'
+          : nachsatz.dataset.normal;
+      }
+    }
+    if (nurLokal && !handverlesen) setTimeout(loadUrls, 3000);
   } catch {
     /* egal */
   }
@@ -478,6 +514,15 @@ function zeigeQr(basis, liste) {
   // Die Lagezeile hängt an der Adresse, die hier gerade gesetzt wurde – tippt
   // der Host mitten im Tunnelabend die Heimnetz-Adresse an, soll sie das sagen.
   zeigeTunnel(tunnelVorhanden);
+  // Dieselben Ziele noch einmal im Menü – dort sind sie auch im Spiel erreichbar.
+  try {
+    $('#menu-qr-play').innerHTML = qrSvg(ziel, { ecl: 'M', quiet: 3 });
+    $('#menu-qr').hidden = false;
+    $('#menu-qr-fern-box').hidden = !hostSchluessel;
+    if (hostSchluessel) $('#menu-qr-fern').innerHTML = qrSvg(fernZiel, { ecl: 'M', quiet: 3 });
+  } catch {
+    $('#menu-qr').hidden = true;
+  }
   const fernQr = $('#remote-qr');
   if (fernQr) {
     fernQr.hidden = !hostSchluessel;
@@ -493,6 +538,11 @@ function zeigeQr(basis, liste) {
 }
 
 loadSets();
+// Wer im Editor (eigener Tab) einen Satz speichert und zurückkommt, soll ihn in
+// der Lobby finden, ohne erst „↻“ zu suchen.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && state?.phase === 'lobby') loadSets();
+});
 loadUrls();
 // Im Netz-Spiel steht der Raum erst nach dem ersten Kontakt fest (oder wird
 // neu angelegt, wenn der alte abgelaufen ist) – dann stimmen QR-Code und
@@ -856,6 +906,10 @@ function renderAnschluss() {
 
   const hilfe = $('#kein-handy');
   if (!hilfe) return;
+  // Die Tipps dort (Firewall, Gast-WLAN, gleiches Netz) gelten nur fürs
+  // Laptop-Spiel. Im Netz braucht niemand ein gemeinsames WLAN; der Raumcode
+  // über dem QR-Code sagt schon, was zu tun ist.
+  if (raeume) { hilfe.hidden = true; return; }
   const verbunden = (state.wartende || 0)
     + state.teams.reduce((n, t) => n + t.members.filter((m) => m.online).length, 0);
   if (verbunden > 0) {

@@ -2103,6 +2103,23 @@ body.host.flat .tile {
   overflow: hidden;
 }
 .remote-qr-bild svg { width: 100%; height: auto; display: block; }
+.ton-hinweis {
+  position: fixed;
+  left: 1rem;
+  bottom: 4.6rem;
+  z-index: 60;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(10, 18, 34, 0.92);
+  color: #cfe4ff;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.menu-qr-reihe { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+.menu-qr-code { margin: 0; display: grid; gap: 0.4rem; max-width: 190px; }
+.menu-qr-code figcaption { margin: 0; }
 .join-urls { width: 100%; display: grid; gap: 0.4rem; margin: 0; }
 .join-urls .url {
   display: block;

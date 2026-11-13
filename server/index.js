@@ -1361,6 +1361,9 @@ server.listen(PORT, async () => {
     });
     if (tunnelAdresse) {
       console.log(`  Der Tunnel steht:         ${tunnelAdresse}`);
+      // Mit Schlüssel – zum Kopieren in den Video-Chat. Nach einem Neustart ist
+      // die Tunneladresse eine neue, und die Gäste von außerhalb brauchen sie.
+      if (zugang?.spiel) console.log(`  Mitspielen (mit Schlüssel): ${tunnelAdresse}/play?k=${zugang.spiel}`);
       console.log('  Die Mitspieler brauchen jetzt kein gemeinsames WLAN mehr – der QR-Code');
       console.log('  in der Lobby zeigt dorthin und trägt den Schlüssel schon bei sich.\n');
     }

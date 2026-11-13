@@ -14,6 +14,8 @@ let zielDatei = gemerkt?.zielDatei || null; // zuletzt geladene Datei – dorthi
 // ist, gehört das Speichern in dieselbe Datei; ein anderer Name ist dagegen
 // ein anderer Satz – siehe zielJetzt().
 let zielName = gemerkt?.zielName ?? null;
+// Die Datei, die dieser Editor selbst gespeichert oder vom Server geladen hat.
+let bestaetigteDatei = null;
 
 function blankRound() {
   return {
@@ -47,15 +49,41 @@ function persistSoon() {
   clearTimeout(persistTimer);
   persistTimer = setTimeout(persist, 500);
 }
-window.addEventListener('blur', () => persist());
-document.addEventListener('visibilitychange', () => persist());
+/*
+ * Zwei offene Editor-Tabs teilen sich denselben Zwischenspeicher. Vorher schrieb
+ * jeder Tab beim Wegklicken seinen Stand hinein – auch ohne eigene Änderung –
+ * und überschrieb so, was im anderen gerade getippt wurde. Jetzt schreibt ein
+ * Tab nur, wenn er selbst etwas geändert hat, und übernimmt den Stand des
+ * anderen, solange er selbst nichts Ungesichertes hat.
+ */
+let zuletztGesichert = JSON.stringify({ set, zielDatei, zielName });
+const stand = () => JSON.stringify({ set, zielDatei, zielName });
+const persistWennGeaendert = () => { if (stand() !== zuletztGesichert) persist(); };
+window.addEventListener('blur', persistWennGeaendert);
+document.addEventListener('visibilitychange', persistWennGeaendert);
+window.addEventListener('storage', (ev) => {
+  if (ev.key !== STORAGE_KEY || ev.newValue == null) return;
+  if (stand() !== zuletztGesichert) {
+    toast('Der Editor ist noch in einem anderen Tab offen – bitte nur in einem arbeiten.', 'error');
+    return;
+  }
+  const d = load();
+  if (!d?.set) return;
+  set = d.set;
+  zielDatei = d.zielDatei || null;
+  zielName = d.zielName ?? null;
+  zuletztGesichert = stand();
+  render();
+});
 
 function persist() {
   try {
     // Auch merken, wohin gespeichert wird: Nach einem Neuladen war das sonst
     // vergessen, und „Speichern" legte plötzlich eine zweite Datei unter dem
     // Namen des Satzes an, statt die geladene zu aktualisieren.
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ set, zielDatei, zielName }));
+    const json = stand();
+    localStorage.setItem(STORAGE_KEY, json);
+    zuletztGesichert = json;
     zeigeSpeicherwarnung(false);
   } catch {
     // Passiert bei vielen eingebetteten Bildern. Ein Toast wäre hier fatal: Er
@@ -473,11 +501,14 @@ async function save(overwrite) {
     const res = await fetch('/api/sets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ set, file: zielJetzt(), overwrite }),
+      // Die eigene Datei (eben gespeichert oder vom Server geladen, Name
+      // unverändert) braucht keine Rückfrage – die kam bisher bei jedem Mal.
+      body: JSON.stringify({ set, file: zielJetzt(), overwrite: overwrite || zielJetzt() === bestaetigteDatei }),
     });
     const data = await res.json();
     if (data.ok) {
       zielDatei = data.file;
+      bestaetigteDatei = data.file;
       zielName = set.name;
       persist();
       zeigeZiel();
@@ -812,6 +843,7 @@ $('#file-input').addEventListener('change', async (ev) => {
     if (!verwerfenOk()) return;
     set = normalizeLoaded(raw);
     zielDatei = file.name;
+    bestaetigteDatei = null; // eine hochgeladene Datei kann einen fremden Satz treffen
     zielName = set.name;
     persist();
     render();
@@ -834,6 +866,7 @@ $('#btn-load').addEventListener('click', async () => {
     if (!verwerfenOk()) return;
     set = normalizeLoaded(raw);
     zielDatei = file;
+    bestaetigteDatei = file;
     zielName = set.name;
     persist();
     render();
@@ -841,6 +874,21 @@ $('#btn-load').addEventListener('click', async () => {
   } catch (err) {
     toast(`Laden fehlgeschlagen: ${err.message}`, 'error');
   }
+});
+
+// Ein frischer, leerer Satz. Vorher ging das nur über den Zwischenspeicher des
+// Browsers oder eine leere Datei – sonst baute man immer im letzten Satz weiter.
+$('#btn-new')?.addEventListener('click', () => {
+  if (!verwerfenOk()) return;
+  set = blankSet();
+  zielDatei = null;
+  zielName = null;
+  bestaetigteDatei = null;
+  persist();
+  render();
+  zeigeZiel();
+  $('#set-name')?.focus();
+  $('#set-name')?.select();
 });
 
 /** Der Editor haelt nur einen Satz – vor dem Ueberschreiben also fragen. */

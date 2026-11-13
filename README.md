@@ -28,8 +28,8 @@ braucht der Abend nichts mehr außer einem Browser:
    den Raumcode ein. Ein gemeinsames WLAN braucht niemand.
 3. Teams bilden, Fragensatz wählen, **Spiel starten**.
 
-Die **Fernbedienung** fürs eigene Handy hängt wie immer am Menü des Bildschirms
-(`⋯`): Ihr QR-Code trägt den Host-Schlüssel dieses Raums. Den gibt man nicht an
+Die **Fernbedienung** fürs eigene Handy: Ihr QR-Code steht in der Lobby und – auch
+mitten im Spiel – im Menü des Bildschirms (`⋯`). Er trägt den Host-Schlüssel dieses Raums. Den gibt man nicht an
 Mitspieler weiter – wer ihn hat, sieht die Lösungen und darf werten.
 
 Was dabei anders ist als am Laptop:
@@ -443,7 +443,11 @@ abliest, öffnet die Fernbedienung und liest alle Lösungen mit.
 Ohne Schlüssel kommt niemand an `/host`, `/remote`, den Editor oder die Fragensätze –
 dort stehen die Lösungen. Beide Schlüssel gelten 12 Stunden und liegen neben dem
 Spielstand: Stürzt der Server mitten im Spiel ab, kommen mit dem Stand auch die
-Schlüssel zurück, und kein Handy im Raum fliegt raus. Am nächsten Abend sind sie neu.
+Schlüssel zurück, und kein Handy im Heimnetz fliegt raus. Gäste von außerhalb
+brauchen danach allerdings die neue Tunneladresse – der Tunnel bekommt bei jedem
+Start eine andere. Den passenden QR-Code zeigt das Menü des Bildschirms (`⋯`) auch
+mitten im Spiel, und das Terminal nennt die Adresse samt Schlüssel zum Kopieren.
+Am nächsten Abend sind die Schlüssel neu.
 
 ---
 
