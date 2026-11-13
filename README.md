@@ -977,6 +977,12 @@ Ohne die Redis-Zugangsdaten startet die veröffentlichte Fassung absichtlich nic
 (`fra1` in `vercel.json`); liegt die Datenbank ebenfalls dort (`eu-central-1`),
 ist jeder Zug spürbar schneller.
 
+**Wie viel Datenbank ein Abend braucht:** Jedes Gerät fragt nach und meldet sich
+etwa alle acht Sekunden. Ein Abend mit Bildschirm, Fernbedienung und fünf Handys
+kommt grob auf einige zehntausend Redis-Befehle. Der kostenlose Upstash-Tarif reicht
+damit für viele Abende im Monat – teilt sich das Spiel die Datenbank mit einem
+anderen Projekt, teilen sich beide auch dieses Kontingent.
+
 **Wie es gebaut ist:** Vercel liefert `public/` als fertige Seiten aus und ruft für
 alles unter `/api/` eine einzige Funktion (`api/quizduell.js`). Die lädt den Raum aus
 Redis, wendet dieselben Regeln an wie der Laptop-Server (`server/spiel.js`) und legt

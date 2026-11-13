@@ -64,6 +64,13 @@ const adresseBeimLaden = typeof location === 'undefined' ? null
   : new URL(location.href); // bevor verbergeSchluessel() sie kürzt
 const RAUM_K = 'quizduell.raum.k';
 const RAUM_H = 'quizduell.raum.h';
+// Wann dieses Handy zuletzt etwas aus seinem Raum gehört hat. Ein Code von
+// einem früheren Abend soll nicht still weitergelten – dann landete ein Gast,
+// der nur die Adresse aufruft, im Raum der letzten Woche, statt nach dem Code
+// gefragt zu werden. Zwölf Stunden: so lange gilt auch ein Spiel als laufend.
+const RAUM_AM = 'quizduell.raum.am';
+const RAUM_VERFALL_MS = 12 * 60 * 60 * 1000;
+let alterCode = ''; // als Vorschlag im Dialog
 
 function setzeKeks(name, wert) {
   const sicher = location.protocol === 'https:' ? '; Secure' : '';
@@ -86,6 +93,7 @@ let raum = null; // { k, h } im Netz-Spiel, sonst null
 function uebernimmRaum(k, h) {
   if (k) {
     merke(RAUM_K, k);
+    merke(RAUM_AM, String(Date.now()));
     setzeKeks('qd_spiel', k);
   }
   if (h) {
@@ -120,6 +128,16 @@ async function richteRaumEin(anlegen) {
   const ausAdresse = (name) => adresseBeimLaden?.searchParams.get(name) || '';
   let h = ROLE === 'host' ? (ausAdresse('h') || lies(RAUM_H) || '') : '';
   let k = (ausAdresse('k') || lies(RAUM_K) || '').toUpperCase();
+  const veraltet = ROLE !== 'host' && !ausAdresse('k') && k
+    && Date.now() - Number(lies(RAUM_AM) || 0) > RAUM_VERFALL_MS;
+  if (veraltet) {
+    // Nicht still beitreten – aber den alten Code anbieten: Wer wieder beim
+    // selben Gastgeber sitzt, tippt nur auf „Beitreten“. Auch der Keks muss
+    // weg, sonst führt der Server das Handy über ihn doch in den alten Raum.
+    alterCode = k;
+    k = '';
+    document.cookie = 'qd_spiel=; Path=/; Max-Age=0';
+  }
   if (ROLE === 'host' && h) k = h.split('.')[0];
   if (ROLE === 'host' && !h && anlegen) return neuerRaum();
   return uebernimmRaum(k, h);
@@ -133,7 +151,7 @@ function frageRaumcode(grund) {
   return new Promise((fertig) => {
     document.querySelector('.raum-frage')?.remove();
     const eingabe = el('input', {
-      id: 'raum-code', maxlength: '4', autocomplete: 'off', autocapitalize: 'characters',
+      id: 'raum-code', maxlength: '4', value: alterCode, autocomplete: 'off', autocapitalize: 'characters',
       spellcheck: 'false', placeholder: 'ABCD', 'aria-describedby': 'raum-frage-hinweis',
     });
     const fehler = el('p', { class: 'raum-frage-fehler', role: 'alert' });
@@ -714,6 +732,7 @@ export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false 
     if (letzteNummer != null && sicht.nummer <= letzteNummer) return;
     merkeGeheim(sicht.geheim);
     verarbeiteSignale(sicht.signale);
+    if (ROLE !== 'host') merke(RAUM_AM, String(Date.now()));
     letzteNummer = sicht.nummer;
     lobby = sicht.phase === 'lobby';
     nimm(sicht, `Raum ${sicht.raum}`);

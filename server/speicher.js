@@ -83,10 +83,11 @@ export function speicherImArbeitsspeicher({ jetzt = () => Date.now() } = {}) {
       return true;
     },
 
-    /** Vermerkt, dass sich ein Gerät gemeldet hat, und nennt alle bekannten. */
+    /** Vermerkt, dass sich ein Gerät gemeldet hat, und nennt alle bekannten.
+        null heißt: Den Raum gibt es nicht. */
     async puls(code, clientId, isHost) {
       const e = hole(code);
-      if (!e) return {};
+      if (!e) return null;
       e.geraete.set(clientId, { zeit: jetzt(), host: !!isHost });
       return Object.fromEntries(e.geraete);
     },
@@ -124,6 +125,22 @@ redis.call('SET', KEYS[1], ARGV[2], 'EX', ARGV[4])
 redis.call('SET', KEYS[2], ARGV[3], 'EX', ARGV[4])
 if ARGV[5] ~= '' then redis.call('SET', KEYS[3], ARGV[5], 'EX', ARGV[4]) end
 return 1
+`;
+
+/*
+ * Die Meldung eines Geräts als ein einziger Befehl. Upstash zählt ein Skript
+ * als einen Befehl; vorher waren es drei (HSET, EXPIRE, HGETALL) plus ein
+ * eigener Blick, ob es den Raum überhaupt gibt. Bei sieben Geräten, die sich
+ * alle acht Sekunden melden, ist das der größte Posten eines Abends.
+ *
+ * KEYS: Raum, Geräte.  ARGV: Gerät, Wert, Lebensdauer.
+ * Gibt es den Raum nicht, wird nichts angelegt und false zurückgegeben.
+ */
+const PULS_SKRIPT = `
+if redis.call('EXISTS', KEYS[1]) == 0 then return false end
+redis.call('HSET', KEYS[2], ARGV[1], ARGV[2])
+redis.call('EXPIRE', KEYS[2], ARGV[3])
+return redis.call('HGETALL', KEYS[2])
 `;
 
 export function speicherUpstash({ url, token, fetchen = fetch, jetzt = () => Date.now() }) {
@@ -199,11 +216,11 @@ export function speicherUpstash({ url, token, fetchen = fetch, jetzt = () => Dat
     },
 
     async puls(code, clientId, isHost) {
-      const [, , alle] = await rutsch([
-        ['HSET', k.geraete(code), clientId, `${jetzt()}|${isHost ? 1 : 0}`],
-        ['EXPIRE', k.geraete(code), ttl],
-        ['HGETALL', k.geraete(code)],
+      const alle = await befehl([
+        'EVAL', PULS_SKRIPT, '2', k.raum(code), k.geraete(code),
+        clientId, `${jetzt()}|${isHost ? 1 : 0}`, ttl,
       ]);
+      if (alle == null || alle === false) return null;
       // HGETALL kommt als flache Liste: [feld, wert, feld, wert, …]
       const out = {};
       for (let i = 0; i + 1 < (alle || []).length; i += 2) {

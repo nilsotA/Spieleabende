@@ -432,11 +432,14 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
     const willHost = url.searchParams.get('role') === 'host';
     const wer = ausweis(req, url, willHost);
     if (!wer.code) return keinRaum(res, 'Kein Raum gewählt.');
-    const kopf = await speicher.kopf(wer.code);
-    if (!kopf) return keinRaum(res);
-
+    // Mit Meldung genügt die Meldung selbst als Lebenszeichen des Raums: Sie
+    // sagt auch, ob es ihn gibt. Das spart einen Lesezugriff je Meldung – im
+    // Gratis-Kontingent von Upstash zählt jeder Befehl.
     const puls = !!clientId && url.searchParams.has('puls');
     const geraete = puls ? await speicher.puls(wer.code, clientId, willHost) : null;
+    if (puls && !geraete) return keinRaum(res);
+    const kopf = puls ? null : await speicher.kopf(wer.code);
+    if (!puls && !kopf) return keinRaum(res);
     const seit = url.searchParams.has('seit') ? Number(url.searchParams.get('seit')) : NaN;
     const zahl = (name, vor) => {
       const n = Number(url.searchParams.get(name));
