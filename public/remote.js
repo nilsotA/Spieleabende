@@ -357,12 +357,7 @@ function render() {
         setz(
           big('Richtig ✓', 'btn-good', () => act('judge', { correct: true }), seit),
           big('Falsch ✗', 'btn-bad', () => act('judge', { correct: false }), seit),
-          // Direkt darüber steht schon „↩ Buzz zurücknehmen" – der Rückweg-Knopf
-          // trägt nach einem Buzz dieselbe Aufschrift und tut dasselbe. Zwei
-          // gleich beschriftete Knöpfe übereinander lassen nur rätseln, worin
-          // sie sich unterscheiden.
-          ...(state.rueckgaengig === 'Buzz' ? []
-            : [big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz'), seit)]),
+          big('Buzz zurücknehmen', 'btn-ghost', () => act('resetBuzz'), seit),
         );
       } else if (q.stechen) {
         setzeText(phase, state.stechenSieger
@@ -400,14 +395,16 @@ function render() {
   // In der Lobby stehen alle Punktestände auf 0: Sucht sich dort ein Handy
   // sein Wappen aus oder benennt der Host ein Team um, änderte sich am
   // Schlüssel nichts, und die Liste auf der Fernbedienung fror ein.
+  // Hervorgehoben ist nur, wer am Zug ist – am Runden- und Spielende niemand.
+  const amZug = state.phase === 'board' || state.phase === 'question';
   const key = state.teams.map((t) => `${t.id}:${t.name}:${t.wappen}:${t.score}`).join('|')
-    + `#${state.turnIndex}`;
+    + `#${amZug ? state.turnIndex : -1}`;
   if (list.dataset.key !== key) {
     list.dataset.key = key;
     list.innerHTML = '';
     state.teams.forEach((team, i) => {
       list.append(
-        el('li', { class: i === state.turnIndex ? 'turn' : '' },
+        el('li', { class: amZug && i === state.turnIndex ? 'turn' : '' },
           // Punkt und Name in einer Hülle: Auf schmalen Handys rutschen die
           // Knöpfe in eine zweite Zeile, und ohne die Hülle stünde der
           // Farbpunkt allein in der ersten. Auf breiten Screens ist die Hülle
@@ -568,11 +565,19 @@ function renderFeldwahl() {
         // Ohne Beschriftung liest ein Screenreader nur „300" – bei sechs
         // Kategorien untereinander sagt das nichts.
         'aria-label': `${cat.name}, ${cell.value} Punkte${cell.used ? ' – schon gespielt' : ''}`,
-        onclick: () => {
+        // Gesperrt, bis die Antwort da ist: Im Netz dauert ein Zug einen
+        // Moment, und ein zweiter Tipp aufs selbe Feld brachte einen roten
+        // Fehlerkasten. Den Einsatz erst nach Erfolg verbrauchen – sonst ist er
+        // bei einer Ablehnung (Pause, kurz offline) still weg.
+        onclick: (ev) => {
+          const knopf = ev.currentTarget;
+          knopf.disabled = true;
           const mitEinsatz = einsatzFuer !== null
             && einsatzFuer === state.teams[state.turnIndex]?.id;
-          einsatzFuer = null;
-          act('pick', { catIdx, rowIdx, einsatz: mitEinsatz });
+          act('pick', { catIdx, rowIdx, einsatz: mitEinsatz }).then((r) => {
+            if (r?.ok) einsatzFuer = null;
+            else knopf.disabled = false;
+          });
         },
       }, String(einsatzScharf ? cell.value * 2 : cell.value)))),
     );

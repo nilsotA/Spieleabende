@@ -4417,17 +4417,13 @@ test('ein Spielstand, der nicht geschrieben werden kann, steht auf der Leinwand'
 /*
  * „↩ Wertung für Rot zurücknehmen" nahm den Buzz zurück, der dazwischenkam.
  *
- * Der Knopf ist der einzige im Haus, der seinen Inhalt nennt. Geschickt hat er
- * trotzdem nur `undo`, und der Server nahm stur das oberste Element vom
- * Rückweg – dort landet auch ein Buzz (RUECKNEHMBAR). Ein Handy, das in
- * derselben Sekunde drückt, schiebt sich also zwischen Versprechen und
- * Einlösung: zurückgenommen wird der Buzz, die Fehlwertung bleibt auf der
- * Leinwand stehen, und der Knopf heißt danach wieder so wie vorhin.
- *
- * Denselben Weg wie bei den Wertungen (`lage`): Der Absender schickt mit, was
- * er zurückzunehmen glaubte.
+ * Nach „Falsch“ für das Zugteam ist der Buzzer sofort offen, und irgendwer
+ * drückt immer. Stand der Buzz im Rückweg, lag er über der Wertung: Der Knopf
+ * hieß dann „↩ Buzz zurücknehmen“, öffnete den Buzzer wieder, und der Nächste
+ * drückte, bevor der Host an die Wertung kam. Ein Buzz gehört deshalb nicht in
+ * den Rückweg – der Knopf hält, was er verspricht, in einem einzigen Schritt.
  */
-test('Zurücknehmen nimmt das zurück, was auf dem Knopf steht', async (t) => {
+test('Zurücknehmen nimmt das zurück, was auf dem Knopf steht – auch wenn dazwischen gebuzzert wurde', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-undo-'));
   const { proc, base } = await starteServer(6700 + Math.floor(Math.random() * 200), path.join(dir, 'stand.json'));
   t.after(async () => { proc.kill('SIGKILL'); await rm(dir, { recursive: true, force: true }); });
@@ -4442,37 +4438,35 @@ test('Zurücknehmen nimmt das zurück, was auf dem Knopf steht', async (t) => {
   await host({ type: 'startGame', set: SATZ });
   await host({ type: 'setTurn', teamId: teams[0].id });
   await host({ type: 'pick', catIdx: 0, rowIdx: 3 });
+  const vorWertung = (await zustand(base)).teams[0].score;
 
   // Die Fehlwertung: Das Zugteam bekommt fälschlich „falsch" – danach ist der
-  // Buzzer für die Übrigen offen, und genau dort passt der Unfall hinein.
+  // Buzzer für die Übrigen offen, und genau dort passt der Buzz hinein.
   await host({ type: 'judge', correct: false });
   const nachWertung = await zustand(base);
   assert.match(nachWertung.rueckgaengig, /Wertung/, 'der Knopf verspricht jetzt die Wertung');
   const versprochen = nachWertung.rueckgaengig;
-  const standVorher = nachWertung.teams[0].score;
 
-  // Dazwischen kommt ein Buzz – auch der steht im Rückweg.
   const gebuzzert = await gast.tu({ type: 'buzz' });
   assert.equal(gebuzzert.ok, true, gebuzzert.error || '');
-  assert.equal((await zustand(base)).rueckgaengig, 'Buzz', 'obenauf liegt jetzt der Buzz');
+  assert.equal((await zustand(base)).rueckgaengig, versprochen, 'der Buzz schiebt sich nicht davor');
 
-  // Der Tipp, der für die Wertung gedacht war, prallt ab.
-  const daneben = await host({ type: 'undo', was: versprochen });
-  assert.equal(daneben.ok, false, 'er darf nicht den Buzz treffen');
-  assert.match(daneben.error, /dazwischengekommen/);
+  // Ein einziger Tipp holt die Antwortphase des Zugteams zurück – mit
+  // geschlossenem Buzzer, also kann niemand mehr dazwischendrücken.
+  const zurueck = await host({ type: 'undo', was: versprochen });
+  assert.equal(zurueck.ok, true, zurueck.error || '');
   const stand = await zustand(base);
-  assert.equal(stand.current?.buzzedTeamId, teams[1].id, 'der Buzz steht noch');
-  assert.equal(stand.teams[0].score, standVorher, 'und die Punkte auch');
+  assert.equal(stand.current.step, 'primary');
+  assert.equal(stand.current.buzzedTeamId ?? null, null);
+  assert.equal(stand.teams[0].score, vorWertung, 'die Punkte sind wieder wie vor der Wertung');
 
-  // Ohne Angabe bleibt alles wie bisher – eine ältere Seite darf nicht aussperren.
-  const blind = await host({ type: 'undo' });
-  assert.equal(blind.ok, true, blind.error || '');
-  assert.equal((await zustand(base)).current?.buzzedTeamId ?? null, null, 'der Buzz ist zurückgenommen');
-
-  // Und jetzt trifft der Knopf das, was er verspricht.
-  const jetzt = await zustand(base);
-  const echt = await host({ type: 'undo', was: jetzt.rueckgaengig });
-  assert.equal(echt.ok, true, echt.error || '');
+  // Kommt doch einmal ein anderer Zug dazwischen, prallt der Tipp weiterhin ab.
+  await host({ type: 'judge', correct: false });
+  const zweite = (await zustand(base)).rueckgaengig;
+  await host({ type: 'adjustScore', teamId: teams[1].id, delta: 100 });
+  const daneben = await host({ type: 'undo', was: zweite });
+  assert.equal(daneben.ok, false, 'er darf nicht die Punktekorrektur treffen');
+  assert.match(daneben.error, /dazwischengekommen/);
 });
 
 test('eine unberührte Spalte lässt sich tauschen und der Tausch zurücknehmen', async (t) => {

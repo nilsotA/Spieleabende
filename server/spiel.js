@@ -103,9 +103,16 @@ export const HOST_ACTIONS = new Set([
 const LAGEGEBUNDEN = new Set(['judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close', 'resetBuzz',
   'buzzFor', 'discard']);
 
+/* Ein Buzz steht bewusst NICHT im Rückweg. Sonst legte sich jeder Buzz über
+   die Wertung davor: Nach „Falsch“ für das Zugteam ist der Buzzer sofort
+   offen, irgendwer drückt immer, und „↩ Wertung zurücknehmen“ wurde zu
+   „↩ Buzz zurücknehmen“ – das den Buzzer wieder öffnete, worauf sofort der
+   nächste drückte. Der Protest „das war doch richtig!“ ließ sich so am Abend
+   kaum noch einlösen. Einen falschen Buzz nimmt „Buzz zurücknehmen“
+   (resetBuzz) zurück; die Wertung davor ein einziges Zurücknehmen. */
 export const RUECKNEHMBAR = new Set([
   'pick', 'judge', 'pass', 'openBuzz', 'reveal', 'endQuestion', 'close',
-  'nextRound', 'adjustScore', 'setTurn', 'resetBuzz', 'buzzFor', 'buzz',
+  'nextRound', 'adjustScore', 'setTurn', 'resetBuzz',
   'stechen', 'tauscheKategorie',
 ]);
 
@@ -261,7 +268,6 @@ function benenne(type, vorher) {
     case 'nextRound': return 'Rundenwechsel';
     case 'adjustScore': return 'Punktekorrektur';
     case 'setTurn': return 'Zugwechsel';
-    case 'buzz': case 'buzzFor': return 'Buzz';
     case 'resetBuzz': return 'Buzz zurücksetzen';
     case 'stechen': return 'Stechen starten';
     case 'tauscheKategorie': return 'Kategorietausch';
@@ -571,6 +577,12 @@ export async function handleAction(raum, clientId, body, isHost) {
     // höchstens acht Teams. Entfernen kann sie weiterhin nur der Host.
     case 'eigenesTeam': {
       const wunsch = String(body.name || '').trim();
+      // Doppeltipp: Im Netz dauert ein Zug ein paar hundert Millisekunden, und
+      // der zweite Tipp legte ein zweites Team gleichen Namens an – das erste
+      // blieb leer zurück und kam im Spiel trotzdem an die Reihe. Steht das
+      // Gerät schon allein in einem Team dieses Namens, ist nichts zu tun.
+      const schon = G.teamOfClient(raum.state, clientId);
+      if (schon && schon.members.length === 1 && wunsch && schon.name === wunsch.slice(0, 24)) break;
       G.addTeam(raum.state, wunsch);
       const neu = raum.state.teams[raum.state.teams.length - 1];
       G.joinTeam(raum.state, clientId, neu.id, wunsch);

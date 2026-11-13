@@ -547,6 +547,16 @@ function render(prev) {
     // über dem Logo hängen, bis jemand die Seite neu lud.
     renderWiederhergestellt();
     renderSicherung();
+    // Zurück aus einem Spiel („Neues Spiel“): Vorgewählt war noch der eben
+    // gespielte Satz, und ein Tipp auf „Spiel starten“ spielte dieselben 48
+    // Fragen noch einmal. Der Zufallsmix dagegen meidet, was schon dran war.
+    if (prev && prev.phase !== 'lobby') {
+      const wahl = $('#set-select');
+      if (wahl.value !== MIX && wahl.querySelector(`option[value="${MIX}"]`)) {
+        wahl.value = MIX;
+        wahl.dispatchEvent(new Event('change'));
+      }
+    }
     return renderLobby();
   }
 
@@ -567,7 +577,7 @@ function render(prev) {
 
   renderBoard();
   renderQuestion(prev);
-  renderPlayers();
+  renderPlayers(prev);
   renderScoreboard();
   renderPause();
   renderUhr();
@@ -1494,7 +1504,7 @@ function setBuzzIndicator(mode) {
   node.classList.toggle('aus', mode === 'aus');
 }
 
-function renderPlayers() {
+function renderPlayers(prev) {
   const box = $('#players');
   // Name und Wappen gehören mit in den Schlüssel: Beides lässt sich in der
   // Lobby noch ändern, und die Pulte werden nicht neu gebaut, solange dieselben
@@ -1612,8 +1622,13 @@ function renderPlayers() {
   // Auch die Schwelle geht über die Spanne statt über den Höchststand: Ein Feld,
   // das 500 Punkte auseinanderliegt, hat seine Anfangsphase hinter sich – egal,
   // ob das oben oder unten von der Null passiert.
+  // Nur nach einer echten Wertung – das Protokoll der Frage ist gewachsen.
+  // Zurücknehmen kürzt es, eine Punktekorrektur lässt es gleich: Beides sind
+  // Korrekturen, keine Überholmanöver, und „Führungswechsel“ wäre dort falsch.
+  const gewertet = !!state.current && !!prev?.current
+    && (state.current.log?.length || 0) > (prev.current.log?.length || 0);
   if (fuehrendJetzt && fuehrend && fuehrendJetzt.id !== fuehrend && spanne >= 500
-      && state.phase === 'question') {
+      && state.phase === 'question' && gewertet) {
     const name = fuehrendJetzt.name;
     setTimeout(() => ansagen('Führungswechsel', name, 1400), 900);
   }
@@ -2108,14 +2123,26 @@ function countUp(node, von, bis, dauer = 600) {
   requestAnimationFrame(schritt);
 }
 
+/* Seit wann das Rundenende steht. „Weiter“ mit der Leertaste am Ende der
+   letzten Frage, ein zweiter Druck aus Gewohnheit – und das Rundenende war
+   übersprungen, bevor es jemand gesehen hatte. Der Zwischenstand ist aber
+   genau der Moment, in dem der Raum Luft holt. */
+let rundenendeSeit = 0;
+const RUNDENENDE_SPERRE_MS = 1200;
+const rundenendeBereit = () => performance.now() - rundenendeSeit > RUNDENENDE_SPERRE_MS;
+
 function renderScoreboard() {
   const box = $('#scoreboard');
   const show = state.phase === 'roundEnd' || state.phase === 'gameOver';
   box.hidden = !show;
   if (!show) {
     rundeAbgepfiffen = false; // vor dem Aussteigen, sonst wird nie zurückgesetzt
+    // Wer den Endstand zurücknimmt und die letzte Frage neu wertet, erreicht
+    // das Ende ein zweites Mal – und bekam bisher eine stumme Tafel.
+    konfettiGefallen = false;
     return;
   }
+  rundenendeSeit = lageSeit('rundenende', `${state.phase}#${state.round}`);
 
   const final = state.phase === 'gameOver';
   $('#score-title').textContent = final ? 'Endstand' : `Runde ${state.round} beendet`;
@@ -2900,7 +2927,7 @@ function knopfAufschriften(teams) {
   });
 }
 
-$('#btn-next-round').addEventListener('click', () => act('nextRound'));
+$('#btn-next-round').addEventListener('click', () => { if (rundenendeBereit()) act('nextRound'); });
 $('#btn-stechen').addEventListener('click', () => act('stechen'));
 /**
  * Der Abend als Text, zum Weiterschicken.
@@ -3533,7 +3560,7 @@ document.addEventListener('keydown', (ev) => {
 
   const q = state.current;
   if (!q) {
-    if (key === ' ' && state.phase === 'roundEnd') { ev.preventDefault(); act('nextRound'); }
+    if (key === ' ' && state.phase === 'roundEnd') { ev.preventDefault(); if (rundenendeBereit()) act('nextRound'); }
     return;
   }
 

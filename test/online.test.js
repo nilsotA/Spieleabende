@@ -185,11 +185,10 @@ pruefe('ein ganzer Spielzug im Raum: aufrufen, buzzern, werten, zurücknehmen', 
   assert.equal(stand.teams[0].score, -50, '„weiß nicht" kostet das Zugteam die Hälfte');
 
   // Der Rückweg liegt getrennt vom Raum und übersteht die einzelnen Anfragen.
-  assert.ok(stand.rueckwegTiefe >= 4);
+  assert.ok(stand.rueckwegTiefe >= 3);
   assert.equal((await host.tu('undo')).ok, true);
   assert.equal((await host.stand()).teams[1].score, 0, 'die Wertung ist zurückgenommen');
-  await host.tu('undo'); // der Buzz
-  await host.tu('undo'); // „weiß nicht"
+  await host.tu('undo'); // „weiß nicht" – ein Buzz steht nicht im Rückweg
   stand = await host.stand();
   assert.equal(stand.current.step, 'primary');
   assert.equal(stand.teams[0].score, 0);

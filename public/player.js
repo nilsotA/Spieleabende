@@ -116,7 +116,9 @@ lageKnopf.addEventListener('click', () => {
  * Ein Schritt statt zwei – der Name steht ja schon im Feld darüber. Wer zu
  * zweit spielt, tippt danach einfach auf das Team des anderen.
  */
+let legtAn = false; // gegen den Doppeltipp, solange der erste Zug unterwegs ist
 async function eigenesTeam() {
+  if (legtAn) return;
   unlockAudio();
   keepScreenAwake();
   const name = $('#my-name').value.trim();
@@ -125,8 +127,13 @@ async function eigenesTeam() {
     return toast('Bitte trag deinen Namen ein.', 'error');
   }
   document.activeElement?.blur?.();
-  const res = await action('eigenesTeam', { name });
-  if (res.ok) merke('quizduell.name', name);
+  legtAn = true;
+  try {
+    const res = await action('eigenesTeam', { name });
+    if (res.ok) merke('quizduell.name', name);
+  } finally {
+    legtAn = false;
+  }
 }
 
 /* Stumm gilt pro Gerät: Wer neben dem Beamer sitzt, braucht seinen Buzzerton
@@ -531,7 +538,7 @@ function renderJoin() {
   // trotzdem einsteigen" wäre dann ein Versprechen, das der Knopf gleich bricht.
   $('#join-hint').textContent =
     state.phase === 'lobby'
-      ? 'Für Zweierteams wählt ihr beide dasselbe Team.'
+      ? 'Tippe auf dein Team, um beizutreten. Für Zweierteams wählt ihr beide dasselbe.'
       : state.phase === 'question'
         ? 'Gerade läuft eine Frage – gleich danach kannst du einsteigen.'
         : 'Das Spiel läuft schon – du kannst trotzdem einsteigen.';
@@ -555,7 +562,17 @@ function renderJoin() {
         el('button', {
           type: 'button',
           class: `team-choice ${selectedTeam === team.id ? 'selected' : ''}`,
-          onclick: () => { selectedTeam = team.id; renderJoin(); },
+          // Ein Tipp aufs Team ist der Beitritt. Vorher wählte er nur aus, und
+          // „Mitspielen“ lag auf kleinen Handys unter dem Bildrand – direkt
+          // unter „Eigenes Team“, das dagegen sofort beitritt. Zwei gleich
+          // aussehende Kacheln, die sich verschieden verhalten. Fehlt der
+          // Name, fängt der Absende-Weg das ab (Fokus ins Feld, Hinweis).
+          // `.click()` statt requestSubmit: Das fehlt älterem iOS-Safari.
+          onclick: () => {
+            selectedTeam = team.id;
+            renderJoin();
+            $('#join-form button[type=submit]').click();
+          },
         },
           el('span', { class: 'tw', style: { '--team': team.color } }, team.wappen),
           el('span', {},
@@ -938,7 +955,11 @@ function renderBuzzer(prev) {
         : `${state.teams.find((t) => t.id === state.stechenSieger)?.name ?? '?'} gewinnt das Stechen.`)
       // Gleichstand oben: Gleich kommt die Entscheidungsfrage – das Handy sagt
       // es, damit niemand den Buzzer weglegt.
-      : spitze.length > 1 ? 'Gleichstand oben – gleich das Stechen!' : 'Spiel beendet!');
+      : spitze.length > 1 ? 'Gleichstand oben – gleich das Stechen!'
+        // Das Handy nannte bisher keinen Sieger – nur „Spiel beendet!“.
+        : spitze[0].id === you.teamId ? 'Ihr habt gewonnen!'
+          : `Sieg für ${spitze[0].name} – ihr seid auf Platz ${
+            1 + state.teams.filter((t) => t.score > (state.teams.find((x) => x.id === you.teamId)?.score ?? -Infinity)).length}.`);
     lock('ENDE');
     return;
   }
@@ -1152,7 +1173,11 @@ function summenzeile(geholt, verloren) {
 
 function renderScores() {
   const box = $('#p-scores');
-  const activeId = state.teams[state.turnIndex]?.id;
+  // Golden leuchtet, wer am Zug ist – das gibt es nur auf dem Brett und während
+  // einer Frage. Am Runden- und Spielende glühte sonst irgendein Team, das
+  // zufällig „dran“ gewesen wäre, und sah aus wie der Sieger.
+  const amZug = state.phase === 'board' || state.phase === 'question';
+  const activeId = amZug ? state.teams[state.turnIndex]?.id : null;
   // Die eigene Teamkennung gehört mit hinein: Sie entscheidet, welcher Chip
   // als „meiner" leuchtet. Nach „Team wechseln" ändert sich sonst nichts am
   // Schlüssel – kein Name, kein Wappen, kein Punktestand –, die Reihe wird
