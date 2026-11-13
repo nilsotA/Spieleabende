@@ -15,7 +15,7 @@
             {
               "text": "Welche Stadt hat das Kennzeichen M?",
               "answer": "München",
-              "note": "Zwölf Städte haben einen einzelnen Buchstaben: B, C, D, E, F, H, K, L, M, N, S und Z."
+              "note": "Einen einzelnen Buchstaben bekamen vor allem große Städte – von A wie Augsburg bis Z wie Zwickau."
             },
             {
               "text": "Welche Stadt hat das Kennzeichen KI?",
@@ -65,7 +65,7 @@
             {
               "text": "Welcher Fluss fließt durch Köln?",
               "answer": "Der Rhein",
-              "note": "Der Dom steht keine hundert Meter vom Ufer – deshalb kommt bei Hochwasser die Altstadt zuerst dran."
+              "note": "Bei Hochwasser läuft in Köln zuerst die Altstadt direkt am Ufer voll – der Dom steht etwas höher und bleibt trocken."
             },
             {
               "text": "Welcher Fluss fließt durch Dresden?",
@@ -199,7 +199,7 @@
             {
               "text": "In welchem Jahr wurde die Berliner Mauer gebaut?",
               "answer": "1961",
-              "note": "Gebaut wurde in einer einzigen Nacht, vom 12. auf den 13. August."
+              "note": "In der Nacht zum 13. August wurde die Grenze mit Stacheldraht abgeriegelt. Die Mauer aus Stein folgte in den Tagen danach."
             },
             {
               "text": "In welchem Jahr wurde das Deutsche Kaiserreich gegründet?",
