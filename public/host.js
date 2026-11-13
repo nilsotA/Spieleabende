@@ -2128,6 +2128,8 @@ function countUp(node, von, bis, dauer = 600) {
    übersprungen, bevor es jemand gesehen hatte. Der Zwischenstand ist aber
    genau der Moment, in dem der Raum Luft holt. */
 let rundenendeSeit = 0;
+let rundenendeOffen = false;
+let rundenendeEintritt = 0;
 const RUNDENENDE_SPERRE_MS = 1200;
 const rundenendeBereit = () => performance.now() - rundenendeSeit > RUNDENENDE_SPERRE_MS;
 
@@ -2138,11 +2140,20 @@ function renderScoreboard() {
   if (!show) {
     rundeAbgepfiffen = false; // vor dem Aussteigen, sonst wird nie zurückgesetzt
     // Wer den Endstand zurücknimmt und die letzte Frage neu wertet, erreicht
-    // das Ende ein zweites Mal – und bekam bisher eine stumme Tafel.
-    konfettiGefallen = false;
+    // das Ende ein zweites Mal – und bekam bisher eine stumme Tafel. Nicht aber
+    // während einer Stechfrage: Bleibt die ohne Sieger, kehrt das Spiel zum
+    // Endstand zurück, und die Fanfare käme für niemanden.
+    if (!state.current?.stechen) konfettiGefallen = false;
+    rundenendeOffen = false;
     return;
   }
-  rundenendeSeit = lageSeit('rundenende', `${state.phase}#${state.round}`);
+  // Jedes neue Erscheinen der Tafel (auch nach „Zurücknehmen“) startet die
+  // Sperre neu; weitere Zeichnungen, solange sie steht, verlängern sie nicht.
+  if (!rundenendeOffen) {
+    rundenendeOffen = true;
+    rundenendeEintritt += 1;
+  }
+  rundenendeSeit = lageSeit('rundenende', `${state.phase}#${state.round}#${rundenendeEintritt}`);
 
   const final = state.phase === 'gameOver';
   $('#score-title').textContent = final ? 'Endstand' : `Runde ${state.round} beendet`;

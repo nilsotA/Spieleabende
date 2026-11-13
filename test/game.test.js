@@ -1555,3 +1555,31 @@ test('ein neues Spiel vergisst, was weggetauscht wurde', () => {
   G.startGame(lobby, SET);
   assert.deepEqual(lobby.abgewaehlt, []);
 });
+
+test('ein zurückgenommener Buzz bleibt kein Rekord', () => {
+  // Fehlbuzz gleich nach dem Freigeben: der schnellste des Abends, den danach
+  // niemand mehr unterbieten könnte. „Buzz zurücknehmen“ nimmt ihn mit.
+  const state = G.createState();
+  G.addTeam(state, 'Rot');
+  G.addTeam(state, 'Blau');
+  G.joinTeam(state, 'c_rot', state.teams[0].id, 'Rita');
+  G.joinTeam(state, 'c_blau', state.teams[1].id, 'Ben');
+  G.startGame(state, {
+    name: 'Klein',
+    rounds: [{ categories: [0, 1].map((c) => ({ name: `K${c}`, questions: [0, 1, 2, 3].map((i) => ({ text: `F${c}${i}`, answer: 'A' })) })) }],
+  });
+  G.pickCell(state, 0, 0);
+  const team = state.teams.find((t) => t.id !== state.current.teamId);
+  const geraet = team.id === state.teams[0].id ? 'c_rot' : 'c_blau';
+  G.judge(state, false);
+  state.current.buzzOpenedAt = Date.now() - 30;
+  G.buzz(state, geraet);
+  assert.ok(state.rekorde.schnellsterBuzz, 'der Buzz steht erst einmal als Rekord da');
+  G.resetBuzz(state);
+  assert.equal(state.rekorde.schnellsterBuzz, null, 'zurückgenommen – kein Rekord');
+  // Ein echter Buzz danach zählt wieder.
+  state.current.buzzOpenedAt = Date.now() - 900;
+  G.buzz(state, geraet);
+  G.judge(state, true);
+  assert.equal(state.rekorde.schnellsterBuzz?.teamId, team.id);
+});

@@ -772,7 +772,12 @@ export function buzz(state, clientId) {
   // Buzzers aus irgendeinem Grund in der Zukunft – ein Serverneustart mitten in
   // der Pause reicht dafür –, wäre das Ergebnis ein Rekord, den niemand mehr
   // unterbieten kann, und er stünde bis zum Abendende im Rückblick.
+  // Den alten Rekord merken: Nimmt der Host diesen Buzz zurück (resetBuzz),
+  // war es meist ein Fehlbuzz gleich nach dem Freigeben – der schnellste des
+  // Abends, den danach niemand mehr unterbieten könnte.
+  q.rekordVorBuzz = undefined;
   if (q.buzzOpenedAt && ms > 0 && (!state.rekorde.schnellsterBuzz || ms < state.rekorde.schnellsterBuzz.ms)) {
+    q.rekordVorBuzz = state.rekorde.schnellsterBuzz;
     state.rekorde.schnellsterBuzz = { teamId: team.id, name: q.buzzedBy, ms };
   }
   return state;
@@ -939,6 +944,11 @@ export function revealAnswer(state) {
 export function resetBuzz(state) {
   const q = requireQuestion(state);
   if (q.step !== 'buzz') throw new GameError('Der Buzzer ist gerade nicht offen.');
+  // Ein zurückgenommener Buzz zählt auch nicht als Rekord (siehe buzz()).
+  if (q.rekordVorBuzz !== undefined) {
+    state.rekorde.schnellsterBuzz = q.rekordVorBuzz;
+    q.rekordVorBuzz = undefined;
+  }
   q.buzzedTeamId = null;
   q.buzzedBy = null;
   q.buzzQuelle = null;
