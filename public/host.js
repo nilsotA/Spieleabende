@@ -1,6 +1,6 @@
 import {
   $, $$, el, connect, hostAction, toast, sound, installAudioUnlock, keepScreenAwake,
-  setFrageText, setzeText, istStumm, setzeStumm, anschlussStand, aufzaehlung,
+  setFrageText, setzeText, istStumm, tonBereit, setzeStumm, anschlussStand, aufzaehlung,
   punkte, delta as vorzeichen, starteUhr, laufendeUhr, verbergeSchluessel, lageSeit,
   wenigerBewegung } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
@@ -47,7 +47,7 @@ installAudioUnlock();
  * die erste Geste kommt.
  */
 setTimeout(() => {
-  if (istStumm() || navigator.userActivation?.hasBeenActive) return;
+  if (istStumm() || tonBereit()) return;
   const hinweis = el('button', { type: 'button', class: 'ton-hinweis' }, '🔈 Für Ton einmal hier klicken');
   document.body.append(hinweis);
   const weg = () => hinweis.remove();

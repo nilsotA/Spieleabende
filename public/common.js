@@ -1203,6 +1203,11 @@ const KLAENGE = {
 const TON_AUS = 'quizduell.stumm';
 let stumm = lies(TON_AUS) === '1';
 
+/** Ob der Browser Töne gerade wirklich abspielt (erst nach einer Geste). */
+export function tonBereit() {
+  return !!audio && audio.state === 'running';
+}
+
 export function istStumm() {
   return stumm;
 }
