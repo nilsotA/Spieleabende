@@ -169,6 +169,7 @@ zeigeTon();
 /* ------------------------------------------------------------------ Buzzer */
 
 let gedrueckt = false; // hat dieses Handy in der laufenden Buzzer-Runde gedrückt?
+let spaetGemeldet = false; // „zu spät“ kam in dieser Buzzer-Runde schon
 const buzzer = $('#buzzer');
 let buzzLock = false;
 
@@ -204,6 +205,16 @@ async function pressBuzzer() {
     //    einen Fehlgriff, wo gar keiner vorliegt.
     // 3. Alle anderen sind wirklich zu früh – dafür war die Meldung gedacht.
     if (state?.pause) return;
+    // Zu spät: Ein anderes Team hat schon gebuzzert, und der Stand war schon da,
+    // als hier gedrückt wurde – der häufigste Fall. Ohne diesen Zweig kam dann
+    // gar keine Rückmeldung.
+    const c = state?.current;
+    const y = state?.you;
+    if (c?.step === 'buzz' && c.buzzedTeamId && y?.teamId && c.buzzedTeamId !== y.teamId
+        && !c.lockedOut?.includes(y.teamId) && c.teamId !== y.teamId) {
+      if (!spaetGemeldet) { spaetGemeldet = true; vibrate(30); sound('zuspaet'); }
+      return;
+    }
     if (state?.current?.step === 'primary') {
       if (state.you.onTheHook) {
         toast('Ihr seid dran – sagt eure Antwort einfach laut.');
@@ -1001,6 +1012,7 @@ function renderBuzzer(prev) {
     // bleibt es stumm, wenn der Buzzer nach einem falschen Buzz erneut aufgeht.
     if (prev && !prev.you?.canBuzz) {
       gedrueckt = false;
+      spaetGemeldet = false;
       vibrate([30, 50, 30]);
       sound('armed');
       flash();
@@ -1037,7 +1049,10 @@ function renderBuzzer(prev) {
       if (mine) { vibrate([40, 40, 80]); sound('pick'); }
       // „Zu spät“ nur, wo wirklich jemand gedrückt hat – nicht auf jedem Handy
       // im Raum gleichzeitig.
-      else if (gedrueckt && !q.lockedOut.includes(you.teamId) && q.teamId !== you.teamId) sound('zuspaet');
+      else if (gedrueckt && !q.lockedOut.includes(you.teamId) && q.teamId !== you.teamId) {
+        sound('zuspaet');
+        spaetGemeldet = true;
+      }
       gedrueckt = false;
     }
     return;

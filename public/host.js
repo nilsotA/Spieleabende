@@ -221,9 +221,11 @@ async function loadSets() {
       );
     }
     if (vorher && [...select.options].some((o) => o.value === vorher && !o.disabled)) select.value = vorher;
-    // Nur bei einer echten Änderung neu beschreiben – sonst flackerte die
-    // Satz-Info bei jedem Tab-Wechsel.
-    if (!vorher || select.value !== vorher) select.dispatchEvent(new Event('change'));
+    // Einen Dateisatz immer neu beschreiben – er kann eben im Editor geändert
+    // worden sein, und gespielt wird die neue Fassung. Mix und Datei-Satz nur
+    // bei einem Wechsel; ihr Inhalt hängt nicht an der Liste vom Server.
+    const fest = select.value === MIX || select.value === '__local';
+    if (!vorher || select.value !== vorher || !fest) select.dispatchEvent(new Event('change'));
   } catch {
     toast('Fragensätze konnten nicht geladen werden.', 'error');
   }

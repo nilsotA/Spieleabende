@@ -2104,9 +2104,11 @@ body.host.flat .tile {
 }
 .remote-qr-bild svg { width: 100%; height: auto; display: block; }
 .ton-hinweis {
+  /* Oben rechts ist im Spiel und in der Lobby frei – unten links lag er im
+     Spiel über der ersten Team-Kachel, und ohne Klick bleibt er stehen. */
   position: fixed;
-  left: 1rem;
-  bottom: 4.6rem;
+  top: 0.8rem;
+  right: 0.8rem;
   z-index: 60;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
