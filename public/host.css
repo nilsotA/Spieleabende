@@ -161,6 +161,8 @@ h2 { font-size: clamp(1rem, 1.15vw, 1.4rem); letter-spacing: 0.1em; text-transfo
 }
 .satz-knopf:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
 .satz-knopf:focus-visible { outline: 2px solid #6ea8ff; outline-offset: 2px; }
+.vorlage-hinweis { margin: 0.7rem 0 0; }
+.vorlage-hinweis a { white-space: nowrap; }
 /* „↻“ steht quadratisch neben der Auswahl und ist genauso hoch wie sie. */
 .satz-neu { width: auto; aspect-ratio: 1; padding: 0; font-size: 1.25rem; align-self: stretch; }
 /* Vier Einstellungen mit der Beschriftung darüber waren 280 Pixel hoch – und

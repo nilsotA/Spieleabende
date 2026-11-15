@@ -3,6 +3,7 @@ import { $, el, toast, setzeText, verbergeSchluessel, serverInfo } from '/common
 verbergeSchluessel();
 
 import { verraeteneLoesungen, selbstverraeter } from '/fragenpruefung.js';
+import { satzAusDatei } from '/tabelle.js';
 
 const BASE_VALUES = [100, 200, 300, 500];
 const STORAGE_KEY = 'quizduell.editor';
@@ -849,11 +850,12 @@ $('#file-input').addEventListener('change', async (ev) => {
   const file = ev.target.files?.[0];
   if (!file) return;
   try {
-    const raw = JSON.parse(await file.text());
-    if (!Array.isArray(raw?.rounds)) throw new Error('Das ist kein Fragensatz.');
+    // Auch die ausgefüllte Tabellen-Vorlage (.xlsx/.csv) – danach im Editor
+    // nachbessern und speichern.
+    const raw = await satzAusDatei(file);
     if (!verwerfenOk()) return;
     set = normalizeLoaded(raw);
-    zielDatei = file.name;
+    zielDatei = /\.json$/i.test(file.name) ? file.name : null;
     bestaetigteDatei = null; // eine hochgeladene Datei kann einen fremden Satz treffen
     zielName = set.name;
     persist();

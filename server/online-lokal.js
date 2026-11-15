@@ -30,6 +30,7 @@ const MIME = {
   '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon',
   '.webp': 'image/webp', '.gif': 'image/gif',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 };
 // Dieselben Kurzadressen wie in vercel.json und am Laptop-Server.
 const ROUTES = { '/': 'index.html', '/host': 'host.html', '/play': 'player.html', '/remote': 'remote.html', '/editor': 'editor.html' };

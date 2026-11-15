@@ -981,6 +981,19 @@ Ohne die Redis-Zugangsdaten startet die veröffentlichte Fassung absichtlich nic
 (`fra1` in `vercel.json`); liegt die Datenbank ebenfalls dort (`eu-central-1`),
 ist jeder Zug spürbar schneller.
 
+**Ein Freund ist der Fragemeister:** Zwei Wege, beide ohne Dateiformate:
+
+- *Im Editor:* Er öffnet `/editor`, gibt das Editor-Passwort ein, füllt die Felder
+  aus und tippt **Speichern**. Im Netz-Spiel landet der Satz in der Datenbank und
+  steht danach in der Lobby zur Wahl („eigener Satz“); im Editor lässt er sich dort
+  auch wieder löschen.
+- *In Excel:* Die **Vorlage** (Lobby → „📄 Vorlage herunterladen“, oder
+  `/Fragen-Vorlage.xlsx`) hat eine Zeile je Frage: Kategorie, Frage, Antwort, ein
+  freiwilliger Zusatz – Runde und Punkte stehen schon drin. Ausgefüllt zurückschicken
+  und in der Lobby über „Datei laden …“ wählen (oder im Editor öffnen und speichern).
+  Excel, Numbers, Google Tabellen und LibreOffice gehen; als `.xlsx` oder `.csv`.
+  Die Vorlage baut `node werkzeug/fragen-vorlage.js`.
+
 **Fragen-Editor mit Passwort:** Im Editor stehen alle Antworten. Mit der
 Umgebungsvariable `EDITOR_PASSWORT` (auf Vercel unter *Settings → Environment
 Variables*, danach neu deployen) fragt `/editor` nach diesem Passwort; der Browser

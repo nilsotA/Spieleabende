@@ -162,9 +162,10 @@
       <button id="btn-delete-set" class="btn btn-ghost btn-sm" type="button" hidden title="Diesen eigenen Satz löschen">Löschen</button>
       <button id="btn-new" class="btn btn-ghost btn-sm" type="button">Neuer Satz</button>
       <label class="btn btn-ghost btn-sm datei-knopf" style="margin:0;cursor:pointer">
-        Datei öffnen <input id="file-input" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei öffnen">
+        Datei öffnen <input id="file-input" type="file" accept=".json,.xlsx,.csv,application/json" aria-label="Fragensatz aus einer Datei öffnen (auch die ausgefüllte Excel-Vorlage)">
       </label>
       <button id="btn-download" class="btn btn-ghost btn-sm" type="button">Herunterladen</button>
+      <a class="btn btn-ghost btn-sm" href="/Fragen-Vorlage.xlsx" download title="Fragen in Excel schreiben – ausgefüllt hier über „Datei öffnen“ laden">Excel-Vorlage</a>
       <button id="btn-save" class="btn btn-primary btn-sm" type="button">Speichern</button>
       <span id="ziel-datei" class="muted small" style="flex-basis:100%"></span>
     </div>

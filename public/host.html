@@ -130,10 +130,14 @@
       <p id="set-info" class="muted small"></p>
       <div class="satz-knoepfe">
         <label class="btn satz-knopf datei-knopf">
-          <span aria-hidden="true">📂</span> Datei laden … <input id="set-file" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei laden">
+          <span aria-hidden="true">📂</span> Datei laden … <input id="set-file" type="file" accept=".json,.xlsx,.csv,application/json" aria-label="Fragensatz aus einer Datei laden (auch die ausgefüllte Excel-Vorlage)">
         </label>
         <a class="btn satz-knopf" href="/editor" target="_blank" rel="noopener"><span aria-hidden="true">✏️</span> Fragen-Editor</a>
       </div>
+      <!-- Für einen Fragemeister ohne Editor: Tabelle ausfüllen, schicken,
+           hier über „Datei laden …“ wählen. -->
+      <p class="muted small vorlage-hinweis">Fragen lieber in Excel schreiben?
+        <a href="/Fragen-Vorlage.xlsx" download>📄 Vorlage herunterladen</a> – ausgefüllt über „Datei laden …“ wählen.</p>
     </div>
 
     <div class="card">

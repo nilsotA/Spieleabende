@@ -7,6 +7,7 @@ import {
 verbergeSchluessel();
 
 import { qrSvg } from '/qr.js';
+import { satzAusDatei, satzLuecke } from '/tabelle.js';
 
 let state = null;
 let localSet = null;      // aktuell gewählter Satz aus einer Datei
@@ -130,8 +131,10 @@ $('#set-file').addEventListener('change', async (ev) => {
   const file = ev.target.files?.[0];
   if (!file) return;
   try {
-    const parsed = JSON.parse(await file.text());
-    if (!Array.isArray(parsed?.rounds)) throw new Error('Das ist kein Fragensatz.');
+    // Eine .json-Datei, oder die ausgefüllte Tabellen-Vorlage (.xlsx/.csv).
+    const parsed = await satzAusDatei(file);
+    const luecke = satzLuecke(parsed);
+    if (luecke) throw new Error(luecke);
     dateiSatz = parsed;
     localSet = parsed;
     const select = $('#set-select');
