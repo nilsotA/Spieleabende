@@ -32,6 +32,7 @@ export const RAUM_TTL_SEK = 30 * 24 * 60 * 60;
 
 export function speicherImArbeitsspeicher({ jetzt = () => Date.now() } = {}) {
   const raeume = new Map(); // code -> { json, rev, nummer, weg, geraete: Map, bilder: Map, bis }
+  const saetze = new Map(); // datei -> { json, info }
 
   const hole = (code) => {
     const e = raeume.get(code);
@@ -104,6 +105,21 @@ export function speicherImArbeitsspeicher({ jetzt = () => Date.now() } = {}) {
     async bild(code, id) {
       return hole(code)?.bilder.get(id) || null;
     },
+
+    /* Eigene Fragensätze aus dem Editor – sie bleiben, bis man sie löscht. */
+    async saetze() {
+      return [...saetze.values()].map((s) => JSON.parse(s.info));
+    },
+    async satz(datei) {
+      const s = saetze.get(datei);
+      return s ? JSON.parse(s.json) : null;
+    },
+    async legeSatz(datei, set, info) {
+      saetze.set(datei, { json: JSON.stringify(set), info: JSON.stringify(info) });
+    },
+    async loescheSatz(datei) {
+      return saetze.delete(datei);
+    },
   };
 }
 
@@ -175,6 +191,8 @@ export function speicherUpstash({ url, token, fetchen = fetch, jetzt = () => Dat
     weg: (c) => `qd:w:${c}`,
     geraete: (c) => `qd:d:${c}`,
     bild: (c, id) => `qd:b:${c}:${id}`,
+    satz: (d) => `qd:s:${d}`,
+    satzListe: 'qd:si',
   };
   const ttl = String(RAUM_TTL_SEK);
 
@@ -241,6 +259,31 @@ export function speicherUpstash({ url, token, fetchen = fetch, jetzt = () => Dat
     async bild(code, id) {
       const roh = await befehl(['GET', k.bild(code, id)]);
       return roh ? JSON.parse(roh) : null;
+    },
+
+    /* Eigene Fragensätze aus dem Editor. Ohne Ablaufzeit: Ein Satz, den
+       jemand eine Woche lang vorbereitet hat, darf nicht von selbst verfallen.
+       Die Liste ist ein eigener Hash – so kostet das Aufklappen der Auswahl
+       einen Befehl statt eines je Satz. */
+    async saetze() {
+      const alle = await befehl(['HGETALL', k.satzListe]);
+      const out = [];
+      for (let i = 0; i + 1 < (alle || []).length; i += 2) out.push(JSON.parse(alle[i + 1]));
+      return out;
+    },
+    async satz(datei) {
+      const roh = await befehl(['GET', k.satz(datei)]);
+      return roh ? JSON.parse(roh) : null;
+    },
+    async legeSatz(datei, set, info) {
+      await rutsch([
+        ['SET', k.satz(datei), JSON.stringify(set)],
+        ['HSET', k.satzListe, datei, JSON.stringify(info)],
+      ]);
+    },
+    async loescheSatz(datei) {
+      const [weg] = await rutsch([['DEL', k.satz(datei)], ['HDEL', k.satzListe, datei]]);
+      return Number(weg) > 0;
     },
   };
 }

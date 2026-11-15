@@ -35,7 +35,7 @@ import path from 'node:path';
 
 import * as G from './game.js';
 import { handleAction, neuerRaum, RUECKNEHMBAR } from './spiel.js';
-import { listSets, loadSet, mixSet, DATA_DIR } from './questions.js';
+import { listSets, loadSet, mixSet, normalizeSet, DATA_DIR } from './questions.js';
 import { leseCookie, COOKIE_SPIEL, COOKIE_HOST } from './zugang.js';
 import { editorPasswort as passwortAusUmgebung, editorFrei, editorSeite, editorAnmelden } from './editortuer.js';
 import { fileURLToPath } from 'node:url';
@@ -154,6 +154,80 @@ export function erzeugeOnline({
    * Gast an der Editor-Tür vorbei einfach die Schnittstelle fragen. Ohne
    * eingestelltes Passwort bleibt alles offen wie bisher.
    */
+  /* ---------------------------------------------- Eigene Fragensätze
+   *
+   * Am Laptop speichert der Editor in data/. Im Netz gibt es keine Platte,
+   * also liegen eigene Sätze im Speicher (Upstash) – neben den mitgelieferten
+   * aus data/, die nur gelesen werden. Gedacht für den Abend, an dem ein
+   * Freund der Fragemeister ist: Er baut seinen Satz im Editor, speichert,
+   * und der Satz steht in der Lobby zur Wahl. Keine Datei, kein Import.
+   */
+  const SATZ_MAX_ZEICHEN = 900000; // Upstash nimmt im freien Tarif 1 MB je Anfrage
+  const dateiName = (roh) => {
+    const name = path.basename(String(roh || '')).trim();
+    const datei = name.endsWith('.json') ? name : `${name}.json`;
+    return /^[\w][\w.-]{0,78}\.json$/.test(datei) ? datei : null;
+  };
+  async function mitgeliefert(datei) {
+    return (await listSets()).some((s) => s.file === datei);
+  }
+  async function ladeSatz(roh) {
+    const datei = dateiName(roh);
+    const eigen = datei ? await speicher.satz(datei) : null;
+    if (eigen) return normalizeSet(eigen, datei.replace(/\.json$/, ''));
+    return loadSet(roh);
+  }
+  async function alleSaetze() {
+    const eigene = (await speicher.saetze()).map((s) => ({ ...s, eigen: true }));
+    return [...await listSets(), ...eigene].sort((a, b) => String(a.name).localeCompare(String(b.name), 'de'));
+  }
+  async function speichereSatz(req, res) {
+    // Ohne Passwort könnte jeder, der die Adresse kennt, Sätze anlegen.
+    if (!editorPasswort) {
+      return json(res, 200, { ok: false, error: 'Speichern im Netz braucht ein Editor-Passwort (EDITOR_PASSWORT bei Vercel). Bis dahin: „Herunterladen“ und in der Lobby über „Datei laden …“ wählen.' });
+    }
+    if (!editorFrei(req, editorPasswort)) return json(res, 403, { ok: false, error: 'Bitte den Editor neu öffnen und das Passwort eingeben.' });
+    let body;
+    try {
+      body = await liesJson(req);
+    } catch (err) {
+      return json(res, err.statusCode || 400, { ok: false, error: err.statusCode ? err.message : 'Ungültiges JSON' });
+    }
+    let set;
+    try {
+      set = normalizeSet(body.set, 'Eigener Satz');
+    } catch (err) {
+      return json(res, 200, { ok: false, error: err.message });
+    }
+    const datei = dateiName(body.file || set.name);
+    if (!datei) return json(res, 200, { ok: false, error: 'Der Name taugt nicht als Dateiname – bitte nur Buchstaben, Ziffern und Bindestriche.' });
+    if (await mitgeliefert(datei)) {
+      return json(res, 200, { ok: false, error: 'So heißt schon ein mitgelieferter Fragensatz – gib deinem Satz bitte einen eigenen Namen.' });
+    }
+    if (JSON.stringify(set).length > SATZ_MAX_ZEICHEN) {
+      return json(res, 200, { ok: false, error: 'Der Satz ist zu groß fürs Speichern im Netz (meist liegt es an großen Bildern). Bilder verkleinern oder weglassen.' });
+    }
+    if (await speicher.satz(datei) && !body.overwrite) return json(res, 200, { ok: false, exists: true, file: datei });
+    const info = {
+      file: datei,
+      name: set.name,
+      description: set.description,
+      rounds: set.rounds.length,
+      questions: set.rounds.reduce((n, r) => n + r.categories.reduce((m, c) => m + c.questions.length, 0), 0),
+      am: jetzt(),
+    };
+    await speicher.legeSatz(datei, set, info);
+    return json(res, 200, { ok: true, file: datei });
+  }
+  async function loescheSatz(req, res, url) {
+    if (!editorPasswort || !editorFrei(req, editorPasswort)) return json(res, 403, { ok: false, error: 'Nur im Editor mit Passwort.' });
+    const datei = dateiName(url.searchParams.get('file'));
+    if (!datei || !(await speicher.loescheSatz(datei))) {
+      return json(res, 200, { ok: false, error: 'Diesen eigenen Satz gibt es nicht – mitgelieferte lassen sich nicht löschen.' });
+    }
+    return json(res, 200, { ok: true });
+  }
+
   async function darfSaetzeLesen(req, url) {
     if (editorFrei(req, editorPasswort)) return true;
     const alsHost = ausweis(req, url, true);
@@ -582,6 +656,7 @@ export function erzeugeOnline({
       const platzhalter = [];
       const offen = []; // was nebenher noch in den Speicher soll
       const raum = neuerRaum({
+        ladeSatz,
         hostToast: (text, level = 'ok') => signal(daten, 'toast', { text, level }, true),
         ereignis: (name, payload) => signal(daten, name, payload, false),
         sichereBilder: () => {
@@ -710,7 +785,7 @@ export function erzeugeOnline({
       if (pfad === 'action' && m === 'POST') return await aktion(req, res, url);
       if (pfad === 'bild' && m === 'GET') return await bild(req, res, url);
       if (pfad === 'datei' && m === 'GET') return await datei(res, ausAnfrage('name'));
-      if (pfad === 'sets' && m === 'GET') return json(res, 200, await listSets());
+      if (pfad === 'sets' && m === 'GET') return json(res, 200, await alleSaetze());
       if (pfad === 'editor-seite' && m === 'GET') {
         return await editorSeite(req, res, editorPasswort, () => readFile(EDITOR_HTML, 'utf8'));
       }
@@ -721,19 +796,13 @@ export function erzeugeOnline({
       if (pfad === 'mix' && m === 'GET') return json(res, 200, await mixSet());
       if (pfad === 'set' && m === 'GET') {
         try {
-          return json(res, 200, await loadSet(url.searchParams.get('file')));
+          return json(res, 200, await ladeSatz(url.searchParams.get('file')));
         } catch (err) {
           return json(res, 400, { error: err.message });
         }
       }
-      if (pfad === 'sets' && m === 'POST') {
-        // Im Netz gibt es keine Platte, auf der ein Satz liegen bleiben könnte.
-        return json(res, 200, {
-          ok: false,
-          error: 'Im Netz-Spiel lassen sich Sätze nicht auf dem Server speichern. '
-            + 'Lade den Satz als Datei herunter und wähle ihn in der Lobby über „Datei laden …“.',
-        });
-      }
+      if (pfad === 'sets' && m === 'POST') return await speichereSatz(req, res);
+      if (pfad === 'sets' && m === 'DELETE') return await loescheSatz(req, res, url);
       // Die offene Leitung des Laptop-Servers gibt es hier nicht. 204 heißt für
       // den Browser: nicht noch einmal versuchen.
       if (pfad === 'events') return sende(res, 204, 'text/plain', '');

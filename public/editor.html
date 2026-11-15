@@ -159,12 +159,13 @@
       <input id="set-name" class="grow" aria-label="Name des Fragensatzes" placeholder="Name des Fragensatzes" maxlength="80">
       <select id="load-select" class="grow" aria-label="Vorhandenen Fragensatz laden"></select>
       <button id="btn-load" class="btn btn-ghost btn-sm" type="button">Laden</button>
+      <button id="btn-delete-set" class="btn btn-ghost btn-sm" type="button" hidden title="Diesen eigenen Satz löschen">Löschen</button>
       <button id="btn-new" class="btn btn-ghost btn-sm" type="button">Neuer Satz</button>
       <label class="btn btn-ghost btn-sm datei-knopf" style="margin:0;cursor:pointer">
         Datei öffnen <input id="file-input" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei öffnen">
       </label>
       <button id="btn-download" class="btn btn-ghost btn-sm" type="button">Herunterladen</button>
-      <button id="btn-save" class="btn btn-primary btn-sm" type="button">Auf dem Server speichern</button>
+      <button id="btn-save" class="btn btn-primary btn-sm" type="button">Speichern</button>
       <span id="ziel-datei" class="muted small" style="flex-basis:100%"></span>
     </div>
     <button id="fortschritt" class="fortschritt" type="button" title="Zur nächsten Lücke springen">
@@ -188,8 +189,7 @@
     <div id="speicher-warnung" class="speicher-warnung" role="alert" hidden>
       <strong>Zwischenspeicher voll.</strong> Es wird gerade <em>nichts</em> mehr automatisch
       gesichert – meist liegt das an vielen eingebetteten Bildern. Jetzt bitte
-      „Herunterladen“: Das geht auch mit halb gefülltem Satz. „Auf dem Server
-      speichern“ verlangt, dass alle Felder ausgefüllt sind.
+      „Herunterladen“: Das geht auch mit halb gefülltem Satz. „Speichern“ verlangt, dass alle Felder ausgefüllt sind.
     </div>
   </div>
   <!-- Marke direkt unter der Leiste. Woran erkannt wird, ob man schon im

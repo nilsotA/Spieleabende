@@ -634,7 +634,7 @@ export async function handleAction(raum, clientId, body, isHost) {
         ? normalizeSet(body.set)
         : body.file === MIX
           ? normalizeSet(await mixSet({ zuletzt: raum.gespielt }))
-          : await loadSet(body.file);
+          : await (raum.dienste.ladeSatz || loadSet)(body.file);
       const { set, images } = externalizeImages(roh);
       raum.bilder = images;
       // Über einen Spielstart hinweg zurückzunehmen, hieße das alte Spiel

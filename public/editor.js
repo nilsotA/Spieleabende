@@ -1,4 +1,4 @@
-import { $, el, toast, setzeText, verbergeSchluessel } from '/common.js';
+import { $, el, toast, setzeText, verbergeSchluessel, serverInfo } from '/common.js';
 // Der Schlüssel hat seinen Zweck erfüllt, sobald die Seite steht.
 verbergeSchluessel();
 
@@ -16,6 +16,7 @@ let zielDatei = gemerkt?.zielDatei || null; // zuletzt geladene Datei – dorthi
 let zielName = gemerkt?.zielName ?? null;
 // Die Datei, die dieser Editor selbst gespeichert oder vom Server geladen hat.
 let bestaetigteDatei = null;
+let imNetz = false; // Netz-Spiel: gespeichert wird in die Datenbank, nicht nach data/
 
 function blankRound() {
   return {
@@ -357,10 +358,20 @@ function zeigeZiel() {
   const ziel = $('#ziel-datei');
   if (!ziel) return;
   const datei = zielJetzt();
-  ziel.textContent = datei === zielDatei
-    ? `Speichern schreibt nach data/${datei}`
-    : `Speichern legt data/${datei} an`;
+  // Im Netz gibt es kein data/ – der Satz landet in der Datenbank und steht
+  // danach in der Lobby zur Wahl.
+  ziel.textContent = imNetz
+    ? (datei === zielDatei
+      ? `Speichern aktualisiert „${set.name || datei}“ – er steht in der Lobby zur Wahl.`
+      : 'Speichern legt den Satz im Netz an – danach steht er in der Lobby zur Wahl.')
+    : (datei === zielDatei
+      ? `Speichern schreibt nach data/${datei}`
+      : `Speichern legt data/${datei} an`);
 }
+serverInfo().then((info) => {
+  imNetz = !!info?.raeume;
+  zeigeZiel();
+}).catch(() => {});
 
 /** Bilder werden als Data-URL eingebettet – der Fragensatz bleibt eine einzige Datei. */
 const MAX_BILD = 12 * 1024 * 1024;
@@ -1061,13 +1072,41 @@ addEventListener('keydown', (ev) => {
   if (ev.key === 'Escape' && !$('#baukasten').hidden) zeigeBaukastenDialog(false);
 });
 
+/* Eigene Sätze im Netz lassen sich wieder löschen – mitgelieferte nicht. */
+function zeigeLoeschen() {
+  const knopf = $('#btn-delete-set');
+  const wahl = $('#load-select');
+  if (knopf && wahl) knopf.hidden = !wahl.selectedOptions[0]?.dataset.eigen;
+}
+$('#load-select')?.addEventListener('change', zeigeLoeschen);
+$('#btn-delete-set')?.addEventListener('click', async () => {
+  const wahl = $('#load-select');
+  const datei = wahl.value;
+  const name = wahl.selectedOptions[0]?.textContent || datei;
+  if (!datei || !confirm(`„${name}“ wirklich löschen? Das lässt sich nicht zurücknehmen.`)) return;
+  try {
+    const data = await (await fetch(`/api/sets?file=${encodeURIComponent(datei)}`, { method: 'DELETE' })).json();
+    if (!data.ok) return toast(data.error || 'Löschen fehlgeschlagen.', 'error');
+    if (zielDatei === datei) { zielDatei = null; bestaetigteDatei = null; persist(); zeigeZiel(); }
+    toast('Gelöscht.');
+    baukastenDaten = null;
+    loadSetList();
+  } catch (err) {
+    toast(`Löschen fehlgeschlagen: ${err.message}`, 'error');
+  }
+});
+
 async function loadSetList() {
   try {
     const sets = await (await fetch('/api/sets')).json();
     const select = $('#load-select');
     select.innerHTML = '';
     select.append(el('option', { value: '' }, 'Vorhandenen Satz laden …'));
-    for (const s of sets) select.append(el('option', { value: s.file }, s.name));
+    for (const s of sets) {
+      select.append(el('option', { value: s.file, 'data-eigen': s.eigen ? '1' : null },
+        s.eigen ? `${s.name} (eigener Satz)` : s.name));
+    }
+    zeigeLoeschen();
   } catch {
     /* egal */
   }

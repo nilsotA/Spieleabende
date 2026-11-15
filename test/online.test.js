@@ -543,3 +543,63 @@ test('ohne eingestelltes Passwort bleibt der Editor offen wie bisher', async (t)
   assert.match(await (await fetch(`${base}/editor`)).text(), /editor\.js/);
   assert.equal((await fetch(`${base}/api/set?file=beispiel-spieleabend.json`)).status, 200);
 });
+
+pruefe('ein Freund baut im Editor einen Satz, speichert ihn im Netz, und er steht in der Lobby zur Wahl', async (t, baue) => {
+  const speicher = baue();
+  const server = await starteOnlineLokal({ port: 0, speicher, editorPasswort: 'Geheim42' });
+  t.after(() => new Promise((r) => server.close(r)));
+  const base = `http://localhost:${server.address().port}`;
+  const login = await fetch(`${base}/api/editor-login`, {
+    method: 'POST', redirect: 'manual',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'passwort=Geheim42',
+  });
+  const keks = login.headers.get('set-cookie').split(';')[0];
+  const mitKeks = (opt = {}) => ({ ...opt, headers: { ...(opt.headers || {}), cookie: keks } });
+  const satz = {
+    name: 'Fragen von Tim',
+    rounds: [{
+      categories: Array.from({ length: 2 }, (_, c) => ({
+        name: `Tims Kategorie ${c + 1}`,
+        questions: Array.from({ length: 4 }, (_, i) => ({ text: `Tims Frage ${c}-${i}?`, answer: `Antwort ${c}-${i}` })),
+      })),
+    }],
+  };
+  const speichern = (body, opt = mitKeks()) => fetch(`${base}/api/sets`, {
+    ...opt, method: 'POST', headers: { ...(opt.headers || {}), 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  }).then((r) => r.json());
+
+  // Ohne Anmeldung darf niemand speichern.
+  assert.equal((await speichern({ set: satz, file: 'fragen-von-tim.json' }, {})).ok, false);
+  // Mit Anmeldung schon – und der Name eines mitgelieferten Satzes ist tabu.
+  assert.equal((await speichern({ set: satz, file: 'fragen-von-tim.json' })).ok, true);
+  const mitgeliefert = await speichern({ set: satz, file: 'beispiel-spieleabend.json' });
+  assert.equal(mitgeliefert.ok, false);
+  assert.match(mitgeliefert.error, /mitgelieferter/);
+  // Ein zweites Mal fragt nach, mit overwrite geht es.
+  assert.equal((await speichern({ set: satz, file: 'fragen-von-tim.json' })).exists, true);
+  assert.equal((await speichern({ set: satz, file: 'fragen-von-tim.json', overwrite: true })).ok, true);
+
+  // In der Liste, die die Lobby zeigt – als eigener Satz markiert.
+  const liste = await (await fetch(`${base}/api/sets`)).json();
+  const eintrag = liste.find((s) => s.file === 'fragen-von-tim.json');
+  assert.equal(eintrag?.name, 'Fragen von Tim');
+  assert.equal(eintrag.eigen, true);
+  assert.equal(eintrag.questions, 8);
+
+  // Der Bildschirm eines Raums startet ihn wie jeden anderen Satz.
+  const raum = await (await fetch(`${base}/api/raum`, { method: 'POST' })).json();
+  const tu = (type, mehr = {}) => fetch(`${base}/api/action`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...mehr, type, role: 'host', clientId: 'c_host', h: raum.h }),
+  }).then((r) => r.json());
+  for (const name of ['Rot', 'Blau']) await tu('addTeam', { name });
+  const start = await tu('startGame', { file: 'fragen-von-tim.json' });
+  assert.equal(start.ok, true, start.error);
+  assert.equal(start.sicht.board.categories[0].name, 'Tims Kategorie 1');
+
+  // Und er lässt sich wieder löschen – mitgelieferte nicht.
+  const weg = (file) => fetch(`${base}/api/sets?file=${file}`, mitKeks({ method: 'DELETE' })).then((r) => r.json());
+  assert.equal((await weg('beispiel-spieleabend.json')).ok, false);
+  assert.equal((await weg('fragen-von-tim.json')).ok, true);
+  assert.equal((await (await fetch(`${base}/api/sets`)).json()).some((s) => s.file === 'fragen-von-tim.json'), false);
+});
