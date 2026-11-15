@@ -26,7 +26,18 @@ export async function satzAusDatei(datei) {
   const name = String(datei?.name || '');
   const endung = name.toLowerCase().split('.').pop();
   if (endung === 'xlsx') return satzAusZeilen(await zeilenAusXlsx(await datei.arrayBuffer()), name);
-  if (endung === 'csv' || endung === 'tsv' || endung === 'txt') return satzAusZeilen(zeilenAusCsv(await datei.text()), name);
+  if (endung === 'csv' || endung === 'tsv' || endung === 'txt') {
+    // Deutsches Excel speichert „CSV (Trennzeichen-getrennt)“ in Windows-1252,
+    // nicht in UTF-8 – sonst würde aus jedem „Müller“ ein „M�ller“.
+    const roh = await datei.arrayBuffer();
+    let text;
+    try {
+      text = new TextDecoder('utf-8', { fatal: true }).decode(roh);
+    } catch {
+      text = new TextDecoder('windows-1252').decode(roh);
+    }
+    return satzAusZeilen(zeilenAusCsv(text), name);
+  }
   if (endung === 'xls' || endung === 'numbers' || endung === 'ods') {
     throw new Error('Bitte die Tabelle als .xlsx (Excel) oder .csv speichern – dieses Format kann das Spiel nicht lesen.');
   }
@@ -45,12 +56,19 @@ export async function satzAusDatei(datei) {
  * Regeln wie auf dem Server (questions.js normalizeSet), damit der Fehler
  * schon beim Laden auffällt und nicht erst beim Spielstart.
  */
+export const MAX_KATEGORIE = 40; // wie MAX_KATEGORIE in server/questions.js
+export const MAX_TEXT = 2000; // wie MAX_TEXT in server/questions.js
+
 export function satzLuecke(satz) {
   for (const [ri, runde] of (satz?.rounds || []).entries()) {
     const kats = runde.categories || [];
     if (!kats.length) return `Runde ${ri + 1} hat keine Kategorien.`;
     if (kats.length > 8) return `Runde ${ri + 1} hat ${kats.length} Kategorien – höchstens 8 passen aufs Brett.`;
     for (const kat of kats) {
+      const name = String(kat.name || '');
+      if (name.length > MAX_KATEGORIE) {
+        return `Die Kategorie „${name}“ in Runde ${ri + 1} hat ${name.length} Zeichen – höchstens ${MAX_KATEGORIE} passen aufs Schild.`;
+      }
       const n = (kat.questions || []).length;
       if (n !== 4) {
         return `Kategorie „${kat.name}“ in Runde ${ri + 1} hat ${n === 1 ? 'eine Frage' : `${n} Fragen`} – es müssen genau 4 sein.`
@@ -59,6 +77,9 @@ export function satzLuecke(satz) {
       for (const [qi, q] of kat.questions.entries()) {
         if (!String(q.text || '').trim()) return `In „${kat.name}“ (Runde ${ri + 1}) fehlt bei Frage ${qi + 1} der Fragetext.`;
         if (!String(q.answer || '').trim()) return `In „${kat.name}“ (Runde ${ri + 1}) fehlt bei Frage ${qi + 1} die Antwort.`;
+        if (String(q.text).length > MAX_TEXT || String(q.answer).length > MAX_TEXT) {
+          return `In „${kat.name}“ (Runde ${ri + 1}) ist Frage ${qi + 1} länger als ${MAX_TEXT} Zeichen.`;
+        }
       }
     }
   }
@@ -100,10 +121,13 @@ export function satzAusZeilen(zeilen, dateiname = '') {
   }
 
   const runden = new Map(); // nr -> Map(kategorie -> [{punkte, frage}])
+  const herkunft = new Map(); // Map der Kategorie -> { zeile, benannt }
   let runde = 1;
   let kategorie = '';
   let blockNr = 0;
-  for (const zeile of zeilen.slice(kopfZeile + 1)) {
+  for (const [i, zeile] of zeilen.entries()) {
+    if (i <= kopfZeile || !zeile) continue;
+    const zeileNr = i + 1; // so, wie die Tabelle zählt
     const wert = (k) => (spalten[k] >= 0 ? sauber(zeile[spalten[k]]) : '');
     const text = wert('frage');
     const answer = wert('antwort');
@@ -117,16 +141,33 @@ export function satzAusZeilen(zeilen, dateiname = '') {
     if (!text && !answer) continue;
     // Ohne Namen trägt die Kategorie eine Nummer – lieber „Kategorie 3“ als
     // vier Fragen, die in der Kategorie davor landen.
+    const benannt = !!kategorie;
     if (!kategorie) kategorie = `Kategorie ${++blockNr}`;
     if (!runden.has(runde)) runden.set(runde, new Map());
     const kats = runden.get(runde);
-    if (!kats.has(kategorie)) kats.set(kategorie, []);
+    if (!kats.has(kategorie)) {
+      kats.set(kategorie, []);
+      herkunft.set(kats.get(kategorie), { zeile: zeileNr, benannt });
+    }
     kats.get(kategorie).push({
       punkte: Number.parseInt(wert('punkte'), 10),
       frage: { text, answer, image: null, note: wert('zusatz') || null },
     });
   }
   if (!runden.size) throw new Error('In der Tabelle steht noch keine einzige Frage.');
+  // Ein Block mit falscher Fragenzahl: mit Zeilennummer melden – ein Fragemeister
+  // ohne Technikliebe sucht sonst eine „Kategorie 1“, die er nie geschrieben hat.
+  const spalteKat = spalten.kategorie >= 0 ? String.fromCharCode(65 + spalten.kategorie) : null;
+  for (const [nr, kats] of runden) {
+    for (const [katName, fragen] of kats) {
+      if (fragen.length === 4) continue;
+      const { zeile, benannt } = herkunft.get(fragen);
+      if (!benannt) {
+        throw new Error(`Zeile ${zeile}: Frage ohne Kategorie${spalteKat ? ` – trag in Spalte ${spalteKat} einen Namen ein` : ''} oder lösch die Zeile.`);
+      }
+      throw new Error(`Die Kategorie „${katName}“ (Runde ${nr}, ab Zeile ${zeile}) hat ${fragen.length === 1 ? 'eine Frage' : `${fragen.length} Fragen`} – es müssen genau 4 sein.`);
+    }
+  }
 
   const rounds = [...runden.entries()].sort((a, b) => a[0] - b[0]).map(([, kats]) => ({
     categories: [...kats.entries()].map(([katName, fragen]) => {
@@ -254,7 +295,7 @@ export async function zeilenAusXlsx(puffer) {
   const geteilt = [...(dateien.get('xl/sharedStrings.xml') || '').matchAll(/<si>([\s\S]*?)<\/si>/g)].map((m) => textAus(m[1]));
 
   const zeilen = [];
-  for (const [, zeileXml] of blatt.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
+  for (const [, zeileAttr, zeileXml] of blatt.matchAll(/<row\b([^>]*)>([\s\S]*?)<\/row>/g)) {
     const zeile = [];
     for (const m of zeileXml.matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
       const attr = m[1];
@@ -265,11 +306,15 @@ export async function zeilenAusXlsx(puffer) {
       let wert = '';
       if (typ === 's') wert = geteilt[Number(v)] ?? '';
       else if (typ === 'inlineStr') wert = textAus(inhalt);
+      else if (typ === 'b') wert = v === '1' ? 'Wahr' : 'Falsch';
       else if (v != null) wert = dekodiere(v);
       const nr = ref ? spalteNr(ref) : zeile.length;
       zeile[nr] = wert;
     }
-    zeilen.push(Array.from(zeile, (z) => z ?? ''));
+    // An ihre echte Nummer: Leere Zeilen schreibt Excel gar nicht erst hin,
+    // und die Fehlermeldungen sollen die Zeile nennen, die man sieht.
+    const nr = Number(/\br="(\d+)"/.exec(zeileAttr)?.[1]) - 1;
+    zeilen[Number.isInteger(nr) && nr >= zeilen.length ? nr : zeilen.length] = Array.from(zeile, (z) => z ?? '');
   }
-  return zeilen;
+  return Array.from(zeilen, (z) => z ?? []);
 }

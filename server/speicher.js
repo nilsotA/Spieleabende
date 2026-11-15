@@ -33,6 +33,7 @@ export const RAUM_TTL_SEK = 30 * 24 * 60 * 60;
 export function speicherImArbeitsspeicher({ jetzt = () => Date.now() } = {}) {
   const raeume = new Map(); // code -> { json, rev, nummer, weg, geraete: Map, bilder: Map, bis }
   const saetze = new Map(); // datei -> { json, info }
+  const zaehler = new Map(); // schluessel -> { n, bis }
 
   const hole = (code) => {
     const e = raeume.get(code);
@@ -119,6 +120,18 @@ export function speicherImArbeitsspeicher({ jetzt = () => Date.now() } = {}) {
     },
     async loescheSatz(datei) {
       return saetze.delete(datei);
+    },
+
+    /* Ein Zähler mit Ablaufzeit – für falsche Passwörter am Editor. */
+    async zaehle(schluessel, sek) {
+      const z = zaehler.get(schluessel);
+      const neu = z && z.bis > jetzt() ? { n: z.n + 1, bis: z.bis } : { n: 1, bis: jetzt() + sek * 1000 };
+      zaehler.set(schluessel, neu);
+      return neu.n;
+    },
+    async zaehlerStand(schluessel) {
+      const z = zaehler.get(schluessel);
+      return z && z.bis > jetzt() ? z.n : 0;
     },
   };
 }
@@ -284,6 +297,17 @@ export function speicherUpstash({ url, token, fetchen = fetch, jetzt = () => Dat
     async loescheSatz(datei) {
       const [weg] = await rutsch([['DEL', k.satz(datei)], ['HDEL', k.satzListe, datei]]);
       return Number(weg) > 0;
+    },
+
+    /* Ein Zähler mit Ablaufzeit – die Ablaufzeit beginnt beim ersten Treffer. */
+    async zaehle(schluessel, sek) {
+      return Number(await befehl([
+        'EVAL', "local n = redis.call('INCR', KEYS[1]) if n == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end return n",
+        '1', `qd:z:${schluessel}`, String(sek),
+      ]));
+    },
+    async zaehlerStand(schluessel) {
+      return Number(await befehl(['GET', `qd:z:${schluessel}`]) || 0);
     },
   };
 }

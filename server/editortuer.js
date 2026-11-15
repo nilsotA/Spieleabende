@@ -21,9 +21,36 @@ import { leseCookie } from './zugang.js';
 
 export const EDITOR_KEKS = 'qd_editor';
 const GUELTIG_SEK = 30 * 24 * 60 * 60;
-/* Ein falsches Passwort kostet einen Moment. Durchprobieren wird dadurch
-   mühsam, ohne dass ein Vertipper den Gastgeber spürbar aufhält. */
+/* Ein falsches Passwort kostet einen Moment – das bremst aber nur, wer
+   nacheinander probiert. Gegen viele Versuche gleichzeitig zählt ein
+   gemeinsamer Zähler: Nach 20 Fehlversuchen in 10 Minuten nimmt die Tür
+   gar nichts mehr an, auch das richtige Passwort nicht. Gezählt wird für
+   alle zusammen, nicht je Gerät – Adressen lassen sich leicht wechseln, und
+   der Gastgeber meldet sich ohnehin selten an. Schlimmstenfalls wartet er
+   zehn Minuten. */
 const STRAFE_MS = 700;
+const FEHL_MAX = 20;
+const FEHL_FENSTER_SEK = 10 * 60;
+
+/** Zähler im Arbeitsspeicher – am Laptop reicht der eine Prozess. */
+function speicherZaehler() {
+  let stand = { n: 0, bis: 0 };
+  return {
+    async stand() { return stand.bis > Date.now() ? stand.n : 0; },
+    async fehler() {
+      stand = stand.bis > Date.now() ? { n: stand.n + 1, bis: stand.bis } : { n: 1, bis: Date.now() + FEHL_FENSTER_SEK * 1000 };
+    },
+  };
+}
+const ZAEHLER_LOKAL = speicherZaehler();
+
+/** Zähler im gemeinsamen Speicher (Upstash) – im Netz laufen viele Instanzen. */
+export function zaehlerAus(speicher) {
+  return {
+    stand: () => speicher.zaehlerStand('editor-fehl'),
+    fehler: () => speicher.zaehle('editor-fehl', FEHL_FENSTER_SEK),
+  };
+}
 
 /** Das eingestellte Passwort, oder null, wenn der Editor offen sein soll. */
 export function editorPasswort(env = process.env) {
@@ -121,14 +148,18 @@ export async function editorSeite(req, res, passwort, liesEditorHtml) {
 }
 
 /** POST /api/editor-login: Passwort prüfen, Keks setzen, zum Editor. */
-export async function editorAnmelden(req, res, passwort) {
+export async function editorAnmelden(req, res, passwort, zaehler = ZAEHLER_LOKAL) {
   if (!passwort) {
     res.writeHead(303, { Location: '/editor', 'Cache-Control': 'no-store' });
     return res.end();
   }
+  if (await zaehler.stand() >= FEHL_MAX) {
+    return seite(res, 429, anmeldeSeite('Zu viele falsche Versuche – bitte in zehn Minuten noch einmal.'));
+  }
   const form = await liesFormular(req);
   const eingabe = String(form.get('passwort') || '');
   if (!gleich(eingabe, passwort)) {
+    await zaehler.fehler();
     await new Promise((r) => setTimeout(r, STRAFE_MS));
     return seite(res, 401, anmeldeSeite('Das Passwort stimmt nicht.'));
   }

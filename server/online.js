@@ -37,7 +37,7 @@ import * as G from './game.js';
 import { handleAction, neuerRaum, RUECKNEHMBAR } from './spiel.js';
 import { listSets, loadSet, mixSet, normalizeSet, DATA_DIR } from './questions.js';
 import { leseCookie, COOKIE_SPIEL, COOKIE_HOST } from './zugang.js';
-import { editorPasswort as passwortAusUmgebung, editorFrei, editorSeite, editorAnmelden } from './editortuer.js';
+import { editorPasswort as passwortAusUmgebung, editorFrei, editorSeite, editorAnmelden, zaehlerAus } from './editortuer.js';
 import { fileURLToPath } from 'node:url';
 
 const EDITOR_HTML = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public', 'editor.html');
@@ -228,13 +228,20 @@ export function erzeugeOnline({
     return json(res, 200, { ok: true });
   }
 
-  async function darfSaetzeLesen(req, url) {
-    if (editorFrei(req, editorPasswort)) return true;
-    const alsHost = ausweis(req, url, true);
-    if (!alsHost.hostGeheim) return false;
-    const daten = await speicher.lade(alsHost.code);
-    return !!daten && gleich(alsHost.hostGeheim, daten.hostGeheim);
-  }
+  /*
+   * Ohne Editor-Anmeldung gibt es von einem Satz nur den Umriss: Name,
+   * Beschreibung, Kategorienamen. Mehr braucht die Lobby für die
+   * Satz-Beschreibung nicht, und gespielt wird ohnehin auf dem Server
+   * (startGame lädt selbst). Ein Host-Schlüssel reicht dafür bewusst nicht –
+   * einen Raum samt Schlüssel kann sich jeder anlegen.
+   */
+  const ganzeSaetze = (req) => !editorPasswort || editorFrei(req, editorPasswort);
+  const umriss = (set) => ({
+    name: set.name,
+    description: set.description,
+    umriss: true,
+    rounds: set.rounds.map((r) => ({ categories: r.categories.map((c) => ({ name: c.name, questions: [] })) })),
+  });
 
   const instanz = randomBytes(4).toString('hex');
 
@@ -789,14 +796,15 @@ export function erzeugeOnline({
       if (pfad === 'editor-seite' && m === 'GET') {
         return await editorSeite(req, res, editorPasswort, () => readFile(EDITOR_HTML, 'utf8'));
       }
-      if (pfad === 'editor-login' && m === 'POST') return await editorAnmelden(req, res, editorPasswort);
-      if ((pfad === 'mix' || pfad === 'set') && m === 'GET' && !(await darfSaetzeLesen(req, url))) {
-        return json(res, 403, { error: 'Ganze Fragensätze gibt es nur im Editor (mit Passwort) oder auf dem Bildschirm des Raums.' });
+      if (pfad === 'editor-login' && m === 'POST') return await editorAnmelden(req, res, editorPasswort, zaehlerAus(speicher));
+      if (pfad === 'mix' && m === 'GET' && !ganzeSaetze(req)) {
+        return json(res, 403, { error: 'Ganze Fragensätze gibt es nur im Editor (mit Passwort).' });
       }
       if (pfad === 'mix' && m === 'GET') return json(res, 200, await mixSet());
       if (pfad === 'set' && m === 'GET') {
         try {
-          return json(res, 200, await ladeSatz(url.searchParams.get('file')));
+          const set = await ladeSatz(url.searchParams.get('file'));
+          return json(res, 200, ganzeSaetze(req) ? set : umriss(set));
         } catch (err) {
           return json(res, 400, { error: err.message });
         }

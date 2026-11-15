@@ -53,12 +53,30 @@ test('Tabellen ohne Vorlage: Spalten nach Überschrift, Reihenfolge nach Punkten
   assert.equal(satz.name, 'meine fragen', 'ohne Namenszeile gilt der Dateiname');
   assert.deepEqual(satz.rounds[0].categories[0].questions.map((q) => q.answer), ['Leicht', 'Mittel', 'Auch', 'Schwer']);
   assert.throws(() => satzAusZeilen([['a', 'b'], ['c', 'd']]), /Kopfzeile mit „Frage“ und „Antwort“/);
-  // Eine Kategorie mit drei Fragen lässt der Server mit klarer Meldung nicht durch.
-  const drei = satzAusZeilen(zeilenAusCsv('Kategorie;Frage;Antwort\nX;1;a\n;2;b\n;3;c'));
-  assert.throws(() => normalizeSet(drei), /hat 3 Fragen – es müssen genau 4 sein/);
+  // Eine Kategorie mit drei Fragen – gemeldet mit der Zeile, die man in der Tabelle sieht.
+  assert.throws(() => satzAusZeilen(zeilenAusCsv('Kategorie;Frage;Antwort\nX;1;a\n;2;b\n;3;c')),
+    /„X“ \(Runde 1, ab Zeile 2\) hat 3 Fragen – es müssen genau 4 sein/);
+  // Eine Frage ganz ohne Kategorie: Zeile und Spalte, statt einer erfundenen „Kategorie 1“.
+  assert.throws(() => satzAusZeilen(zeilenAusCsv('Runde;Kategorie;Frage;Antwort\n1;;Wer?;Ich')),
+    /Zeile 2: Frage ohne Kategorie – trag in Spalte B einen Namen ein/);
 });
 
 test('die Vorlage im Ordner public ist die, die das Werkzeug baut', async () => {
   const imOrdner = await readFile(new URL('../public/Fragen-Vorlage.xlsx', import.meta.url));
   assert.ok(Buffer.compare(imOrdner, baueVorlage()) === 0, 'node werkzeug/fragen-vorlage.js laufen lassen');
+});
+
+test('CSV aus deutschem Excel (Windows-1252) behält ihre Umlaute', async () => {
+  const csv = 'Kategorie;Frage;Antwort\nFußball;Wer ist Müller?;Thomas\n;Größte Stadt?;Köln\n;Ä?;Ö\n;Ü?;ß\n';
+  const bytes = Buffer.from(csv, 'latin1'); // Windows-1252 und Latin-1 sind für Umlaute gleich
+  const satz = await satzAusDatei({ name: 'excel.csv', arrayBuffer: async () => bytes, text: async () => bytes.toString('utf8') });
+  assert.equal(satz.rounds[0].categories[0].name, 'Fußball');
+  assert.equal(satz.rounds[0].categories[0].questions[1].answer, 'Köln');
+});
+
+test('die Vorlage hält die Eingabefelder als Text – aus „Wahr“ wird keine 1', async () => {
+  const xml = baueVorlage().toString('latin1');
+  assert.ok(xml.length > 0);
+  const { satzLuecke } = await import('../public/tabelle.js');
+  assert.match(satzLuecke({ rounds: [{ categories: [{ name: 'x'.repeat(41), questions: [] }] }] }), /41 Zeichen – höchstens 40/);
 });

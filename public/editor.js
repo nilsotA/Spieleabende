@@ -18,6 +18,8 @@ let zielName = gemerkt?.zielName ?? null;
 // Die Datei, die dieser Editor selbst gespeichert oder vom Server geladen hat.
 let bestaetigteDatei = null;
 let imNetz = false; // Netz-Spiel: gespeichert wird in die Datenbank, nicht nach data/
+let netzOhnePasswort = false; // dann nimmt der Server im Netz gar nichts an
+let zielEigen = !!gemerkt?.zielEigen; // ist die Zieldatei ein eigener Satz im Netz (nicht mitgeliefert)?
 
 function blankRound() {
   return {
@@ -58,8 +60,8 @@ function persistSoon() {
  * Tab nur, wenn er selbst etwas geändert hat, und übernimmt den Stand des
  * anderen, solange er selbst nichts Ungesichertes hat.
  */
-let zuletztGesichert = JSON.stringify({ set, zielDatei, zielName });
-const stand = () => JSON.stringify({ set, zielDatei, zielName });
+let zuletztGesichert = JSON.stringify({ set, zielDatei, zielName, zielEigen });
+const stand = () => JSON.stringify({ set, zielDatei, zielName, zielEigen });
 const persistWennGeaendert = () => { if (stand() !== zuletztGesichert) persist(); };
 window.addEventListener('blur', persistWennGeaendert);
 document.addEventListener('visibilitychange', persistWennGeaendert);
@@ -74,6 +76,7 @@ window.addEventListener('storage', (ev) => {
   set = d.set;
   zielDatei = d.zielDatei || null;
   zielName = d.zielName ?? null;
+  zielEigen = !!d.zielEigen;
   zuletztGesichert = stand();
   render();
 });
@@ -362,15 +365,23 @@ function zeigeZiel() {
   // Im Netz gibt es kein data/ – der Satz landet in der Datenbank und steht
   // danach in der Lobby zur Wahl.
   ziel.textContent = imNetz
-    ? (datei === zielDatei
-      ? `Speichern aktualisiert „${set.name || datei}“ – er steht in der Lobby zur Wahl.`
-      : 'Speichern legt den Satz im Netz an – danach steht er in der Lobby zur Wahl.')
+    ? (netzOhnePasswort
+      ? 'Speichern im Netz ist aus (kein Editor-Passwort eingestellt) – bitte „Herunterladen“.'
+      : datei === zielDatei && !zielEigen
+        ? 'Das ist ein mitgelieferter Satz – zum Speichern bitte umbenennen.'
+        : datei === zielDatei
+          ? `Speichern aktualisiert „${set.name || datei}“ – er steht in der Lobby zur Wahl.`
+          : 'Speichern legt den Satz im Netz an – danach steht er in der Lobby zur Wahl.')
     : (datei === zielDatei
       ? `Speichern schreibt nach data/${datei}`
       : `Speichern legt data/${datei} an`);
 }
-serverInfo().then((info) => {
+serverInfo().then(async (info) => {
   imNetz = !!info?.raeume;
+  if (imNetz) {
+    const lage = await fetch('/api/laeuft', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({}));
+    netzOhnePasswort = lage?.editor?.passwort === false;
+  }
   zeigeZiel();
 }).catch(() => {});
 
@@ -521,6 +532,7 @@ async function save(overwrite) {
     if (data.ok) {
       zielDatei = data.file;
       bestaetigteDatei = data.file;
+      zielEigen = true;
       zielName = set.name;
       persist();
       zeigeZiel();
@@ -536,7 +548,7 @@ async function save(overwrite) {
       // Wer hier abbricht, hat auf „Speichern“ gedrückt und sieht sonst gar
       // nichts passieren – und weiß nicht, ob der Klick angekommen ist.
       if (confirm(`„${data.file}“ gibt es schon. Überschreiben?`)) save(true);
-      else toast('Nicht gespeichert – der Satz behält seinen bisherigen Stand auf der Platte.');
+      else toast(imNetz ? 'Nicht gespeichert – der Satz im Netz bleibt, wie er war.' : 'Nicht gespeichert – der Satz behält seinen bisherigen Stand auf der Platte.');
     } else {
       toast(data.error || 'Speichern fehlgeschlagen.', 'error');
     }
@@ -855,7 +867,10 @@ $('#file-input').addEventListener('change', async (ev) => {
     const raw = await satzAusDatei(file);
     if (!verwerfenOk()) return;
     set = normalizeLoaded(raw);
-    zielDatei = /\.json$/i.test(file.name) ? file.name : null;
+    // Der Dateiname einer geöffneten Datei („pauls-fragen (1).json“) taugt nicht
+    // als Speicherort – gespeichert wird unter dem Namen des Satzes.
+    zielDatei = null;
+    zielEigen = false;
     bestaetigteDatei = null; // eine hochgeladene Datei kann einen fremden Satz treffen
     zielName = set.name;
     persist();
@@ -880,6 +895,7 @@ $('#btn-load').addEventListener('click', async () => {
     set = normalizeLoaded(raw);
     zielDatei = file;
     bestaetigteDatei = file;
+    zielEigen = !!$('#load-select').selectedOptions[0]?.dataset.eigen;
     zielName = set.name;
     persist();
     render();
@@ -897,6 +913,7 @@ $('#btn-new')?.addEventListener('click', () => {
   zielDatei = null;
   zielName = null;
   bestaetigteDatei = null;
+  zielEigen = false;
   persist();
   render();
   zeigeZiel();
