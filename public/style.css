@@ -147,6 +147,19 @@ a { color: #79b6ff; }
 .btn-bad { background: linear-gradient(180deg, #e2455f, #93122e); border-color: #f26d84; }
 .btn-ghost { background: rgba(255, 255, 255, 0.04); }
 .btn-sm { padding: 0.35rem 0.6rem; font-size: 0.8rem; border-radius: 8px; }
+/* Ein Link oder ein Label, das wie ein Knopf aussieht, verhält sich jetzt auch
+   so: Text mittig – auf dem iPad, wo Knöpfe 44 px hoch werden, klebte er sonst
+   oben – und ohne den Unterstrich eines Links. */
+a.btn,
+label.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  text-decoration: none;
+  margin: 0;
+  cursor: pointer;
+}
 
 input, select, textarea {
   font-family: inherit;

@@ -125,14 +125,14 @@
       <h2>3 · Fragen</h2>
       <div class="row" style="margin-bottom:0.6rem">
         <select id="set-select" class="grow"></select>
-        <button id="btn-reload-sets" class="btn btn-ghost btn-sm" type="button" title="Fragensätze neu einlesen" aria-label="Fragensätze neu einlesen">↻</button>
+        <button id="btn-reload-sets" class="btn satz-knopf satz-neu" type="button" title="Fragensätze neu einlesen" aria-label="Fragensätze neu einlesen">↻</button>
       </div>
       <p id="set-info" class="muted small"></p>
-      <div class="row">
-        <label class="btn btn-ghost btn-sm datei-knopf" style="margin:0;cursor:pointer">
-          Datei laden … <input id="set-file" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei laden">
+      <div class="satz-knoepfe">
+        <label class="btn satz-knopf datei-knopf">
+          <span aria-hidden="true">📂</span> Datei laden … <input id="set-file" type="file" accept="application/json" aria-label="Fragensatz aus einer Datei laden">
         </label>
-        <a class="btn btn-ghost btn-sm" href="/editor" target="_blank" rel="noopener">Fragen-Editor öffnen</a>
+        <a class="btn satz-knopf" href="/editor" target="_blank" rel="noopener"><span aria-hidden="true">✏️</span> Fragen-Editor</a>
       </div>
     </div>
 
