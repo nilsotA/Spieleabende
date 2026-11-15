@@ -1,18 +1,45 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "functions": {
     "api/quizduell.js": {
-      "includeFiles": "data/**",
+      "includeFiles": "{data/**,public/editor.html}",
       "maxDuration": 15
     }
   },
   "rewrites": [
-    { "source": "/host", "destination": "/host.html" },
-    { "source": "/play", "destination": "/player.html" },
-    { "source": "/remote", "destination": "/remote.html" },
-    { "source": "/editor", "destination": "/editor.html" },
-    { "source": "/bilder/:name", "destination": "/api/quizduell?pfad=datei&name=:name" },
-    { "source": "/api/:pfad", "destination": "/api/quizduell?pfad=:pfad" }
+    {
+      "source": "/host",
+      "destination": "/host.html"
+    },
+    {
+      "source": "/play",
+      "destination": "/player.html"
+    },
+    {
+      "source": "/remote",
+      "destination": "/remote.html"
+    },
+    {
+      "source": "/editor",
+      "destination": "/api/quizduell?pfad=editor-seite"
+    },
+    {
+      "source": "/bilder/:name",
+      "destination": "/api/quizduell?pfad=datei&name=:name"
+    },
+    {
+      "source": "/api/:pfad",
+      "destination": "/api/quizduell?pfad=:pfad"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/editor.html",
+      "destination": "/editor",
+      "permanent": false
+    }
   ]
 }

@@ -13,6 +13,7 @@ import { oeffne as oeffneImBrowser } from './browser.js';
 import { starteTunnel, stoppeTunnel } from './tunnel.js';
 import { neuerZugang, pruefeZugang, cookieKoepfe, ueberHttps, TUER_ZU } from './zugang.js';
 import { nodeZuAlt } from './node-version.js';
+import { editorPasswort, editorFrei, editorSeite, editorAnmelden } from './editortuer.js';
 
 /*
  * Vor allem anderen: Läuft das Spiel auf diesem Node überhaupt?
@@ -882,6 +883,10 @@ const server = http.createServer(async (req, res) => {
       }
       return serveFile(res, path.join(DATA_DIR, 'bilder', datei));
     }
+    // Der Editor fragt nach dem Passwort, wenn eins eingestellt ist (EDITOR_PASSWORT).
+    if ((pathname === '/editor' || pathname === '/editor.html') && !editorFrei(req, editorPasswort())) {
+      return editorSeite(req, res, editorPasswort(), async () => '');
+    }
     const file = ROUTES[pathname] || pathname.replace(/^\//, '');
     const full = path.join(PUBLIC_DIR, file);
     if (!full.startsWith(PUBLIC_DIR + path.sep)) return send(res, 403, 'text/plain', 'Verboten');
@@ -1048,6 +1053,9 @@ async function apiHandler(req, res, url, pathname, rolle) {
       return undefined;
     }
     return antworteMitStand(res, { isHost, clientId });
+  }
+  if (pathname === '/api/editor-login' && req.method === 'POST') {
+    return editorAnmelden(req, res, editorPasswort());
   }
   if (pathname === '/api/sets' && req.method === 'GET') {
     return sendJson(res, 200, await listSets());

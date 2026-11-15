@@ -488,3 +488,58 @@ pruefe('QR-Code und Fernbedienung zeigen auf die öffentliche Adresse, egal wor�
   })).json();
   assert.deepEqual(info.urls, ['https://spiel.example']);
 });
+
+/* ---------------------------------------------------------- Editor-Passwort */
+
+test('der Editor fragt nach dem Passwort, und ganze Sätze gibt es nur mit Passwort oder als Bildschirm', async (t) => {
+  const server = await starteOnlineLokal({ port: 0, speicher: speicherImArbeitsspeicher(), editorPasswort: 'Geheim42' });
+  t.after(() => new Promise((r) => server.close(r)));
+  const base = `http://localhost:${server.address().port}`;
+
+  // Ohne Keks: die Anmeldeseite statt des Editors – unter beiden Adressen.
+  for (const weg of ['/editor', '/editor.html']) {
+    const seite = await (await fetch(base + weg)).text();
+    assert.match(seite, /name="passwort"/, `${weg} zeigt die Anmeldung`);
+    assert.doesNotMatch(seite, /editor\.js/, `${weg} verrät den Editor nicht`);
+  }
+  // Ganze Sätze (mit Antworten) gibt es so nicht – die Liste schon.
+  assert.equal((await fetch(`${base}/api/set?file=beispiel-spieleabend.json`)).status, 403);
+  assert.equal((await fetch(`${base}/api/mix`)).status, 403);
+  assert.equal((await fetch(`${base}/api/sets`)).status, 200);
+
+  // Falsches Passwort: keine Tür, kein Keks.
+  const falsch = await fetch(`${base}/api/editor-login`, {
+    method: 'POST', redirect: 'manual',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'passwort=hallo',
+  });
+  assert.equal(falsch.status, 401);
+  assert.equal(falsch.headers.get('set-cookie'), null);
+  assert.match(await falsch.text(), /stimmt nicht/);
+
+  // Richtiges Passwort: Keks, und damit der Editor und die Sätze.
+  const richtig = await fetch(`${base}/api/editor-login`, {
+    method: 'POST', redirect: 'manual',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'passwort=Geheim42',
+  });
+  assert.equal(richtig.status, 303);
+  const keks = richtig.headers.get('set-cookie');
+  assert.match(keks, /^qd_editor=[\w-]+;.*HttpOnly/);
+  assert.doesNotMatch(keks, /Geheim42/, 'das Passwort selbst steht nicht im Keks');
+  const mitKeks = { headers: { cookie: keks.split(';')[0] } };
+  assert.match(await (await fetch(`${base}/editor`, mitKeks)).text(), /editor\.js/);
+  assert.equal((await fetch(`${base}/api/set?file=beispiel-spieleabend.json`, mitKeks)).status, 200);
+
+  // Der Bildschirm eines Raums darf die Sätze lesen (Satz-Beschreibung in der
+  // Lobby) – mit einem erfundenen Host-Schlüssel nicht.
+  const raum = await (await fetch(`${base}/api/raum`, { method: 'POST' })).json();
+  assert.equal((await fetch(`${base}/api/set?file=beispiel-spieleabend.json&h=${raum.h}`)).status, 200);
+  assert.equal((await fetch(`${base}/api/set?file=beispiel-spieleabend.json&h=${raum.k}.falsch`)).status, 403);
+});
+
+test('ohne eingestelltes Passwort bleibt der Editor offen wie bisher', async (t) => {
+  const server = await starteOnlineLokal({ port: 0, speicher: speicherImArbeitsspeicher(), editorPasswort: null });
+  t.after(() => new Promise((r) => server.close(r)));
+  const base = `http://localhost:${server.address().port}`;
+  assert.match(await (await fetch(`${base}/editor`)).text(), /editor\.js/);
+  assert.equal((await fetch(`${base}/api/set?file=beispiel-spieleabend.json`)).status, 200);
+});

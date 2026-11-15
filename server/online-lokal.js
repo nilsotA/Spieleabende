@@ -34,11 +34,16 @@ const MIME = {
 // Dieselben Kurzadressen wie in vercel.json und am Laptop-Server.
 const ROUTES = { '/': 'index.html', '/host': 'host.html', '/play': 'player.html', '/remote': 'remote.html', '/editor': 'editor.html' };
 
-export function starteOnlineLokal({ port = 3100, speicher = speicherAusUmgebung(), jetzt, oeffentlich } = {}) {
-  const behandle = erzeugeOnline({ speicher, jetzt, bau: 'lokal', oeffentlich });
+export function starteOnlineLokal({ port = 3100, speicher = speicherAusUmgebung(), jetzt, oeffentlich, editorPasswort } = {}) {
+  const behandle = erzeugeOnline({ speicher, jetzt, bau: 'lokal', oeffentlich, ...(editorPasswort !== undefined ? { editorPasswort } : {}) });
   const server = http.createServer(async (req, res) => {
     const pfad = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (pfad.startsWith('/api/') || pfad.startsWith('/bilder/')) return behandle(req, res);
+    // Der Editor geht durch die Tür (Passwort) – wie auf Vercel.
+    if (pfad === '/editor' || pfad === '/editor.html') {
+      req.url = '/api/editor-seite';
+      return behandle(req, res);
+    }
     const datei = path.join(PUBLIC_DIR, ROUTES[pfad] || path.posix.normalize(pfad).replace(/^\/+/, ''));
     if (!datei.startsWith(PUBLIC_DIR + path.sep)) {
       res.writeHead(403);

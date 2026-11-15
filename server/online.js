@@ -37,6 +37,10 @@ import * as G from './game.js';
 import { handleAction, neuerRaum, RUECKNEHMBAR } from './spiel.js';
 import { listSets, loadSet, mixSet, DATA_DIR } from './questions.js';
 import { leseCookie, COOKIE_SPIEL, COOKIE_HOST } from './zugang.js';
+import { editorPasswort as passwortAusUmgebung, editorFrei, editorSeite, editorAnmelden } from './editortuer.js';
+import { fileURLToPath } from 'node:url';
+
+const EDITOR_HTML = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public', 'editor.html');
 
 /* Ohne I und O: Die liest am Fernseher jeder Zweite als 1 und 0. */
 const CODE_ZEICHEN = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -139,7 +143,25 @@ function frischerRaum(code, jetzt) {
   };
 }
 
-export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'online', oeffentlich = '' }) {
+export function erzeugeOnline({
+  speicher, jetzt = () => Date.now(), bau = 'online', oeffentlich = '',
+  editorPasswort = passwortAusUmgebung(),
+}) {
+  /*
+   * Ganze Fragensätze samt Antworten (/api/set, /api/mix) gibt es nur für den
+   * Editor (mit Passwort) und für den Bildschirm eines Raums – der braucht sie
+   * für die Beschreibung des gewählten Satzes in der Lobby. Sonst könnte jeder
+   * Gast an der Editor-Tür vorbei einfach die Schnittstelle fragen. Ohne
+   * eingestelltes Passwort bleibt alles offen wie bisher.
+   */
+  async function darfSaetzeLesen(req, url) {
+    if (editorFrei(req, editorPasswort)) return true;
+    const alsHost = ausweis(req, url, true);
+    if (!alsHost.hostGeheim) return false;
+    const daten = await speicher.lade(alsHost.code);
+    return !!daten && gleich(alsHost.hostGeheim, daten.hostGeheim);
+  }
+
   const instanz = randomBytes(4).toString('hex');
 
   /* ----------------------------------------------- Was die Instanz behält
@@ -676,7 +698,12 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
     pfad = pfad.replace(/^\/+|\/+$/g, '');
     const m = req.method;
     try {
-      if (pfad === 'laeuft') return json(res, 200, { quizduell: true, raeume: true, instanz });
+      if (pfad === 'laeuft') {
+        // `editor`: ob die Editor-Seite in der Funktion liegt (vercel.json,
+        // includeFiles) und ob sie ein Passwort verlangt – verrät nichts weiter.
+        const editorDa = await readFile(EDITOR_HTML).then(() => true, () => false);
+        return json(res, 200, { quizduell: true, raeume: true, instanz, editor: { da: editorDa, passwort: !!editorPasswort } });
+      }
       if (pfad === 'info' && m === 'GET') return await info(req, res, url);
       if (pfad === 'raum' && m === 'POST') return await raumAnlegen(res);
       if (pfad === 'state' && m === 'GET') return await zustand(req, res, url);
@@ -684,6 +711,13 @@ export function erzeugeOnline({ speicher, jetzt = () => Date.now(), bau = 'onlin
       if (pfad === 'bild' && m === 'GET') return await bild(req, res, url);
       if (pfad === 'datei' && m === 'GET') return await datei(res, ausAnfrage('name'));
       if (pfad === 'sets' && m === 'GET') return json(res, 200, await listSets());
+      if (pfad === 'editor-seite' && m === 'GET') {
+        return await editorSeite(req, res, editorPasswort, () => readFile(EDITOR_HTML, 'utf8'));
+      }
+      if (pfad === 'editor-login' && m === 'POST') return await editorAnmelden(req, res, editorPasswort);
+      if ((pfad === 'mix' || pfad === 'set') && m === 'GET' && !(await darfSaetzeLesen(req, url))) {
+        return json(res, 403, { error: 'Ganze Fragensätze gibt es nur im Editor (mit Passwort) oder auf dem Bildschirm des Raums.' });
+      }
       if (pfad === 'mix' && m === 'GET') return json(res, 200, await mixSet());
       if (pfad === 'set' && m === 'GET') {
         try {

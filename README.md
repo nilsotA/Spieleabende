@@ -981,6 +981,14 @@ Ohne die Redis-Zugangsdaten startet die veröffentlichte Fassung absichtlich nic
 (`fra1` in `vercel.json`); liegt die Datenbank ebenfalls dort (`eu-central-1`),
 ist jeder Zug spürbar schneller.
 
+**Fragen-Editor mit Passwort:** Im Editor stehen alle Antworten. Mit der
+Umgebungsvariable `EDITOR_PASSWORT` (auf Vercel unter *Settings → Environment
+Variables*, danach neu deployen) fragt `/editor` nach diesem Passwort; der Browser
+merkt sich die Anmeldung 30 Tage. Ganze Fragensätze samt Antworten gibt die
+Schnittstelle dann nur noch an den Editor und an den Bildschirm des eigenen Raums
+heraus. Am Laptop wirkt dieselbe Variable auf die Editor-Seite; ohne Variable bleibt
+der Editor offen wie bisher.
+
 **Wie viel Datenbank ein Abend braucht:** Jedes Gerät fragt nach und meldet sich
 etwa alle acht Sekunden. Ein Abend mit Bildschirm, Fernbedienung und fünf Handys
 kommt grob auf einige zehntausend Redis-Befehle. Der kostenlose Upstash-Tarif reicht
