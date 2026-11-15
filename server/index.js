@@ -839,6 +839,14 @@ const server = http.createServer(async (req, res) => {
          * noch bekommen kann.
          */
         if (pathname === '/start-wache.js') return serveFile(res, path.join(PUBLIC_DIR, 'start-wache.js'));
+        // Ebenso das Icon fürs Lesezeichen und das Manifest: Der Browser holt
+        // das Manifest ohne Keks, und beides verrät nichts über das Spiel.
+        if (pathname === '/apple-touch-icon.png' || pathname === '/manifest.json') {
+          return serveFile(res, path.join(PUBLIC_DIR, pathname.slice(1)));
+        }
+        if (/^\/icons\/[\w.-]+\.(png|svg)$/.test(pathname)) {
+          return serveFile(res, path.join(PUBLIC_DIR, 'icons', path.basename(pathname)));
+        }
         /*
          * Eine Absage für eine Datei ist keine Seite.
          *
