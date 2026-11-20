@@ -527,6 +527,47 @@ test('ein überholter Stand im Kopf einer Instanz hält sich nicht selbst am Leb
   assert.equal(weiter.unveraendert, true);
 });
 
+test('schreibt die Instanz, während eine Anfrage noch am Speicher hängt, wartet das Gerät nicht auf den Wächter', async (t) => {
+  const uhr = { zeit: Date.now() };
+  const jetzt = () => uhr.zeit;
+  const roh = speicherImArbeitsspeicher({ jetzt });
+  let langsam = false;
+  const speicher = new Proxy(roh, {
+    get(ziel, name) {
+      const wert = ziel[name];
+      if (name === 'kopf') {
+        return async (...a) => {
+          const r = await wert.apply(ziel, a);
+          if (langsam) await new Promise((z) => setTimeout(z, 150));
+          return r;
+        };
+      }
+      return typeof wert === 'function' ? wert.bind(ziel) : wert;
+    },
+  });
+  const server = await starteOnlineLokal({ port: 0, speicher, jetzt });
+  t.after(() => new Promise((r) => { server.closeAllConnections?.(); server.close(r); }));
+  const A = `http://localhost:${server.address().port}`;
+  const j = async (u, o) => (await fetch(u, o)).json();
+  const raum = await j(`${A}/api/raum`, { method: 'POST' });
+  const q = (x) => `/api/state?clientId=c_host&role=host&h=${raum.h}${x}`;
+  await j(A + q('&puls=1'));
+  const s = await j(A + q(''));
+  uhr.zeit += 2000; // der Kopf im Gedächtnis ist nicht mehr frisch
+  langsam = true;
+  const t0 = Date.now();
+  const offen = j(A + q('&seit=1&warte=8000&takt=1000'));
+  await new Promise((z) => setTimeout(z, 40));
+  const zug = await j(`${A}/api/action`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'addTeam', name: 'Rot', role: 'host', clientId: 'c_host', geheim: s.geheim, h: raum.h }),
+  });
+  assert.equal(zug.nummer, 2);
+  const stand = await offen;
+  assert.equal(stand.nummer, 2);
+  assert.ok(Date.now() - t0 < 1000, `kam erst nach ${Date.now() - t0} ms`);
+});
+
 pruefe('QR-Code und Fernbedienung zeigen auf die öffentliche Adresse, egal worüber der Host kam', async (t, baue) => {
   // Auf Vercel sind die Nebenadressen eines Projekts nur mit Anmeldung
   // erreichbar. Der Host ist angemeldet und merkt nichts – seine Gäste schon.

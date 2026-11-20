@@ -424,6 +424,14 @@ export function erzeugeOnline({
       menge.add(warter);
       res.on?.('close', aufgelegt);
       const frist = setTimeout(() => ende({}), dauer);
+      // Hat diese Instanz selbst geschrieben, während die Anfrage noch am
+      // Speicher hing, lief das Wecken ins Leere – dann gleich antworten,
+      // statt auf den nächsten Blick des Wächters zu warten.
+      const k = koepfe.get(code);
+      if (k && k.nummer !== seit) {
+        const g = gedaechtnis.get(code);
+        return g && g.rev === k.rev ? ende({ daten: JSON.parse(g.json) }) : ende({ neu: true });
+      }
       waechterAn(code);
     });
   }
