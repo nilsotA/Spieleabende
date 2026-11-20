@@ -483,6 +483,50 @@ pruefe('zwei Instanzen: Züge von nebenan werden bemerkt, und ein alter Stand im
   assert.equal(zurueck.sicht.teams.find((tm) => tm.name === 'Blau').score, punkte.Blau);
 });
 
+test('ein überholter Stand im Kopf einer Instanz hält sich nicht selbst am Leben', async (t) => {
+  // Gefunden in der Prüfung: Instanz A hatte Nummer 1 im Kopf, B schrieb
+  // Nummer 2. Jede Frage an A frischte den alten Kopf wieder auf – das Gerät
+  // bekam ewig Nummer 1 und fragte achtmal pro Sekunde nach.
+  const uhr = { zeit: Date.now() };
+  const jetzt = () => uhr.zeit;
+  const speicher = speicherImArbeitsspeicher({ jetzt });
+  const a = await starteOnlineLokal({ port: 0, speicher, jetzt });
+  const b = await starteOnlineLokal({ port: 0, speicher, jetzt });
+  t.after(() => Promise.all([a, b].map((s) => new Promise((r) => { s.closeAllConnections?.(); s.close(r); }))));
+  const A = `http://localhost:${a.address().port}`;
+  const B = `http://localhost:${b.address().port}`;
+  const j = async (u, o) => (await fetch(u, o)).json();
+  const raum = await j(`${A}/api/raum`, { method: 'POST' });
+  const q = (extra) => `/api/state?clientId=c_host&role=host&h=${raum.h}${extra}`;
+  await j(A + q('&puls=1'));
+  const s = await j(A + q(''));
+  assert.equal(s.nummer, 1);
+  const zug = await j(`${B}/api/action`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'addTeam', name: 'Rot', role: 'host', clientId: 'c_host', geheim: s.geheim, h: raum.h }),
+  });
+  assert.equal(zug.nummer, 2);
+  // Wer schon weiter ist als A (Zug lief über B), bekommt sofort den echten
+  // Stand – nie den älteren aus A's Kopf.
+  const vorn = await j(A + q('&seit=2&warte=300&takt=200'));
+  assert.equal(vorn.nummer, 2);
+  assert.equal(vorn.unveraendert, true);
+  // Wer den Zug noch nicht kennt, hört höchstens so lange „nichts Neues“, wie
+  // der Kopf frisch ist – auch wenn er ständig nachfragt (alle 0,6 s).
+  const gesehen = [];
+  for (let i = 0; i < 5; i++) {
+    uhr.zeit += 600;
+    const x = await j(A + q(`&seit=1${i === 2 ? '&puls=1' : ''}`));
+    gesehen.push(x.nummer);
+  }
+  assert.ok(gesehen.slice(2).every((n) => n === 2), `nach spätestens 1,5 s Stand 2 – gesehen: ${gesehen}`);
+  // Und wer schon weiter ist als A, bekommt nie einen älteren Stand.
+  uhr.zeit += 600;
+  const weiter = await j(A + q('&seit=2&warte=300&takt=200'));
+  assert.equal(weiter.nummer, 2);
+  assert.equal(weiter.unveraendert, true);
+});
+
 pruefe('QR-Code und Fernbedienung zeigen auf die öffentliche Adresse, egal worüber der Host kam', async (t, baue) => {
   // Auf Vercel sind die Nebenadressen eines Projekts nur mit Anmeldung
   // erreichbar. Der Host ist angemeldet und merkt nichts – seine Gäste schon.

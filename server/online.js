@@ -274,21 +274,36 @@ export function erzeugeOnline({
      dann kostet „gibt es Neues?“ gar keinen Befehl. */
   const koepfe = new Map(); // code -> { rev, nummer, am }
   const waechter = new Map(); // code -> Zeitgeber des gemeinsamen Nachsehens
-  const merkeKopf = (code, rev, nummer) => koepfe.set(code, { rev, nummer, am: jetzt() });
-  /** Der Kopf eines Raums – aus dem Gedächtnis, wenn er höchstens `frischMs` alt ist. */
-  async function kopfVon(code, frischMs) {
+  /* Nur was der Speicher gerade bestätigt hat (gelesen oder geschrieben),
+     macht einen Kopf frisch. Und ein älterer Stand, der nach einem `await`
+     zu spät ankommt, überschreibt nie einen neueren – sonst hielte sich ein
+     veralteter Kopf mit jedem Abruf selbst am Leben. */
+  const merkeKopf = (code, rev, nummer) => {
     const k = koepfe.get(code);
-    if (k && jetzt() - k.am <= frischMs) return k;
+    if (k && k.rev > rev) return;
+    koepfe.set(code, { rev, nummer, am: jetzt() });
+  };
+  /** Ist der gemerkte Kopf frisch – und nicht hinter dem, was das Gerät schon kennt? */
+  const kopfFrisch = (k, frischMs, mindestens) =>
+    !!k && jetzt() - k.am <= frischMs && !(mindestens > k.nummer);
+  /** Der Kopf eines Raums – aus dem Gedächtnis, wenn er höchstens `frischMs` alt ist. */
+  async function kopfVon(code, frischMs, mindestens) {
+    const k = koepfe.get(code);
+    if (kopfFrisch(k, frischMs, mindestens)) return k;
     const neu = await speicher.kopf(code);
     if (neu) merkeKopf(code, neu.rev, neu.nummer);
     else koepfe.delete(code);
     return neu;
   }
   /** Der Raum, aus dem Gedächtnis, wenn der Kopf frisch dazu passt – sonst gelesen. */
-  async function ladeRaum(code, frischMs) {
+  async function ladeRaum(code, frischMs, mindestens) {
     const k = koepfe.get(code);
     const g = gedaechtnis.get(code);
-    if (k && g && g.rev === k.rev && jetzt() - k.am <= frischMs) return JSON.parse(g.json);
+    if (g && kopfFrisch(k, frischMs, mindestens) && g.rev === k.rev) {
+      const daten = JSON.parse(g.json);
+      Object.defineProperty(daten, 'ausDemKopf', { value: true }); // nicht mitgespeichert
+      return daten;
+    }
     return speicher.lade(code);
   }
 
@@ -306,6 +321,8 @@ export function erzeugeOnline({
   /** Frisch gelesen. Der Rückweg im Kopf gilt weiter, wenn die Fassung dieselbe ist. */
   function merkeGelesen(code, daten, weg) {
     const alt = gedaechtnis.get(code);
+    // Kam zu spät zurück: Inzwischen kennt diese Instanz schon Neueres.
+    if (alt && alt.rev > daten.rev) return;
     merke(code, daten, weg !== undefined
       ? JSON.stringify(weg)
       : (alt && alt.rev === daten.rev ? alt.wegJson : undefined));
@@ -597,9 +614,11 @@ export function erzeugeOnline({
     if (puls && !geraete) return keinRaum(res);
     // Der Kopf darf aus dem Gedächtnis kommen, solange der Wächter ihn frisch
     // hält – Neues meldet er ohnehin, sobald er es sieht.
-    const kopf = puls ? null : await kopfVon(wer.code, KOPF_FRISCH_MS);
-    if (!puls && !kopf) return keinRaum(res);
     const seit = url.searchParams.has('seit') ? Number(url.searchParams.get('seit')) : NaN;
+    // Kennt das Gerät schon eine höhere Nummer (von einer anderen Instanz),
+    // ist der gemerkte Kopf überholt – dann fragt diese den Speicher.
+    const kopf = puls ? null : await kopfVon(wer.code, KOPF_FRISCH_MS, seit);
+    if (!puls && !kopf) return keinRaum(res);
     const zahl = (name, vor) => {
       const n = Number(url.searchParams.get(name));
       return Number.isFinite(n) && n > 0 ? n : vor;
@@ -618,7 +637,7 @@ export function erzeugeOnline({
         // Beim ersten Versuch aus dem Gedächtnis, wenn es zum frischen Kopf
         // passt; muss geschrieben werden, prüft der Speicher die Fassung
         // ohnehin, und der zweite Versuch liest frisch.
-        const daten = versuch === 0 ? await ladeRaum(wer.code, KOPF_FRISCH_MS) : await speicher.lade(wer.code);
+        const daten = versuch === 0 ? await ladeRaum(wer.code, KOPF_FRISCH_MS, seit) : await speicher.lade(wer.code);
         if (!daten) return keinRaum(res);
         const isHost = willHost && gleich(wer.hostGeheim, daten.hostGeheim);
         const rev = daten.rev;
@@ -638,7 +657,9 @@ export function erzeugeOnline({
           if (vorbei) daten.geaendertAm = jetzt();
           if (!await lege(wer.code, rev, daten, vorbei ? [] : undefined)) continue;
           if (sichtbar) wecke(wer.code, daten);
-        } else {
+        } else if (!daten.ausDemKopf) {
+          // Nur wirklich Gelesenes frischt das Gedächtnis auf – ein Stand aus
+          // dem Kopf bestätigt sich nicht selbst.
           merkeGelesen(wer.code, daten);
         }
         if (gemeldet) {
