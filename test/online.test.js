@@ -261,9 +261,14 @@ pruefe('wer sich nicht mehr meldet, gilt als weg – und ist wieder da, wenn er 
   assert.equal(stand.teams[0].members[0].online, true);
 
   // Annas Handy schläft ein; der Host meldet sich weiter.
-  uhr.zeit += 40000;
+  // Die Geräte melden sich alle zwanzig Sekunden; nach gut zwei verpassten
+  // Meldungen gilt ein Handy als weg.
+  uhr.zeit += 30000;
   stand = await host.stand({ puls: true });
-  assert.equal(stand.teams[0].members[0].online, false, 'nach 40 stillen Sekunden gilt Anna als weg');
+  assert.equal(stand.teams[0].members[0].online, true, 'eine verpasste Meldung ist noch kein gesperrtes Handy');
+  uhr.zeit += 30000;
+  stand = await host.stand({ puls: true });
+  assert.equal(stand.teams[0].members[0].online, false, 'nach einer Minute ohne Meldung gilt Anna als weg');
 
   uhr.zeit += 5000;
   await anna.stand({ puls: true });

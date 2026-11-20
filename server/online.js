@@ -47,9 +47,10 @@ const CODE_ZEICHEN = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 const CODE_LAENGE = 4;
 
 /* So lange gilt ein Gerät als da, nachdem es sich zuletzt gemeldet hat. Die
-   Geräte melden sich etwa alle acht Sekunden – drei verpasste Meldungen sind
-   ein gesperrtes Handy und kein Funkloch mehr. */
-const DA_FRIST_MS = 25000;
+   Geräte melden sich etwa alle zwanzig Sekunden (jede Meldung kostet einen
+   Befehl im Upstash-Kontingent) – zwei verpasste Meldungen und ein paar
+   Sekunden Luft sind ein gesperrtes Handy und kein Funkloch mehr. */
+const DA_FRIST_MS = 50000;
 /* Was länger still war, fliegt aus der Geräteliste. */
 const GERAET_VERGESSEN_MS = 6 * 60 * 60 * 1000;
 /* Wie am Laptop: Nach zwölf Stunden ohne Zug ist der Abend vorbei, und der
@@ -75,6 +76,9 @@ const NACHSEHEN_MAX_MS = 5000;
    Fällt doch einmal eine fremde Änderung auf, gilt zehn Minuten wieder der
    kurze Abstand. */
 const NACHSEHEN_GELASSEN = 3;
+/* So alt darf ein Kopf aus dem Gedächtnis sein, um eine Nachfrage ohne eigenen
+   Blick in den Speicher zu beantworten. Der Wächter frischt ihn im Takt auf. */
+const KOPF_FRISCH_MS = 1500;
 const FREMD_FRIST_MS = 10 * 60 * 1000;
 /* So viele Räume behält eine Instanz im Kopf (siehe `gedaechtnis`). */
 const GEDAECHTNIS_MAX = 40;
@@ -263,16 +267,40 @@ export function erzeugeOnline({
    * Änderung an ihr vorbeiging.
    */
   const gedaechtnis = new Map(); // code -> { rev, json, wegJson }
-  const wartende = new Map(); // code -> Set<(daten) => void>
+  const wartende = new Map(); // code -> Set<{ seit, takt, geweckt, neu }>
   const lage = new Map(); // code -> { eigene, fremdAm }
+  /* `koepfe`: der zuletzt bekannte Kopf („rev|nummer“) je Raum und wann.
+     Solange der Wächter (siehe `halte`) im Takt nachsieht, ist er frisch –
+     dann kostet „gibt es Neues?“ gar keinen Befehl. */
+  const koepfe = new Map(); // code -> { rev, nummer, am }
+  const waechter = new Map(); // code -> Zeitgeber des gemeinsamen Nachsehens
+  const merkeKopf = (code, rev, nummer) => koepfe.set(code, { rev, nummer, am: jetzt() });
+  /** Der Kopf eines Raums – aus dem Gedächtnis, wenn er höchstens `frischMs` alt ist. */
+  async function kopfVon(code, frischMs) {
+    const k = koepfe.get(code);
+    if (k && jetzt() - k.am <= frischMs) return k;
+    const neu = await speicher.kopf(code);
+    if (neu) merkeKopf(code, neu.rev, neu.nummer);
+    else koepfe.delete(code);
+    return neu;
+  }
+  /** Der Raum, aus dem Gedächtnis, wenn der Kopf frisch dazu passt – sonst gelesen. */
+  async function ladeRaum(code, frischMs) {
+    const k = koepfe.get(code);
+    const g = gedaechtnis.get(code);
+    if (k && g && g.rev === k.rev && jetzt() - k.am <= frischMs) return JSON.parse(g.json);
+    return speicher.lade(code);
+  }
 
   function merke(code, daten, wegJson) {
     gedaechtnis.delete(code);
     gedaechtnis.set(code, { rev: daten.rev, json: JSON.stringify(daten), wegJson });
+    merkeKopf(code, daten.rev, daten.nummer);
     if (gedaechtnis.size > GEDAECHTNIS_MAX) {
       const aeltester = gedaechtnis.keys().next().value;
       gedaechtnis.delete(aeltester);
       lage.delete(aeltester);
+      koepfe.delete(aeltester);
     }
   }
   /** Frisch gelesen. Der Rückweg im Kopf gilt weiter, wenn die Fassung dieselbe ist. */
@@ -286,6 +314,7 @@ export function erzeugeOnline({
   async function lege(code, erwartet, daten, weg) {
     if (!await speicher.schreibe(code, erwartet, daten, weg)) {
       gedaechtnis.delete(code);
+      koepfe.delete(code);
       return false;
     }
     const alt = gedaechtnis.get(code);
@@ -304,7 +333,52 @@ export function erzeugeOnline({
   function wecke(code, daten) {
     lageVon(code).eigene = true;
     const menge = wartende.get(code);
-    if (menge) for (const fn of [...menge]) fn(daten);
+    if (menge) for (const w of [...menge]) w.geweckt(daten);
+  }
+
+  /*
+   * Der gemeinsame Wächter: EIN Blick in den Speicher je Raum und Takt, egal
+   * wie viele Geräte gerade warten. Vorher sah jede liegende Nachfrage selbst
+   * nach – während einer Frage sieben Geräte zweimal je Sekunde, gemessen der
+   * größte Posten im Upstash-Kontingent. Hat sich etwas getan, wird der Raum
+   * einmal gelesen und allen Wartenden mitgegeben.
+   */
+  function abstandFuer(code) {
+    const menge = wartende.get(code);
+    const takt = Math.min(...[...menge].map((w) => w.takt));
+    const l = lageVon(code);
+    const gelassen = l.eigene && jetzt() - l.fremdAm > FREMD_FRIST_MS;
+    return Math.min(NACHSEHEN_MAX_MS, takt * (gelassen ? NACHSEHEN_GELASSEN : 1));
+  }
+  function waechterAn(code) {
+    if (waechter.has(code) || !wartende.get(code)?.size) return;
+    waechter.set(code, setTimeout(() => siehNach(code), abstandFuer(code)));
+  }
+  async function siehNach(code) {
+    waechter.delete(code);
+    const menge = wartende.get(code);
+    if (!menge?.size) return;
+    try {
+      const kopf = await speicher.kopf(code);
+      if (!kopf) {
+        koepfe.delete(code);
+        for (const w of [...menge]) w.neu();
+      } else {
+        merkeKopf(code, kopf.rev, kopf.nummer);
+        const veraltet = [...menge].filter((w) => w.seit !== kopf.nummer);
+        if (veraltet.length) {
+          // Was diese Instanz selbst schreibt, weckt sofort (`wecke`). Wer hier
+          // noch auf dem alten Stand wartet, hat einen Zug von nebenan verpasst.
+          lageVon(code).fremdAm = jetzt();
+          const daten = await speicher.lade(code);
+          if (daten) merkeGelesen(code, daten);
+          for (const w of veraltet) (daten ? w.geweckt(daten) : w.neu());
+        }
+      }
+    } catch {
+      /* der Speicher hakt – beim nächsten Blick noch einmal */
+    }
+    waechterAn(code);
   }
 
   /**
@@ -317,46 +391,26 @@ export function erzeugeOnline({
   function halte(code, seit, dauer, takt, res) {
     return new Promise((fertig) => {
       let erledigt = false;
-      let zeit = null;
       const menge = wartende.get(code) || new Set();
       wartende.set(code, menge);
       const ende = (was) => {
         if (erledigt) return;
         erledigt = true;
-        clearTimeout(zeit);
         clearTimeout(frist);
-        menge.delete(geweckt);
+        menge.delete(warter);
         if (!menge.size && wartende.get(code) === menge) wartende.delete(code);
         res.off?.('close', aufgelegt);
         fertig(was);
       };
-      const geweckt = (daten) => ende({ daten });
+      const warter = { seit, takt, geweckt: (daten) => ende({ daten }), neu: () => ende({ neu: true }) };
       const aufgelegt = () => ende({});
-      const abstand = () => {
-        const l = lageVon(code);
-        const gelassen = l.eigene && jetzt() - l.fremdAm > FREMD_FRIST_MS;
-        return Math.min(NACHSEHEN_MAX_MS, takt * (gelassen ? NACHSEHEN_GELASSEN : 1));
-      };
-      const siehNach = async () => {
-        try {
-          const kopf = await speicher.kopf(code);
-          if (erledigt) return;
-          if (!kopf || kopf.nummer !== seit) {
-            lageVon(code).fremdAm = jetzt();
-            return ende({ neu: true });
-          }
-        } catch {
-          /* der Speicher hakt – beim nächsten Blick noch einmal */
-        }
-        if (!erledigt) zeit = setTimeout(siehNach, abstand());
-        return undefined;
-      };
-      menge.add(geweckt);
+      menge.add(warter);
       res.on?.('close', aufgelegt);
       const frist = setTimeout(() => ende({}), dauer);
-      zeit = setTimeout(siehNach, abstand());
+      waechterAn(code);
     });
   }
+
 
   /* ------------------------------------------------------------ Antworten */
 
@@ -541,7 +595,9 @@ export function erzeugeOnline({
     const puls = !!clientId && url.searchParams.has('puls');
     const geraete = puls ? await speicher.puls(wer.code, clientId, willHost) : null;
     if (puls && !geraete) return keinRaum(res);
-    const kopf = puls ? null : await speicher.kopf(wer.code);
+    // Der Kopf darf aus dem Gedächtnis kommen, solange der Wächter ihn frisch
+    // hält – Neues meldet er ohnehin, sobald er es sieht.
+    const kopf = puls ? null : await kopfVon(wer.code, KOPF_FRISCH_MS);
     if (!puls && !kopf) return keinRaum(res);
     const seit = url.searchParams.has('seit') ? Number(url.searchParams.get('seit')) : NaN;
     const zahl = (name, vor) => {
@@ -559,7 +615,10 @@ export function erzeugeOnline({
      */
     async function frisch(gemeldet) {
       for (let versuch = 0; versuch < SCHREIB_VERSUCHE; versuch++) {
-        const daten = await speicher.lade(wer.code);
+        // Beim ersten Versuch aus dem Gedächtnis, wenn es zum frischen Kopf
+        // passt; muss geschrieben werden, prüft der Speicher die Fassung
+        // ohnehin, und der zweite Versuch liest frisch.
+        const daten = versuch === 0 ? await ladeRaum(wer.code, KOPF_FRISCH_MS) : await speicher.lade(wer.code);
         if (!daten) return keinRaum(res);
         const isHost = willHost && gleich(wer.hostGeheim, daten.hostGeheim);
         const rev = daten.rev;

@@ -659,22 +659,25 @@ export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false 
    * Nummer des Stands, den es schon hat – und der Server lässt die Frage
    * liegen, bis sich etwas tut. Die Antwort kommt also in dem Augenblick, in
    * dem jemand buzzert oder wertet, nicht erst beim nächsten Takt. Etwa alle
-   * acht Sekunden fragt das Gerät neu und hängt ein „ich bin noch da" an;
-   * daran erkennt der Server, wer weg ist, denn auflegen kann hier niemand.
+   * zwanzig Sekunden hängt das Gerät ein „ich bin noch da" an; daran erkennt
+   * der Server, wer weg ist, denn auflegen kann hier niemand. Öfter wäre
+   * genauer, kostet aber je Meldung einen Befehl im Upstash-Kontingent.
    *
    * `raumTakt` ist nur noch das Netz darunter: der Abstand, in dem der Server
    * für eine liegende Frage selbst im Speicher nachsieht (falls der Zug auf
    * einer anderen Maschine ankam) – und der Abfragetakt für einen Server, der
-   * nichts liegen lässt.
+   * nichts liegen lässt. Züge in derselben Maschine wecken sofort; der Takt
+   * zählt also nur im seltenen Fall und darf gemächlich sein – jeder Blick
+   * kostet einen Befehl.
    */
-  const PULS_TAKT = 8000;
+  const PULS_TAKT = 20000;
   let lobby = true;
   let letztesSignal = null;
 
   const raumTakt = () => {
-    if (document.hidden) return 4000;
-    if (heiss) return 500;
-    return lobby ? 1500 : 1000;
+    if (document.hidden) return 6000;
+    if (heiss) return 1000;
+    return lobby ? 2500 : 2000;
   };
 
   const raumPause = (ms) => new Promise((weiter) => {

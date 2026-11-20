@@ -1002,11 +1002,16 @@ Schnittstelle dann nur noch an den Editor und an den Bildschirm des eigenen Raum
 heraus. Am Laptop wirkt dieselbe Variable auf die Editor-Seite; ohne Variable bleibt
 der Editor offen wie bisher.
 
-**Wie viel Datenbank ein Abend braucht:** Jedes Gerät fragt nach und meldet sich
-etwa alle acht Sekunden. Ein Abend mit Bildschirm, Fernbedienung und fünf Handys
-kommt grob auf einige zehntausend Redis-Befehle. Der kostenlose Upstash-Tarif reicht
-damit für viele Abende im Monat – teilt sich das Spiel die Datenbank mit einem
-anderen Projekt, teilen sich beide auch dieses Kontingent.
+**Wie viel Datenbank ein Abend braucht:** Jedes Gerät meldet sich etwa alle
+20 Sekunden („bin noch da“); wer eine Minute lang schweigt, gilt als weg. Auf
+Änderungen warten die Geräte nicht einzeln: Je Raum schaut eine Server-Instanz
+für alle wartenden Geräte gemeinsam nach, und den zuletzt gelesenen Stand hält sie
+kurz im Kopf. Gemessen mit Bildschirm, Fernbedienung und drei Handys sind das
+etwa 35 Redis-Befehle pro Minute in Lobby und Spielbrett, gut 40 bei offener Frage
+und um 90 im dichten Spiel – ein dreistündiger Abend also grob 10 000–15 000
+Befehle. Der kostenlose Upstash-Tarif (500 000 im Monat) reicht damit für sehr
+viele Abende; teilt sich das Spiel die Datenbank mit einem anderen Projekt, teilen
+sich beide dieses Kontingent.
 
 **Wie es gebaut ist:** Vercel liefert `public/` als fertige Seiten aus und ruft für
 alles unter `/api/` eine einzige Funktion (`api/quizduell.js`). Die lädt den Raum aus
