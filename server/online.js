@@ -332,6 +332,7 @@ export function erzeugeOnline({
     if (!await speicher.schreibe(code, erwartet, daten, weg)) {
       gedaechtnis.delete(code);
       koepfe.delete(code);
+      lageVon(code).fremdAm = jetzt(); // jemand anderes hat geschrieben
       return false;
     }
     const alt = gedaechtnis.get(code);
@@ -342,7 +343,9 @@ export function erzeugeOnline({
   }
 
   const lageVon = (code) => {
-    if (!lage.has(code)) lage.set(code, { eigene: false, fremdAm: -Infinity });
+    // Gelassen erst nach zehn wirklich beobachteten Minuten ohne fremden Zug –
+    // eine frische Instanz hat noch nichts beobachtet.
+    if (!lage.has(code)) lage.set(code, { eigene: false, fremdAm: jetzt() });
     return lage.get(code);
   };
 

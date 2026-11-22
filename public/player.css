@@ -185,6 +185,10 @@ body {
 .p-statuszeile {
   text-align: center;
   min-height: 1.4rem;
+  /* Die feste Mindesthöhe ersetzt das automatische Minimum – ohne diese Zeile
+     stauchte die scrollende Spalte die Zeile auf 22 px, und die zweite Zeile
+     („… oder 250 Abzug.“) lief unter den Fragenkasten. */
+  flex-shrink: 0;
 }
 .p-status,
 .p-uhr {

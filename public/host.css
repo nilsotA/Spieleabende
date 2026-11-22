@@ -1789,7 +1789,8 @@ body.host #toasts { bottom: 4.6rem; }
 }
 /* Die Tastenkürzel liest der Host aus einem halben Meter – aber 10,6 px bei
    60 % Deckkraft waren auch dafür knapp. */
-.control-buttons kbd {
+.control-buttons kbd,
+.btn-undo kbd {
   font: inherit;
   font-size: 0.78em;
   opacity: 0.72;
@@ -2152,6 +2153,9 @@ body.host.flat .tile {
 .menu-qr-reihe { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
 .menu-qr-code { margin: 0; display: grid; gap: 0.4rem; max-width: 190px; }
 .menu-qr-code figcaption { margin: 0; }
+.menu-fern { max-width: 220px; }
+.menu-fern > summary { cursor: pointer; padding: 0.4rem 0; }
+.menu-fern[open] > summary { margin-bottom: 0.4rem; }
 .join-urls { width: 100%; display: grid; gap: 0.4rem; margin: 0; }
 .join-urls .url {
   display: block;

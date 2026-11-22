@@ -277,6 +277,16 @@ export function joinTeam(state, clientId, teamId, name) {
     name: String(name || 'Spieler').trim().slice(0, 24),
     online: true,
   });
+  // Wer sich in der Lobby erst ein eigenes Team anlegt und dann zu jemand
+  // anderem wechselt, ließ sein Team leer zurück – und das kam im Spiel mit an
+  // die Reihe, ohne ein einziges Handy. Teams, die das Gerät selbst angelegt
+  // hat, verschwinden deshalb, sobald es woanders beigetreten ist und sie leer
+  // sind. Vom Host angelegte Teams (ohne `vonGeraet`) bleiben: Teams ohne
+  // Handy sind dort gewollt.
+  if (state.phase === 'lobby') {
+    const verwaist = state.teams.filter((t) => t !== target && t.vonGeraet === clientId && !t.members.length);
+    for (const t of verwaist) removeTeam(state, t.id);
+  }
   return state;
 }
 

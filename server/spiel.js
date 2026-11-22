@@ -585,6 +585,7 @@ export async function handleAction(raum, clientId, body, isHost) {
       if (schon && schon.members.length === 1 && wunsch && schon.name === wunsch.slice(0, 24)) break;
       G.addTeam(raum.state, wunsch);
       const neu = raum.state.teams[raum.state.teams.length - 1];
+      neu.vonGeraet = clientId; // siehe joinTeam: räumt es leer zurückgelassen weg
       G.joinTeam(raum.state, clientId, neu.id, wunsch);
       break;
     }

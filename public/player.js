@@ -227,8 +227,12 @@ async function pressBuzzer() {
     }
     return;
   }
-  if (!isOnline()) return toast('Keine Verbindung – dein Buzz käme nicht an.', 'error');
-
+  // Kein Abbruch, nur weil das Gerät sich gerade für offline hält: Ein
+  // einziger verlorener Zug setzte die Anzeige auf „offline“, und zurück kam
+  // sie erst mit der nächsten Abfrage – bis zu 20 s. So lange wurde jeder
+  // weitere Druck gar nicht erst gesendet, obwohl das Netz längst wieder da
+  // war. Ob es ankommt, sagt die Antwort; ist das Netz wirklich weg, scheitert
+  // der Versuch in Millisekunden und meldet sich unten.
   buzzLock = true;
   gedrueckt = true; // nur wer selbst gedrückt hat, hört „zu spät“
   setTimeout(() => (buzzLock = false), 400);

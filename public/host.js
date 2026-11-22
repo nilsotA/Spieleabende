@@ -523,7 +523,7 @@ function zeigeQr(basis, liste) {
   try {
     $('#menu-qr-play').innerHTML = qrSvg(ziel, { ecl: 'M', quiet: 3 });
     $('#menu-qr').hidden = false;
-    $('#menu-qr-fern-box').hidden = !hostSchluessel;
+    $('#menu-qr-fern-klappe').hidden = !hostSchluessel;
     if (hostSchluessel) $('#menu-qr-fern').innerHTML = qrSvg(fernZiel, { ecl: 'M', quiet: 3 });
   } catch {
     $('#menu-qr').hidden = true;
@@ -1004,6 +1004,12 @@ function passeFrageEin() {
     const hatBild = !!bild && !bild.hidden;
     const bildAus = () => panel.style.setProperty('--bildhoehe', '0px');
     const restHoehe = () => platzHoch - kopfUeber - panel.offsetHeight;
+    // Nach dem Auflösen zählt die Lösung mehr als das Bild: Mit den vier
+    // Zehnteln fürs Bild landete eine Flaggenfrage auf 1280×720 auf der
+    // kleinsten Stufe – die Lösung kleiner als die Zeile darüber, der Zusatz
+    // bei 7 Pixeln. Dann bekommt das Bild nur noch gut ein Fünftel garantiert.
+    const loesungDa = !(overlay.querySelector('#q-answer')?.hidden ?? true);
+    const bildAnteil = loesungDa ? 0.22 : 0.4;
 
     const stufen = [1, 0.92, 0.84, 0.76, 0.68, 0.6, 0.52, 0.44];
     const letzte = stufen[stufen.length - 1];
@@ -1018,7 +1024,7 @@ function passeFrageEin() {
         // Bleibt für das Bild weniger als vier Zehntel der Bühne, ist die Frage
         // eine Stufe zu groß geschrieben: Ein Bild, das kleiner ist als die
         // Schrift darüber, kann der Raum nicht mehr erkennen.
-        if (!hatBild || stufe === letzte || restHoehe() >= platzHoch * 0.4) return true;
+        if (!hatBild || stufe === letzte || restHoehe() >= platzHoch * bildAnteil) return true;
       }
       return false;
     };
@@ -3208,6 +3214,8 @@ function openMenu() {
 
 function closeMenu() {
   $('#menu').hidden = true;
+  // Beim nächsten Öffnen (Punkte korrigieren …) wieder zugeklappt.
+  $('#menu-qr-fern-klappe').open = false;
   $('#view-game').inert = false;
   // Fokus dorthin zurück, wo er hergekommen ist – sonst steht er nach dem
   // Schließen im Nichts und der nächste Tabulator fängt oben wieder an.
@@ -3431,6 +3439,7 @@ function fuelleSpickzettel() {
     ['4', 'Keiner weiß es → auflösen'],
     ['L', 'Lösung kurz aufdecken (alle sehen sie)'],
     ['Leer', 'Weiter / nächste Runde'],
+    ['Z', 'Letzten Schritt zurücknehmen'],
     ['F', 'Vollbild'],
     ['Esc', 'dieses Menü'],
   ]) {
@@ -3627,6 +3636,14 @@ document.addEventListener('keydown', (ev) => {
   }
   // Solange das Menü offen ist, gehören die Tasten dem Menü.
   if (menuOpen) return;
+  // Z nimmt zurück – über den Knopf, damit seine Sperre und der Abgleich mit
+  // dem, was er verspricht, mitgelten. (Nicht die Rücktaste: die liegt zu nah
+  // an den Tasten, die man beim Tippen trifft.)
+  if (key === 'z') {
+    ev.preventDefault();
+    if (!$('#btn-undo').hidden) $('#btn-undo').click();
+    return;
+  }
 
   const q = state.current;
   if (!q) {

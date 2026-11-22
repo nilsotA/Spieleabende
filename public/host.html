@@ -341,7 +341,7 @@
            unten links unter dem Hinweistext. Zusammen bleiben sie zusammen und
            halten sich rechts. -->
       <div class="control-neben">
-        <button id="btn-undo" class="btn btn-ghost btn-sm btn-undo" hidden>↩ Zurücknehmen</button>
+        <button id="btn-undo" class="btn btn-ghost btn-sm btn-undo" hidden>↩ Zurücknehmen <kbd>Z</kbd></button>
         <button id="btn-vollbild" class="btn btn-ghost btn-sm" title="Vollbild (Taste F)" aria-label="Vollbild einschalten" hidden>⛶</button>
         <button id="btn-menu" class="btn btn-ghost btn-sm" title="Punkte korrigieren / Spiel beenden" aria-label="Menü: Punkte korrigieren, Zug setzen, Ton, Spiel beenden">⋯</button>
       </div>
@@ -388,10 +388,15 @@
           <div id="menu-qr-play" class="remote-qr-bild"></div>
           <figcaption class="muted small">Mitspielen</figcaption>
         </figure>
-        <figure id="menu-qr-fern-box" class="menu-qr-code" hidden>
-          <div id="menu-qr-fern" class="remote-qr-bild"></div>
-          <figcaption class="muted small">Fernbedienung – nur mit deinem eigenen Handy scannen, wer sie hat, sieht alle Lösungen.</figcaption>
-        </figure>
+        <!-- Zugeklappt wie in der Lobby: Das Menü steht auf der Leinwand, die
+             alle sehen – wer diesen Code vom Sofa scannt, liest alle Lösungen mit. -->
+        <details id="menu-qr-fern-klappe" class="menu-fern" hidden>
+          <summary class="muted small">Fernbedienung koppeln (nur dein eigenes Handy)</summary>
+          <figure id="menu-qr-fern-box" class="menu-qr-code">
+            <div id="menu-qr-fern" class="remote-qr-bild"></div>
+            <figcaption class="muted small">Wer sie hat, sieht alle Lösungen.</figcaption>
+          </figure>
+        </details>
       </div>
     </div>
     <!-- Spickzettel: die Regeln, wie sie für DIESE Runde eingestellt sind -->

@@ -1969,6 +1969,39 @@ test('ein Handy legt sein eigenes Team an – aber nur in der Lobby', async (t) 
   assert.equal((await zustand(base)).teams.length, 3, 'und es bleibt bei drei Teams');
 });
 
+test('wer vom eigenen Team zu einem anderen wechselt, lässt kein leeres Team zurück', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-wechsel-'));
+  const stateFile = path.join(dir, 'stand.json');
+  const port = 3900 + Math.floor(Math.random() * 90);
+  const { proc, base } = await starteServer(port, stateFile);
+  t.after(async () => {
+    proc.kill('SIGKILL');
+    await rm(dir, { recursive: true, force: true });
+  });
+  const tippe = async (id, body) => (await fetch(`${base}/api/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientId: id, role: 'player', ...body }),
+  })).json();
+
+  // Der Host legt ein Team ohne Handy an – das bleibt, auch wenn es leer ist.
+  const host = await alsHost(base, 'wechsel-host');
+  await host({ type: 'addTeam', name: 'Tisch' });
+  await tippe('anna', { type: 'eigenesTeam', name: 'Anna' });
+  await tippe('bea', { type: 'eigenesTeam', name: 'Bea' });
+  assert.deepEqual((await zustand(base)).teams.map((tm) => tm.name), ['Tisch', 'Anna', 'Bea']);
+
+  // „Team wechseln“ allein lässt Annas Team noch stehen – sie kann zurück.
+  await tippe('anna', { type: 'leaveTeam' });
+  assert.equal((await zustand(base)).teams.length, 3);
+  // Erst wenn sie bei Bea beitritt, verschwindet ihr leeres Team.
+  const bea = (await zustand(base)).teams.find((tm) => tm.name === 'Bea');
+  assert.equal((await tippe('anna', { type: 'joinTeam', teamId: bea.id, name: 'Anna' })).ok, true);
+  const danach = await zustand(base);
+  assert.deepEqual(danach.teams.map((tm) => tm.name), ['Tisch', 'Bea'], 'das vom Host angelegte Team bleibt');
+  assert.equal(danach.teams[1].members.length, 2);
+});
+
 test('jedes Handy sucht sich das Wappen seines Teams selbst aus', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'quizduell-wappen-'));
   const stateFile = path.join(dir, 'stand.json');

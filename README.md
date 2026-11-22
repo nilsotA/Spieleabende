@@ -601,6 +601,7 @@ Die Punkteregeln sind das ganze Spiel – alles Folgende ist reine Anzeige und
 | `4` | Keiner weiß es → auflösen |
 | `L` | Lösung kurz aufdecken (Achtung: alle sehen den Bildschirm) |
 | `Leertaste` | Weiter / nächste Runde |
+| `Z` | Letzten Schritt zurücknehmen |
 | `F` | Vollbild an/aus (geht auch schon in der Lobby) |
 | `Esc` | Menü (Punkte korrigieren, Zug setzen, Ton an/aus, Spickzettel) |
 
