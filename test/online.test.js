@@ -256,6 +256,8 @@ pruefe('wer sich nicht mehr meldet, gilt als weg – und ist wieder da, wenn er 
   assert.equal((await host.stand({ puls: true })).wartende, 1, 'ein Handy wartet noch ohne Team');
   await anna.stand();
   await anna.tu('joinTeam', { teamId: team.id, name: 'Anna' });
+  // Gleich nach dem Beitreten – nicht erst nach Annas nächster Meldung.
+  assert.equal((await host.stand()).wartende, 0, 'wer beitritt, wartet nicht mehr');
   let stand = await host.stand({ puls: true });
   assert.equal(stand.wartende, 0);
   assert.equal(stand.teams[0].members[0].online, true);

@@ -774,6 +774,8 @@ export function erzeugeOnline({
       raum.gespielt = daten.gespielt || {};
       raum.heuteGemerkt = new Set(daten.heuteGemerkt);
 
+      const imTeam = (st) => !!clientId && st.teams.some((tm) => tm.members.some((m) => m.clientId === clientId));
+      const warImTeam = imTeam(daten.state);
       try {
         await handleAction(raum, clientId, body, isHost);
         await Promise.all(offen);
@@ -795,6 +797,11 @@ export function erzeugeOnline({
       if (wegNeu) {
         daten.wegKopf = { tiefe: raum.rueckWeg.length, was: raum.rueckWeg.at(-1)?.was ?? null };
       }
+      // „Noch ohne Team“ zählt sonst erst die nächste Meldung des Handys neu
+      // (bis zu 20 s) – so lange stünde, wer gerade beigetreten ist, doppelt da.
+      const istImTeam = imTeam(raum.state);
+      if (!warImTeam && istImTeam && daten.wartende > 0) daten.wartende -= 1;
+      else if (warImTeam && !istImTeam && !isHost) daten.wartende = (daten.wartende || 0) + 1;
       daten.rev = rev + 1;
       daten.nummer += 1;
       daten.geaendertAm = jetzt();

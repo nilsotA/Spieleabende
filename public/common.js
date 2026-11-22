@@ -676,7 +676,7 @@ export function connect({ role, onState, onEvent, onStatus, raumAnlegen = false 
 
   const raumTakt = () => {
     if (document.hidden) return 6000;
-    if (heiss) return 1000;
+    if (heiss) return 700; // ein Buzz soll schnell auf der Leinwand stehen
     return lobby ? 2500 : 2000;
   };
 
