@@ -3641,6 +3641,10 @@ document.addEventListener('keydown', (ev) => {
   // an den Tasten, die man beim Tippen trifft.)
   if (key === 'z') {
     ev.preventDefault();
+    // Nicht hinter einem offenen Dialog: `inert` hält Mausklicks auf, aber
+    // keinen Klick aus dem Code – Z nähme sonst am Spielende hinter der
+    // Zusammenfassung still die letzte Frage zurück.
+    if (!$('#zusammenfassung').hidden || $('#btn-undo').closest('[inert]')) return;
     if (!$('#btn-undo').hidden) $('#btn-undo').click();
     return;
   }
